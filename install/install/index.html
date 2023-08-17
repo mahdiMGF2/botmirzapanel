@@ -1,0 +1,54 @@
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>نصب ربات</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link type="text/css" href="styleset.css" rel="stylesheet" />
+</head>
+
+<body>
+
+    <img class="img" src="../img/logo-dark.png" alt="">
+    <div class="container">
+        <div class="boxwarning">
+            <h2 style="text-align: center;">نکات مهم</h2>
+            <ol>
+                <li>دیتابیس را باید از سی پنل ساخته و اطلاعات را در این صفحه وارد کنید</li>
+                <li>توکن ربات نباید از قبل وبهوک شده باشد</li>
+                <li>پس از زدن دکمه نصب ربات به صفحه عملیات نصب منتقل می شوید که به شما  باید سه  پیام موفقیت نصب نشان دهد</li>
+                <li>اضافه کردن پنل مرزبان از داخل ربات انجام می شود</li>
+                <li>توکن ربات را باید از ربات @BotFather بگیرید</li>
+                <li>درصورتی که مشکلی در ربات داشتید میتوانید داخل گروه سوال خود را بپرسید 
+                    آیدی ربات : @mirzapanelgroup
+                </li>
+            </ol>
+        </div>
+        <form id="contact" action="../data.php" method="post">
+            <fieldset>
+                <input class="form" placeholder="توکن ربات" type="text" id="tokenbot" name="tokenbot" autocomplete="off"
+                    required>
+                <input class="form" placeholder="آیدی عددی ادمین" type="text" id="idadmin" name="idadmin"
+                    autocomplete="off" required>
+            </fieldset>
+            <fieldset>
+                <input class="form" placeholder="اسم دیتابیس" type="text" name="dbname" autocomplete="off" required>
+                <input class="form" placeholder="یوزرنیم دیتابیس" type="text" name="dbuser" autocomplete="off" required>
+            </fieldset>
+            <fieldset>
+                <input class="form" placeholder="پسورد دیتابیس" type="text" name="dbpassword" autocomplete="off"
+                    required>
+                <input class="form" placeholder="آیدی ربات بدون @" type="text" name="idbot" autocomplete="off" required>
+            </fieldset>
+            <fieldset>
+                <button class="btninstall" type="submit">نصب ربات</button>
+            </fieldset>
+        </form>
+    </div>
+
+</body>
+
+</html>

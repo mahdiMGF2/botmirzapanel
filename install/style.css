@@ -1,0 +1,91 @@
+    @font-face {
+        font-family: 'vazir';
+        src: url('/Vazir.eot');
+        src: local('☺'), url('../fonts/Vazir.woff') format('woff'), url('../fonts/Vazir.ttf') format('truetype');
+        font-weight: 300;
+    }
+
+    input,
+    button,
+    body {
+        font-family: vazir !important;
+        font-weight: 200  !important;
+    }
+
+    body {
+        direction: rtl;
+        font-family: vazir;
+        padding-top: 15px;
+        text-align: center;
+
+    }
+
+    .card {
+        background: rgb(255 255 255 / 71%);
+        border-radius: 16px;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(100px);
+        display: inline-block;
+        padding: 10px;
+
+
+    }
+
+    .install_btn {
+        background-color: #009350;
+        border: none;
+        font-weight: 600;
+        color: white;
+        cursor: pointer;
+        font-size: 18px;
+        width: 150px;
+        margin-bottom: 0px;
+        border-radius: 50px;
+        padding: 10px;
+    }
+
+    .update_btn {
+        margin: 5px;
+        background-color: #ff0000;
+        border: none;
+        font-weight: 600;
+        color: white;
+        cursor: pointer;
+        font-size: 18px;
+        width: 150px;
+        margin-bottom: 10px;
+        border-radius: 50px;
+        padding: 10px;
+    }
+
+    .ch_tel_btn {
+        width: 100px;
+        margin: 5px;
+        padding: 3px;
+        font-size: 16px;
+        cursor: pointer;
+        font-size: 18px;
+        width: 150px;
+        margin-bottom: 10px;
+        border-radius: 50px;
+        padding: 10px;
+        border: 1px #eae1e1 solid;
+    }
+
+    .gap_tel_btn {
+        width: 100px;
+        margin: 5px;
+        padding: 3px;
+        font-size: 16px;
+        cursor: pointer;
+        font-size: 18px;
+        width: 150px;
+        margin-bottom: 10px;
+        border-radius: 50px;
+        padding: 10px;
+        border: 1px #eae1e1 solid;
+    }
+
+    type[input] {
+        direction: rtl;
+    }

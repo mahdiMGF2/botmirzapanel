@@ -1,0 +1,97 @@
+    @font-face {
+        font-family: 'vazir';
+        src: url('/Vazir.eot');
+        src: local('☺'), url('../fonts/Vazir.woff') format('woff'), url('../fonts/Vazir.ttf') format('truetype');
+    }
+
+    input,
+    button {
+        font-family: vazir;
+    }
+
+    body {
+        direction: rtl;
+        font-family: vazir;
+        padding-top: 15px;
+        text-align: center;
+        background: linear-gradient(45deg, #464444, #575757);
+        font-family: vazir;
+    }
+
+
+    type[input] {
+        direction: rtl;
+    }
+
+    .img {
+        width: 250px;
+    }
+
+    .form {
+        width: 50%;
+        height: 30px;
+        border-radius: 10px;
+        margin: 0 10px;
+    }
+
+    fieldset {
+        display: flex;
+        border: 0;
+    }
+
+    button {
+        display: inline-block;
+        cursor: pointer;
+        font-size: 18px;
+        width: 90%;
+        margin-bottom: 10px;
+        border-radius: 10px;
+        padding: 10px;
+        border: 0;
+    }
+
+    input {
+        padding: 20px 10px;
+    }
+
+    input:focus {
+        outline: 0;
+        border: 0;
+    }
+
+    .container {
+        width: 70%;
+        margin: 0 auto;
+    }
+
+    .container .h1 {
+        color: #fff;
+    }
+
+    button {
+        background: linear-gradient(45deg, #000678, #5600ff);
+        color: #fff;
+        margin: 20px 0;
+        width: 100%;
+    }
+
+    @media (max-width : 700px) {
+        .form {
+            width: 100%;
+        }
+
+        fieldset {
+            display: flex;
+            flex-direction: column;
+            border: 0;
+        }
+    }
+
+    .boxwarning {
+        padding: 5px;
+        border-radius: 10px;
+        color: #fff;
+        background-color: #cc8100;
+        margin: 40px 0;
+        text-align: right;
+    }
