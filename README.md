@@ -16,7 +16,7 @@ You can contact us to buy the advanced version</h1>
         <img src="https://img.shields.io/badge/telegram-group-blue?style=flat-square&logo=telegram" />
     </a>
     <a href="#">
-        <img src="https://img.shields.io/github/stars/mahdigholipour3/bottelegrammarzban?style=social" />
+        <img src="https://img.shields.io/github/stars/mahdigholipour3/botmirzapanel?style=social" />
     </a>
 </p>
 
@@ -66,7 +66,7 @@ Bot Mirza Panel is a bot for selling VPN services specifically for the Mirzaban 
 # Installation Guide
 
 1. Download the latest public version from the link below:
-   [Download](https://github.com/mahdigholipour3/bottelegrammarzban/releases).
+   [Download](https://github.com/mahdigholipour3/botmirzapanel/releases).
 
 2. After downloading the source, upload it to the "public_html" folder of your hosting file manager. Once uploaded, extract the source from the compressed file.
 
