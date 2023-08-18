@@ -149,6 +149,12 @@ $textbotlang['users']['perfectmoney']['invalidvcodeorev'] = "❌ ووچر ارس
 $textbotlang['users']['perfectmoney']['invalidvcode'] = "❌ کد ووچر ارسال شده نامعتبر است";
 $textbotlang['users']['perfectmoney']['invalid_ev_number'] = "❌ کد فعالسازی ارسال شده نامعتبر است";
 
+
+
+$textbotlang['users']['Discount']['getcode']  = "💝 برای دریافت موجودی کد هدیه خود را ارسال نمایید";
+$textbotlang['users']['Discount']['notcode']  = "❌ کد نامعتبر است";
+$textbotlang['users']['Discount']['onecode']  = "⭕️ این کد تنها یک بار قابل استفاده است";
+
 #--------------[ other users ]--------------#
 $textbotlang['users']['time-Service'] = "⏳ زمان اشتراک";
 $textbotlang['users']['Volume-Service'] = "🌐 حجم سرویس";
