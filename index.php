@@ -1218,15 +1218,10 @@ elseif ($user['step'] == "endstepuser" ||preg_match('/prodcutservice_(.*)/', $da
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
 } 
-elseif ($user['step'] == "payment" && $datain == "confirmandgetservice" || $datain == "confirmandgetserviceDiscount"){
-    $info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE name_product = '{$user['Processing_value_one']}' AND (Location = '$Processing_value'  or Location = '/all') LIMIT 1"));
+elseif ($user['step'] == "payment" && $datain == "confirmandgetservice"){
+    $info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE code_product = '{$user['Processing_value_one']}' AND (Location = '$Processing_value'  or Location = '/all') LIMIT 1"));
     if (empty($info_product['price_product']) || empty($info_product['price_product'])) return;
-    if($datain == "confirmandgetserviceDiscount"){
-    $priceproduct =  $user['Processing_value_four'];
-}
-else{
         $priceproduct =  $info_product['price_product'];
-}
     if ($priceproduct > $user['Balance']) {
     $Balance_prim = $info_product['price_product'] - $user['Balance'];
     $stmt = $connect->prepare("UPDATE user SET Processing_value = ? WHERE id = ?");
@@ -1354,12 +1349,7 @@ unlink("qrcode.png");
     sendmessage($from_id, $textcreatuser, $Shoppinginfo, 'HTML');
     sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboard, 'HTML');
 }
-if($datain == "confirmandgetserviceDiscount"){
-    $priceproduct =  $user['Processing_value_four'];
-}
-else{
         $priceproduct =  $info_product['price_product'];
-}
     $stmt = $connect->prepare("UPDATE user SET Balance = ? WHERE id = ?");
     $Balance_prim = $user['Balance'] - $priceproduct;
     $stmt->bind_param("ss", $Balance_prim, $from_id);
