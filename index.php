@@ -1154,12 +1154,12 @@ elseif (preg_match('/^location_(.*)/', $datain, $dataget)) {
 while ($result = mysqli_fetch_assoc($getdataproduct)) {
     if($setting['MethodUsername'] == "نام کاربری دلخواه"){
     $product['inline_keyboard'][] = [
-        ['text' => $result['name_product'], 'callback_data' => "prodcutservices_".$result['name_product']]
+        ['text' => $result['name_product'], 'callback_data' => "prodcutservices_".$result['code_product']]
     ];
     }
     else{
           $product['inline_keyboard'][] = [
-        ['text' => $result['name_product'], 'callback_data' => "prodcutservice_{$result['name_product']}"]
+        ['text' => $result['name_product'], 'callback_data' => "prodcutservice_{$result['code_product']}"]
     ];  
     }
 }
@@ -1196,7 +1196,7 @@ elseif ($user['step'] == "endstepuser" ||preg_match('/prodcutservice_(.*)/', $da
     $stmt = $connect->prepare("UPDATE user SET Processing_value_one = ? WHERE id = ?");
     $stmt->bind_param("ss", $loc, $from_id);
     $stmt->execute();
-    $info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE name_product = '$loc' AND (Location = '$Processing_value'or Location = '/all') LIMIT 1"));
+    $info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE code_product = '$loc' AND (Location = '$Processing_value'or Location = '/all') LIMIT 1"));
     $randomString = bin2hex(random_bytes(2));
     $username_ac = generateUsername($from_id, $setting['MethodUsername'], $username, $randomString,$text);
     $stmt = $connect->prepare("UPDATE user SET Processing_value_tow = ? WHERE id = ?");
@@ -3923,6 +3923,9 @@ elseif($user['step'] == "GetNameNew"){
     $stmt->bind_param("ss", $text, $Processing_value);
     $stmt->execute();
     $stmt = $connect->prepare("UPDATE product SET Location = ? WHERE Location = ?");
+    $stmt->bind_param("ss", $text, $Processing_value);
+    $stmt->execute();
+    $stmt = $connect->prepare("UPDATE TestAccount SET Service_location = ? WHERE Service_location = ?");
     $stmt->bind_param("ss", $text, $Processing_value);
     $stmt->execute();
     $stmt = $connect->prepare("UPDATE user SET Processing_value = ? WHERE id = ?");
