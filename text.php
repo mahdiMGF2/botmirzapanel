@@ -479,12 +479,4 @@ $textbotlang['Admin']['AlgortimeUsername']['SaveData'] = "✅روش ساخت ن�
 $textbotlang['Admin']['SettingPayment']['Savacard'] = "✅ شماره کارت شما با موفقیت ثبت شد.";
 $textbotlang['Admin']['SettingnowPayment']['Savaapi'] = "✅ تغییرات  با موفقیت ثبت شد";
 
-$textbotlang['Admin']['agent']['agentsendid'] = " ⭕️ برای اضافه کردن نماینده آیدی عددی کاربر را ارسال نمایید.";
-$textbotlang['Admin']['agent']['agentsendidremove'] = "⭕️ برای حذف کردن نماینده آیدی عددی کاربر را ارسال نمایید";
-$textbotlang['Admin']['agent']['useragented'] = "✅کاربر با موفقیت نماینده شد";
-$textbotlang['Admin']['agent']['useragentremoved'] = "❌ کاربر با موفقیت از حالت نماینده حذف شد";
-$textbotlang['Admin']['agent']['invalidvlue'] = "⭕️ ورودی نا معتبر";
-$textbotlang['Admin']['agent']['setagentproduct'] = "محصول برای چه کاربری نشان داده شود ؟
-کاربر نماینده کلمه n را ارسال کنید کاربر عادی کلمه f";
-
 $textbotlang['Admin']['perfectmoney']['setnumberacount'] = "✅ شماره اکانت با موفقیت ثبت شد";
