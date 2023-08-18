@@ -116,7 +116,6 @@ $code_Discount = array_column(mysqli_fetch_all(mysqli_query($connect, "SELECT (c
 $users_ids = array_column(mysqli_fetch_all(mysqli_query($connect, "SELECT (id) FROM user"), MYSQLI_ASSOC), 'id');
 $marzban_list = array_column(mysqli_fetch_all(mysqli_query($connect, "SELECT (name_panel) FROM marzban_panel"), MYSQLI_ASSOC), 'name_panel');
 $name_product = array_column(mysqli_fetch_all(mysqli_query($connect, "SELECT (name_product) FROM product"), MYSQLI_ASSOC), 'name_product');
-$SellDiscount = array_column(mysqli_fetch_all(mysqli_query($connect, "SELECT (codeDiscount) FROM DiscountSell"), MYSQLI_ASSOC), 'codeDiscount');
 $datatxtbot = array();
 foreach ($datatextbotget as $row) {
     $datatxtbot[] = array(
