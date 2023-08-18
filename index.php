@@ -99,7 +99,6 @@ if (mysqli_num_rows($query) > 0) {
         'step' => '',
         'Processing_value' => '',
         'User_Status' => '',
-        'agent' =>  '',
         'username' => '',
         'limit_usertest' =>''
     );
@@ -153,7 +152,7 @@ if (isset($channels['link']) && $from_id != 0) {
     $response = json_decode(file_get_contents('https://api.telegram.org/bot' . $APIKEY . "/getChatMember?chat_id=@{$channels['link']}&user_id=$from_id"));
     $tch = $response->result->status;
 }
-if($from_id != 0)$connect->query("INSERT IGNORE INTO user (id , step,limit_usertest,User_Status,number,Balance,pagenumber,username,agent) VALUES ('$from_id', 'none','{$setting['limit_usertest_all']}','Active','none','0','1','$username','f')");
+if($from_id != 0)$connect->query("INSERT IGNORE INTO user (id , step,limit_usertest,User_Status,number,Balance,pagenumber,username) VALUES ('$from_id', 'none','{$setting['limit_usertest_all']}','Active','none','0','1','$username')");
 if($user['username'] == "none" || $user['username'] == null){
     $stmt = $connect->prepare("UPDATE user SET username = ? WHERE id = ?");
     $stmt->bind_param("ss", $username, $from_id);
@@ -2897,9 +2896,9 @@ elseif ($user['step'] == "get_limit") {
     $stmt = $connect->prepare("UPDATE user SET Processing_value = ? WHERE id = ?");
     $stmt->bind_param("ss", $randomString, $from_id);
     $stmt->execute();
-    sendmessage($from_id,$textbotlang['Admin']['agent']['setagentproduct'], $backadmin, 'HTML');
+    sendmessage($from_id, $textbotlang['Admin']['Product']['GetLimit'], $backadmin, 'HTML');
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
-    $step = 'get_agent';
+    $step = 'get_location';
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
 }elseif ($user['step'] == "get_location") {
