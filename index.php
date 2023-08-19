@@ -908,6 +908,7 @@ if(isset($nameprotocol['vless']) && $setting['flow'] == "flowon"){
         if (isset($data_test['detail']['proxies'])) $data_test['detail'] = $data_test['detail']['proxies'];
         if (isset($data_test['detail']['username'])) $data_test['detail'] = $data_test['detail']['username'];
         sendmessage($from_id, $textbotlang['users']['usertest']['errorcreat'], $keyboard, 'html');
+        $data['detail'] = json_encode($data['detail']);
         $texterros = "
     ⭕️ یک کاربر قصد دریافت اکانت داشت که ساخت کانفیگ با خطا مواجه شده و به کاربر کانفیگ داده نشد
     ✍️ دلیل خطا : 
@@ -1275,6 +1276,7 @@ if(isset($nameprotocol['vless']) && $setting['flow'] == "flowon"){
     if (!isset($data['username'])) {
         if (isset($data['detail']['proxies'])) $data['detail'] = $data['detail']['proxies'];
         sendmessage($from_id, $textbotlang['users']['sell']['ErrorConfig'], $keyboard, 'HTML');
+        $data['detail'] = json_encode($data['detail']);
         $texterros = "
     ⭕️ یک کاربر قصد دریافت اکانت داشت که ساخت کانفیگ با خطا مواجه شده و به کاربر کانفیگ داده نشد
     ✍️ دلیل خطا : 
