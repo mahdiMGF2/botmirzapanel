@@ -100,7 +100,8 @@ if (mysqli_num_rows($query) > 0) {
         'Processing_value' => '',
         'User_Status' => '',
         'username' => '',
-        'limit_usertest' =>''
+        'limit_usertest' =>'',
+        'roll_Status' => ''
     );
 }
 $Processing_value =  $user['Processing_value'];
@@ -905,10 +906,8 @@ if(isset($nameprotocol['vless']) && $setting['flow'] == "flowon"){
     $config_test = adduser($username_ac, $expire, $data_limit, $Check_token['access_token'], $marzban_list_get['url_panel'], $nameprotocol);
     $data_test = json_decode($config_test, true);
     if (!isset($data_test['username'])) {
-        if (isset($data_test['detail']['proxies'])) $data_test['detail'] = $data_test['detail']['proxies'];
-        if (isset($data_test['detail']['username'])) $data_test['detail'] = $data_test['detail']['username'];
-        sendmessage($from_id, $textbotlang['users']['usertest']['errorcreat'], $keyboard, 'html');
         $data['detail'] = json_encode($data['detail']);
+        sendmessage($from_id, $textbotlang['users']['usertest']['errorcreat'], $keyboard, 'html');
         $texterros = "
     ⭕️ یک کاربر قصد دریافت اکانت داشت که ساخت کانفیگ با خطا مواجه شده و به کاربر کانفیگ داده نشد
     ✍️ دلیل خطا : 
@@ -1274,9 +1273,8 @@ if(isset($nameprotocol['vless']) && $setting['flow'] == "flowon"){
     $configuser = adduser($username_ac, $timestamp, $data_limit, $Check_token['access_token'], $marzban_list_get['url_panel'], $nameprotocol);
     $data = json_decode($configuser, true);
     if (!isset($data['username'])) {
-        if (isset($data['detail']['proxies'])) $data['detail'] = $data['detail']['proxies'];
-        sendmessage($from_id, $textbotlang['users']['sell']['ErrorConfig'], $keyboard, 'HTML');
         $data['detail'] = json_encode($data['detail']);
+        sendmessage($from_id, $textbotlang['users']['sell']['ErrorConfig'], $keyboard, 'HTML');
         $texterros = "
     ⭕️ یک کاربر قصد دریافت اکانت داشت که ساخت کانفیگ با خطا مواجه شده و به کاربر کانفیگ داده نشد
     ✍️ دلیل خطا : 
@@ -3478,7 +3476,11 @@ $sublinkkeyboard = json_encode([
         ],
     ]
 ]);
-if ($text == "🔗 ارسال لینک سابسکرایبشن"  ) {
+if ($text == "🔗 ارسال لینک سابسکرایبشن") {
+        if ($setting['configManual'] == "✅ ارسال کانفیگ بعد خرید فعال است.") {
+                sendmessage($from_id, "ابتدا  ارسال کانفیگ را خاموش کنید", null, 'HTML');
+                return;
+    }
     sendmessage($from_id, $textbotlang['Admin']['Status']['subTitle'], $sublinkkeyboard, 'HTML');
 }
 if ($datain == "✅ لینک اشتراک فعال است."  ) {
