@@ -12,8 +12,27 @@ foreach($rows as $row) {
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
     $get_username_Check = getuser($row['username'], $Check_token['access_token'], $marzban_list_get['url_panel']);
     if(isset($get_username_Check['status'])){
+
     if ($get_username_Check['status'] != "active" && isset($get_username_Check['status'])) {
-            sendmessage($row['id_user'], "⭕️ کاربر عزیز کانفیگ تست شما با نام کاربری {$row['username']}  حذف شد⭕️ ", null,'HTML');
+
+        $userrealname=substr($row['username'], 0, -5);
+        switch ($get_username_Check['status']) {
+            case "limited":
+                sendmessage($row['id_user'],"⚠️ کاربر عزیز $userrealname
+📦 حجم اکانت تست شما به پایان رسید ⚠️
+                
+✨✨ در صورت رضایت از کیفیت سرویس ما می توانید
+نسبت به 🛍 خرید اشتراک اقدام فرمایید 🌺 ✨✨" , null,'HTML');
+                break;
+            case "expired":
+                sendmessage($row['id_user'],"⚠️ کاربر عزیز $userrealname
+🕒 زمان اکانت تست شما به پایان رسید ⚠️
+                
+✨✨ در صورت رضایت از کیفیت سرویس ما می توانید
+نسبت به 🛍 خرید اشتراک اقدام فرمایید 🌺 ✨✨" , null,'HTML');
+                break;
+        }
+
         removeuser($Check_token['access_token'], $marzban_list_get['url_panel'], $row['username']);
     }
     }
