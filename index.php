@@ -101,7 +101,6 @@ if (mysqli_num_rows($query) > 0) {
         'User_Status' => '',
         'username' => '',
         'limit_usertest' =>'',
-        'roll_Status' => ''
     );
 }
 $Processing_value =  $user['Processing_value'];
