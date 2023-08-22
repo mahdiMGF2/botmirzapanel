@@ -3129,8 +3129,9 @@ elseif ($user['step'] == "change_price") {
         sendmessage($from_id, $textbotlang['Admin']['Product']['InvalidPrice'], $backadmin, 'HTML');
         return;
     }
-    $stmt = $connect->prepare("UPDATE product SET price_product = ? WHERE name_product = ? AND Location = ? ");
-    $stmt->bind_param("sss", $text, $Processing_value,$user['Processing_value_one']);
+    $stmt = $connect->prepare("UPDATE product SET price_product = ? WHERE name_product = ? AND (Location = ? OR Location = ?)");
+    $location = '/all';
+    $stmt->bind_param("ssss", $text, $Processing_value,$user['Processing_value_one'],$location);
     $stmt->execute();
     $stmt = $connect->prepare("UPDATE invoice SET price_product = ? WHERE name_product = ? AND Service_location = ? ");
     $stmt->bind_param("sss", $text, $Processing_value,$user['Processing_value_one']);
