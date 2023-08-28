@@ -409,7 +409,8 @@ $result = $connect->query("SHOW TABLES LIKE 'product'");
 $table_exists = ($result->num_rows > 0);
 if ($table_exists) {
     $product = [];
-    $getdataproduct = mysqli_query($connect, "SELECT * FROM product WHERE Location = '$text' OR Location = '/all'");
+    $cleaned_text = mysqli_real_escape_string($connect, $text);
+    $getdataproduct = mysqli_query($connect, "SELECT * FROM product WHERE Location = '$cleaned_text' OR Location = '/all'");
     if(isset($getdataproduct)){
     while ($row = mysqli_fetch_assoc($getdataproduct)) {
         $product[] = [$row['name_product']];
