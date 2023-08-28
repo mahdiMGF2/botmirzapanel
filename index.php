@@ -152,7 +152,7 @@ if (isset($channels['link']) && $from_id != 0) {
     $response = json_decode(file_get_contents('https://api.telegram.org/bot' . $APIKEY . "/getChatMember?chat_id=@{$channels['link']}&user_id=$from_id"));
     $tch = $response->result->status;
 }
-if($from_id != 0)$connect->query("INSERT IGNORE INTO user (id , step,limit_usertest,User_Status,number,Balance,pagenumber,username) VALUES ('$from_id', 'none','{$setting['limit_usertest_all']}','Active','none','0','1','$username')");
+if($from_id != 0)$connect->query("INSERT IGNORE INTO user (id , step,limit_usertest,User_Status,number,Balance,pagenumber,username,message_count,last_message_time) VALUES ('$from_id', 'none','{$setting['limit_usertest_all']}','Active','none','0','1','$username','0','0')");
 if($user['username'] == "none" || $user['username'] == null){
     $stmt = $connect->prepare("UPDATE user SET username = ? WHERE id = ?");
     $stmt->bind_param("ss", $username, $from_id);
@@ -168,7 +168,32 @@ if ($user['User_Status'] == "block") {
     sendmessage($from_id, $textblock, null, 'html');
     return;
 }
-#-----------Channel------------#
+$timebot= time();
+$TimeLastMessage=  $timebot - intval($user['last_message_time']);
+if(floor($TimeLastMessage / 60) > 1){
+    $stmt = $connect->prepare("UPDATE user SET last_message_time = ? WHERE id = ?");
+    $stmt->bind_param("ss", $timebot, $from_id);
+    $stmt->execute();
+    $stmt = $connect->prepare("UPDATE user SET message_count = ? WHERE id = ?");
+    $addmessage = 1;
+    $stmt->bind_param("is", $addmessage, $from_id);
+    $stmt->execute();
+}else{
+if(!in_array($from_id,$admin_ids)){
+$stmt = $connect->prepare("UPDATE user SET message_count = ? WHERE id = ?");
+$addmessage = intval($user['message_count']) + 1;
+$stmt->bind_param("ss", $addmessage, $from_id);
+$stmt->execute();
+if($user['message_count'] >= "25"){
+    $stmt = $connect->prepare("UPDATE user SET User_Status = ? ,description_blocking = ? WHERE id = ?");
+    $User_Status = "block";
+    $stmt->bind_param("sss", $User_Status,$textbotlang['users']['spam']['spamed'], $from_id);
+    $stmt->execute();
+    sendmessage($from_id, $textbotlang['users']['spam']['spamedmessage'], null, 'html');
+    return;
+}
+}
+}#-----------Channel------------#
 if($datain == "confirmchannel"){
     if(!in_array($tch, ['member', 'creator', 'administrator'])){
         telegram('answerCallbackQuery', array(
