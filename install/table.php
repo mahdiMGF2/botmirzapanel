@@ -24,8 +24,9 @@ try {
         number varchar(2000) NOT null ,
         Balance int(255) NOT null ,
         User_Status varchar(500) NOT NULL,
-        spam varchar(500) NOT NULL,
         pagenumber int(10) NOT NULL,
+        message_count varchar(100) NOT NULL,
+        last_message_time varchar(100) NOT NULL,
         username varchar(1000) NOT NULL)
         ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin");
         if (!$result) {
@@ -33,6 +34,18 @@ try {
         }
     }
     else {
+        $Check_filde = $connect->query("SHOW COLUMNS FROM user LIKE 'message_count'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE user ADD message_count VARCHAR(100)");
+            $connect->query("UPDATE user SET message_count = '0'");
+            echo "The message_count field was added ✅";
+        }
+        $Check_filde = $connect->query("SHOW COLUMNS FROM user LIKE 'last_message_time'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE user ADD last_message_time VARCHAR(100)");
+            $connect->query("UPDATE user SET last_message_time = '0'");
+            echo "The last_message_time field was added ✅";
+        }
         $Check_filde = $connect->query("SHOW COLUMNS FROM user LIKE 'Processing_value_four'");
         if (mysqli_num_rows($Check_filde) != 1) {
             $connect->query("ALTER TABLE user ADD Processing_value_four VARCHAR(100)");
