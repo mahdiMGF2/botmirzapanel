@@ -683,6 +683,10 @@ elseif (preg_match('/confirmserivce_(\w+)/', $datain, $dataget) && $user['step']
      if (strlen($setting['Channel_Report']) > 0) {    
          sendmessage($setting['Channel_Report'], $text_report, null, 'HTML');
          }
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'home';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
 }
 elseif (preg_match('/changelink_(\w+)/', $datain, $dataget)) {
     $username = $dataget[1];
