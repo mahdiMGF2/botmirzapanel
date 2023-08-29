@@ -648,15 +648,12 @@ elseif (preg_match('/confirmserivce_(\w+)/', $datain, $dataget)) {
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
     $data_useer = getuser($usernamepanel, $Check_token['access_token'], $marzban_list_get['url_panel']);
     ResetUserDataUsage($usernamepanel, $Check_token['access_token'], $marzban_list_get['url_panel']);
-    if(isset($data_useer['expire'])){
-    $oldTimestamp = $data_useer['expire'];
-    $newDate = $oldTimestamp + ($prodcut['Service_time'] * 86400);
-    }else{
     $date = strtotime("+" . $prodcut['Service_time'] . "day");
     $newDate = strtotime(date("Y-m-d H:i:s", $date));
-    }
+    $data_limit = $prodcut['Volume_constraint'] * pow(1024, 3);
         $datam = array(
-        "expire" => $newDate
+        "expire" => $newDate,
+        "data_limit" => $data_limit
         );
     $Modifyuser =Modifyuser($Check_token['access_token'],$marzban_list_get['url_panel'],$usernamepanel,$datam);
             $keyboardextendfnished = json_encode([
