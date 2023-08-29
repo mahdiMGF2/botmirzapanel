@@ -617,14 +617,18 @@ elseif (preg_match('/extend_(\w+)/', $datain, $dataget)) {
 مدت زمان تمدید : {$prodcut['Service_time']} روز
 حجم تمدید : {$prodcut['Volume_constraint']} گیگ
 
-⚠️ پس از تمدید حجم شما ریست خواهد شدو اگر حجمی باقی مانده باشد حذف می شود و زمان باقی مانده به زمان تمدید اضافه خواهد شد
+⚠️ پس از تمدید حجم شما ریست خواهد شدو اگر حجمی باقی مانده باشد حذف می شود
 
 ✅ برای تایید و تمدید سرویس روی دکمه زیر کلیک کنید
 
 ❌ برای تمدید باید کیف پول خود را شارژ کنید.";
     sendmessage($from_id,$textextend, $keyboardextend, 'HTML');
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'confirmextend';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
 }
-elseif (preg_match('/confirmserivce_(\w+)/', $datain, $dataget)) {
+elseif (preg_match('/confirmserivce_(\w+)/', $datain, $dataget) && $user['step'] == "confirmextend") {
     $usernamepanel = $dataget[1];
     $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '$usernamepanel'"));
     $prodcut = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE name_product = '{$nameloc['name_product']}'"));
