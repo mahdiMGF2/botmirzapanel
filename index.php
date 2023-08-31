@@ -31,9 +31,6 @@ function generateUUID() {
 
     return $uuid;
 }
-function createqrcode($textqrcode){
-            QRcode::png($textqrcode, 'qrcode.png', QR_ECLEVEL_L, 7);
-        }
 function tronratee(){
     return json_decode(file_get_contents('https://api.changeto.technology/api/rate'), true);
 }
@@ -751,13 +748,11 @@ elseif (preg_match('/qrcodelink_(\w+)/', $datain, $dataget)) {
     if (!preg_match('/^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?((\/[^\s\/]+)+)?$/', $subscriptionurl)) {
         $subscriptionurl = $marzban_list_get['url_panel'] . "/" . ltrim($subscriptionurl, "/");
     }
-    createqrcode($subscriptionurl);
-    $qrconfig = file_get_contents('qrcode.png');
-    $rand = rand(1111,9999);
-    file_put_contents("$rand.png",$qrconfig);
-    sendphoto($from_id, "https://$domainhosts/$rand.png", $textbotlang['users']['qrcode']['manageservice']['getqrcodelink']);
-    unlink("$rand.png");
-    unlink("qrcode.png");
+    $randomString = bin2hex(random_bytes(3));
+    $urlimage = "$from_id$randomString.png";
+    QRcode::png($subscriptionurl,$urlimage, QR_ECLEVEL_L, 7);
+    sendphoto($from_id, "https://$domainhosts/$urlimage", $textbotlang['users']['qrcode']['manageservice']['getqrcodelink']);
+    unlink($urlimage);
 }
 elseif (preg_match('/Extra_volume_(\w+)/', $datain, $dataget)) {
     $username = $dataget[1];
@@ -996,20 +991,17 @@ if(isset($nameprotocol['vless']) && $setting['flow'] == "flowon"){
     <code>$output_config_link</code>
     <code>$text_config</code>";
 if ($setting['sublink'] == "✅ لینک اشتراک فعال است.") {
-createqrcode($output_config_link);
-$qrconfig = file_get_contents('qrcode.png');
-$rand = rand(1111,9999);
-file_put_contents("$rand.png",$qrconfig);
+    $urlimage = "$from_id$randomString.png";
+    QRcode::png($output_config_link,$urlimage, QR_ECLEVEL_L, 7);
         telegram('sendphoto', [
             'chat_id' => $from_id,
-            'photo' => "https://$domainhosts/$rand.png",
+            'photo' => "https://$domainhosts/$urlimage",
             'reply_markup' => $usertestinfo,
             'caption' => $textcreatuser,
             'parse_mode' => "HTML",
         ]);
     sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboard, 'HTML');
-unlink("$rand.png");
-unlink("qrcode.png");
+unlink($urlimage);
 }else{
     sendmessage($from_id, $textcreatuser, $usertestinfo, 'HTML');
     sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboard, 'HTML');
@@ -1358,20 +1350,17 @@ if(isset($nameprotocol['vless']) && $setting['flow'] == "flowon"){
 $text_config
 $link_config";
 if ($setting['sublink'] == "✅ لینک اشتراک فعال است.") {
-createqrcode($output_config_link);
-$qrconfig = file_get_contents('qrcode.png');
-$rand = rand(1111,9999);
-file_put_contents("$rand.png",$qrconfig);
+$urlimage = "$from_id$randomString.png";
+    QRcode::png($output_config_link,$urlimage, QR_ECLEVEL_L, 7);
         telegram('sendphoto', [
             'chat_id' => $from_id,
-            'photo' => "https://$domainhosts/$rand.png",
+            'photo' => "https://$domainhosts/$urlimage",
             'reply_markup' => $Shoppinginfo,
             'caption' => $textcreatuser,
             'parse_mode' => "HTML",
         ]);
             sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboard, 'HTML');
-unlink("$rand.png");
-unlink("qrcode.png");
+unlink($urlimage);
 }else{
     sendmessage($from_id, $textcreatuser, $Shoppinginfo, 'HTML');
     sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboard, 'HTML');
