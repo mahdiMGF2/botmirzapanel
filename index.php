@@ -105,6 +105,7 @@ $setting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM setting"));
 $helpdata = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM help"));
 $datatextbotget = mysqli_query($connect, "SELECT * FROM textbot");
 $channels = array();
+$id_invoice = array_column(mysqli_fetch_all(mysqli_query($connect, "SELECT (id_invoice) FROM invoice"), MYSQLI_ASSOC), 'id_invoice');
 $channels = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM channels  LIMIT 1"));
 $admin_ids = array_column(mysqli_fetch_all(mysqli_query($connect, "SELECT (id_admin) FROM admin"), MYSQLI_ASSOC), 'id_admin');
 $usernameinvoice = array_column(mysqli_fetch_all(mysqli_query($connect, "SELECT (username) FROM invoice"), MYSQLI_ASSOC), 'username');
@@ -930,7 +931,7 @@ if(isset($nameprotocol['vless']) && $setting['flow'] == "flowon"){
     $config_test = adduser($username_ac, $expire, $data_limit, $Check_token['access_token'], $marzban_list_get['url_panel'], $nameprotocol);
     $data_test = json_decode($config_test, true);
     if (!isset($data_test['username'])) {
-        $data['detail'] = json_encode($data['detail']);
+        $data['detail'] = json_encode($data);
         sendmessage($from_id, $textbotlang['users']['usertest']['errorcreat'], $keyboard, 'html');
         $texterros = "
     ⭕️ یک کاربر قصد دریافت اکانت داشت که ساخت کانفیگ با خطا مواجه شده و به کاربر کانفیگ داده نشد
@@ -1263,6 +1264,9 @@ elseif ($user['step'] == "payment" && $datain == "confirmandgetservice"){
     if (isset($get_username_Check['username']) || in_array($username_ac, $usernameinvoice)) {
         $username_ac = $random_number . $username_ac;
     }
+        if(in_array($randomString,$id_invoice)){
+        $randomString = $random_number.$randomString;
+    }
     $stmt = $connect->prepare("INSERT IGNORE INTO invoice (id_user, id_invoice, username,time_sell, Service_location, name_product, price_product, Volume, Service_time,Status) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?,?)");
     $Status =  "active";
     $stmt->bind_param("ssssssssss", $from_id, $randomString, $username_ac, $date, $Processing_value, $info_product['name_product'], $info_product['price_product'], $info_product['Volume_constraint'], $info_product['Service_time'],$Status);
@@ -1294,7 +1298,7 @@ if(isset($nameprotocol['vless']) && $setting['flow'] == "flowon"){
     $configuser = adduser($username_ac, $timestamp, $data_limit, $Check_token['access_token'], $marzban_list_get['url_panel'], $nameprotocol);
     $data = json_decode($configuser, true);
     if (!isset($data['username'])) {
-        $data['detail'] = json_encode($data['detail']);
+        $data['detail'] = json_encode($data);
         sendmessage($from_id, $textbotlang['users']['sell']['ErrorConfig'], $keyboard, 'HTML');
         $texterros = "
     ⭕️ یک کاربر قصد دریافت اکانت داشت که ساخت کانفیگ با خطا مواجه شده و به کاربر کانفیگ داده نشد
