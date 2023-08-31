@@ -77,7 +77,7 @@ $keyboardpaymentManage = json_encode([
     'keyboard' => [
         [['text' => "💳 تنظبمات درگاه آفلاین"]],
         [['text' => "💵 تنظیمات nowpayment"]],
-        [['text' => "💎 درگاه ارزی ریالی"],['text' => "🟡  درگاه زرین پال"]],
+        [['text' => "💎 درگاه ارزی ریالی"],['text' => "🟡  درگاه آل سات"]],
         [['text' => "🔵 درگاه آقای پرداخت"],['text' => "🔴 درگاه پرفکت مانی"]],
         [['text' => "🏠 بازگشت به منوی مدیریت"]]
     ],
@@ -91,9 +91,9 @@ $CartManage = json_encode([
     ],
     'resize_keyboard' => true
 ]);
-$zarinpal = json_encode([
+$alsat = json_encode([
     'keyboard' => [
-        [['text' => "تنظیم مرچنت"],['text' => "وضعیت درگاه زرین پال"]],
+        [['text' => "تنظیم مرچنت"],['text' => "وضعیت درگاه آل سات"]],
         [['text' => "🏠 بازگشت به منوی مدیریت"]]
     ],
     'resize_keyboard' => true
@@ -175,7 +175,7 @@ $step_payment = [
     }
    if($PaySettingzarin == "onzarinpal"){
         $step_payment['inline_keyboard'][] = [
-            ['text' => "🟡 درگاه زرین پال" , 'callback_data' => "zarinpal" ]
+            ['text' => "🟡 درگاه آل سات" , 'callback_data' => "zarinpal" ]
     ];
     }
    if($PaySettingaqayepardakht == "onaqayepardakht"){
