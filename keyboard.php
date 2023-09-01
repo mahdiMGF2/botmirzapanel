@@ -37,13 +37,12 @@ if ($table_exists) {
     }
 }
 $result = mysqli_query($connect, "SELECT id_admin FROM admin");
-$adminrulecheck = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM admin WHERE id_admin = '$from_id'"));
 $admin_ids = array_column(mysqli_fetch_all($result, MYSQLI_ASSOC), 'id_admin');
 $keyboard = [
     'keyboard' => [
         [['text' => $datatextbot['text_sell']], ['text' => $datatextbot['text_usertest']]],
-        [['text' => $datatextbot['text_Purchased_services']],['text' => $datatextbot['text_Tariff_list']]],
-        [['text' => $datatextbot['text_account']],['text' => $datatextbot['text_Add_Balance']]],
+        [['text' => $datatextbot['text_Purchased_services']]],
+        [['text' => $datatextbot['text_account']],['text' => $datatextbot['text_Tariff_list']]],
         [['text' => $datatextbot['text_support']], ['text' => $datatextbot['text_help']]],
     ],
     'resize_keyboard' => true
@@ -58,47 +57,26 @@ $keyboard  = json_encode($keyboard);
 
 $keyboardPanel = json_encode([
     'inline_keyboard' => [
-        [['text' => $datatextbot['text_Discount'] ,'callback_data' => "Discount"]],
+        [['text' => $datatextbot['text_Discount'] ,'callback_data' => "Discount"],['text' => $datatextbot['text_Add_Balance'],'callback_data' => "Add_Balance"]],
     ],
     'resize_keyboard' => true
 ]);
-if($adminrulecheck['rule'] == "administrator"){
 $keyboardadmin = json_encode([
     'keyboard' => [
         [['text' => "🔑 تنظیمات اکانت تست"], ['text' => "📊 آمار ربات"]],
         [['text' => "🏬 بخش فروشگاه"],['text' => "💵 مالی"]],
         [['text' => "👨‍🔧 بخش ادمین"], ['text' => "📝 تنظیم متن ربات"]],
         [['text' => "👤 خدمات کاربر"],['text' => " 👤 کاربران ربات"]],
-        [['text' => "✏️ مدیریت پنل"],['text' => "🖥 اضافه کردن پنل  مرزبان"]],
-        [['text' => "📚 بخش آموزش "], ['text' => "⚙️ تنظیمات"]],
-        [['text' => "👥 تنظیمات زیر مجموعه گیری"]],
+        [['text' => "📚 بخش آموزش "], ['text' => "🖥 پنل مرزبان"]],
+        [['text' => "⚙️ تنظیمات"]],
         [['text' => "🏠 بازگشت به منوی اصلی"]]
     ],
     'resize_keyboard' => true
 ]);
-}
-if($adminrulecheck['rule'] == "Seller"){
-$keyboardadmin = json_encode([
-    'keyboard' => [
-        [['text' => "📊 آمار ربات"]],
-        [['text' => "👤 خدمات کاربر"],['text' => " 👤 کاربران ربات"]],
-        [['text' => "🏠 بازگشت به منوی اصلی"]]
-    ],
-    'resize_keyboard' => true
-]);
-}
-if($adminrulecheck['rule'] == "support"){
-$keyboardadmin = json_encode([
-    'keyboard' => [
-        [['text' => "👤 خدمات کاربر"],['text' => " 👤 کاربران ربات"]],
-        [['text' => "🏠 بازگشت به منوی اصلی"]]
-    ],
-    'resize_keyboard' => true
-]);
-}
 $keyboardpaymentManage = json_encode([
     'keyboard' => [
-        [['text' => "💳 تنظبمات درگاه آفلاین"],['text' => "💵 تنظیمات nowpayment"]],
+        [['text' => "💳 تنظبمات درگاه آفلاین"]],
+        [['text' => "💵 تنظیمات nowpayment"]],
         [['text' => "💎 درگاه ارزی ریالی"],['text' => "🟡  درگاه آل سات"]],
         [['text' => "🔵 درگاه آقای پرداخت"],['text' => "🔴 درگاه پرفکت مانی"]],
         [['text' => "🏠 بازگشت به منوی مدیریت"]]
@@ -107,17 +85,8 @@ $keyboardpaymentManage = json_encode([
 ]);
 $CartManage = json_encode([
     'keyboard' => [
-        [['text' => "💳 تنظیم شماره کارت"],['text' => "💳 درگاه آفلاین در پیوی"]],
-        [['text' => "👤 آیدی پشتیبانی"]],
+        [['text' => "💳 تنظیم شماره کارت"]],
         [['text' => "🔌 وضعیت درگاه آفلاین"]],
-        [['text' => "🏠 بازگشت به منوی مدیریت"]]
-    ],
-    'resize_keyboard' => true
-]);
-$perfectmoneykeyboard = json_encode([
-    'keyboard' => [
-        [['text' => "تنظیم شماره کیف پول"],['text' => "تنظیم شماره اکانت"]],
-        [['text' => "تنظیم رمز اکانت"],['text' => "وضعیت پرفکت مانی"]],
         [['text' => "🏠 بازگشت به منوی مدیریت"]]
     ],
     'resize_keyboard' => true
@@ -186,22 +155,13 @@ $PaySettingnow = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FR
 $PaySettingdigi = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'digistatus'"))['ValuePay'];
 $PaySettingzarin = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'statuszarinpal'"))['ValuePay'];
 $PaySettingaqayepardakht = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'statusaqayepardakht'"))['ValuePay'];
-$PaySettingperfectmoney = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'status_perfectmoney'"))['ValuePay'];
-$PaySettingpv = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'Cartstatuspv'"))['ValuePay'];
-$usernamecart = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'CartDirect'"))['ValuePay'];
 $step_payment = [
     'inline_keyboard' => []
     ];
     if($PaySettingcard == "oncard"){
-        if($PaySettingpv == "oncardpv"){
         $step_payment['inline_keyboard'][] = [
-            ['text' => "💳 کارت به کارت" ,'url' => "https://t.me/$usernamecart"],
-    ];
-        }else{
-                    $step_payment['inline_keyboard'][] = [
             ['text' => "💳 کارت به کارت" ,'callback_data' => "cart_to_offline"],
     ];
-        }
     }
    if($PaySettingnow == "onnowpayment"){
         $step_payment['inline_keyboard'][] = [
@@ -213,14 +173,14 @@ $step_payment = [
             ['text' => "💎درگاه پرداخت ارزی (ریالی)" , 'callback_data' => "iranpay" ]
     ];
     }
+   if($PaySettingzarin == "onzarinpal"){
+        $step_payment['inline_keyboard'][] = [
+            ['text' => "🟡 درگاه آل سات" , 'callback_data' => "zarinpal" ]
+    ];
+    }
    if($PaySettingaqayepardakht == "onaqayepardakht"){
         $step_payment['inline_keyboard'][] = [
             ['text' => "🔵 درگاه آقای پرداخت" , 'callback_data' => "aqayepardakht" ]
-    ];
-    }
-  if($PaySettingperfectmoney == "onperfectmoney"){
-        $step_payment['inline_keyboard'][] = [
-            ['text' => "🔴 درگاه پرفکت مانی" , 'callback_data' => "perfectmoney" ]
     ];
     }
     $step_payment['inline_keyboard'][] = [
@@ -290,6 +250,17 @@ $Feature_status = json_encode([
     'keyboard' => [
         [['text' => "قابلیت مشاهده اطلاعات اکانت"]],
         [['text' => "قابلیت اکانت تست"], ['text' => "قابلیت آموزش"]],
+        [['text' => "🏠 بازگشت به منوی مدیریت"]]
+    ],
+    'resize_keyboard' => true
+]);
+$keyboardmarzban =  json_encode([
+    'keyboard' => [
+        [['text' => '🔌 وضعیت پنل'], ['text' => "🖥 اضافه کردن پنل  مرزبان"]],
+        [['text' => "⚙️ارسال کانفیگ"], ['text' => "✏️ ویرایش پنل"]],
+        [['text' => "🔗 ارسال لینک سابسکرایبشن"]],
+        [['text' => "💡 روش ساخت نام کاربری"]],
+        [['text' => "🍀 قابلیت flow"]],
         [['text' => "🏠 بازگشت به منوی مدیریت"]]
     ],
     'resize_keyboard' => true
@@ -365,19 +336,15 @@ $user = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM user WHERE id =
     $list_marzban_panel_users = [
         'inline_keyboard' => [],
     ];
-$marzbnget = mysqli_query($connect, "SELECT * FROM marzban_panel WHERE status = 'active'");
-    while ($row = mysqli_fetch_assoc($marzbnget)) {
-        $namepaneluser[] = [$row['name_panel']];
-    }
 if ($user['step'] == "getusernameinfo") {
-    foreach ($namepaneluser as $button) {
+    foreach ($namepanel as $button) {
     $list_marzban_panel_users['inline_keyboard'][] = [
         ['text' => $button[0] , 'callback_data' => "locationnotuser_{$button[0]}"]
     ];
 }
 }
 else{
-        foreach ($namepaneluser as $button) {
+        foreach ($namepanel as $button) {
     $list_marzban_panel_users['inline_keyboard'][] = [
         ['text' => $button[0] , 'callback_data' => "location_{$button[0]}"]
     ];
@@ -387,17 +354,21 @@ $list_marzban_panel_users['inline_keyboard'][] = [
     ['text' => "🏠 بازگشت به منوی اصلی", 'callback_data' => "backuser"],
 ];
 $list_marzban_panel_user = json_encode($list_marzban_panel_users);
-$marzbngettest = mysqli_query($connect, "SELECT * FROM marzban_panel WHERE status = 'active' AND TestAccount = 'ONTestAccount'");
-    while ($row = mysqli_fetch_assoc($marzbngettest)) {
-        $namepaneluserTEST[] = [$row['name_panel']];
-    }
   $list_marzban_panel_usertest = [
         'inline_keyboard' => [],
     ];
-    foreach ($namepaneluserTEST as $buttons) {
+        if($setting['MethodUsername'] == "نام کاربری دلخواه"){
+    foreach ($namepanel as $buttons) {
     $list_marzban_panel_usertest['inline_keyboard'][] = [
         ['text' => $buttons[0] , 'callback_data' => "locationtest_".$buttons[0]]
     ];
+}
+}else{
+     foreach ($namepanel as $buttons) {
+    $list_marzban_panel_usertest['inline_keyboard'][] = [
+        ['text' => $buttons[0] , 'callback_data' => "locationtestorder_".$buttons[0]]
+    ];
+}   
 }
 $list_marzban_panel_usertest['inline_keyboard'][] = [
     ['text' => "🏠 بازگشت به منوی اصلی", 'callback_data' => "backuser"],
@@ -438,8 +409,8 @@ $result = $connect->query("SHOW TABLES LIKE 'product'");
 $table_exists = ($result->num_rows > 0);
 if ($table_exists) {
     $product = [];
-    $escapedText = mysqli_real_escape_string($connect, $text);
-    $getdataproduct = mysqli_query($connect, "SELECT * FROM product WHERE Location = '$escapedText' or Location = '/all' ");
+    $cleaned_text = mysqli_real_escape_string($connect, $text);
+    $getdataproduct = mysqli_query($connect, "SELECT * FROM product WHERE Location = '$cleaned_text' OR Location = '/all'");
     if(isset($getdataproduct)){
     while ($row = mysqli_fetch_assoc($getdataproduct)) {
         $product[] = [$row['name_product']];
@@ -483,30 +454,6 @@ if ($table_exists) {
     $json_list_Discount_list_admin = json_encode($list_Discount);
 }
 //--------------------------------------------------
-$result = $connect->query("SHOW TABLES LIKE 'Inbound'");
-$table_exists = ($result->num_rows > 0);
-if ($table_exists) {
-    $Inboundkeyboard = [];
-    $user = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM user WHERE id = '$from_id'"));
-    $getdataInbound = mysqli_query($connect, "SELECT * FROM Inbound WHERE location = '{$user['Processing_value']}' AND protocol = '$text'");
-    while ($row = mysqli_fetch_assoc($getdataInbound)) {
-        $Inboundkeyboard[] = [$row['NameInbound']];
-    }
-    $list_Inbound = [
-        'keyboard' => [],
-        'resize_keyboard' => true,
-    ];
-    $list_Inbound['keyboard'][] = [
-        ['text' => "🏠 بازگشت به منوی مدیریت"],
-    ];
-    foreach ($Inboundkeyboard as $button) {
-        $list_Inbound['keyboard'][] = [
-            ['text' => $button[0]]
-        ];
-    }
-    $json_list_Inbound_list_admin = json_encode($list_Inbound);
-}
-//--------------------------------------------------
 $result = $connect->query("SHOW TABLES LIKE 'DiscountSell'");
 $table_exists = ($result->num_rows > 0);
 if ($table_exists) {
@@ -532,7 +479,6 @@ if ($table_exists) {
 $payment = json_encode([
     'inline_keyboard' => [
         [['text' => "💰 پرداخت و دریافت سرویس", 'callback_data' => "confirmandgetservice"]],
-        [['text' => "🎁 ثبت کد تخفیف", 'callback_data' => "aptdc"]],
         [['text' => "🏠 بازگشت به منوی اصلی" ,  'callback_data' => "backuser"]]
     ]
 ]);
@@ -574,13 +520,8 @@ $MethodUsername = json_encode([
 $optionMarzban = json_encode([
     'keyboard' => [
         [['text' => "✍️ نام پنل"],['text' => "❌ حذف پنل"]],
-        [['text' => "🔐 ویرایش رمز عبور"],['text' => "👤 ویرایش نام کاربری"]],
-        [['text'=>"🔗 ویرایش آدرس پنل"]],
-        [['text' => "⚙️ تنظیمات پروتکل"],['text' =>"🖥 وضعیت پنل"]],
-        [['text' => "🍀 قابلیت flow"],['text' =>"💡 روش ساخت نام کاربری"]],
-        [['text' => "⚙️ارسال کانفیگ"],['text' => "🔗 ارسال لینک سابسکرایبشن"]],
-        [['text' => "❌ حذف اینباند"],['text' => "⚙️ تنظیمات اینباند"]],
-        [['text' => "🎁 وضعیت اکانت تست"]],
+        [['text'=>"🔗 ویرایش آدرس پنل"],['text' => "👤 ویرایش نام کاربری"]],
+        [['text' => "🔐 ویرایش رمز عبور"],['text' => "⚙️ تنظیمات پروتکل"]],
         [['text' => "🏠 بازگشت به منوی مدیریت"]]
     ],
     'resize_keyboard' => true
@@ -598,24 +539,6 @@ $supportoption = json_encode([
 $adminrule = json_encode([
     'keyboard' => [
         [['text' => "administrator"],['text' => "Seller"],['text' => "support"]],
-        [['text' => "🏠 بازگشت به منوی مدیریت"]]
-    ],
-    'resize_keyboard' => true
-]);
-$keyboardaddbalance = json_encode([
-    'keyboard' => [
-        [['text' => "👥 زیر مجموعه گیری"],['text' => "💸 شارژ حساب"]],
-        [['text' => "🏠 بازگشت به منوی اصلی"]]
-    ],
-    'resize_keyboard' => true
-]);
-$affiliates =  json_encode([
-    'keyboard' => [
-        [['text' => "🎁 وضعیت زیرمجموعه گیری"]],
-        [['text' => "🧮 تنظیم درصد زیرمجموعه"]],
-        [['text' => "🏞 تنظیم بنر زیرمجموعه گیری"]],
-        [['text' => "🎁 پورسانت بعد از خرید"],['text' => "🎁 دریافت هدیه "]],
-        [['text' => "🌟 مبلغ هدیه استارت"]],
         [['text' => "🏠 بازگشت به منوی مدیریت"]]
     ],
     'resize_keyboard' => true
