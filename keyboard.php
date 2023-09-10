@@ -548,10 +548,3 @@ $supportoption = json_encode([
             ],
         ]
     ]);
-$adminrule = json_encode([
-    'keyboard' => [
-        [['text' => "administrator"],['text' => "Seller"],['text' => "support"]],
-        [['text' => "🏠 بازگشت به منوی مدیریت"]]
-    ],
-    'resize_keyboard' => true
-]);
