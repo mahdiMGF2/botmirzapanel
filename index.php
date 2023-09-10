@@ -608,7 +608,7 @@ elseif (preg_match('/extend_(\w+)/', $datain, $dataget)) {
         ]
     ]);
      $prodcut['price_product'] = number_format($prodcut['price_product'],0);
-    $textextend = "🧾 فاکتور تمدید شما برای نام کاربری $username ایجاد شد.
+    $textextend = "🧾 فاکتور تمدید شما برای نام کاربری @$username ایجاد شد.
 
 🛍 نام محصول :  {$nameloc['name_product']}
 مبلغ تمدید :  {$prodcut['price_product']}
@@ -669,6 +669,8 @@ elseif (preg_match('/confirmserivce_(\w+)/', $datain, $dataget) && $user['step']
         ]
     ]);
     sendmessage($from_id,$textbotlang['users']['extend']['thanks'],$keyboardextendfnished, 'HTML');
+    $prodcut['price_product'] = number_format($prodcut['price_product']);
+    
      $text_report = "⭕️ یک کاربر سرویس خود را تمدید کرد.
 
 اطلاعات کاربر : 
@@ -779,6 +781,8 @@ elseif($user['step'] == "getvolumeextra"){
         return;
     }
     $priceextra = $setting['Extra_volume']*$text;
+    $priceextra = number_format($priceextra);
+    $setting['Extra_volume'] = number_format($setting['Extra_volume']);
     $textextra = "📇 فاکتور خرید حجم اضافه برای شما ایجاد شد.
 
 💰 قیمت هر گیگابایت حجم اضافه :  {$setting['Extra_volume']} تومان
@@ -789,7 +793,7 @@ elseif($user['step'] == "getvolumeextra"){
         $keyboardsetting = json_encode([
         'inline_keyboard' => [
             [
-                ['text' => $textbotlang['users']['Extra_volume']['extracheck'], 'callback_data' => 'confirmaextra_'.$priceextra],
+                ['text' => $textbotlang['users']['Extra_volume']['extracheck'], 'callback_data' => 'confirmaextra_'.$setting['Extra_volume']*$text],
             ]
         ]
     ]);
@@ -836,6 +840,7 @@ elseif (preg_match('/confirmaextra_(\w+)/', $datain, $dataget)) {
     ]);
     sendmessage($from_id, $textbotlang['users']['Extra_volume']['extraadded'], $keyboardextrafnished, 'HTML');
     $volumes  =  $volume/$setting['Extra_volume'];
+    $volume = number_format($volume);
      $text_report = "⭕️ یک کاربر حجم اضافه خریده است
 
 اطلاعات کاربر : 
@@ -1666,6 +1671,7 @@ if (preg_match('/Confirmpay_user_(\w+)_(\w+)/', $datain, $dataget)) {
         $stmt->bind_param("ss", $Status_change, $Payment_report['id_order']);
         $stmt->execute();
         sendmessage($from_id, $textbotlang['users']['Balance']['Confirmpay'], null, 'HTML');
+        $Payment_report['price'] = number_format($Payment_report['price']);
     $text_report = "💵 پرداخت جدید
         
 آیدی عددی کاربر : $from_id
@@ -1732,12 +1738,13 @@ if (preg_match('/Confirmpay_user_(\w+)_(\w+)/', $datain, $dataget)) {
         ]
     ]);
     $Payment_report = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM Payment_report WHERE id_user = '$from_id' LIMIT 1"));
+    $Processing_value = number_format($Processing_value);
     $textsendrasid = "
             ⭕️ یک پرداخت جدید انجام شده است .
         
 👤 شناسه کاربر: $from_id
 🛒 کد پیگیری پرداخت: $randomString
-⚜️ نام کاربری: $username
+⚜️ نام کاربری: @$username
 💸 مبلغ پرداختی: $Processing_value تومان
         
 توضیحات: $caption
@@ -1791,6 +1798,7 @@ if ($datain == "Discount") {
     $step = 'اhome';
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
+    number_format($get_codesql['price']);
     $text_balance_code = "کد هدیه با موفقیت ثبت شد و به موجودی شما مبلغ {$get_codesql['price']} تومان اضافه گردید. 🥳";
     sendmessage($from_id, $text_balance_code, $keyboard, 'HTML');
     $stmt = $connect->prepare("INSERT INTO Giftcodeconsumed (id_user,code) VALUES (?,?)");
@@ -3043,6 +3051,7 @@ if (preg_match('/Confirm_pay_(\w+)/', $datain, $dataget) ) {
               به موجودی کاربر مبلغ {$Payment_report['price']} اضافه گردید.
             ";
     sendmessage($from_id, $textconfrom, null, 'HTML');
+    number_format($Payment_report['price']);
     sendmessage($Payment_report['id_user'], "💎 کاربر گرامی مبلغ {$Payment_report['price']} تومان به کیف پول شما واریز گردید با تشکر از پرداخت شما.
         
         🛒 کد پیگیری شما: {$Payment_report['id_order']}", null, 'HTML');
@@ -3340,6 +3349,7 @@ elseif ($user['step'] == "get_price_add") {
     $stmt = $connect->prepare("UPDATE user SET Balance = ? WHERE id = ?");
     $stmt->bind_param("ss", $Balance_add_user, $Processing_value);
     $stmt->execute();
+    $text = number_format($text);
     $textadd = "💎 کاربر عزیز مبلغ $text تومان به موجودی کیف پول تان اضافه گردید.";
     sendmessage($Processing_value, $textadd, null, 'HTML');
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
@@ -3378,6 +3388,7 @@ elseif ($user['step'] == "get_price_Negative") {
     $stmt = $connect->prepare("UPDATE user SET Balance = ? WHERE id = ?");
     $stmt->bind_param("ss", $Balance_Low_user, $Processing_value);
     $stmt->execute();
+    $text = number_format($text);
     $textkam = "❌ کاربر عزیز مبلغ $text تومان از  موجودی کیف پول تان کسر گردید.";
     sendmessage($Processing_value, $textkam, null, 'HTML');
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
