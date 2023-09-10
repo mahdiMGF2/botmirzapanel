@@ -463,12 +463,13 @@ try {
         $result =  $connect->query("CREATE TABLE Payment_report (
         id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
         id_user varchar(200),
-        id_order varchar(2000),
+        id_order varchar(500),
         time varchar(200)  NULL,
-        price varchar(2000) NULL,
-        dec_not_confirmed varchar(2000) NULL,
-        Payment_Method varchar(400) NULL,
-        payment_Status varchar(2000) NULL)");
+        price varchar(400) NULL,
+        dec_not_confirmed varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL,
+        Payment_Method varchar(400) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL,
+        payment_Status varchar(2000) NULL)
+        ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin");
         if (!$result) {
             echo "table Payment_report".mysqli_error($connect);
         }
