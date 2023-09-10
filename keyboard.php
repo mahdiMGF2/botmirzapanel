@@ -40,9 +40,9 @@ $result = mysqli_query($connect, "SELECT id_admin FROM admin");
 $admin_ids = array_column(mysqli_fetch_all($result, MYSQLI_ASSOC), 'id_admin');
 $keyboard = [
     'keyboard' => [
-        [['text' => $datatextbot['text_sell']], ['text' => $datatextbot['text_usertest']]],
-        [['text' => $datatextbot['text_Purchased_services']]],
-        [['text' => $datatextbot['text_account']],['text' => $datatextbot['text_Tariff_list']]],
+        [['text' => $datatextbot['text_sell']],['text' => $datatextbot['text_usertest']]],
+        [['text' => $datatextbot['text_Purchased_services']],['text' => $datatextbot['text_Tariff_list']]],
+        [['text' => $datatextbot['text_account']],['text' => $datatextbot['text_Add_Balance']]],
         [['text' => $datatextbot['text_support']], ['text' => $datatextbot['text_help']]],
     ],
     'resize_keyboard' => true
@@ -57,7 +57,7 @@ $keyboard  = json_encode($keyboard);
 
 $keyboardPanel = json_encode([
     'inline_keyboard' => [
-        [['text' => $datatextbot['text_Discount'] ,'callback_data' => "Discount"],['text' => $datatextbot['text_Add_Balance'],'callback_data' => "Add_Balance"]],
+        [['text' => $datatextbot['text_Discount'] ,'callback_data' => "Discount"]],
     ],
     'resize_keyboard' => true
 ]);
@@ -332,11 +332,23 @@ if ($table_exists) {
         $json_list_help = json_encode($help_arr);
     }
 }
-$user = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM user WHERE id = '$from_id'"));
-    $list_marzban_panel_users = [
+$query = mysqli_query($connect, "SELECT * FROM user WHERE id = '$from_id' LIMIT 1");
+if (mysqli_num_rows($query) > 0) {
+    $users = mysqli_fetch_assoc($query);
+} else {
+    $users = array();
+    $users = array(
+        'step' => '',
+        'Processing_value' => '',
+        'User_Status' => '',
+        'username' => '',
+        'limit_usertest' =>'',
+    );
+}
+$list_marzban_panel_users = [
         'inline_keyboard' => [],
     ];
-if ($user['step'] == "getusernameinfo") {
+if ($users['step'] == "getusernameinfo") {
     foreach ($namepanel as $button) {
     $list_marzban_panel_users['inline_keyboard'][] = [
         ['text' => $button[0] , 'callback_data' => "locationnotuser_{$button[0]}"]
@@ -364,11 +376,11 @@ $list_marzban_panel_user = json_encode($list_marzban_panel_users);
     ];
 }
 }else{
-     foreach ($namepanel as $buttons) {
+     foreach ($namepanel as $button) {
     $list_marzban_panel_usertest['inline_keyboard'][] = [
-        ['text' => $buttons[0] , 'callback_data' => "locationtestorder_".$buttons[0]]
+        ['text' => $button[0] , 'callback_data' => "locationtests_{$button[0]}"]
     ];
-}   
+}  
 }
 $list_marzban_panel_usertest['inline_keyboard'][] = [
     ['text' => "🏠 بازگشت به منوی اصلی", 'callback_data' => "backuser"],
