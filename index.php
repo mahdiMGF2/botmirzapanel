@@ -168,7 +168,7 @@ if ($user['User_Status'] == "block") {
 }
 $timebot= time();
 $TimeLastMessage=  $timebot - intval($user['last_message_time']);
-if(floor($TimeLastMessage / 60) > 1){
+if(floor($TimeLastMessage / 60) >= 1){
     $stmt = $connect->prepare("UPDATE user SET last_message_time = ? WHERE id = ?");
     $stmt->bind_param("ss", $timebot, $from_id);
     $stmt->execute();
@@ -182,7 +182,7 @@ $stmt = $connect->prepare("UPDATE user SET message_count = ? WHERE id = ?");
 $addmessage = intval($user['message_count']) + 1;
 $stmt->bind_param("ss", $addmessage, $from_id);
 $stmt->execute();
-if($user['message_count'] >= "25"){
+if($user['message_count'] >= "35"){
     $stmt = $connect->prepare("UPDATE user SET User_Status = ? ,description_blocking = ? WHERE id = ?");
     $User_Status = "block";
     $stmt->bind_param("sss", $User_Status,$textbotlang['users']['spam']['spamed'], $from_id);
@@ -880,7 +880,7 @@ if (preg_match('/locationtest_(.*)/', $datain, $dataget)) {
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
 }
-if ($user['step'] == "createusertest" || preg_match('/locationtestorder_(.*)/', $datain, $dataget)) {
+if ($user['step'] == "createusertest" || preg_match('/locationtests_(.*)/', $datain, $dataget)) {
         if ($user['limit_usertest'] <= 0) {
         sendmessage($from_id, $textbotlang['users']['usertest']['limitwarning'], $keyboard, 'html');
         return;
@@ -931,7 +931,7 @@ if(isset($nameprotocol['vless']) && $setting['flow'] == "flowon"){
     $config_test = adduser($username_ac, $expire, $data_limit, $Check_token['access_token'], $marzban_list_get['url_panel'], $nameprotocol);
     $data_test = json_decode($config_test, true);
     if (!isset($data_test['username'])) {
-        $data['detail'] = json_encode($data);
+        $data['detail'] = json_encode($data_test['detail']);
         sendmessage($from_id, $textbotlang['users']['usertest']['errorcreat'], $keyboard, 'html');
         $texterros = "
     ⭕️ یک کاربر قصد دریافت اکانت داشت که ساخت کانفیگ با خطا مواجه شده و به کاربر کانفیگ داده نشد
@@ -982,6 +982,9 @@ if(isset($nameprotocol['vless']) && $setting['flow'] == "flowon"){
             [
                 ['text' => $setting['val_usertest'] . " مگابایت", 'callback_data' => "Volume_constraint"],
                 ['text' => $textbotlang['users']['Volume-Service'], 'callback_data' => "Volume_constraint"],
+            ],
+            [
+                ['text' => $textbotlang['users']['help']['btninlinebuy'], 'callback_data' => "helpbtn"],
             ]
         ]
     ]);
@@ -1046,7 +1049,7 @@ unlink($urlimage);
     }
 }
 #-----------help------------#
-if ($text == $datatextbot['text_help']) {
+if ($text == $datatextbot['text_help'] || $datain == "helpbtn") {
     if ($setting['help_Status'] == "❌ آموزش غیرفعال است") {
         sendmessage($from_id, $textbotlang['users']['help']['disablehelp'], null, 'HTML');
         return;
@@ -1223,6 +1226,8 @@ elseif ($user['step'] == "endstepuser" ||preg_match('/prodcutservice_(.*)/', $da
     $stmt->bind_param("ss", $username_ac, $from_id);
     $stmt->execute();
     if($info_product['Volume_constraint'] == 0 )$info_product['Volume_constraint'] = $textbotlang['users']['stateus']['Unlimited'];
+    $info_product['price_product'] = number_format($info_product['price_product'], 0);
+    $user['Balance'] = number_format($user['Balance']);
     $textin = "
          📇 پیش فاکتور شما:
 👤 نام کاربری: <code>$username_ac</code>
@@ -1230,6 +1235,7 @@ elseif ($user['step'] == "endstepuser" ||preg_match('/prodcutservice_(.*)/', $da
 📆 مدت اعتبار: {$info_product['Service_time']} روز
 💶 قیمت: {$info_product['price_product']}  تومان
 👥 حجم اکانت: {$info_product['Volume_constraint']} گیگ
+💵 موجودی کیف پول شما : {$user['Balance']}
 
 💰 سفارش شما آماده پرداخت است.  ";
     sendmessage($from_id, $textin, $payment, 'HTML');
@@ -1317,6 +1323,8 @@ if(isset($nameprotocol['vless']) && $setting['flow'] == "flowon"){
     }
     $link_config = "";
     $text_config = "";
+    $config = "";
+    $configqr = "";
     if ($setting['sublink'] == "✅ لینک اشتراک فعال است.") {
         $output_config_link = $data['subscription_url'];
         if (!preg_match('/^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?((\/[^\s\/]+)+)?$/', $output_config_link)) {
@@ -1401,7 +1409,7 @@ unlink($urlimage);
 
 
 #-------------------[ text_Add_Balance ]---------------------#
-if ($datain == "Add_Balance") {
+if ($text == $datatextbot['text_Add_Balance']) {
     if ($setting['get_number'] == "✅ تایید شماره موبایل روشن است" && $user['step'] != "get_number" && $user['number'] == "none") {
         sendmessage($from_id, $textbotlang['users']['number']['Confirming'], $request_contact, 'HTML');
         $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
@@ -1430,6 +1438,7 @@ if ($datain == "Add_Balance") {
 } elseif ($user['step'] == "get_step_payment") {
     if ($datain == "cart_to_offline") {
 $PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'CartDescription'"))['ValuePay'];
+$Processing_value = number_foramt($Processing_value);
 $textcart = "برای افزایش موجودی به صورت دستی، مبلغ $Processing_value  تومان  را به شماره‌ی حساب زیر واریز کنید 👇🏻
 
 ==================== 
@@ -2127,17 +2136,26 @@ if ($text == "🖥 اضافه کردن پنل  مرزبان"  ) {
 }
 if ($text == "📨 ارسال پیام به کاربر" ) {
     sendmessage($from_id, $textbotlang['users']['selectoption'], $sendmessageuser, 'HTML');
-} elseif ($text == "✉️ ارسال همگانی" ) {
+} elseif ($text == "✉️ ارسال همگانی") {
     sendmessage($from_id, $textbotlang['Admin']['ManageUser']['GetText'], $backadmin, 'HTML');
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'gettextforsendall';
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
 } elseif ($user['step'] == "gettextforsendall") {
-    foreach ($users_ids as $id) {
-        sendmessage($id, $text, null,'html');
+    $maxBatchSize = 100;
+    $totalUsers = count($users_ids);
+    $messageCount = 0;
+
+    for ($offset = 0; $offset < $totalUsers; $offset += $maxBatchSize) {
+        $batchUsers = array_slice($users_ids, $offset, $maxBatchSize);
+        foreach ($batchUsers as $id) {
+            sendmessage($id, $text, null, 'html');
+            $messageCount++;
+        }
+        sendmessage($from_id, "✅ به تعداد $messageCount   کاربر از $totalUsers  کاربر ارسال شد", null, 'html');
+        sleep(3);
     }
-    sendmessage($from_id, "✅ پیام برای تمامی کاربران ارسال شد.", $keyboardadmin, 'HTML');
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'home';
     $stmt->bind_param("ss", $step, $from_id);
@@ -2149,10 +2167,19 @@ if ($text == "📨 ارسال پیام به کاربر" ) {
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
 } elseif ($user['step'] == "gettextforwardMessage") {
-    foreach ($users_ids as $id) {
-        forwardMessage($from_id, $message_id, $id);
+$maxBatchSize = 100;
+    $totalUsers = count($users_ids);
+    $messageCount = 0;
+
+    for ($offset = 0; $offset < $totalUsers; $offset += $maxBatchSize) {
+        $batchUsers = array_slice($users_ids, $offset, $maxBatchSize);
+        foreach ($batchUsers as $id) {
+            sendmessage($id, $text, null, 'html');
+            $messageCount++;
+        }
+        sendmessage($from_id, "✅ به تعداد $messageCount   کاربر از $totalUsers  کاربر ارسال شد", null, 'html');
+        sleep(3);
     }
-    sendmessage($from_id, $textbotlang['Admin']['ManageUser']['ForwardSendAllUser'], $keyboardadmin, 'HTML');
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'home';
     $stmt->bind_param("ss", $step, $from_id);
