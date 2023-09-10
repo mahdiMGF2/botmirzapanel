@@ -1443,7 +1443,7 @@ if ($text == $datatextbot['text_Add_Balance']) {
 } elseif ($user['step'] == "get_step_payment") {
     if ($datain == "cart_to_offline") {
 $PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'CartDescription'"))['ValuePay'];
-$Processing_value = number_foramt($Processing_value);
+$Processing_value = number_format($Processing_value);
 $textcart = "برای افزایش موجودی به صورت دستی، مبلغ $Processing_value  تومان  را به شماره‌ی حساب زیر واریز کنید 👇🏻
 
 ==================== 
