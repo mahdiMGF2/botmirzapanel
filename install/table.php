@@ -297,23 +297,18 @@ try {
     $result = $connect->query("SHOW TABLES LIKE 'admin'");
     $table_exists = ($result->num_rows > 0);
     if ($table_exists) {
-        $Check_filde = $connect->query("SHOW COLUMNS FROM admin LIKE 'rule'");
-        if (mysqli_num_rows($Check_filde) != 1) {
-           $result = $connect->query("ALTER TABLE admin ADD rule VARCHAR(1000)");
-        } 
         $id_admin = mysqli_query($connect, "SELECT * FROM admin");
         while ($row = mysqli_fetch_assoc($id_admin)) {
             $admin_ids[] = $row['id_admin'];
         }
         if (!in_array($adminnumber, $admin_ids)) {
-            $connect->query("INSERT INTO admin (id_admin,rule) VALUES ('$adminnumber','administrator')");
+            $connect->query("INSERT INTO admin (id_admin) VALUES ('$adminnumber')");
             echo "table admin update✅</br>";
         }
     } else {
         $result =  $connect->query("CREATE TABLE admin (
-        id_admin varchar(500) PRIMARY KEY NOT NULL,
-        rule varchar(500) NOT NULL)");
-        $connect->query("INSERT INTO admin (id_admin,rule) VALUES ('$adminnumber','administrator')");
+        id_admin varchar(500) PRIMARY KEY NOT NULL)");
+        $connect->query("INSERT INTO admin (id_admin) VALUES ('$adminnumber')");
         if (!$result) {
             echo "table admin".mysqli_error($connect);
         }  }
