@@ -90,6 +90,7 @@ $textbotlang['users']['usertest']['namepanel'] = "نام پنل";
 
 
 $textbotlang['users']['help']['disablehelp'] = "کاربر گرامی بخش آموزش درحال حاضر غیرفعال است. 😔";
+$textbotlang['users']['help']['btninlinebuy'] = "📚 مشاهده آموزش استفاده ";
 
 
 $textbotlang['users']['support']['sendmessageadmin'] = "🚀 پیام شما ارسال شد منتظر پاسخ مدیریت باشید";
