@@ -612,7 +612,7 @@ try {
         }
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_start','سلام خوش آمدید') ");
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_usertest','🔑 اکانت تست')");
-        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_Purchased_services','🛍 مشاهده سرویس های خریداری شده')");
+        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_Purchased_services','🛍 سرویس های من')");
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_support','☎️ پشتیبانی')");
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_help','📚 آموزش')");
         $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_bot_off','❌ ربات خاموش است، لطفا دقایقی دیگر مراجعه کنید')");
@@ -631,7 +631,7 @@ try {
     else{
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_start','سلام خوش آمدید')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_usertest','🔑 اکانت تست')");
-        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_Purchased_services','🛍 مشاهده سرویس های خریداری شده')");
+        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_Purchased_services','🛍 سرویس های من')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_support','☎️ پشتیبانی')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_help','📚 آموزش')");
         $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_bot_off','❌ ربات خاموش است، لطفا دقایقی دیگر مراجعه کنید')");
