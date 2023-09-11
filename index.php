@@ -936,7 +936,7 @@ if(isset($nameprotocol['vless']) && $setting['flow'] == "flowon"){
     $config_test = adduser($username_ac, $expire, $data_limit, $Check_token['access_token'], $marzban_list_get['url_panel'], $nameprotocol);
     $data_test = json_decode($config_test, true);
     if (!isset($data_test['username'])) {
-        $data['detail'] = json_encode($data_test['detail']);
+        $data_test['detail'] = json_encode($data_test['detail']);
         sendmessage($from_id, $textbotlang['users']['usertest']['errorcreat'], $keyboard, 'html');
         $texterros = "
     ⭕️ یک کاربر قصد دریافت اکانت داشت که ساخت کانفیگ با خطا مواجه شده و به کاربر کانفیگ داده نشد
