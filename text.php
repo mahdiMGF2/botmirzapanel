@@ -191,7 +191,7 @@ $textbotlang['Admin']['channel']['setchannel'] = "🔰 کانال با موفق�
     
     
     
-$textbotlang['Admin']['manageadmin']['getid'] ="🌟آیدی عددی ادمین جدید را ارسال نمایید";
+$textbotlang['Admin']['manageadmin']['getid'] ="🌟آیدی عددی ادمین را ارسال نمایید";
 $textbotlang['Admin']['manageadmin']['addadminset'] ="🥳 ادمین با موفقیت اضافه گردید";
 $textbotlang['Admin']['manageadmin']['setrule'] ="⭕️ سطح دسترسی ادمین را ارسال کنید
 سطح دسترسی administrator به تمامی بخش ها دسترسی دارد
