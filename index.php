@@ -706,34 +706,32 @@ elseif (preg_match('/confirmchange_(\w+)/', $datain, $dataget)) {
     $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$nameloc['Service_location']}'"));
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
     $Allowedusername = getuser($username_ac, $Check_token['access_token'], $marzban_list_get['url_panel']);
-            if($marzban_list_get['vless'] == "onvlss"){
-            $nameprotocol = array(
-                "vless" => array(
-            "id" => generateUUID() ,
-            "status" => "active"
-            ));
-    }
-    if($marzban_list_get['vmess'] == "onvmess"){
-            $nameprotocol = array(
-                "vmess" => array(
-                    "id" => generateUUID() ,
-            "status" => "active"
-            ));
-    }
-   if($marzban_list_get['trojan'] == "ontrojan"){
-            $nameprotocol = array(
-                "trojan" => array(
-                    "id" => generateUUID() ,
-            "status" => "active"
-            ));
-    }
-   if($marzban_list_get['trojan'] == "onshadowsocks"){
-            $nameprotocol = array(
-                "shadowsocks" => array(
-                    "id" => generateUUID() ,
-            "status" => "active"
-            ));
-    }
+    $nameprotocol = array();
+if(isset($marzban_list_get['vless']) && $marzban_list_get['vless'] == "onvless"){
+    $nameprotocol['vless'] = array(
+        "id" => generateUUID(),
+        "status" => "active");
+}
+
+if(isset($marzban_list_get['vmess']) && $marzban_list_get['vmess'] == "onvmess"){
+    $nameprotocol['vmess'] = array(
+                "id" => generateUUID(),
+        "status" => "active");
+}
+
+if(isset($marzban_list_get['trojan']) && $marzban_list_get['trojan'] == "ontrojan"){
+    $nameprotocol['trojan'] = array(
+        "id" => generateUUID(),
+        "status" => "active");
+}
+
+if(isset($marzban_list_get['shadowsocks']) && $marzban_list_get['shadowsocks'] == "onshadowsocks"){
+    $nameprotocol['shadowsocks'] = array(
+        "id" => generateUUID(),
+        "status" => "active");
+}
+
+
         $datam = array(
         "proxies" => $nameprotocol
         );
