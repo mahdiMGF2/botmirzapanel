@@ -3701,9 +3701,6 @@ elseif ($user['step'] == "updatemethodusername") {
     $stmt->bind_param("s", $text);
     $stmt->execute();
     sendmessage($from_id, $textbotlang['Admin']['AlgortimeUsername']['SaveData'], $keyboardmarzban, 'HTML');
-    if($text == "متن دلخواه + عدد رندوم"){
-            sendmessage($from_id, "این قابلیت در نسخه پولی فعال است", null, 'HTML');
-    }
 }
 #----------------[  MANAGE PAYMENT   ]------------------#
 
