@@ -63,11 +63,6 @@ try {
             $connect->query("UPDATE user SET Processing_value = 'none'");
             echo "The Processing_Value field was added ✅";
         }
-                $Check_filde = $connect->query("SHOW COLUMNS FROM user LIKE 'spam'");
-        if (mysqli_num_rows($Check_filde) != 1) {
-            $connect->query("ALTER TABLE user ADD spam VARCHAR(1000)");
-            echo "The spam field was added ✅";
-        }
             $Check_filde = $connect->query("SHOW COLUMNS FROM user LIKE 'Processing_value_tow'");
             if (mysqli_num_rows($Check_filde) != 1) {
                 $connect->query("ALTER TABLE user ADD Processing_value_tow VARCHAR(1000)");
@@ -664,8 +659,6 @@ try {
         $connect->query("INSERT INTO PaySetting (NamePay,ValuePay) VALUES ('apinowpayment','0') ");
         $connect->query("INSERT INTO PaySetting (NamePay,ValuePay) VALUES ('nowpaymentstatus','offnowpayment') ");
         $connect->query("INSERT INTO PaySetting (NamePay,ValuePay) VALUES ('digistatus','offdigi') ");
-        $connect->query("INSERT INTO PaySetting (NamePay,ValuePay) VALUES ('merchant_id','0') ");
-        $connect->query("INSERT INTO PaySetting (NamePay,ValuePay) VALUES ('statuszarinpal','offzarinpal') ");
         $connect->query("INSERT INTO PaySetting (NamePay,ValuePay) VALUES ('statusaqayepardakht','offaqayepardakht') ");
         $connect->query("INSERT INTO PaySetting (NamePay,ValuePay) VALUES ('merchant_id_aqayepardakht','0')");
     }
@@ -675,8 +668,6 @@ try {
         $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('apinowpayment','0')");
         $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('nowpaymentstatus','offnowpayment')");
         $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('digistatus','offdigi')");
-        $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('merchant_id','0')");
-        $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('statuszarinpal','offzarinpal')");
         $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('statusaqayepardakht','offaqayepardakht') ");
         $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('merchant_id_aqayepardakht','0')");
 
