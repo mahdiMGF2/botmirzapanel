@@ -781,6 +781,13 @@ elseif($user['step'] == "getvolumeextra"){
         return;
     }
     $priceextra = $setting['Extra_volume']*$text;
+        $keyboardsetting = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $textbotlang['users']['Extra_volume']['extracheck'], 'callback_data' => 'confirmaextra_'.$priceextra],
+            ]
+        ]
+    ]);
     $priceextra = number_format($priceextra);
     $setting['Extra_volume'] = number_format($setting['Extra_volume']);
     $textextra = "📇 فاکتور خرید حجم اضافه برای شما ایجاد شد.
@@ -790,13 +797,6 @@ elseif($user['step'] == "getvolumeextra"){
 📥 حجم اضافه درخواستی : $text  گیگابایت
 
 ✅ جهت پرداخت و اضافه شدن حجم، روی دکمه زیر کلیک کنید.";
-        $keyboardsetting = json_encode([
-        'inline_keyboard' => [
-            [
-                ['text' => $textbotlang['users']['Extra_volume']['extracheck'], 'callback_data' => 'confirmaextra_'.$setting['Extra_volume']*$text],
-            ]
-        ]
-    ]);
     sendmessage($from_id,$textextra, $keyboardsetting, 'HTML');
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'home';
@@ -805,6 +805,7 @@ elseif($user['step'] == "getvolumeextra"){
 }
 elseif (preg_match('/confirmaextra_(\w+)/', $datain, $dataget)) {
     $volume = $dataget[1];
+    sendmessage($from_id, $volume, null, 'HTML');
     $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '$Processing_value'"));
         if($user['Balance'] <$volume){
     $Balance_prim = $volume - $user['Balance'];
@@ -939,7 +940,7 @@ if(isset($nameprotocol['vless']) && $setting['flow'] == "flowon"){
         $data_test['detail'] = json_encode($data_test['detail']);
         sendmessage($from_id, $textbotlang['users']['usertest']['errorcreat'], $keyboard, 'html');
         $texterros = "
-    ⭕️ یک کاربر قصد دریافت اکانت داشت که ساخت کانفیگ با خطا مواجه شده و به کاربر کانفیگ داده نشد
+    ⭕️ یک کاربر قصد دریافت اکانت تست داشت که ساخت کانفیگ با خطا مواجه شده و به کاربر کانفیگ داده نشد
     ✍️ دلیل خطا : 
     {$data_test['detail']}
     آیدی کابر : $from_id
