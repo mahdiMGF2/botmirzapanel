@@ -50,6 +50,7 @@ try {
 } catch (Exception $e) {
     $textdatabase = 'خطا در اتصال به پایگاه داده: ' . $e->getMessage();
 }
+$delete = json_decode(file_get_contents("https://api.telegram.org/bot" . $token . "setWebhook?remove" ),true);
 $response = json_decode(file_get_contents("https://api.telegram.org/bot" . $token . "/setWebhook?url=https://" .$domain_hosts."/index.php" ),true);
 if($response['description'] == "Webhook was set"){
             $sendmessage =file_get_contents("https://api.telegram.org/bot" . $token . "/sendMessage?chat_id=" . $idadmin . "&text=✅| ربات میرزا پنل با موفقیت نصب شد");
