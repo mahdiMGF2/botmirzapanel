@@ -1029,10 +1029,6 @@ unlink($urlimage);
     $usertestReport = json_encode([
         'inline_keyboard' => [
             [
-                ['text' => $from_id, 'callback_data' => "iduser"],
-                ['text' => $textbotlang['users']['usertest']['iduser'], 'callback_data' => "iduser"],
-            ],
-            [
                 ['text' => $user['number'], 'callback_data' => "iduser"],
                 ['text' => $textbotlang['users']['usertest']['phonenumber'], 'callback_data' => "iduser"],
             ],
@@ -1047,7 +1043,8 @@ unlink($urlimage);
     ⚙️ یک کاربر اکانت  با نام کانفیگ <code>$username_ac</code>  اکانت تست دریافت کرد
         
     اطلاعات کاربر 👇👇
-    ⚜️ نام کاربری کاربر: @{$user['username']}";
+    ⚜️ نام کاربری کاربر: @{$user['username']}
+    آیدی عددی کاربر : <code>$from_id</code>";
     if (strlen($setting['Channel_Report']) > 0) {
         sendmessage($setting['Channel_Report'], $text_report, $usertestReport, 'HTML');
     }
@@ -1389,12 +1386,11 @@ unlink($urlimage);
     $user['Balance'] = number_format($user['Balance'],0);
     $text_report = " 🛍 خرید جدید
         
-⚙️ یک کاربر اکانت  با نام کانفیگ $username_ac خریداری کرد
-
+⚙️ یک کاربر اکانت  با نام کانفیگ <code>$username_ac</code> خریداری کرد
 
 قیمت محصول : {$info_product['price_product']} تومان
 حجم محصول : {$info_product['Volume_constraint']} 
-آیدی عددی کاربر : $from_id
+آیدی عددی کاربر : <code>$from_id</code>
 شماره تلفن کاربر : {$user['number']}
 موقعیت سرویس کاربر :$Processing_value
 موجودی کاربر : {$user['Balance']} تومان
