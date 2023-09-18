@@ -2150,23 +2150,32 @@ if ($text == "📨 ارسال پیام به کاربر" ) {
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
 } elseif ($user['step'] == "gettextforsendall") {
-    $maxBatchSize = 100;
-    $totalUsers = count($users_ids);
-    $messageCount = 0;
-
-    for ($offset = 0; $offset < $totalUsers; $offset += $maxBatchSize) {
-        $batchUsers = array_slice($users_ids, $offset, $maxBatchSize);
-        foreach ($batchUsers as $id) {
-            sendmessage($id, $text, null, 'html');
-            $messageCount++;
-        }
-        sendmessage($from_id, "✅ به تعداد $messageCount   کاربر از $totalUsers  کاربر ارسال شد", null, 'html');
-        sleep(3);
+sendmessage($from_id, "درحال ارسال پیام",$keyboardaadmin, 'HTML');
+$stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+$step = 'home';
+$stmt->bind_param("ss", $step, $from_id);
+$stmt->execute();
+$filename = 'user.txt';
+$query = "SELECT id FROM user";
+$result = $connect->query($query);
+if ($result) {
+    $ids = array();
+    while ($row = $result->fetch_assoc()) {
+        $ids[] = $row['id'];
     }
-    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
-    $step = 'home';
-    $stmt->bind_param("ss", $step, $from_id);
-    $stmt->execute();
+    $idsText = implode("\n", $ids);
+    file_put_contents($filename, $idsText);
+}
+$file = fopen($filename, 'r');
+if ($file) {
+    while (($line = fgets($file)) !== false) {
+    sendmessage($line, $text, null, 'HTML');
+    usleep(2000000);
+    }
+    sendmessage($from_id, "✅ پیام به تمامی کاربران ارسال شد",$keyboardaadmin, 'HTML');
+    fclose($file);
+}
+unlink($filename);
 } elseif ($text == "📤 فوروارد همگانی" ) {
     sendmessage($from_id, $textbotlang['Admin']['ManageUser']['ForwardGetext'], $backadmin, 'HTML');
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
@@ -2174,23 +2183,32 @@ if ($text == "📨 ارسال پیام به کاربر" ) {
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
 } elseif ($user['step'] == "gettextforwardMessage") {
-$maxBatchSize = 100;
-    $totalUsers = count($users_ids);
-    $messageCount = 0;
-
-    for ($offset = 0; $offset < $totalUsers; $offset += $maxBatchSize) {
-        $batchUsers = array_slice($users_ids, $offset, $maxBatchSize);
-        foreach ($batchUsers as $id) {
-            sendmessage($id, $text, null, 'html');
-            $messageCount++;
-        }
-        sendmessage($from_id, "✅ به تعداد $messageCount   کاربر از $totalUsers  کاربر ارسال شد", null, 'html');
-        sleep(3);
+sendmessage($from_id, "درحال ارسال پیام",$keyboardaadmin, 'HTML');
+$stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+$step = 'home';
+$stmt->bind_param("ss", $step, $from_id);
+$stmt->execute();
+$filename = 'user.txt';
+$query = "SELECT id FROM user WHERE agent != 'f'";
+$result = $connect->query($query);
+if ($result) {
+    $ids = array();
+    while ($row = $result->fetch_assoc()) {
+        $ids[] = $row['id'];
     }
-    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
-    $step = 'home';
-    $stmt->bind_param("ss", $step, $from_id);
-    $stmt->execute();
+    $idsText = implode("\n", $ids);
+    file_put_contents($filename, $idsText);
+}
+$file = fopen($filename, 'r');
+if ($file) {
+    while (($line = fgets($file)) !== false) {
+    forwardMessage($chat_id,$message_id,$from_id);
+    usleep(2000000);
+    }
+    sendmessage($from_id, "✅ پیام به تمامی کاربران ارسال شد",$keyboardaadmin, 'HTML');
+    fclose($file);
+}
+unlink($filename);
 }
 //_________________________________________________
 if ($text  == "📝 تنظیم متن ربات"  ) {
