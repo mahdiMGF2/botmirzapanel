@@ -3222,11 +3222,9 @@ if ($text == "نام محصول"  ) {
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();}
 elseif ($user['step'] == "change_name") {
-    $stmt = $connect->prepare("UPDATE product SET name_product = ? WHERE name_product = ? AND Location = ? ");
-    $stmt->bind_param("sss", $text, $Processing_value,$user['Processing_value_one']);
-    $stmt->execute();
-    $stmt = $connect->prepare("UPDATE invoice SET name_product = ? WHERE name_product = ? AND Service_location = ? ");
-    $stmt->bind_param("sss", $text, $Processing_value,$user['Processing_value_one']);
+    $stmt = $connect->prepare("UPDATE product SET name_product = ? WHERE name_product = ? AND (Location = ?  || Location = ?)");
+    $value = "/all";
+    $stmt->bind_param("ssss", $text, $Processing_value,$user['Processing_value_one'],$value);
     $stmt->execute();
     $stmt = $connect->prepare("UPDATE invoice SET name_product = ? WHERE name_product = ? AND Service_location = ? ");
     $stmt->bind_param("sss", $text, $Processing_value,$user['Processing_value_one']);
