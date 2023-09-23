@@ -153,7 +153,6 @@ $valid_Number =  json_encode([
 $PaySettingcard = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'Cartstatus'"))['ValuePay'];
 $PaySettingnow = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'nowpaymentstatus'"))['ValuePay'];
 $PaySettingdigi = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'digistatus'"))['ValuePay'];
-$PaySettingzarin = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'statuszarinpal'"))['ValuePay'];
 $PaySettingaqayepardakht = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'statusaqayepardakht'"))['ValuePay'];
 $step_payment = [
     'inline_keyboard' => []
@@ -171,11 +170,6 @@ $step_payment = [
    if($PaySettingdigi == "ondigi"){
         $step_payment['inline_keyboard'][] = [
             ['text' => "💎درگاه پرداخت ارزی (ریالی)" , 'callback_data' => "iranpay" ]
-    ];
-    }
-   if($PaySettingzarin == "onzarinpal"){
-        $step_payment['inline_keyboard'][] = [
-            ['text' => "🟡 درگاه آل سات" , 'callback_data' => "zarinpal" ]
     ];
     }
    if($PaySettingaqayepardakht == "onaqayepardakht"){
