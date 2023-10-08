@@ -2166,7 +2166,7 @@ $file = fopen($filename, 'r');
 if ($file) {
     while (($line = fgets($file)) !== false) {
     sendmessage($line, $text, null, 'HTML');
-    usleep(2000000);
+    usleep(1000000);
     }
     sendmessage($from_id, "✅ پیام به تمامی کاربران ارسال شد",$keyboardaadmin, 'HTML');
     fclose($file);
@@ -2198,7 +2198,7 @@ if ($result) {
 $file = fopen($filename, 'r');
 if ($file) {
     while (($line = fgets($file)) !== false) {
-    forwardMessage($chat_id,$message_id,$from_id);
+    forwardMessage($from_id, $message_id, $line);
     usleep(2000000);
     }
     sendmessage($from_id, "✅ پیام به تمامی کاربران ارسال شد",$keyboardaadmin, 'HTML');
