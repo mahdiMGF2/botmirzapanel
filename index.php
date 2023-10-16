@@ -3713,6 +3713,32 @@ elseif ($user['step'] == "updatemethodusername") {
     $stmt->bind_param("s", $text);
     $stmt->execute();
     sendmessage($from_id, $textbotlang['Admin']['AlgortimeUsername']['SaveData'], $keyboardmarzban, 'HTML');
+        if ($text == "متن دلخواه + عدد رندوم") {
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'getnamecustom';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+    sendmessage($from_id, $textbotlang['Admin']['managepanel']['customnamesend'], $backuser, 'HTML');
+    return;
+    }
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'home';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+elseif ($user['step'] == "getnamecustom") {
+    if (!preg_match('/^\w{3,32}$/', $text)) {
+        sendmessage($from_id, $textbotlang['Admin']['managepanel']['invalidname'], $backadmin, 'html');
+        return;
+    }
+    $stmt = $connect->prepare("UPDATE setting SET namecustome = ? ");
+    $stmt->bind_param("s", $text);
+    $stmt->execute();
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'home';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+    sendmessage($from_id, $textbotlang['Admin']['managepanel']['savedname'], $optionMarzban, 'HTML');
 }
 #----------------[  MANAGE PAYMENT   ]------------------#
 
