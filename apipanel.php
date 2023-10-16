@@ -185,4 +185,5 @@ function generateUsername($from_id,$Metode,$username,$randomString,$text)
         return $username."_".$countInvoice;
     }
     elseif($Metode == "نام کاربری دلخواه")return $text;
+    elseif($Metode == "متن دلخواه + عدد رندوم")return $setting['namecustome']."_".$randomString;
 }
