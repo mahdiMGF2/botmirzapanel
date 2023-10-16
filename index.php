@@ -891,7 +891,7 @@ if ($user['step'] == "createusertest" || preg_match('/locationtests_(.*)/', $dat
     }
     $location = $dataget[1];
         if($setting['MethodUsername'] == "نام کاربری دلخواه" && $user['step'] == "createusertest"){
-            if (!preg_match('~^[a-z][a-z\d_]{2,32}$~i', $text)) {
+            if (!preg_match('~(?!_)^[a-z][a-z\d_]{2,32}(?<!_)$~i', $text)) {
         sendmessage($from_id, $textbotlang['users']['invalidusername'], $backuser,'HTML');
         return;
     }
@@ -1208,7 +1208,7 @@ elseif (preg_match('/^prodcutservices_(.*)/', $datain, $dataget)){
 elseif ($user['step'] == "endstepuser" ||preg_match('/prodcutservice_(.*)/', $datain, $dataget)) {
         $prodcut = $dataget[1];
         if($setting['MethodUsername'] == "نام کاربری دلخواه"){
-            if (!preg_match('~^[a-z][a-z\d_]{2,32}$~i', $text)) {
+            if (!preg_match('~(?!_)^[a-z][a-z\d_]{2,32}(?<!_)$~i', $text)) {
         sendmessage($from_id, $textbotlang['users']['invalidusername'], $backuser,'HTML');
         return;
             }
@@ -4259,19 +4259,4 @@ elseif($user['step'] == "GetPriceExtra"){
     $step = 'home';
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
-}
-if($text == "🤖 افزودن نماینده" ){
-        sendmessage($from_id, "این قابلیت در نسخه پولی فعال است", null, 'HTML');
-}
-if($text == "🤖 حذف نماینده" ){
-        sendmessage($from_id, "این قابلیت در نسخه پولی فعال است", null, 'HTML');
-}
-if ($text == "👤 کاربران ربات" || $datain == "backuser" ) {
-       sendmessage($from_id, "این قابلیت در نسخه پولی فعال است", null, 'HTML');
-}
-if ($text == "🎁 ساخت کد تخفیف"  ) {
-    sendmessage($from_id, "این قابلیت در نسخه پولی فعال است", null, 'HTML');
-}
-if($text == "🔴 درگاه پرفکت مانی"  ){
-    sendmessage($from_id, "این قابلیت در نسخه پولی فعال است", null, 'HTML');
 }
