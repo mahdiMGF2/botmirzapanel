@@ -1192,6 +1192,9 @@ $product['inline_keyboard'][] = [
     $textproduct = "🛍 برای خرید اشتراک سرویس مدنظر خود را انتخاب کنید
     لوکیشن سرویس  :$location ";
     sendmessage($from_id,$textproduct, $json_list_product_list, 'HTML');
+    $stmt = $connect->prepare("UPDATE user SET Processing_value = ? WHERE id = ?");
+    $stmt->bind_param("ss", $location, $from_id);
+    $stmt->execute();
         }else{
                 sendmessage($from_id, $textbotlang['users']['Service']['Location'], $list_marzban_panel_user, 'HTML');
         }
