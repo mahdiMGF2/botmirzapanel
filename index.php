@@ -705,7 +705,7 @@ elseif (preg_match('/confirmchange_(\w+)/', $datain, $dataget)) {
     $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '$username'"));
     $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$nameloc['Service_location']}'"));
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
-    $Allowedusername = getuser($username_ac, $Check_token['access_token'], $marzban_list_get['url_panel']);
+    $Allowedusername = getuser($username, $Check_token['access_token'], $marzban_list_get['url_panel']);
     $nameprotocol = array();
 if(isset($marzban_list_get['vless']) && $marzban_list_get['vless'] == "onvless"){
     $nameprotocol['vless'] = array(
@@ -1161,7 +1161,40 @@ if (mysqli_num_rows($locationproduct) == 0) {
     }
     if ($user['number'] == "none" && $setting['get_number'] == "✅ تایید شماره موبایل روشن است") return;
     #-----------------------#
-    sendmessage($from_id, $textbotlang['users']['Service']['Location'], $list_marzban_panel_user, 'HTML');
+        if (mysqli_num_rows($locationproduct) == 1) {
+        $nullproduct = mysqli_query($connect, "SELECT * FROM product");
+        if (mysqli_num_rows($nullproduct) == 0) {
+            sendmessage($from_id, $textbotlang['Admin']['Product']['nullpProduct'], null, 'HTML');
+            return;
+        }
+    $product = [];
+    $location = mysqli_fetch_assoc($locationproduct)['name_panel'];
+    $escapedText = mysqli_real_escape_string($connect, $text);
+        $getdataproduct = mysqli_query($connect, "SELECT * FROM product WHERE Location = '$location' OR Location = '/all'");
+   $product = ['inline_keyboard' => []];
+while ($result = mysqli_fetch_assoc($getdataproduct)) {
+    if($setting['MethodUsername'] == "نام کاربری دلخواه"){
+    $product['inline_keyboard'][] = [
+        ['text' => $result['name_product'], 'callback_data' => "prodcutservices_".$result['code_product']]
+    ];
+    }
+    else{
+          $product['inline_keyboard'][] = [
+        ['text' => $result['name_product'], 'callback_data' => "prodcutservice_{$result['code_product']}"]
+    ];  
+    }
+}
+$product['inline_keyboard'][] = [
+    ['text' => "🏠 بازگشت به منوی اصلی", 'callback_data' => "backuser"]
+];
+
+    $json_list_product_list = json_encode($product);
+    $textproduct = "🛍 برای خرید اشتراک سرویس مدنظر خود را انتخاب کنید
+    لوکیشن سرویس  :$location ";
+    sendmessage($from_id,$textproduct, $json_list_product_list, 'HTML');
+        }else{
+                sendmessage($from_id, $textbotlang['users']['Service']['Location'], $list_marzban_panel_user, 'HTML');
+        }
 } 
 elseif (preg_match('/^location_(.*)/', $datain, $dataget)) {
     $location = $dataget[1];
@@ -2137,7 +2170,7 @@ if ($text == "🖥 اضافه کردن پنل  مرزبان"  ) {
     $stmt->bind_param("ss", $text, $Processing_value);
     $stmt->execute();
 }
-if ($text == "📨 ارسال پیام به کاربر" ) {
+if ($text == "📨 ارسال پیام" ) {
     sendmessage($from_id, $textbotlang['users']['selectoption'], $sendmessageuser, 'HTML');
 } elseif ($text == "✉️ ارسال همگانی") {
     sendmessage($from_id, $textbotlang['Admin']['ManageUser']['GetText'], $backadmin, 'HTML');
@@ -2836,7 +2869,7 @@ if ($text == "👤 خدمات کاربر" ) {
 #-------------------------#
 
 elseif ($text == "📊 وضعیت تایید شماره کاربر" ) {
-    sendmessage($from_id, $textbotlang['Admin']['manageusertest']['getidlimit'], $backadmin, 'HTML');
+    sendmessage($from_id, $textbotlang['Admin']['ManageUser']['GetIdUserunblock'], $backadmin, 'HTML');
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'get_status';
     $stmt->bind_param("ss", $step, $from_id);
@@ -3058,13 +3091,13 @@ if (preg_match('/Confirm_pay_(\w+)/', $datain, $dataget) ) {
     $Status_change = "paid";
     $stmt->bind_param("ss", $Status_change, $Payment_report['id_order']);
     $stmt->execute();
-    $Payment_report['price'] = number_format($Payment_report['price'],0);
+    $Payment_report['price'] = number_format($Payment_report['price']);
     $textconfrom = "
             💵 پرداخت با موفقیت تایید گردید.
               به موجودی کاربر مبلغ {$Payment_report['price']} اضافه گردید.
             ";
     sendmessage($from_id, $textconfrom, null, 'HTML');
-    number_format($Payment_report['price']);
+    $Payment_report['price'] = number_format($Payment_report['price']);
     sendmessage($Payment_report['id_user'], "💎 کاربر گرامی مبلغ {$Payment_report['price']} تومان به کیف پول شما واریز گردید با تشکر از پرداخت شما.
         
         🛒 کد پیگیری شما: {$Payment_report['id_order']}", null, 'HTML');
@@ -4281,6 +4314,31 @@ elseif($user['step'] == "GetPriceExtra"){
     $stmt->bind_param("s", $text);
     $stmt->execute();
     sendmessage($from_id, $textbotlang['users']['Extra_volume']['ChangedPrice'], $shopkeyboard, 'HTML');
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'home';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+#-------------------------#
+if ($text == "👥 شارژ همگانی") {
+    sendmessage($from_id, $textbotlang['Admin']['Balance']['addallbalance'], $backadmin, 'HTML');
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'add_Balance_all';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+} elseif ($user['step'] == "add_Balance_all") {
+    if (!ctype_digit($text)) {
+        sendmessage($from_id, $textbotlang['Admin']['Balance']['Invalidprice'], $backadmin, 'HTML');
+        return;
+    }
+    sendmessage($from_id, $textbotlang['Admin']['Balance']['AddBalanceUsers'], $User_Services, 'HTML');
+    $Balance_user = mysqli_query($connect, "SELECT * FROM user");
+    foreach ($Balance_user as $balance) {
+    $Balance_add_user = $balance['Balance'] + $text;
+    $stmt = $connect->prepare("UPDATE user SET Balance = ? WHERE id = ?");
+    $stmt->bind_param("ss", $Balance_add_user, $balance['id']);
+    $stmt->execute();
+    }
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'home';
     $stmt->bind_param("ss", $step, $from_id);
