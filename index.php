@@ -3097,7 +3097,6 @@ if (preg_match('/Confirm_pay_(\w+)/', $datain, $dataget) ) {
               به موجودی کاربر مبلغ {$Payment_report['price']} اضافه گردید.
             ";
     sendmessage($from_id, $textconfrom, null, 'HTML');
-    $Payment_report['price'] = number_format($Payment_report['price']);
     sendmessage($Payment_report['id_user'], "💎 کاربر گرامی مبلغ {$Payment_report['price']} تومان به کیف پول شما واریز گردید با تشکر از پرداخت شما.
         
         🛒 کد پیگیری شما: {$Payment_report['id_order']}", null, 'HTML');
