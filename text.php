@@ -309,6 +309,7 @@ $textbotlang['Admin']['ManageUser']['addbalanceuserdec'] = "⭕️ مبلغی ک
 $textbotlang['Admin']['ManageUser']['lowbalanceuserdec'] = "⭕️ مبلغی که میخواهید کسر کنید را ارسال کنید";
 $textbotlang['Admin']['ManageUser']['addbalanced'] = "✅ موجودی با موفقیت به حساب کاربر افزوده شد.";
 $textbotlang['Admin']['ManageUser']['lowbalanced'] = "✅ موجودی با موفقیت از حساب کاربر کم شد.";
+$textbotlang['Admin']['Balance']['AddBalanceUsers'] = "✅ مبلغ به موجودی کاربران اضافه شد";
 $textbotlang['Admin']['ManageUser']['banuserlist'] = "🔒 مسدود کردن کاربر";
 $textbotlang['Admin']['ManageUser']['unbanuserlist'] = "🔓 رفع مسدودی کاربر";
 $textbotlang['Admin']['ManageUser']['confirmnumber'] = "تایید دستی شماره تلفن";
@@ -449,6 +450,7 @@ $textbotlang['Admin']['Balance']['PriceBalancek'] = "آیدی عددی دریا�
 $textbotlang['Admin']['Balance']['Invalidprice'] = "مبلغ نامعتبر است";
 $textbotlang['Admin']['Balance']['AddBalanceUser'] = "✅ مبلغ به موجودی کاربر اضافه شد";
 $textbotlang['Admin']['Balance']['NegativeBalanceUser'] = "✅ مبلغ از موجودی کاربر کسر شد";
+$textbotlang['Admin']['Balance']['addallbalance'] = "📌 مبلغ را برای شارژ همگانی ارسال نمایید";
 
 
 
