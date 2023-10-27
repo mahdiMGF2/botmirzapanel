@@ -29,7 +29,7 @@ function ActiveVoucher($ev_number, $ev_code){
 
     $opts = array(
         'socket' => array(
-            'bindto' => '46.149.77.153',
+            'bindto' => 'ip',
         )
     );
 
