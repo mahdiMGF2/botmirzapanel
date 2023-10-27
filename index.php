@@ -21,6 +21,23 @@ foreach ($telegram_ip_ranges as $telegram_ip_range) if (!$ok) {
 }
 if (!$ok) die("دسترسی غیرمجاز");
 #-----------function------------#
+function ActiveVoucher($ev_number, $ev_code){
+    global $connect;
+    $Payer_Account = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'perfectmoney_Payer_Account'"))['ValuePay'];
+    $AccountID = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'perfectmoney_AccountID'"))['ValuePay'];
+    $PassPhrase = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'perfectmoney_PassPhrase'"))['ValuePay'];
+
+    $opts = array(
+        'socket' => array(
+            'bindto' => '46.149.77.153',
+        )
+    );
+
+    $context = stream_context_create($opts);
+
+    $voucher = file_get_contents("https://perfectmoney.com/acct/ev_activate.asp?AccountID=" . $AccountID . "&PassPhrase=" . $PassPhrase . "&Payee_Account=" . $Payer_Account . "&ev_number=" . $ev_number . "&ev_code=" . $ev_code);
+    return $voucher;
+}
 
 function generateUUID() {
     $data = openssl_random_pseudo_bytes(16);
@@ -98,6 +115,7 @@ if (mysqli_num_rows($query) > 0) {
         'User_Status' => '',
         'username' => '',
         'limit_usertest' =>'',
+        'last_message_time' => '',
     );
 }
 $Processing_value =  $user['Processing_value'];
@@ -1670,6 +1688,83 @@ $PaySetting
 ✅ در صورت مشکل میتوانید با پشتیبانی در ارتباط باشید";
         sendmessage($from_id, $textnowpayments, $paymentkeyboard, 'HTML');
     }
+        if ($datain == "perfectmoney") {
+        deletemessage($from_id, $message_id);
+        sendmessage($from_id, $textbotlang['users']['perfectmoney']['getvcode'], $bakcuser, 'HTML');
+        $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+        $step = 'getvcodeuser';
+        $stmt->bind_param("ss", $step, $from_id);
+        $stmt->execute();
+    }
+
+}
+if ($user['step'] == "getvcodeuser") {
+    $stmt = $connect->prepare("UPDATE user SET Processing_value = ? WHERE id = ?");
+    $stmt->bind_param("ss", $text, $from_id);
+    $stmt->execute();
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'getvnumbervuser';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+    sendmessage($from_id, $textbotlang['users']['perfectmoney']['getvnumber'], $bakcuser, 'HTML');
+} elseif ($user['step'] == "getvnumbervuser") {
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'home';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+    $Voucher = ActiveVoucher($user['Processing_value'], $text);
+    $lines = explode("\n", $Voucher);
+    foreach ($lines as $line) {
+        if (strpos($line, "Error:") !== false) {
+            $errorMessage = trim(str_replace("Error:", "", $line));
+            break;
+        }
+    }
+    if ($errorMessage == "Invalid ev_number or ev_code") {
+        sendmessage($from_id, $textbotlang['users']['perfectmoney']['invalidvcodeorev'], $keyboard, 'HTML');
+        return;
+    }
+    if ($errorMessage == "Invalid ev_number") {
+        sendmessage($from_id, $textbotlang['users']['perfectmoney']['invalid_ev_number'], $keyboard, 'HTML');
+        return;
+    }
+    if ($errorMessage == "Invalid ev_code") {
+        sendmessage($from_id, $textbotlang['users']['perfectmoney']['invalidvcode'], $keyboard, 'HTML');
+        return;
+    }
+    if (isset($errorMessage)) {
+        sendmessage($from_id, $textbotlang['users']['perfectmoney']['errors'], null, 'HTML');
+        foreach ($admin_ids as $id_admin) {
+            $texterrors = "";
+            sendmessage($id_admin, "❌ یک کاربر قصد افزایش موجودی با ووچر را داشته اما با خطا مواجه شده است 
+
+دلیل خطا : $errorMessage", null, 'HTML');
+        }
+        return;
+    }
+        $Balance_id = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM user WHERE id = '$from_id' LIMIT 1"));
+        $startTag = "<td>VOUCHER_AMOUNT</td><td>";
+        $endTag = "</td>";
+        $startPos = strpos($Voucher, $startTag) + strlen($startTag);
+        $endPos = strpos($Voucher, $endTag, $startPos);
+        $voucherAmount = substr($Voucher, $startPos, $endPos - $startPos);
+        $USD = $voucherAmount * json_decode(file_get_contents('https://api.tetherland.com/currencies'), true)['data']['currencies']['USDT']['price'];
+        $Balance_confrim = intval($user['Balance']) + intval($USD);
+        $stmt = $connect->prepare("UPDATE user SET Balance = ? WHERE id = ?");
+        $stmt->bind_param("ss", $Balance_confrim, $from_id);
+        $stmt->execute();
+        $USD = number_format($USD, 0);
+        sendmessage($from_id, "💎 با تشکر از پرداخت شما 
+
+پرداخت شما با  موفقیت تایید گردید و مبلغ $USD به موجودی شما اضافه گردید.
+⚙️ کد پیگیری پرداخت شما :$randomString  ", $keyboard, 'HTML');
+    $dateacc = date('Y/m/d h:i:s');
+    $randomString = bin2hex(random_bytes(5));
+    $stmt = $connect->prepare("INSERT INTO Payment_report (id_user,id_order,time,price,payment_Status,Payment_Method) VALUES (?,?,?,?,?,?)");
+    $payment_Status = "paid";
+    $Payment_Method = "perfectmoney";
+    $stmt->bind_param("ssssss", $from_id, $randomString, $dateacc, $USD, $payment_Status, $Payment_Method);
+    $stmt->execute();
 }
 if (preg_match('/Confirmpay_user_(\w+)_(\w+)/', $datain, $dataget)) {
     $id_payment = $dataget[1];
@@ -4345,4 +4440,91 @@ if ($text == "👥 شارژ همگانی") {
     $step = 'home';
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
+}
+if ($text == "🔴 درگاه پرفکت مانی") {
+    sendmessage($from_id, $textbotlang['users']['selectoption'], $perfectmoneykeyboard, 'HTML');
+} elseif ($text == "تنظیم شماره اکانت") {
+    $PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'perfectmoney_AccountID'"))['ValuePay'];
+    sendmessage($from_id, "⭕️ شماره اکانت پرفکت مانی خود را ارسال کنید
+مثال : 93293828
+شماره اکانت فعلی : $PaySetting", $backadmin, 'HTML');
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'setnumberaccount';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+} elseif ($user['step'] == "setnumberaccount") {
+    sendmessage($from_id, $textbotlang['Admin']['perfectmoney']['setnumberacount'], $perfectmoneykeyboard, 'HTML');
+    $stmt = $connect->prepare("UPDATE PaySetting SET ValuePay = ? WHERE NamePay = ?");
+    $value = 'perfectmoney_AccountID';
+    $stmt->bind_param("ss", $text, $value);
+    $stmt->execute();
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'home';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+if ($text == "تنظیم شماره کیف پول") {
+    $PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'perfectmoney_Payer_Account'"))['ValuePay'];
+    sendmessage($from_id, "⭕️ شماره کیف پولی که میخواهید ووچر پرفکت مانی به آن واریز شود را ارسال کنید 
+مثال : u234082394
+شماره کیف پول فعلی : $PaySetting", $backadmin, 'HTML');
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'perfectmoney_Payer_Account';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+} elseif ($user['step'] == "perfectmoney_Payer_Account") {
+    sendmessage($from_id, $textbotlang['Admin']['perfectmoney']['setnumberacount'], $perfectmoneykeyboard, 'HTML');
+    $stmt = $connect->prepare("UPDATE PaySetting SET ValuePay = ? WHERE NamePay = ?");
+    $value = 'perfectmoney_Payer_Account';
+    $stmt->bind_param("ss", $text, $value);
+    $stmt->execute();
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'home';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+if ($text == "تنظیم رمز اکانت") {
+    $PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'perfectmoney_PassPhrase'"))['ValuePay'];
+    sendmessage($from_id, "⭕️ رمز اکانت پرفکت مانی خود را ارسال کنید
+رمز عبور فعلی : $PaySetting", $backadmin, 'HTML');
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'perfectmoney_PassPhrase';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+} elseif ($user['step'] == "perfectmoney_PassPhrase") {
+    sendmessage($from_id, $textbotlang['Admin']['perfectmoney']['setnumberacount'], $perfectmoneykeyboard, 'HTML');
+    $stmt = $connect->prepare("UPDATE PaySetting SET ValuePay = ? WHERE NamePay = ?");
+    $value = 'perfectmoney_PassPhrase';
+    $stmt->bind_param("ss", $text, $value);
+    $stmt->execute();
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'home';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+if ($text == "وضعیت پرفکت مانی") {
+    $PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'status_perfectmoney'"))['ValuePay'];
+    $status_perfectmoney = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $PaySetting, 'callback_data' => $PaySetting],
+            ],
+        ]
+    ]);
+    sendmessage($from_id, $textbotlang['Admin']['Status']['perfectmoneyTitle'], $status_perfectmoney, 'HTML');
+}
+if ($datain == "offperfectmoney") {
+    $stmt = $connect->prepare("UPDATE PaySetting SET ValuePay = ? WHERE NamePay = ?");
+    $value = 'onperfectmoney';
+    $value2 = 'status_perfectmoney';
+    $stmt->bind_param("ss", $value, $value2);
+    $stmt->execute();
+    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['perfectmoneyStatuson'], null);
+} elseif ($datain == "onperfectmoney") {
+     $stmt = $connect->prepare("UPDATE PaySetting SET ValuePay = ? WHERE NamePay = ?");
+    $value = 'offperfectmoney';
+    $value2 = 'status_perfectmoney';
+    $stmt->bind_param("ss", $value, $value2);
+    $stmt->execute();
+    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['perfectmoneyStatusOff'], null);
 }
