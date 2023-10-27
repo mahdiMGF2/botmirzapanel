@@ -154,6 +154,7 @@ $PaySettingcard = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) F
 $PaySettingnow = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'nowpaymentstatus'"))['ValuePay'];
 $PaySettingdigi = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'digistatus'"))['ValuePay'];
 $PaySettingaqayepardakht = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'statusaqayepardakht'"))['ValuePay'];
+$PaySettingperfectmoney = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'status_perfectmoney'"))['ValuePay'];
 $step_payment = [
     'inline_keyboard' => []
     ];
@@ -175,6 +176,11 @@ $step_payment = [
    if($PaySettingaqayepardakht == "onaqayepardakht"){
         $step_payment['inline_keyboard'][] = [
             ['text' => "🔵 درگاه آقای پرداخت" , 'callback_data' => "aqayepardakht" ]
+    ];
+    }
+    if($PaySettingperfectmoney == "onperfectmoney"){
+        $step_payment['inline_keyboard'][] = [
+            ['text' => "🔴 درگاه پرفکت مانی" , 'callback_data' => "perfectmoney" ]
     ];
     }
     $step_payment['inline_keyboard'][] = [
