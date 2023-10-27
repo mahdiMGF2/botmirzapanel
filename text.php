@@ -141,6 +141,14 @@ $textbotlang['users']['changelink']['confirmed'] = "✅ لینک اتصال شم
 
 
 
+$textbotlang['users']['perfectmoney']['getvcode'] = "⭕️ برای  افزایش موجودی  ابتدا کد ووچر پرفکت مانی خود را ارسال کنید";
+$textbotlang['users']['perfectmoney']['getvnumber'] = "⭕️ کد ووچر دریافت شد حالا کد فعالسازی را ارسال کنید";
+$textbotlang['users']['perfectmoney']['errors'] = "❌  خطایی در بررسی ووچر پیش آمده است برای بررسی مشکل با پشتیبانی در ارتباط باشید";
+$textbotlang['users']['perfectmoney']['invalidvcodeorev'] = "❌ ووچر ارسال شده نامعتبر است";
+$textbotlang['users']['perfectmoney']['invalidvcode'] = "❌ کد ووچر ارسال شده نامعتبر است";
+$textbotlang['users']['perfectmoney']['invalid_ev_number'] = "❌ کد فعالسازی ارسال شده نامعتبر است";
+
+
 
 
 
@@ -379,6 +387,9 @@ $textbotlang['Admin']['Status']['zarinpalStatuson'] = "درگاه  روشن گر
 $textbotlang['Admin']['Status']['aqayepardakhtTitle'] = "در این بخش می توانید درگاه آقای پرداخت  را فعال یا غیرفعال کنید";
 $textbotlang['Admin']['Status']['aqayepardakhtStatusOff'] = "⭕ درگاه  خاموش گردید";
 $textbotlang['Admin']['Status']['aqayepardakhtStatuson'] = "درگاه  روشن گردید";
+$textbotlang['Admin']['Status']['perfectmoneyTitle'] = "در این بخش می توانید درگاه پرفکت مانی را فعال یا غیرفعال کنید";
+$textbotlang['Admin']['Status']['perfectmoneyStatusOff'] = "⭕ درگاه  خاموش گردید";
+$textbotlang['Admin']['Status']['perfectmoneyStatuson'] = "درگاه  روشن گردید";
 $textbotlang['Admin']['Status']['perfectmoneyTitle'] = "در این بخش می توانید درگاه پرفکت مانی را فعال یا غیرفعال کنید";
 $textbotlang['Admin']['Status']['perfectmoneyStatusOff'] = "⭕ درگاه  خاموش گردید";
 $textbotlang['Admin']['Status']['perfectmoneyStatuson'] = "درگاه  روشن گردید";
