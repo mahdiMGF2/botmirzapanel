@@ -1407,6 +1407,9 @@ if(isset($nameprotocol['vless']) && $setting['flow'] == "flowon"){
             [
                 ['text' => $info_product['Volume_constraint'] . " گیگابایت", 'callback_data' => "Volume_constraint"],
                 ['text' => $textbotlang['users']['Volume-Service'], 'callback_data' => "Volume_constraint"],
+            ],
+            [
+                ['text' => $textbotlang['users']['help']['btninlinebuy'], 'callback_data' => "helpbtn"],
             ]
         ]
     ]);
