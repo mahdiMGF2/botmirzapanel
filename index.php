@@ -29,7 +29,7 @@ function ActiveVoucher($ev_number, $ev_code){
 
     $opts = array(
         'socket' => array(
-            'bindto' => '46.149.77.153',
+            'bindto' => 'ip',
         )
     );
 
@@ -116,7 +116,6 @@ if (mysqli_num_rows($query) > 0) {
         'username' => '',
         'limit_usertest' =>'',
         'last_message_time' => '',
-        'agent' => '',
     );
 }
 $Processing_value =  $user['Processing_value'];
@@ -169,7 +168,7 @@ if (isset($channels['link']) && $from_id != 0) {
     $response = json_decode(file_get_contents('https://api.telegram.org/bot' . $APIKEY . "/getChatMember?chat_id=@{$channels['link']}&user_id=$from_id"));
     $tch = $response->result->status;
 }
-if($from_id != 0)$connect->query("INSERT IGNORE INTO user (id , step,limit_usertest,User_Status,number,Balance,pagenumber,username,message_count,last_message_time,agent) VALUES ('$from_id', 'none','{$setting['limit_usertest_all']}','Active','none','0','1','$username','0','0','f')");
+if($from_id != 0)$connect->query("INSERT IGNORE INTO user (id , step,limit_usertest,User_Status,number,Balance,pagenumber,username,message_count,last_message_time) VALUES ('$from_id', 'none','{$setting['limit_usertest_all']}','Active','none','0','1','$username','0','0')");
 if($user['username'] == "none" || $user['username'] == null){
     $stmt = $connect->prepare("UPDATE user SET username = ? WHERE id = ?");
     $stmt->bind_param("ss", $username, $from_id);
@@ -1189,7 +1188,7 @@ if (mysqli_num_rows($locationproduct) == 0) {
     $product = [];
     $location = mysqli_fetch_assoc($locationproduct)['name_panel'];
     $escapedText = mysqli_real_escape_string($connect, $text);
-        $getdataproduct = mysqli_query($connect, "SELECT * FROM product WHERE agent = '{$user['agent']}' AND (Location = '$location' OR Location = '/all')");
+        $getdataproduct = mysqli_query($connect, "SELECT * FROM product WHERE Location = '$location' OR Location = '/all'");
    $product = ['inline_keyboard' => []];
 while ($result = mysqli_fetch_assoc($getdataproduct)) {
     if($setting['MethodUsername'] == "نام کاربری دلخواه"){
@@ -1408,6 +1407,9 @@ if(isset($nameprotocol['vless']) && $setting['flow'] == "flowon"){
             [
                 ['text' => $info_product['Volume_constraint'] . " گیگابایت", 'callback_data' => "Volume_constraint"],
                 ['text' => $textbotlang['users']['Volume-Service'], 'callback_data' => "Volume_constraint"],
+            ],
+            [
+                ['text' => $textbotlang['users']['help']['btninlinebuy'], 'callback_data' => "helpbtn"],
             ]
         ]
     ]);
@@ -3135,27 +3137,15 @@ elseif ($user['step'] == "get_limit") {
     $stmt->execute();
     sendmessage($from_id, $textbotlang['Admin']['Product']['GetPrice'], $backadmin, 'HTML');
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
-    $step = 'getagent';
+    $step = 'endstep';
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
-} elseif ($user['step'] == "getagent") {
+} elseif ($user['step'] == "endstep") {
     if (!ctype_digit($text)) {
         sendmessage($from_id, $textbotlang['Admin']['Product']['InvalidPrice'], $backadmin, 'HTML');
         return;
     }
     $stmt = $connect->prepare("UPDATE product SET price_product = ? WHERE code_product = ?");
-    $stmt->bind_param("ss", $text, $Processing_value);
-    $stmt->execute();
-    sendmessage($from_id, "محصول میخواهید برای چه نوع کاربری تعریف شود ؟
-    f : کاربر عادی
-    n : نماینده", $bakadmin, 'HTML');
-    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
-    $step = 'endstep';
-    $stmt->bind_param("ss", $step, $from_id);
-    $stmt->execute();
-}
-elseif ($user['step'] == "endstep") {
-    $stmt = $connect->prepare("UPDATE product SET agent = ? WHERE code_product = ?");
     $stmt->bind_param("ss", $text, $Processing_value);
     $stmt->execute();
     sendmessage($from_id, $textbotlang['Admin']['Product']['SaveProduct'], $shopkeyboard, 'HTML');
@@ -4540,42 +4530,4 @@ if ($datain == "offperfectmoney") {
     $stmt->bind_param("ss", $value, $value2);
     $stmt->execute();
     Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['perfectmoneyStatusOff'], null);
-}
-if ($text == "🤖 افزودن نماینده") {
-    sendmessage($from_id, "آیدی عددی کاربر ارسال کنید", $backadmin, 'HTML');
-    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
-    $step = 'getagentid';
-    $stmt->bind_param("ss", $step, $from_id);
-    $stmt->execute();
-} elseif ($user['step'] == "getagentid") {
-    $stmt = $connect->prepare("UPDATE user SET agent = ? WHERE id = ?");
-    $value = "n";
-    $stmt->bind_param("ss", $value, $text);
-    $stmt->execute();
-    sendmessage($from_id, "کاربر با موفقیت نماینده شد", $bakcadmin, 'HTML');
-    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
-    $step = 'home';
-    $stmt->bind_param("ss", $step, $from_id);
-    $stmt->execute();
-}
-if ($text == "🤖 حذف نماینده") {
-    sendmessage($from_id,"آیدی عددی کاربر را ارسال کنثد", $backadmin, 'HTML');
-    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
-    $step = 'getidagentf';
-    $stmt->bind_param("ss", $step, $from_id);
-    $stmt->execute();
-} elseif ($user['step'] == "getidagentf") {
-    if (!in_array($text, $users_ids)) {
-        sendmessage($from_id, $textbotlang['Admin']['not-user'], $backadmin, 'HTML');
-        return;
-    }
-    sendmessage($from_id, $textbotlang['Admin']['agent']['useragentremoved'], $User_Services, 'HTML');
-    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
-    $step = 'home';
-    $stmt->bind_param("ss", $step, $from_id);
-    $stmt->execute();
-    $stmt = $connect->prepare("UPDATE user SET agent = ? WHERE id = ?");
-    $value = "f";
-    $stmt->bind_param("ss", $value, $text);
-    $stmt->execute();
 }
