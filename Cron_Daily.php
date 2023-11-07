@@ -19,7 +19,7 @@ while ($row = mysqli_fetch_assoc($list_service)) {
 ⭕️ کاربر گرامی از حجم  سرویس تان  $RemainingVolume مانده است
 
 نام کاربری : <code>{$row['username']}</code>
-نام سرویس : {$row['Service_location']}
+نام سرویس : {$row['name_product']}
 ";
 sendmessage($row['id_user'], $text, null,'HTML');
     }
@@ -28,7 +28,7 @@ sendmessage($row['id_user'], $text, null,'HTML');
 ⭕️ کاربر گرامی به پایان زمان سرویس تان $day روز مانده  است در صورت تمدید نکردن تا 72 ساعت معلق می ماند و پس از آن سرویس تان حذف خواهد شد.
 
 نام کاربری : <code>{$row['username']}</code>
-نام سرویس : {$row['Service_location']}
+نام سرویس : {$row['name_product']}
 ";
 sendmessage($row['id_user'], $text, null,'HTML');
     }
