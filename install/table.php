@@ -308,7 +308,7 @@ try {
         }
     } else {
         $result =  $connect->query("CREATE TABLE admin (
-        id_admin varchar(500) PRIMARY KEY NOT NULL)");
+        id_admin varchar(200) PRIMARY KEY NOT NULL)");
         $connect->query("INSERT INTO admin (id_admin) VALUES ('$adminnumber')");
         if (!$result) {
             echo "table admin".mysqli_error($connect);
