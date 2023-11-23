@@ -1430,7 +1430,8 @@ if(isset($nameprotocol['vless']) && $setting['flow'] == "flowon"){
     }
     $affiliatescommission = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM affiliates  LIMIT 1"));
     if ($affiliatescommission['status_commission'] == "oncommission" &&($user['affiliates'] !== null || $user['affiliates'] != "0")) {
-        $result = ($priceproduct * $setting['affiliatespercentage']) / 100;
+        $affiliatescommission = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM affiliates  LIMIT 1"));
+        $result = ($priceproduct * $affiliatescommission['affiliatespercentage']) / 100;
         $user_Balance = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM user WHERE id = '{$user['affiliates']}'"));
         $Balance_prim = $user_Balance['Balance'] + $result;
         $stmt = $connect->prepare("UPDATE user SET Balance = ? WHERE id = ?");
@@ -1580,8 +1581,7 @@ elseif ($user['step'] == "getcodesellDiscount") {
     ]);
     $parametrsendvalue = $text."_".$info_product['price_product'];
     $stmt = $connect->prepare("UPDATE user SET Processing_value_four = ? WHERE id = ?");
-    $step = 'home';
-    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->bind_param("ss", $parametrsendvalue, $from_id);
     $stmt->execute();
     sendmessage($from_id, $textin, $paymentDiscount, 'HTML');
 }
