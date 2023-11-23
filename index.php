@@ -116,6 +116,7 @@ if (mysqli_num_rows($query) > 0) {
         'username' => '',
         'limit_usertest' =>'',
         'last_message_time' => '',
+        'affiliates' => '',
     );
 }
 $Processing_value =  $user['Processing_value'];
@@ -169,7 +170,7 @@ if (isset($channels['link']) && $from_id != 0) {
     $response = json_decode(file_get_contents('https://api.telegram.org/bot' . $APIKEY . "/getChatMember?chat_id=@{$channels['link']}&user_id=$from_id"));
     $tch = $response->result->status;
 }
-if($from_id != 0)$connect->query("INSERT IGNORE INTO user (id , step,limit_usertest,User_Status,number,Balance,pagenumber,username,message_count,last_message_time) VALUES ('$from_id', 'none','{$setting['limit_usertest_all']}','Active','none','0','1','$username','0','0')");
+if($from_id != 0)$connect->query("INSERT IGNORE INTO user (id , step,limit_usertest,User_Status,number,Balance,pagenumber,username,message_count,last_message_time,affiliatescount,affiliates) VALUES ('$from_id', 'none','{$setting['limit_usertest_all']}','Active','none','0','1','$username','0','0','0','0')");
 if($user['username'] == "none" || $user['username'] == null){
     $stmt = $connect->prepare("UPDATE user SET username = ? WHERE id = ?");
     $stmt->bind_param("ss", $username, $from_id);
@@ -210,6 +211,43 @@ if($user['message_count'] >= "35"){
     return;
 }
 }
+    if (strpos($text, "/start ") !== false) {
+        if ($user['affiliates'] != 0) {
+            sendmessage($from_id, "❌ شما زیرمجموعه کاربر {$user['affiliates']} هستید و نمی توانید زیر مجموعه کاربری دیگه ای باشید", null, 'html');
+            return;
+        }
+        if ($setting['affiliatesstatus'] == "offaffiliates") {
+            sendmessage($from_id, $textbotlang['users']['affiliates']['offaffiliates'], $keyboard, 'HTML');
+            return;
+        }
+        $affiliatesid = str_replace("/start ", "", $text);
+        if(!ctype_digit($affiliatesid))return;
+        if ($affiliatesid == $from_id) {
+            sendmessage($from_id, $textbotlang['users']['affiliates']['invalidaffiliates'], null, 'html');
+            return;
+        }
+        $marzbanDiscountaffiliates = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM affiliates"));
+        if ($marzbanDiscountaffiliates['Discount'] == "onDiscountaffiliates") {
+            $marzbanDiscountaffiliates = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM affiliates"));
+            $Balance_user = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM user WHERE id = '$affiliatesid' LIMIT 1"));
+            $Balance_add_user = $Balance_user['Balance'] + $marzbanDiscountaffiliates['price_Discount'];
+            $stmt = $connect->prepare("UPDATE user SET Balance = ? WHERE id = ?");
+            $stmt->bind_param("ss", $Balance_add_user,$affiliatesid);
+            $stmt->execute();
+            $addbalancediscount = number_format($marzbanDiscountaffiliates['price_Discount'], 0);
+            sendmessage($affiliatesid, "🎁 مبلغ $addbalancediscount به موجودی شما از طرف زیر مجموعه با شناسه کاربری $from_id اضافه گردید.", null, 'html');
+        }
+        sendmessage($from_id, $datatextbot['text_start'], $keyboard, 'html');
+            $useraffiliates = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM user WHERE id = '$affiliatesid'"));
+        $addcountaffiliates = intval($useraffiliates['affiliatescount']) + 1;
+        $stmt = $connect->prepare("UPDATE user SET affiliates = ? WHERE id = ?");
+        $stmt->bind_param("ss", $affiliatesid,$from_id);
+        $stmt->execute();
+        $stmt = $connect->prepare("UPDATE user SET affiliatescount = ? WHERE id = ?");
+        $stmt->bind_param("ss", $addcountaffiliates,$affiliatesid);
+        $stmt->execute();
+    }
+
 }#-----------Channel------------#
 if($datain == "confirmchannel"){
     if(!in_array($tch, ['member', 'creator', 'administrator'])){
@@ -1392,6 +1430,20 @@ if(isset($nameprotocol['vless']) && $setting['flow'] == "flowon"){
         if (strlen($setting['Channel_Report']) > 0) {
             sendmessage($setting['Channel_Report'], $text_report, null, 'HTML');
         }
+    }
+    $affiliatescommission = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM affiliates  LIMIT 1"));
+    if ($affiliatescommission['status_commission'] == "oncommission" &&($user['affiliates'] !== null || $user['affiliates'] != "0")) {
+        $result = ($priceproduct * $setting['affiliatespercentage']) / 100;
+        $user_Balance = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM user WHERE id = '{$user['affiliates']}'"));
+        $Balance_prim = $user_Balance['Balance'] + $result;
+        $stmt = $connect->prepare("UPDATE user SET Balance = ? WHERE id = ?");
+        $stmt->bind_param("ss", $Balance_prim,$user['affiliates']);
+        $stmt->execute();
+        $result = number_format($result);
+        $textadd = "🎁  پرداخت پورسانت 
+
+مبلغ $result تومان به حساب شما از طرف  زیر مجموعه تان به کیف پول شما واریز گردید";
+        sendmessage($user['affiliates'], $textadd, null, 'HTML');
     }
     $link_config = "";
     $text_config = "";
@@ -4673,4 +4725,187 @@ elseif ($user['step'] == "remove-Discountsell") {
     $stmt->bind_param("s", $text);
     $stmt->execute();
     sendmessage($from_id, $textbotlang['Admin']['Discount']['RemovedCode'], $shopkeyboard, 'HTML');
+}
+if ($text == "👥 تنظیمات زیر مجموعه گیری") {
+    sendmessage($from_id, $textbotlang['users']['selectoption'], $affiliates, 'HTML');
+}
+elseif ($text == "🎁 وضعیت زیرمجموعه گیری") {
+    $affiliatesvalue = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM affiliates"))['affiliatesstatus'];
+    $keyboardaffiliates = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $affiliatesvalue, 'callback_data' => $affiliatesvalue],
+            ],
+        ]
+    ]);
+    sendmessage($from_id, $textbotlang['Admin']['Status']['affiliates'], $keyboardaffiliates, 'HTML');
+}
+elseif ($datain == "onaffiliates") {
+    $stmt = $connect->prepare("UPDATE affiliates SET affiliatesstatus = ?");
+    $value = "offaffiliates";
+    $stmt->bind_param("s", $value);
+    $stmt->execute();
+    $affiliatesvalue = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM affiliates"))['affiliatesstatus'];
+    $keyboardaffiliates = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $affiliatesvalue, 'callback_data' => $affiliatesvalue],
+            ],
+        ]
+    ]);
+    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['affiliatesStatusOff'], $keyboardaffiliates);
+}
+elseif ($datain == "offaffiliates") {
+    $stmt = $connect->prepare("UPDATE affiliates SET affiliatesstatus = ?");
+    $value = "onaffiliates";
+    $stmt->bind_param("s", $value);
+    $stmt->execute();
+    $affiliatesvalue = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM affiliates"))['affiliatesstatus'];
+    $keyboardaffiliates = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $affiliatesvalue, 'callback_data' => $affiliatesvalue],
+            ],
+        ]
+    ]);
+    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['affiliatesStatuson'], $keyboardaffiliates);
+}
+if ($text == "🧮 تنظیم درصد زیرمجموعه") {
+    sendmessage($from_id, $textbotlang['users']['affiliates']['setpercentage'], $backadmin, 'HTML');
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'setpercentage';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+elseif ($user['step'] == "setpercentage") {
+    sendmessage($from_id, $textbotlang['users']['affiliates']['changedpercentage'], $affiliates, 'HTML');
+    $stmt = $connect->prepare("UPDATE affiliates SET affiliatespercentage = ?");
+    $stmt->bind_param("s", $text);
+    $stmt->execute();
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'home';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+elseif ($text == "🏞 تنظیم بنر زیرمجموعه گیری") {
+    sendmessage($from_id, $textbotlang['users']['affiliates']['banner'], $backadmin, 'HTML');
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'setbanner';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+elseif ($user['step'] == "setbanner") {
+    if (!$photo) {
+        sendmessage($from_id, $textbotlang['users']['affiliates']['invalidbanner'], $backadmin, 'HTML');
+        return;
+    }
+    $stmt = $connect->prepare("UPDATE affiliates SET id_media = ?");
+    $stmt->bind_param("s", $photoid);
+    $stmt->execute();
+    $stmt = $connect->prepare("UPDATE affiliates SET description = ?");
+    $stmt->bind_param("s", $caption);
+    $stmt->execute();
+    sendmessage($from_id, $textbotlang['users']['affiliates']['insertbanner'], $affiliates, 'HTML');
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'home';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+elseif ($text == "🎁 پورسانت بعد از خرید") {
+    $marzbancommission = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM affiliates"));
+    $keyboardcommission = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $marzbancommission['status_commission'], 'callback_data' => $marzbancommission['status_commission']],
+            ],
+        ]
+    ]);
+    sendmessage($from_id, $textbotlang['Admin']['Status']['commission'], $keyboardcommission, 'HTML');
+}
+elseif ($datain == "oncommission") {
+    $stmt = $connect->prepare("UPDATE affiliates SET status_commission = ?");
+    $value = "offcommission";
+    $stmt->bind_param("s", $value);
+    $stmt->execute();
+    $marzbancommission = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM affiliates"));
+    $keyboardcommission = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $marzbancommission['status_commission'], 'callback_data' => $marzbancommission['status_commission']],
+            ],
+        ]
+    ]);
+    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['commissionStatusOff'], $keyboardcommission);
+}
+elseif ($datain == "offcommission") {
+    $stmt = $connect->prepare("UPDATE affiliates SET status_commission = ?");
+    $value = "oncommission";
+    $stmt->bind_param("s", $value);
+    $stmt->execute();    $marzbancommission = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM affiliates"));
+    $keyboardcommission = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $marzbancommission['status_commission'], 'callback_data' => $marzbancommission['status_commission']],
+            ],
+        ]
+    ]);
+    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['commissionStatuson'], $keyboardcommission);
+}
+elseif ($text == "🎁 دریافت هدیه") {
+    $marzbanDiscountaffiliates = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM affiliates"));
+    $keyboardDiscountaffiliates = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $marzbanDiscountaffiliates['Discount'], 'callback_data' => $marzbanDiscountaffiliates['Discount']],
+            ],
+        ]
+    ]);
+    sendmessage($from_id, $textbotlang['Admin']['Status']['Discountaffiliates'], $keyboardDiscountaffiliates, 'HTML');
+}
+elseif ($datain == "onDiscountaffiliates") {
+    $stmt = $connect->prepare("UPDATE affiliates SET Discount = ?");
+    $value = "offDiscountaffiliates";
+    $stmt->bind_param("s", $value);
+    $stmt->execute();
+    $marzbanDiscountaffiliates = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM affiliates"));
+    $keyboardDiscountaffiliates = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $marzbanDiscountaffiliates['Discount'], 'callback_data' => $marzbanDiscountaffiliates['Discount']],
+            ],
+        ]
+    ]);
+    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['DiscountaffiliatesStatusOff'], $keyboardDiscountaffiliates);
+}
+elseif ($datain == "offDiscountaffiliates") {
+    $stmt = $connect->prepare("UPDATE affiliates SET Discount = ?");
+    $value = "onDiscountaffiliates";
+    $stmt->bind_param("s", $value);
+    $stmt->execute();
+    $marzbanDiscountaffiliates = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM affiliates"));
+    $keyboardDiscountaffiliates = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $marzbanDiscountaffiliates['Discount'], 'callback_data' => $marzbanDiscountaffiliates['Discount']],
+            ],
+        ]
+    ]);
+    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['DiscountaffiliatesStatuson'], $keyboardDiscountaffiliates);
+}
+if ($text == "🌟 مبلغ هدیه استارت") {
+    sendmessage($from_id, $textbotlang['users']['affiliates']['priceDiscount'], $backadmin, 'HTML');
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'getdiscont';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+elseif ($user['step'] == "getdiscont") {
+    sendmessage($from_id, $textbotlang['users']['affiliates']['changedpriceDiscount'], $affiliates, 'HTML');
+    $stmt = $connect->prepare("UPDATE affiliates SET price_Discount = ?");
+    $stmt->bind_param("s", $text);
+    $stmt->execute();
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'home';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
 }

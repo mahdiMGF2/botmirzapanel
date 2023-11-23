@@ -190,6 +190,21 @@ $textbotlang['users']['invalidusername'] ="❌نام کاربری نامعتبر
 
 
 $textbotlang['users']['qrcode']['manageservice']['getqrcodelink'] = "📷 کیوآرکد لینک اشتراک";
+
+
+
+$textbotlang['users']['affiliates']['setpercentage'] = "📌 درصدی که می‌خواهید بعد خرید  به کاربر واریز شود  را ارسال کنید";
+$textbotlang['users']['affiliates']['changedpercentage'] = "✅ درصد واریز به کاربر با موفقیت تنظیم شد";
+$textbotlang['users']['affiliates']['banner'] = "⭕️ بنر زیرمجموعه گیری خود را ارسال کنید 
+
+❌ بنر باید حتما همراه با عکس باشد";
+$textbotlang['users']['affiliates']['invalidbanner'] = "❌ بنر ارسال شده نامعتبر است ( بنر حتما باید با عکس ارسال شود)";
+$textbotlang['users']['affiliates']['insertbanner'] = "✅ بنر شما با موفقیت ثبت گردید.";
+$textbotlang['users']['affiliates']['invalidaffiliates'] = "❌ شما نمی توانید زیر مجموعه خودتان باشید";
+$textbotlang['users']['affiliates']['priceDiscount'] = "📌 مبلغی که می‌خواهید که کاربر با هر زیرمجموعه جدید دریافت کند را وارد کنید";
+$textbotlang['users']['affiliates']['changedpriceDiscount'] = "✅ مبلغ زیرمجموعه گیری با موفقیت ثبت شد";
+$textbotlang['users']['affiliates']['offaffiliates'] = "❌ بخش زیرمجموعه گیری خاموش می باشد";
+
 #--------------[ admin ]--------------#
 
 $textbotlang['Admin']['Back-Admin'] = "به پنل ادمین بازگشتید!";
@@ -399,8 +414,15 @@ $textbotlang['Admin']['Status']['perfectmoneyStatuson'] = "درگاه  روشن 
 $textbotlang['Admin']['Status']['perfectmoneyTitle'] = "در این بخش می توانید درگاه پرفکت مانی را فعال یا غیرفعال کنید";
 $textbotlang['Admin']['Status']['perfectmoneyStatusOff'] = "⭕ درگاه  خاموش گردید";
 $textbotlang['Admin']['Status']['perfectmoneyStatuson'] = "درگاه  روشن گردید";
-
-
+$textbotlang['Admin']['Status']['affiliates'] = "📌 در این بخش می توانید قابلیت زیر مجموعه گیری در ربات را خاموش یا روشن کنید";
+$textbotlang['Admin']['Status']['affiliatesStatusOff'] = "قابلیت زیرمجموعه گیری غیرفعال شد";
+$textbotlang['Admin']['Status']['affiliatesStatuson'] = "قابلیت زیر مجموعه روشن شد";
+$textbotlang['Admin']['Status']['commission'] = "وضعیت فعال بودن قابلیت هدیه بعد از استارت ربات";
+$textbotlang['Admin']['Status']['commissionStatusOff'] = "قابلیت پورسانت غیرفعال شد";
+$textbotlang['Admin']['Status']['commissionStatuson'] = "قابلیت پورسانت فعال شد";
+$textbotlang['Admin']['Status']['Discountaffiliates'] = "وضعیت فعال بودن قابلیت هدیه";
+$textbotlang['Admin']['Status']['DiscountaffiliatesStatusOff'] = "قابلیت هدیه غیرفعال شد";
+$textbotlang['Admin']['Status']['DiscountaffiliatesStatuson'] = "قابلیت هدیه فعال شد";
 
 
 $textbotlang['Admin']['phone']['notactive'] = "🛑شماره موبایل تایید نشده است🛑";

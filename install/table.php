@@ -27,6 +27,8 @@ try {
         pagenumber int(10) NOT NULL,
         message_count varchar(100) NOT NULL,
         last_message_time varchar(100) NOT NULL,
+        affiliatescount varchar(100) NOT NULL,
+        affiliates varchar(100) NOT NULL,
         username varchar(1000) NOT NULL)
         ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin");
         if (!$result) {
@@ -34,6 +36,18 @@ try {
         }
     }
     else {
+        $Check_filde = $connect->query("SHOW COLUMNS FROM user LIKE 'affiliatescount'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE user ADD affiliatescount VARCHAR(100)");
+            $connect->query("UPDATE user SET affiliatescount = '0'");
+            echo "The affiliatescount field was added ✅";
+        }
+        $Check_filde = $connect->query("SHOW COLUMNS FROM user LIKE 'affiliates'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE user ADD affiliates VARCHAR(100)");
+            $connect->query("UPDATE user SET affiliates = '0'");
+            echo "The affiliates field was added ✅";
+        }
         $Check_filde = $connect->query("SHOW COLUMNS FROM user LIKE 'message_count'");
         if (mysqli_num_rows($Check_filde) != 1) {
             $connect->query("ALTER TABLE user ADD message_count VARCHAR(100)");
@@ -708,5 +722,29 @@ try {
         }
     }
 } catch (Exception $e) {
+    echo "Error: " . $e->getMessage();
+}
+//-----------------------------------------------------------------
+try {
+    $result = $connect->query("SHOW TABLES LIKE 'affiliates'");
+    $table_exists = ($result->num_rows > 0);
+
+    if (!$table_exists) {
+        $result = $connect->query("CREATE TABLE affiliates (
+        description TEXT  CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
+        status_commission varchar(200)  CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
+        Discount varchar(200)  CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
+        price_Discount varchar(200)  CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
+        id_media varchar(300) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
+        affiliatesstatus varchar(600)  NULL,
+        affiliatespercentage varchar(600)  NULL)
+        ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin");
+        if (!$result) {
+            echo "table affiliates".mysqli_error($connect);
+        }
+        $connect->query("INSERT INTO affiliates (description,id_media,status_commission,Discount,affiliatesstatus,affiliatespercentage) VALUES ('none','none','oncommission','onDiscountaffiliates','offaffiliates','0')");
+    }
+}
+catch (Exception $e) {
     echo "Error: " . $e->getMessage();
 }

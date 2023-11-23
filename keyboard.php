@@ -43,6 +43,7 @@ $keyboard = [
         [['text' => $datatextbot['text_sell']],['text' => $datatextbot['text_usertest']]],
         [['text' => $datatextbot['text_Purchased_services']],['text' => $datatextbot['text_Tariff_list']]],
         [['text' => $datatextbot['text_account']],['text' => $datatextbot['text_Add_Balance']]],
+        [['text' => "👥 زیر مجموعه گیری"]],
         [['text' => $datatextbot['text_support']], ['text' => $datatextbot['text_help']]],
     ],
     'resize_keyboard' => true
@@ -67,6 +68,7 @@ $keyboardadmin = json_encode([
         [['text' => "🏬 بخش فروشگاه"],['text' => "💵 مالی"]],
         [['text' => "👨‍🔧 بخش ادمین"], ['text' => "📝 تنظیم متن ربات"]],
         [['text' => "👤 خدمات کاربر"],['text' => "📨 ارسال پیام"]],
+        [['text' => "👥 تنظیمات زیر مجموعه گیری"]],
         [['text' => "📚 بخش آموزش "], ['text' => "🖥 پنل مرزبان"]],
         [['text' => "⚙️ تنظیمات"]],
         [['text' => "🏠 بازگشت به منوی اصلی"]]
@@ -579,3 +581,16 @@ if ($table_exists) {
     }
     $json_list_Discount_list_admin_sell = json_encode($list_Discountsell);
 }
+//--------------------------------------------------
+
+$affiliates =  json_encode([
+    'keyboard' => [
+        [['text' => "🎁 وضعیت زیرمجموعه گیری"]],
+        [['text' => "🧮 تنظیم درصد زیرمجموعه"]],
+        [['text' => "🏞 تنظیم بنر زیرمجموعه گیری"]],
+        [['text' => "🎁 پورسانت بعد از خرید"],['text' => "🎁 دریافت هدیه "]],
+        [['text' => "🌟 مبلغ هدیه استارت"]],
+        [['text' => "🏠 بازگشت به منوی مدیریت"],['text' => "▶️ بازگشت به منوی قبل"]]
+    ],
+    'resize_keyboard' => true
+]);
