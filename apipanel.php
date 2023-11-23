@@ -159,6 +159,32 @@ curl_close($ch);
      $data_useer = json_decode($result, true);
     return $data_useer;
 }
+
+#-----------------------------------------------#
+function revoke_sub($username,$location)
+{
+    global $connect;
+    $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '$location'"));
+    $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
+    $usernameac = $username;
+    $url =  $marzban_list_get['url_panel'].'/api/user/' . $usernameac.'/revoke_sub';
+    $header_value = 'Bearer ';
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_POST , true);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        'Accept: application/json',
+        'Authorization: ' . $header_value .  $Check_token['access_token']
+    ));
+
+    $output = curl_exec($ch);
+    curl_close($ch);
+    $data_useer = json_decode($output, true);
+    return $data_useer;
+}
+
 #-----------------------------------------------#
 function formatBytes($bytes, $precision = 2): string
 {

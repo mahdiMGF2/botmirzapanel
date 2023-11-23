@@ -758,8 +758,8 @@ elseif (preg_match('/changelink_(\w+)/', $datain, $dataget)) {
     sendmessage($from_id,$textbotlang['users']['changelink']['warnchange'], $keyboardextend, 'HTML');
 }
 elseif (preg_match('/confirmchange_(\w+)/', $datain, $dataget)) {
-    $username = $dataget[1];
-    $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '$username'"));
+    $usernameconfig = $dataget[1];
+    $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '$usernameconfig'"));
     $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$nameloc['Service_location']}'"));
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
     $Allowedusername = getuser($username, $Check_token['access_token'], $marzban_list_get['url_panel']);
@@ -769,30 +769,26 @@ if(isset($marzban_list_get['vless']) && $marzban_list_get['vless'] == "onvless")
         "id" => generateUUID(),
         "status" => "active");
 }
-
 if(isset($marzban_list_get['vmess']) && $marzban_list_get['vmess'] == "onvmess"){
     $nameprotocol['vmess'] = array(
                 "id" => generateUUID(),
         "status" => "active");
 }
-
 if(isset($marzban_list_get['trojan']) && $marzban_list_get['trojan'] == "ontrojan"){
     $nameprotocol['trojan'] = array(
         "id" => generateUUID(),
         "status" => "active");
 }
-
 if(isset($marzban_list_get['shadowsocks']) && $marzban_list_get['shadowsocks'] == "onshadowsocks"){
     $nameprotocol['shadowsocks'] = array(
         "id" => generateUUID(),
         "status" => "active");
 }
-
-
-        $datam = array(
+$datam = array(
         "proxies" => $nameprotocol
         );
-    Modifyuser($Check_token['access_token'], $marzban_list_get['url_panel'],$username,$datam);
+    Modifyuser($Check_token['access_token'], $marzban_list_get['url_panel'],$usernameconfig,$datam);
+    revoke_sub($usernameconfig,$nameloc['Service_location']);
     Editmessagetext($from_id, $message_id,  $textbotlang['users']['changelink']['confirmed'], null);
 
 }
