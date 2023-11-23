@@ -2081,7 +2081,7 @@ if ($text == "👥 زیر مجموعه گیری") {
     ]);
     $affiliatescommission = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM affiliates  LIMIT 1"));
     if ($affiliatescommission['status_commission'] == "oncommission"){
-        $affiliatespercentage = $keyboardaddbalance." درصد";
+        $affiliatespercentage = $affiliatescommission['affiliatespercentage']." درصد";
     }else{
         $affiliatespercentage = "غیرفعال";
     }
