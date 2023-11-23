@@ -216,7 +216,8 @@ if($user['message_count'] >= "35"){
             sendmessage($from_id, "❌ شما زیرمجموعه کاربر {$user['affiliates']} هستید و نمی توانید زیر مجموعه کاربری دیگه ای باشید", null, 'html');
             return;
         }
-        if ($setting['affiliatesstatus'] == "offaffiliates") {
+        $affiliatesvalue = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM affiliates"))['affiliatesstatus'];
+        if ($affiliatesvalue == "offaffiliates") {
             sendmessage($from_id, $textbotlang['users']['affiliates']['offaffiliates'], $keyboard, 'HTML');
             return;
         }
@@ -2064,6 +2065,44 @@ if($datain == "colselist"){
     deletemessage($from_id, $message_id);
     sendmessage($from_id, $textbotlang['users']['back'], $keyboard, 'HTML');
 }
+if ($text == "👥 زیر مجموعه گیری") {
+    $affiliatesvalue = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM affiliates"))['affiliatesstatus'];
+    if ($affiliatesvalue == "offaffiliates") {
+        sendmessage($from_id, $textbotlang['users']['affiliates']['offaffiliates'], $keyboard, 'HTML');
+        return;
+    }
+    $affiliates = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM affiliates  LIMIT 1"));
+    $textaffiliates = "{$affiliates['description']}\n\n🔗 https://t.me/$usernamebot?start=$from_id";
+    telegram('sendphoto', [
+        'chat_id' => $from_id,
+        'photo' => $affiliates['id_media'],
+        'caption' => $textaffiliates,
+        'parse_mode' => "HTML",
+    ]);
+    $affiliatescommission = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM affiliates  LIMIT 1"));
+    if ($affiliatescommission['status_commission'] == "oncommission"){
+        $affiliatespercentage = $keyboardaddbalance." درصد";
+    }else{
+        $affiliatespercentage = "غیرفعال";
+    }
+    if ($affiliatescommission['Discount'] == "onDiscountaffiliates"){
+        $price_Discount = $affiliatescommission['price_Discount']." تومان";
+    }else{
+        $price_Discount = "غیرفعال";
+    }
+    $textaffiliates = "🤔 زیرمجموعه گیری به چه صورت است ؟
+
+👨🏻‍💻 ما برای شما محیطی فراهم کرده ایم  تا بتوانید بدون پرداخت حتی 1 ریال به ما، بتوانید موجودی کیف پول خودتان را در ربات افزایش دهید و از خدمات ربات استفاده نمایید.
+
+👥 شما میتوانید با دعوت دوستان و آشنایان خود به ربات ما از طریق لینک اختصاصی شما! کسب درآمد کنید و حتی با هر خرید زیرمجموعه ها به شما پورسانت داده خواهد شد.
+
+👤 شما می توانید با استفاده از بنر بالا برای خود زیرمجموعه جمع کنید
+
+💵 مبلغ هدیه به ازای هر عضویت :  $price_Discount
+💴 میزان پورسانت از خرید زیرمجموعه :  $affiliatespercentage";
+    sendmessage($from_id, $textaffiliates, $keyboard, 'HTML');
+}
+
 #----------------[  admin section  ]------------------#
 $textadmin = ["panel", "/panel", "پنل مدیریت", "ادمین"];
 if (!in_array($from_id, $admin_ids)) {
