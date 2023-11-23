@@ -1,4 +1,4 @@
-<?php
+ا<?php
 date_default_timezone_set('Asia/Tehran');
 require_once 'config.php';
 require_once 'botapi.php';
@@ -131,6 +131,7 @@ $code_Discount = array_column(mysqli_fetch_all(mysqli_query($connect, "SELECT (c
 $users_ids = array_column(mysqli_fetch_all(mysqli_query($connect, "SELECT (id) FROM user"), MYSQLI_ASSOC), 'id');
 $marzban_list = array_column(mysqli_fetch_all(mysqli_query($connect, "SELECT (name_panel) FROM marzban_panel"), MYSQLI_ASSOC), 'name_panel');
 $name_product = array_column(mysqli_fetch_all(mysqli_query($connect, "SELECT (name_product) FROM product"), MYSQLI_ASSOC), 'name_product');
+$SellDiscount = array_column(mysqli_fetch_all(mysqli_query($connect, "SELECT (codeDiscount) FROM DiscountSell"), MYSQLI_ASSOC), 'codeDiscount');
 $datatxtbot = array();
 foreach ($datatextbotget as $row) {
     $datatxtbot[] = array(
@@ -1299,10 +1300,15 @@ elseif ($user['step'] == "endstepuser" ||preg_match('/prodcutservice_(.*)/', $da
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
 } 
-elseif ($user['step'] == "payment" && $datain == "confirmandgetservice"){
+elseif ($user['step'] == "payment" && $datain == "confirmandgetservice" || $datain == "confirmandgetserviceDiscount"){
+    $partsdic = explode("_", $user['Processing_value_four']);
     $info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE code_product = '{$user['Processing_value_one']}' AND (Location = '$Processing_value'  or Location = '/all') LIMIT 1"));
     if (empty($info_product['price_product']) || empty($info_product['price_product'])) return;
+    if ($datain == "confirmandgetserviceDiscount") {
+        $priceproduct =  $partsdic[1];
+    } else {
         $priceproduct =  $info_product['price_product'];
+    }
     if ($priceproduct > $user['Balance']) {
     $Balance_prim = $info_product['price_product'] - $user['Balance'];
     $stmt = $connect->prepare("UPDATE user SET Processing_value = ? WHERE id = ?");
@@ -1375,6 +1381,17 @@ if(isset($nameprotocol['vless']) && $setting['flow'] == "flowon"){
         $stmt->bind_param("ss", $step, $from_id);
         $stmt->execute();
         return;
+    }
+    if ($datain == "confirmandgetserviceDiscount") {
+        $SellDiscountlimit = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM DiscountSell WHERE codeDiscount = '{$partsdic[0]}'"));
+        $value = intval($SellDiscountlimit['usedDiscount']) + 1;
+        $stmt = $connect->prepare("UPDATE DiscountSell SET usedDiscount = ? WHERE codeDiscount = ?");
+        $stmt->bind_param("ss", $value, $partsdic[0]);
+        $stmt->execute();
+        $text_report = "⭕️ یک کاربر با نام کاربری @$username  و آیدی عددی $from_id از کد تخفیف {$partsdic[0]} استفاده کرد.";
+        if (strlen($setting['Channel_Report']) > 0) {
+            sendmessage($setting['Channel_Report'], $text_report, null, 'HTML');
+        }
     }
     $link_config = "";
     $text_config = "";
@@ -1461,6 +1478,63 @@ unlink($urlimage);
     $step = 'home';
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
+}
+elseif ($datain == "aptdc") {
+    sendmessage($from_id, $textbotlang['users']['Discount']['getcodesell'], $backuser, 'HTML');
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'getcodesellDiscount';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+    deletemessage($from_id, $message_id);
+}
+elseif ($user['step'] == "getcodesellDiscount") {
+    if (!in_array($text, $SellDiscount)) {
+        sendmessage($from_id, $textbotlang['users']['Discount']['notcode'], $backuser, 'HTML');
+        return;
+    }
+    $SellDiscountlimit = mysqli_query($connect, "SELECT * FROM DiscountSell WHERE codeDiscount = '$text'");
+    if (mysqli_num_rows($SellDiscountlimit) == 0) {
+        sendmessage($from_id, $textbotlang['Admin']['Discount']['invalidcodedis'], null, 'HTML');
+        return;
+    }
+    $SellDiscountlimit = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM DiscountSell WHERE codeDiscount = '$text'"));
+    if ($SellDiscountlimit['limitDiscount'] == $SellDiscountlimit['usedDiscount']) {
+        sendmessage($from_id, $textbotlang['users']['Discount']['erorrlimit'], null, 'HTML');
+        return;
+    }
+    sendmessage($from_id, $textbotlang['users']['Discount']['correctcode'], $keyboard, 'HTML');
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'payment';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+    $info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE code_product = '{$user['Processing_value_one']}' AND (Location = '{$user['Processing_value']}'or Location = '/all') LIMIT 1"));
+    $result = ($SellDiscountlimit['price'] / 100) * $info_product['price_product'];
+
+    $info_product['price_product'] = $info_product['price_product'] - $result;
+    $info_product['price_product'] = round($info_product['price_product']);
+    if ($info_product['price_product'] < 0) $info_product['price_product'] = 0;
+    $textin = "
+         📇 پیش فاکتور شما:
+👤 نام کاربری: <code>{$user['Processing_value_tow']}</code>
+🔐 نام سرویس: {$info_product['name_product']}
+📆 مدت اعتبار: {$info_product['Service_time']} روز
+💶 قیمت: {$info_product['price_product']}  تومان
+👥 حجم اکانت: {$info_product['Volume_constraint']} گیگ
+💵 موجودی کیف پول شما : {$user['Balance']}
+          
+💰 سفارش شما آماده پرداخت است.  ";
+    $paymentDiscount = json_encode([
+        'inline_keyboard' => [
+            [['text' => "💰 پرداخت و دریافت سرویس", 'callback_data' => "confirmandgetserviceDiscount"]],
+            [['text' => "🏠 بازگشت به منوی اصلی",  'callback_data' => "backuser"]]
+        ]
+    ]);
+    $parametrsendvalue = $text."_".$info_product['price_product'];
+    $stmt = $connect->prepare("UPDATE user SET Processing_value_four = ? WHERE id = ?");
+    $step = 'home';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+    sendmessage($from_id, $textin, $paymentDiscount, 'HTML');
 }
 
 
@@ -2299,6 +2373,7 @@ if ($result) {
 $file = fopen($filename, 'r');
 if ($file) {
     while (($line = fgets($file)) !== false) {
+    $line = trim($line);
     sendmessage($line, $text, null, 'HTML');
     usleep(1000000);
     }
@@ -2319,7 +2394,7 @@ $step = 'home';
 $stmt->bind_param("ss", $step, $from_id);
 $stmt->execute();
 $filename = 'user.txt';
-$query = "SELECT id FROM user WHERE agent != 'f'";
+$query = "SELECT id FROM user";
 $result = $connect->query($query);
 if ($result) {
     $ids = array();
@@ -2332,6 +2407,7 @@ if ($result) {
 $file = fopen($filename, 'r');
 if ($file) {
     while (($line = fgets($file)) !== false) {
+        $line = trim($line);
     forwardMessage($from_id, $message_id, $line);
     usleep(2000000);
     }
@@ -4530,4 +4606,71 @@ if ($datain == "offperfectmoney") {
     $stmt->bind_param("ss", $value, $value2);
     $stmt->execute();
     Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['perfectmoneyStatusOff'], null);
+}
+if ($text == "🎁 ساخت کد تخفیف") {
+    sendmessage($from_id, $textbotlang['Admin']['Discountsell']['GetCode'], $backadmin, 'HTML');
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'get_codesell';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+elseif ($user['step'] == "get_codesell") {
+    if (!preg_match('/^[A-Za-z]+$/', $text)) {
+        sendmessage($from_id, $textbotlang['Admin']['Discount']['ErrorCode'], null, 'HTML');
+        return;
+    }
+    $stmt = $connect->prepare("INSERT INTO DiscountSell (codeDiscount,usedDiscount,price,limitDiscount) VALUES (?,?,?,?)");
+    $values = "0";
+    $stmt->bind_param("ssss", $text, $values, $values, $values);
+    $stmt->execute();
+    sendmessage($from_id, $textbotlang['Admin']['Discount']['PriceCodesell'], null, 'HTML');
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'get_price_codesell';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+    $stmt = $connect->prepare("UPDATE user SET Processing_value = ? WHERE id = ?");
+    $stmt->bind_param("ss", $text, $from_id);
+    $stmt->execute();
+}
+elseif ($user['step'] == "get_price_codesell") {
+    if (!ctype_digit($text)) {
+        sendmessage($from_id, $textbotlang['Admin']['Balance']['Invalidprice'], $backadmin, 'HTML');
+        return;
+    }
+    $stmt = $connect->prepare("UPDATE DiscountSell SET price = ? WHERE codeDiscount = ?");
+    $stmt->bind_param("ss", $text, $user['Processing_value']);
+    $stmt->execute();
+    sendmessage($from_id, $textbotlang['Admin']['Discountsell']['getlimit'], $backadmin, 'HTML');
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'getlimitcode';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+elseif ($user['step'] == "getlimitcode") {
+    $stmt = $connect->prepare("UPDATE DiscountSell SET limitDiscount = ? WHERE codeDiscount = ?");
+    $step = 'get_price_codesell';
+    $stmt->bind_param("ss", $text, $user['Processing_value']);
+    $stmt->execute();
+    sendmessage($from_id, $textbotlang['Admin']['Discount']['SaveCode'], $keyboardadmin, 'HTML');
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'home';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+if ($text == "❌ حذف کد تخفیف") {
+    sendmessage($from_id, $textbotlang['Admin']['Discount']['RemoveCode'], $json_list_Discount_list_admin_sell, 'HTML');
+    $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
+    $step = 'remove-Discountsell';
+    $stmt->bind_param("ss", $step, $from_id);
+    $stmt->execute();
+}
+elseif ($user['step'] == "remove-Discountsell") {
+    if (!in_array($text, $SellDiscount)) {
+        sendmessage($from_id, $textbotlang['Admin']['Discount']['NotCode'], null, 'HTML');
+        return;
+    }
+    $stmt = $connect->prepare("DELETE FROM DiscountSell WHERE codeDiscount = ?");
+    $stmt->bind_param("s", $text);
+    $stmt->execute();
+    sendmessage($from_id, $textbotlang['Admin']['Discount']['RemovedCode'], $shopkeyboard, 'HTML');
 }

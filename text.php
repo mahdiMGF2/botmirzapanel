@@ -164,6 +164,12 @@ $textbotlang['users']['perfectmoney']['invalid_ev_number'] = "❌ کد فعال�
 $textbotlang['users']['Discount']['getcode']  = "💝 برای دریافت موجودی کد هدیه خود را ارسال نمایید";
 $textbotlang['users']['Discount']['notcode']  = "❌ کد نامعتبر است";
 $textbotlang['users']['Discount']['onecode']  = "⭕️ این کد تنها یک بار قابل استفاده است";
+$textbotlang['users']['Discount']['getcodesell']  = "🧑‍💻 کد تخفیف خود را ارسال کنید";
+$textbotlang['users']['Discount']['correctcode']  = "🤩 کد تخفیف شما درست بود و مبلغ روی فاکتور شما اعمال شد.";
+$textbotlang['users']['Discount']['erorrlimit']  = "❌ محدودیت استفاده از این کد تخفیف به پایان رسیده است";
+$textbotlang['users']['Discount']['erorrlimitdiscount']  = "❌ محدودیت استفاده از این کد هدیه به پایان رسیده است";
+
+
 
 #--------------[ other users ]--------------#
 $textbotlang['users']['time-Service'] = "⏳ زمان اشتراک";
@@ -495,3 +501,9 @@ $textbotlang['Admin']['SettingPayment']['Savacard'] = "✅ شماره کارت �
 $textbotlang['Admin']['SettingnowPayment']['Savaapi'] = "✅ تغییرات  با موفقیت ثبت شد";
 
 $textbotlang['Admin']['perfectmoney']['setnumberacount'] = "✅ شماره اکانت با موفقیت ثبت شد";
+
+
+$textbotlang['Admin']['Discountsell']['GetCode'] ="کدی را برای کد تخفیف ارسال کنید";
+$textbotlang['Admin']['Discountsell']['getlimit'] ="محدودیت استفاده برای کاربر را ارسال کنید";
+$textbotlang['Admin']['Discount']['PriceCodesell'] ="کد دریافت شد حالا درصد کد  را بفرست";
+$textbotlang['Admin']['Discount']['invalidcodedis'] ="❌  کد تخفیف نامعتبر است";

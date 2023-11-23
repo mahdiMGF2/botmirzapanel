@@ -491,6 +491,7 @@ if ($table_exists) {
 $payment = json_encode([
     'inline_keyboard' => [
         [['text' => "💰 پرداخت و دریافت سرویس", 'callback_data' => "confirmandgetservice"]],
+        [['text' => "🎁 ثبت کد تخفیف", 'callback_data' => "aptdc"]],
         [['text' => "🏠 بازگشت به منوی اصلی" ,  'callback_data' => "backuser"]]
     ]
 ]);
@@ -555,3 +556,26 @@ $perfectmoneykeyboard = json_encode([
     ],
     'resize_keyboard' => true
 ]);
+//--------------------------------------------------
+$result = $connect->query("SHOW TABLES LIKE 'DiscountSell'");
+$table_exists = ($result->num_rows > 0);
+if ($table_exists) {
+    $DiscountSell = [];
+    $getdataDiscountsell = mysqli_query($connect, "SELECT * FROM DiscountSell");
+    while ($row = mysqli_fetch_assoc($getdataDiscountsell)) {
+        $DiscountSell[] = [$row['codeDiscount']];
+    }
+    $list_Discountsell = [
+        'keyboard' => [],
+        'resize_keyboard' => true,
+    ];
+    $list_Discountsell['keyboard'][] = [
+        ['text' => "🏠 بازگشت به منوی مدیریت"],
+    ];
+    foreach ($DiscountSell as $button) {
+        $list_Discountsell['keyboard'][] = [
+            ['text' => $button[0]]
+        ];
+    }
+    $json_list_Discount_list_admin_sell = json_encode($list_Discountsell);
+}

@@ -691,3 +691,22 @@ try {
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage();
 }
+//----------------------- [ Discount ] --------------------- //
+try {
+    $result = $connect->query("SHOW TABLES LIKE 'DiscountSell'");
+    $table_exists = ($result->num_rows > 0);
+
+    if (!$table_exists) {
+        $result = $connect->query("CREATE TABLE DiscountSell (
+        id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        codeDiscount varchar(1000)  NOT NULL,
+        price varchar(200)  NOT NULL,
+        limitDiscount varchar(500)  NOT NULL,
+        usedDiscount varchar(500) NOT NULL)");
+        if (!$result) {
+            echo "table DiscountSell".mysqli_error($connect);
+        }
+    }
+} catch (Exception $e) {
+    echo "Error: " . $e->getMessage();
+}
