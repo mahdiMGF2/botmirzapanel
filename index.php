@@ -1502,7 +1502,6 @@ unlink($urlimage);
     sendmessage($from_id, $textcreatuser, $Shoppinginfo, 'HTML');
     sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboard, 'HTML');
 }
-        $priceproduct =  $info_product['price_product'];
     $stmt = $connect->prepare("UPDATE user SET Balance = ? WHERE id = ?");
     $Balance_prim = $user['Balance'] - $priceproduct;
     $stmt->bind_param("ss", $Balance_prim, $from_id);
