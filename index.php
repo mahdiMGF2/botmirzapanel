@@ -1345,7 +1345,7 @@ elseif ($user['step'] == "payment" && $datain == "confirmandgetservice" || $data
         $priceproduct =  $info_product['price_product'];
     }
     if ($priceproduct > $user['Balance']) {
-    $Balance_prim = $info_product['price_product'] - $user['Balance'];
+    $Balance_prim = $priceproduct - $user['Balance'];
     $stmt = $connect->prepare("UPDATE user SET Processing_value = ? WHERE id = ?");
     $stmt->bind_param("ss", $Balance_prim, $from_id);
     $stmt->execute();
@@ -1815,7 +1815,7 @@ $PaySetting
     }
         if ($datain == "perfectmoney") {
         deletemessage($from_id, $message_id);
-        sendmessage($from_id, $textbotlang['users']['perfectmoney']['getvcode'], $bakcuser, 'HTML');
+        sendmessage($from_id, $textbotlang['users']['perfectmoney']['getvcode'], $backuser, 'HTML');
         $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
         $step = 'getvcodeuser';
         $stmt->bind_param("ss", $step, $from_id);
@@ -1831,7 +1831,7 @@ if ($user['step'] == "getvcodeuser") {
     $step = 'getvnumbervuser';
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
-    sendmessage($from_id, $textbotlang['users']['perfectmoney']['getvnumber'], $bakcuser, 'HTML');
+    sendmessage($from_id, $textbotlang['users']['perfectmoney']['getvnumber'], $backuser, 'HTML');
 } elseif ($user['step'] == "getvnumbervuser") {
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'home';
