@@ -49,18 +49,7 @@ function generateUUID() {
     return $uuid;
 }
 function tronratee(){
-    $tronrate = [];
-    $tronrate['results'] = [];
-    $requests = json_decode(file_get_contents('https://api.bitpin.ir/v1/mkt/currencies/'), true)['results'];
-    foreach($requests as  $request){
-        if($request['id'] == 15){
-            $tronrate['result']['TRX'] = $request['price_info']['price'];
-        }
-        if($request['id'] == 4){
-            $tronrate['result']['USD'] = $request['price_info']['price'];
-        }
-    }
-    return $tronrate;
+    return json_decode(file_get_contents('https://api.changeto.technology/api/rate'), true);
 }
 function nowPayments($payment, $price_amount, $order_id, $order_description){
     global $connect;
@@ -1126,7 +1115,11 @@ if ($text == $datatextbot['text_help'] || $datain == "helpbtn") {
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
 } elseif ($user['step'] == "sendhelp") {
-    $helpdata = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM help WHERE name_os = '$text'"));
+   $stmt = mysqli_prepare($connect, "SELECT * FROM help WHERE name_os = ?");
+   mysqli_stmt_bind_param($stmt, "s", $text);
+   mysqli_stmt_execute($stmt);
+   $helpdata = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+   mysqli_stmt_close($stmt);
     if (strlen($helpdata['Media_os']) != 0) {
         if ($helpdata['type_Media_os'] == "video") {
             sendvideo($from_id, $helpdata['Media_os'], $helpdata['Description_os']);
@@ -1552,12 +1545,25 @@ elseif ($user['step'] == "getcodesellDiscount") {
         sendmessage($from_id, $textbotlang['users']['Discount']['notcode'], $backuser, 'HTML');
         return;
     }
-    $SellDiscountlimit = mysqli_query($connect, "SELECT * FROM DiscountSell WHERE codeDiscount = '$text'");
+    $stmt = mysqli_prepare($connect, "SELECT * FROM DiscountSell WHERE codeDiscount =  ?");
+    mysqli_stmt_bind_param($stmt, "s", $text);
+    mysqli_stmt_execute($stmt);
+    $SellDiscountlimit = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+    mysqli_stmt_close($stmt);
     if (mysqli_num_rows($SellDiscountlimit) == 0) {
         sendmessage($from_id, $textbotlang['Admin']['Discount']['invalidcodedis'], null, 'HTML');
         return;
     }
-    $SellDiscountlimit = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM DiscountSell WHERE codeDiscount = '$text'"));
+    $stmt = mysqli_prepare($connect, "SELECT * FROM DiscountSell WHERE codeDiscount =  ?");
+    mysqli_stmt_bind_param($stmt, "s", $text);
+    mysqli_stmt_execute($stmt);
+    $SellDiscountlimit = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+    mysqli_stmt_close($stmt);
+    $stmt = mysqli_prepare($connect, "SELECT * FROM DiscountSell WHERE codeDiscount =  ?");
+    mysqli_stmt_bind_param($stmt, "s", $text);
+    mysqli_stmt_execute($stmt);
+    $SellDiscountlimit = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+    mysqli_stmt_close($stmt);
     if ($SellDiscountlimit['limitDiscount'] == $SellDiscountlimit['usedDiscount']) {
         sendmessage($from_id, $textbotlang['users']['Discount']['erorrlimit'], null, 'HTML');
         return;
@@ -2051,11 +2057,15 @@ if ($datain == "Discount") {
         $stmt->execute();
         return;
     }
-    $get_codesql = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM Discount WHERE code = '$text' LIMIT 1"));
     $balance_user = $user['Balance'] + $get_codesql['price'];
     $stmt = $connect->prepare("UPDATE user SET Balance = ? WHERE id = ?");
     $stmt->bind_param("ss", $balance_user, $from_id);
     $stmt->execute();
+    $stmt = mysqli_prepare($connect, "SELECT * FROM Discount WHERE code =  ?");
+    mysqli_stmt_bind_param($stmt, "s", $text);
+    mysqli_stmt_execute($stmt);
+    $get_codesql = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+    mysqli_stmt_close($stmt);
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'اhome';
     $stmt->bind_param("ss", $step, $from_id);
@@ -4954,3 +4964,4 @@ elseif ($user['step'] == "getdiscont") {
     $stmt->bind_param("ss", $step, $from_id);
     $stmt->execute();
 }
+$connect->close();
