@@ -424,7 +424,11 @@ $table_exists = ($result->num_rows > 0);
 if ($table_exists) {
     $product = [];
     $cleaned_text = mysqli_real_escape_string($connect, $text);
-    $getdataproduct = mysqli_query($connect, "SELECT * FROM product WHERE Location = '$cleaned_text' OR Location = '/all'");
+    $stmt = mysqli_prepare($connect, "SELECT * FROM product WHERE Location = ? OR Location = '/all'");
+    mysqli_stmt_bind_param($stmt, "s", $cleaned_text);
+    mysqli_stmt_execute($stmt);
+    $getdataproduct = mysqli_stmt_get_result($stmt);
+    mysqli_stmt_close($stmt);
     if(isset($getdataproduct)){
     while ($row = mysqli_fetch_assoc($getdataproduct)) {
         $product[] = [$row['name_product']];
@@ -590,7 +594,7 @@ $affiliates =  json_encode([
         [['text' => "🏞 تنظیم بنر زیرمجموعه گیری"]],
         [['text' => "🎁 پورسانت بعد از خرید"],['text' => "🎁 دریافت هدیه "]],
         [['text' => "🌟 مبلغ هدیه استارت"]],
-        [['text' => "🏠 بازگشت به منوی مدیریت"],['text' => "▶️ بازگشت به منوی قبل"]]
+        [['text' => "🏠 بازگشت به منوی مدیریل"]]
     ],
     'resize_keyboard' => true
 ]);
