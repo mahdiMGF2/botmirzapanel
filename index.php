@@ -857,7 +857,6 @@ elseif($user['step'] == "getvolumeextra"){
 }
 elseif (preg_match('/confirmaextra_(\w+)/', $datain, $dataget)) {
     $volume = $dataget[1];
-    sendmessage($from_id, $volume, null, 'HTML');
     $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '$Processing_value'"));
         if($user['Balance'] <$volume){
     $Balance_prim = $volume - $user['Balance'];
@@ -3625,7 +3624,7 @@ elseif ($user['step'] == "updatetime") {
 #-------------------------#
 if ($text == "💾 حجم اکانت تست"  ) {
     sendmessage($from_id, "حجم سرویس تست را ارسال کنید.
-        زمان فعلی: {$setting['val_usertest']} مگابایت
+            حجم فعلی: {$setting['val_usertest']} مگابایت
         ⚠️ حجم بر حسب مگابایت است.", $backadmin,'HTML');
     $stmt = $connect->prepare("UPDATE user SET step = ? WHERE id = ?");
     $step = 'val_usertest';
