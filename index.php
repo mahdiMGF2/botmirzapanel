@@ -49,7 +49,18 @@ function generateUUID() {
     return $uuid;
 }
 function tronratee(){
-    return json_decode(file_get_contents('https://api.changeto.technology/api/rate'), true);
+    $tronrate = [];
+    $tronrate['results'] = [];
+    $requests = json_decode(file_get_contents('https://api.bitpin.ir/v1/mkt/currencies/'), true)['results'];
+    foreach($requests as  $request){
+        if($request['id'] == 15){
+            $tronrate['result']['TRX'] = $request['price_info']['price'];
+        }
+        if($request['id'] == 4){
+            $tronrate['result']['USD'] = $request['price_info']['price'];
+        }
+    }
+    return $tronrate;
 }
 function nowPayments($payment, $price_amount, $order_id, $order_description){
     global $connect;
