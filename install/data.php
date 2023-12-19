@@ -12,7 +12,7 @@ $form_data = [];
 
 foreach ($post_vars as $key) {
     if (isset($_POST[$key])) {
-        $form_data[$key] = htmlspecialchars($_POST[$key]);
+        $form_data[$key] = htmlspecialchars($_POST[$key], ENT_QUOTES, 'UTF-8');
     } else {
         $form_data[$key] = '';
     }
