@@ -50,7 +50,7 @@ $patternidadmin = '/\$adminnumber\s*=\s*".*?";/';
 $newFileContent = preg_replace($patternidadmin, '$adminnumber = "'.$form_data['idadmin'].'";', $newFileContent);
 
 try {
-    $connect = new mysqli('localhost', $form_data['dbuser'], $$form_data['passworddb'], $$form_data['dbname']);
+    $connect = new mysqli('localhost', $form_data['dbuser'], $$form_data['dbpassword'], $$form_data['dbname']);
     
     if ($connect->connect_errno) {
         $textdatabase = 'خطا در اتصال به پایگاه داده: ' . $connect->connect_error;
