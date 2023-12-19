@@ -1,17 +1,30 @@
 <?php
-$token = $_POST['tokenbot'];
-$idadmin = $_POST['idadmin'];
-$dbname = $_POST['dbname'];
-$dbuser = $_POST['dbuser'];
-$idbot = $_POST['idbot'];
-$passworddb = $_POST['dbpassword'];
+$post_vars = [
+    'tokenbot',
+    'idadmin',
+    'dbname',
+    'dbuser', 
+    'idbot',
+    'dbpassword'
+];
+
+$form_data = [];
+
+foreach ($post_vars as $key) {
+    if (isset($_POST[$key])) {
+        $form_data[$key] = htmlspecialchars($_POST[$key]);
+    } else {
+        $form_data[$key] = '';
+    }
+}
+
 $domain = $_SERVER['HTTP_HOST'];
 $path = dirname($_SERVER['REQUEST_URI'],2);
 $domain_hosts = $domain . $path;
 $fileContent = file_get_contents('../config.php');
 // تغییر مقدار $idbot
 $patternidbot = '/\$usernamebot\s*=\s*".*?";/';
-$newFileContent = preg_replace($patternidbot, '$usernamebot = "'.$idbot.'";', $fileContent);
+$newFileContent = preg_replace($patternidbot, '$usernamebot = "'.$form_data['idbot'].'";', $fileContent);
 
 // تغییر مقدار $domainhost
 $patterndomain = '/\$domainhosts\s*=\s*".*?";/';
@@ -19,26 +32,26 @@ $newFileContent = preg_replace($patterndomain, '$domainhosts = "'.$domain_hosts.
 
 // تغییر مقدار $dbname
 $patterndbname = '/\$dbname\s*=\s*".*?";/';
-$newFileContent = preg_replace($patterndbname, '$dbname = "'.$dbname.'";', $newFileContent);
+$newFileContent = preg_replace($patterndbname, '$dbname = "'.$form_data['dbname'].'";', $newFileContent);
 
 // تغییر مقدار $dbuser
 $patternuser = '/\$usernamedb\s*=\s*".*?";/';
-$newFileContent = preg_replace($patternuser, '$usernamedb = "'.$dbuser.'";', $newFileContent);
+$newFileContent = preg_replace($patternuser, '$usernamedb = "'.$form_data['dbuser'].'";', $newFileContent);
 // تغییر مقدار $dbdbpassword
 $patternpass = '/\$passworddb\s*=\s*".*?";/';
-$newFileContent = preg_replace($patternpass, '$passworddb = "'.$passworddb.'";', $newFileContent);
+$newFileContent = preg_replace($patternpass, '$passworddb = "'.$form_data['passworddb'].'";', $newFileContent);
 
 // تغییر مقدار $API_KEY
 $patterntoken = '/\$APIKEY\s*=\s*".*?";/';
-$newFileContent = preg_replace($patterntoken, '$APIKEY = "'.$token.'";', $newFileContent);
+$newFileContent = preg_replace($patterntoken, '$APIKEY = "'.$form_data['tokenbot'].'";', $newFileContent);
 
 // تغییر مقدار $adminnumber
 $patternidadmin = '/\$adminnumber\s*=\s*".*?";/';
-$newFileContent = preg_replace($patternidadmin, '$adminnumber = "'.$idadmin.'";', $newFileContent);
+$newFileContent = preg_replace($patternidadmin, '$adminnumber = "'.$form_data['idadmin'].'";', $newFileContent);
 
 file_put_contents('../config.php', $newFileContent);
 try {
-    $connect = new mysqli('localhost', $dbuser, $passworddb, $dbname);
+    $connect = new mysqli('localhost', $form_data['dbuser'], $$form_data['passworddb'], $$form_data['dbname']);
     
     if ($connect->connect_errno) {
         $textdatabase = 'خطا در اتصال به پایگاه داده: ' . $connect->connect_error;
@@ -50,10 +63,10 @@ try {
 } catch (Exception $e) {
     $textdatabase = 'خطا در اتصال به پایگاه داده: ' . $e->getMessage();
 }
-$delete = json_decode(file_get_contents("https://api.telegram.org/bot" . $token . "setWebhook?remove" ),true);
-$response = json_decode(file_get_contents("https://api.telegram.org/bot" . $token . "/setWebhook?url=https://" .$domain_hosts."/index.php" ),true);
+$delete = json_decode(file_get_contents("https://api.telegram.org/bot" . $form_data['tokenbot'] . "setWebhook?remove" ),true);
+$response = json_decode(file_get_contents("https://api.telegram.org/bot" . $form_data['tokenbot'] . "/setWebhook?url=https://" .$domain_hosts."/index.php" ),true);
 if($response['description'] == "Webhook was set"){
-            $sendmessage =file_get_contents("https://api.telegram.org/bot" . $token . "/sendMessage?chat_id=" . $idadmin . "&text=✅| ربات میرزا پنل با موفقیت نصب شد");
+            $sendmessage =file_get_contents("https://api.telegram.org/bot" . $form_data['tokenbot'] . "/sendMessage?chat_id=" . $form_data['idadmin'] . "&text=✅| ربات میرزا پنل با موفقیت نصب شد");
             $webhook = "ست وبهوک با موفقیت تنظیم شد";
         }
         elseif($response['description'] == "Webhook is already set"){
@@ -62,7 +75,7 @@ if($response['description'] == "Webhook was set"){
         else{
             $webhook = "ست وبهوک ربات با موفقتیت انجام نشد.";
         }
-   unlink('data.php');
+   //unlink('data.php');
 ?>
 
 <html>
