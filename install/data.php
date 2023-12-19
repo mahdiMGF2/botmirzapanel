@@ -1,10 +1,10 @@
 <?php
-$token = $_POST['tokenbot'];
-$idadmin = $_POST['idadmin'];
-$dbname = $_POST['dbname'];
-$dbuser = $_POST['dbuser'];
-$idbot = $_POST['idbot'];
-$passworddb = $_POST['dbpassword'];
+$token = htmlspecialchars($_POST['tokenbot'], ENT_QUOTES, 'UTF-8');
+$idadmin = htmlspecialchars($_POST['idadmin'], ENT_QUOTES, 'UTF-8');
+$dbname = htmlspecialchars($_POST['dbname'], ENT_QUOTES, 'UTF-8');
+$dbuser = htmlspecialchars($_POST['dbuser'], ENT_QUOTES, 'UTF-8');
+$idbot = htmlspecialchars($_POST['idbot'], ENT_QUOTES, 'UTF-8');
+$passworddb = htmlspecialchars($_POST['dbpassword'], ENT_QUOTES, 'UTF-8');
 $domain = $_SERVER['HTTP_HOST'];
 $path = dirname($_SERVER['REQUEST_URI'],2);
 $domain_hosts = $domain . $path;
