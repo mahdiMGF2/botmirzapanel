@@ -1,4 +1,5 @@
-ا<?php
+<?php
+ini_set('error_log', 'error_log');
 date_default_timezone_set('Asia/Tehran');
 require_once 'config.php';
 require_once 'botapi.php';
@@ -114,6 +115,7 @@ function StatusPayment($paymentid){
     return $response;
 }
 #-------------Variable----------#
+if($from_id != 0)$connect->query("INSERT IGNORE INTO user (id , step,limit_usertest,User_Status,number,Balance,pagenumber,username,message_count,last_message_time,affiliatescount,affiliates) VALUES ('$from_id', 'none','{$setting['limit_usertest_all']}','Active','none','0','1','$username','0','0','0','0')");
 $version = file_get_contents('install/version');
 $query = mysqli_query($connect, "SELECT * FROM user WHERE id = '$from_id' LIMIT 1");
 if (mysqli_num_rows($query) > 0) {
@@ -181,7 +183,6 @@ if (isset($channels['link']) && $from_id != 0) {
     $response = json_decode(file_get_contents('https://api.telegram.org/bot' . $APIKEY . "/getChatMember?chat_id=@{$channels['link']}&user_id=$from_id"));
     $tch = $response->result->status;
 }
-if($from_id != 0)$connect->query("INSERT IGNORE INTO user (id , step,limit_usertest,User_Status,number,Balance,pagenumber,username,message_count,last_message_time,affiliatescount,affiliates) VALUES ('$from_id', 'none','{$setting['limit_usertest_all']}','Active','none','0','1','$username','0','0','0','0')");
 if($user['username'] == "none" || $user['username'] == null){
     $stmt = $connect->prepare("UPDATE user SET username = ? WHERE id = ?");
     $stmt->bind_param("ss", $username, $from_id);
@@ -196,31 +197,6 @@ if ($user['User_Status'] == "block") {
                 ";
     sendmessage($from_id, $textblock, null, 'html');
     return;
-}
-$timebot= time();
-$TimeLastMessage=  $timebot - intval($user['last_message_time']);
-if(floor($TimeLastMessage / 60) >= 1){
-    $stmt = $connect->prepare("UPDATE user SET last_message_time = ? WHERE id = ?");
-    $stmt->bind_param("ss", $timebot, $from_id);
-    $stmt->execute();
-    $stmt = $connect->prepare("UPDATE user SET message_count = ? WHERE id = ?");
-    $addmessage = 1;
-    $stmt->bind_param("is", $addmessage, $from_id);
-    $stmt->execute();
-}else{
-if(!in_array($from_id,$admin_ids)){
-$stmt = $connect->prepare("UPDATE user SET message_count = ? WHERE id = ?");
-$addmessage = intval($user['message_count']) + 1;
-$stmt->bind_param("ss", $addmessage, $from_id);
-$stmt->execute();
-if($user['message_count'] >= "35"){
-    $stmt = $connect->prepare("UPDATE user SET User_Status = ? ,description_blocking = ? WHERE id = ?");
-    $User_Status = "block";
-    $stmt->bind_param("sss", $User_Status,$textbotlang['users']['spam']['spamed'], $from_id);
-    $stmt->execute();
-    sendmessage($from_id, $textbotlang['users']['spam']['spamedmessage'], null, 'html');
-    return;
-}
 }
     if (strpos($text, "/start ") !== false) {
         if ($user['affiliates'] != 0) {
@@ -260,6 +236,32 @@ if($user['message_count'] >= "35"){
         $stmt->execute();
     }
 
+$timebot= time();
+$TimeLastMessage=  $timebot - intval($user['last_message_time']);
+if(floor($TimeLastMessage / 60) >= 1){
+    $stmt = $connect->prepare("UPDATE user SET last_message_time = ? WHERE id = ?");
+    $stmt->bind_param("ss", $timebot, $from_id);
+    $stmt->execute();
+    $stmt = $connect->prepare("UPDATE user SET message_count = ? WHERE id = ?");
+    $addmessage = 1;
+    $stmt->bind_param("is", $addmessage, $from_id);
+    $stmt->execute();
+}else{
+if(!in_array($from_id,$admin_ids)){
+$stmt = $connect->prepare("UPDATE user SET message_count = ? WHERE id = ?");
+$addmessage = intval($user['message_count']) + 1;
+$stmt->bind_param("ss", $addmessage, $from_id);
+$stmt->execute();
+if($user['message_count'] >= "35"){
+    $stmt = $connect->prepare("UPDATE user SET User_Status = ? ,description_blocking = ? WHERE id = ?");
+    $User_Status = "block";
+    $stmt->bind_param("sss", $User_Status,$textbotlang['users']['spam']['spamed'], $from_id);
+    $stmt->execute();
+    sendmessage($from_id, $textbotlang['users']['spam']['spamedmessage'], null, 'html');
+    return;
+}        
+
+}
 }#-----------Channel------------#
 if($datain == "confirmchannel"){
     if(!in_array($tch, ['member', 'creator', 'administrator'])){
@@ -1209,6 +1211,7 @@ $current_time = time();
 🕴🏻 شناسه کاربری: <code>$from_id</code>
 💰 موجودی: $Balanceuser تومان
 🛍 تعداد سرویس های خریداری شده : {$countorder['COUNT(id_user)']}
+🤝 تعداد زیر مجموعه های شما : {$user['affiliatescount']} نفر
 
 📆 $dateacc → ⏰ $timeacc
             ";
