@@ -309,6 +309,7 @@ if ($table_exists) {
         ];
     }
     $json_list_marzban_panel = json_encode($list_marzban_panel);
+}
     $result = $connect->query("SHOW TABLES LIKE 'help'");
     $table_exists = ($result->num_rows > 0);
 
@@ -332,7 +333,7 @@ if ($table_exists) {
         ];
         $json_list_help = json_encode($help_arr);
     }
-}
+
 $query = mysqli_query($connect, "SELECT * FROM user WHERE id = '$from_id' LIMIT 1");
 if (mysqli_num_rows($query) > 0) {
     $users = mysqli_fetch_assoc($query);
@@ -593,7 +594,7 @@ $affiliates =  json_encode([
         [['text' => "🏞 تنظیم بنر زیرمجموعه گیری"]],
         [['text' => "🎁 پورسانت بعد از خرید"],['text' => "🎁 دریافت هدیه "]],
         [['text' => "🌟 مبلغ هدیه استارت"]],
-        [['text' => "🏠 بازگشت به منوی مدیریل"]]
+        [['text' => "🏠 بازگشت به منوی مدیریت"]]
     ],
     'resize_keyboard' => true
 ]);
