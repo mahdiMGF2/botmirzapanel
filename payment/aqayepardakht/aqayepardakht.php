@@ -3,11 +3,13 @@ $rootPath = $_SERVER['DOCUMENT_ROOT'];
 $Pathfile = dirname(dirname($_SERVER['PHP_SELF'], 2));
 $Pathfiles = $rootPath.$Pathfile;
 $Pathfile = $Pathfiles.'/config.php';
+$functions = $Pathfiles.'/functions.php';
 require_once $Pathfile;
-$amount = $_GET['price'];
-$invoice_id = $_GET['order_id'];
-$PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'merchant_id_aqayepardakht'"))['ValuePay'];
-$checkprice = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (price) FROM Payment_report WHERE id_order = '$invoice_id'"))['price'];
+require_once $functions;
+$amount =     htmlspecialchars($_GET['price'], ENT_QUOTES, 'UTF-8');;
+$invoice_id = htmlspecialchars($_GET['order_id'], ENT_QUOTES, 'UTF-8');;
+$PaySetting = select("PaySetting", "ValuePay", "NamePay", "merchant_id_aqayepardakht","select")['ValuePay'];
+$checkprice = select("Payment_report", "price", "id_order", $invoice_id,"select")['price'];
 // Send Parameter
 if($checkprice !=$amount){
     echo "مبلغ ارسال شده نامعتبر است";
