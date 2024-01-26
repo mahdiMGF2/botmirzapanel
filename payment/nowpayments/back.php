@@ -6,37 +6,19 @@ $Pathfiles = $rootPath.$Pathfile;
 $Pathfile = $Pathfiles.'/config.php';
 $jdf = $Pathfiles.'/jdf.php';
 $botapi = $Pathfiles.'/botapi.php';
+$functions = $Pathfiles.'/functions.php';
+require_once $functions;
 require_once $Pathfile;
 require_once $jdf;
 require_once $botapi;
-$apinowpayments = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'apinowpayment'"))['ValuePay'];
-function arzeweswap(){
-    
-$curl = curl_init();
-
-curl_setopt_array($curl, [
-  CURLOPT_URL => "https://api.weswap.digital/api/rate",
-  CURLOPT_RETURNTRANSFER => true,
-  CURLOPT_ENCODING => "",
-  CURLOPT_MAXREDIRS => 10,
-  CURLOPT_TIMEOUT => 30,
-  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-  CURLOPT_CUSTOMREQUEST => "GET",
-  CURLOPT_HTTPHEADER => [
-    "Accept: application/json"
-  ],
-]);
-
-$response = curl_exec($curl);
-curl_close($curl);
-    $response = json_decode($response, true);
-return $response;
-}
-$price_rate = arzeweswap();
-    if(isset($_GET['NP_id'])){
+$apinowpayments = select("PaySetting", "ValuePay", "NamePay", "apinowpayment","select")['ValuePay'];
+$NP_id = htmlspecialchars($_GET['NP_id'], ENT_QUOTES, 'UTF-8');
+$price_rate = tronratee();
+$usd = $price_rate['result']['USD'];    
+if(isset($NP_id)){
 $curl = curl_init();
 curl_setopt_array($curl, array(
-  CURLOPT_URL => 'https://api.nowpayments.io/v1/payment/'.$_GET['NP_id'],
+  CURLOPT_URL => 'https://api.nowpayments.io/v1/payment/'.$NP_id,
   CURLOPT_RETURNTRANSFER => true,
   CURLOPT_ENCODING => '',
   CURLOPT_MAXREDIRS => 10,
@@ -54,23 +36,18 @@ curl_close($curl);
  } 
  if($response['payment_status'] == "finished"){
     $payment_status = "پرداخت موفق";
-    $price = intval($price_rate['result']['USD']*$response['price_amount']);
+    $price = intval($usd*$response['price_amount']);
     $dec_payment_status = "از انجام تراکنش متشکریم!";
-    $Payment_report = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM Payment_report WHERE id_order = '{$response['order_id']}' LIMIT 1"));
+    $Payment_report = select("Payment_report", "price", "id_order", $response['order_id'],"select");
     if($Payment_report['payment_Status'] != "paid"){
-    $Balance_id = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM user WHERE id = '{$Payment_report['id_user']}' LIMIT 1"));
-    $stmt = $connect->prepare("UPDATE user SET Balance = ? WHERE id = ?");
+    $Balance_id = select("user", "*", "id", $Payment_report['id_user'],"select");
     $Balance_confrim = intval($Balance_id['Balance']) + $price;
-    $stmt->bind_param("ss", $Balance_confrim, $Payment_report['id_user']);
-    $stmt->execute();
-    $stmt = $connect->prepare("UPDATE Payment_report SET payment_Status = ? WHERE id_order = ?");
-    $Status_change = "paid";
-    $stmt->bind_param("ss", $Status_change, $Payment_report['id_order']);
-    $stmt->execute();
+    update("user", "Balance", $Balance_confrim, "id",$Payment_report['id_user']);
+    update("Payment_report", "payment_Status", "paid", "id",$Payment_report['id_order']);
     sendmessage($Payment_report['id_user'],"💎 کاربر گرامی مبلغ $price تومان به کیف پول شما واریز گردید با تشکر از پرداخت شما.
     
     🛒 کد پیگیری شما: {$Payment_report['id_order']}",$keyboard,'HTML');
-    $setting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM setting"));
+    $setting = select("setting", "*");
 $text_report = "💵 پرداخت جدید
         
 آیدی عددی کاربر : $from_id
