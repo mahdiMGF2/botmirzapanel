@@ -5,12 +5,13 @@ $Pathfiles = $rootPath.$Pathfile;
 $Pathfile = $Pathfiles.'/config.php';
 $jdf = $Pathfiles.'/jdf.php';
 $botapi = $Pathfiles.'/botapi.php';
+$botapi = $Pathfiles.'/functions.php';
 require_once $Pathfile;
 require_once $jdf;
 require_once $botapi;
 $invoice_id = htmlspecialchars($_POST['invoice_id'], ENT_QUOTES, 'UTF-8');
-$PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'merchant_id_aqayepardakht'"))['ValuePay'];
-$Payment_report = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM Payment_report WHERE id_order = '$invoice_id' LIMIT 1"))['price'];
+$PaySetting = select("PaySetting", "ValuePay", "NamePay", "merchant_id_aqayepardakht","select")['ValuePay'];
+$Payment_report = select("Payment_report", "price", "id_order", $invoice_id,"select")['price'];
 
 // verify Transaction
 
@@ -37,21 +38,16 @@ if ($result->code == "1") {
     $payment_status = "پرداخت موفق";
     $price = $Payment_report;
     $dec_payment_status = "از انجام تراکنش متشکریم!";
-    $Payment_report = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM Payment_report WHERE id_order = '$invoice_id' LIMIT 1"));
+    $Payment_report = select("Payment_report", "price", "id_order", $invoice_id,"select");
     if($Payment_report['payment_Status'] != "paid"){
-    $Balance_id = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM user WHERE id = '{$Payment_report['id_user']}' LIMIT 1"));
-    $stmt = $connect->prepare("UPDATE user SET Balance = ? WHERE id = ?");
+    $Balance_id = select("user", "*", "id", $Payment_report['id_user'],"select");
     $Balance_confrim = intval($Balance_id['Balance']) + $price;
-    $stmt->bind_param("ss", $Balance_confrim, $Payment_report['id_user']);
-    $stmt->execute();
-    $stmt = $connect->prepare("UPDATE Payment_report SET payment_Status = ? WHERE id_order = ?");
-    $Status_change = "paid";
-    $stmt->bind_param("ss", $Status_change, $Payment_report['id_order']);
-    $stmt->execute();
+    update("user", "Balance", $Balance_confrim, "id",$Payment_report['id_user']);
+    update("Payment_report", "payment_Status", "paid", "id",$Payment_report['id_order']);
     sendmessage($Payment_report['id_user'],"💎 کاربر گرامی مبلغ $price تومان به کیف پول شما واریز گردید با تشکر از پرداخت شما.
     
     🛒 کد پیگیری شما: {$Payment_report['id_order']}",null,'HTML');
-    $setting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM setting"));
+    $setting = select("setting", "*");
 $text_report = "💵 پرداخت جدید
         
 آیدی عددی کاربر : $from_id
