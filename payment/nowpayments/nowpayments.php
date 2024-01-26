@@ -3,8 +3,13 @@ $rootPath = $_SERVER['DOCUMENT_ROOT'];
 $Pathfile = dirname(dirname($_SERVER['PHP_SELF'], 2));
 $Pathfile = $rootPath.$Pathfile;
 $Pathfile = $Pathfile.'/config.php';
+$functions = $Pathfiles.'/functions.php';
 require_once $Pathfile;
-$apinowpayments = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'apinowpayment'"))['ValuePay'];
+require_once $functions;
+$apinowpayments = select("PaySetting", "ValuePay", "NamePay", "apinowpayment","select")['ValuePay'];
+$amount =     htmlspecialchars($_GET['price'], ENT_QUOTES, 'UTF-8');
+$invoice_id = htmlspecialchars($_GET['order_id'], ENT_QUOTES, 'UTF-8');
+$order_description = htmlspecialchars($_GET['order_description'], ENT_QUOTES, 'UTF-8');
 $curl = curl_init();
 curl_setopt_array($curl, array(
   CURLOPT_URL => 'https://api.nowpayments.io/v1/invoice',
@@ -21,10 +26,10 @@ curl_setopt_array($curl, array(
   ),
 ));
 curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode([
-            'price_amount' => $_GET['price'],
+            'price_amount' => $amount,
             'price_currency' => 'usd',
-            'order_id' => $_GET['order_id'],
-            'order_description' => $_GET['order_description'],
+            'order_id' => $invoice_id,
+            'order_description' => $order_description,
             'success_url' => "https://".$domainhosts . '/payment/nowpayments/back.php',
             'is_fee_paid_by_user' => true
         ]));
