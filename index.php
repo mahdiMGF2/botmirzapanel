@@ -170,7 +170,7 @@ if($datain == "confirmchannel"){
     }
         return;
 }
-if (empty($channels['Channel_lock'])) {
+if ($channels !== false) {
     $channels['Channel_lock'] = "off";
     $channels['link'] = $textbotlang['users']['channel']['link'];
 }
@@ -1114,7 +1114,7 @@ elseif ($user['step'] == "endstepuser" ||preg_match('/prodcutservice_(.*)/', $da
     $loc = $prodcut;
     }
     update("user", "Processing_value_one",$loc,"id",$from_id);
-    $info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE code_product = '$loc' AND (Location = {$user['Processing_value']}'or Location = '/all') LIMIT 1"));
+    $info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE code_product = '$loc' AND (Location = '{$user['Processing_value']}' or Location = '/all') LIMIT 1"));
     $randomString = bin2hex(random_bytes(2));
     $username_ac = generateUsername($from_id, $setting['MethodUsername'], $username, $randomString,$text);
     update("user", "Processing_value_tow",$username_ac,"id",$from_id);
