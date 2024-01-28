@@ -1158,6 +1158,7 @@ elseif ($user['step'] == "payment" && $datain == "confirmandgetservice" || $data
     $stmt = $pdo->prepare("SELECT * FROM product WHERE code_product = :code AND (location = :loc1 OR location = '/all') LIMIT 1");
     $stmt->bindValue(':code', $user['Processing_value_one']);
     $stmt->bindValue(':loc1', $user['Processing_value']);
+    $stmt->execute();
     $info_product = $stmt->fetch(PDO::FETCH_ASSOC);
     if (empty($info_product['price_product']) || empty($info_product['price_product'])) return;
     if ($datain == "confirmandgetserviceDiscount") {
