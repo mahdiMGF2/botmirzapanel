@@ -253,7 +253,6 @@ if ($text == $datatextbot['text_Purchased_services'] || $datain == "backorder") 
     $start_index = ($page - 1) * $items_per_page;
     $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user ORDER BY username ASC LIMIT $start_index, $items_per_page");
     $stmt->bindParam(':id_user', $from_id);
-    $stmt->bindParam(':location', $location);
     $stmt->execute();
     $keyboardlists = [
         'inline_keyboard' => [],
