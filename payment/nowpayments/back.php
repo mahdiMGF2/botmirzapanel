@@ -1,7 +1,9 @@
 <?php
+ini_set('error_log', 'error_log');
 $NP_id = htmlspecialchars($_GET['NP_id'], ENT_QUOTES, 'UTF-8');
-$rootPath = filter_input(INPUT_SERVER, 'DOCUMENT_ROOT', FILTER_SANITIZE_STRING); 
-$Pathfile = dirname(dirname($_SERVER['PHP_SELF'], 2));
+$rootPath = filter_input(INPUT_SERVER, 'DOCUMENT_ROOT', FILTER_SANITIZE_STRING);
+$PHP_SELF = filter_input(INPUT_SERVER, 'PHP_SELF', FILTER_SANITIZE_STRING);
+$Pathfile = dirname(dirname($PHP_SELF, 2));
 $Pathfiles = $rootPath.$Pathfile;
 $Pathfile = $Pathfiles.'/config.php';
 $jdf = $Pathfiles.'/jdf.php';
