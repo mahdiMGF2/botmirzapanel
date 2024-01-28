@@ -1,4 +1,5 @@
 <?php
+ini_set('error_log', 'error_log');
 date_default_timezone_set('Asia/Tehran');
 require_once 'config.php';
 require_once 'botapi.php';
@@ -1634,7 +1635,7 @@ if ($user['step'] == "getvcodeuser") {
         }
         return;
     }
-        $Balance_id = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM user WHERE id = '$from_id' LIMIT 1"));
+        $Balance_id = select("user", "*", "id", $from_id,"select");
         $startTag = "<td>VOUCHER_AMOUNT</td><td>";
         $endTag = "</td>";
         $startPos = strpos($Voucher, $startTag) + strlen($startTag);
@@ -1659,7 +1660,7 @@ if ($user['step'] == "getvcodeuser") {
 if (preg_match('/Confirmpay_user_(\w+)_(\w+)/', $datain, $dataget)) {
     $id_payment = $dataget[1];
     $id_order = $dataget[2];
-    $Payment_report = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM Payment_report WHERE id_order = '$id_order' LIMIT 1"));
+    $Payment_report = select("Payment_report", "*", "id_order", $id_order,"select");
     if ($Payment_report['payment_Status'] == "paid") {
         telegram('answerCallbackQuery', array(
             'callback_query_id' => $callback_query_id,
@@ -1677,7 +1678,7 @@ if (preg_match('/Confirmpay_user_(\w+)_(\w+)/', $datain, $dataget)) {
             'show_alert' => true,
             'cache_time' => 5,
         ));
-        $Balance_id = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM user WHERE id = '{$Payment_report['id_user']}' LIMIT 1"));
+        $Balance_id = select("user", "*", "id", $Payment_report['id_user'],"select");
         $Balance_confrim = intval($Balance_id['Balance']) + intval($Payment_report['price']);
         update("user", "Balance",$Balance_confrim,"id",$Payment_report['id_user']);
         update("Payment_report", "payment_Status","paid","id_order",$Payment_report['id_order']);
@@ -1748,7 +1749,6 @@ if (preg_match('/Confirmpay_user_(\w+)_(\w+)/', $datain, $dataget)) {
             ]
         ]
     ]);
-    $Payment_report = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM Payment_report WHERE id_user = '$from_id' LIMIT 1"));
     $Processing_value = number_format($user['Processing_value']);
     $textsendrasid = "
             ⭕️ یک پرداخت جدید انجام شده است .
@@ -2709,8 +2709,8 @@ if ($text == "🔑 تنظیمات اکانت تست"  ) {
 #-------------------------#
 if (preg_match('/Confirm_pay_(\w+)/', $datain, $dataget) ) {
     $order_id = $dataget[1];
-    $Payment_report = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM Payment_report WHERE id_order = '$order_id' LIMIT 1"));
-    $Balance_id = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM user WHERE id = '{$Payment_report['id_user']}' LIMIT 1"));
+    $Payment_report = select("Payment_report", "*", "id_order", $id_order,"select");
+    $Balance_id = select("user", "*", "id", $Payment_report['id_user'],"select");
     if ($Payment_report['payment_Status'] == "paid" || $Payment_report['payment_Status'] == "reject") {
         telegram('answerCallbackQuery', array(
             'callback_query_id' => $callback_query_id,
@@ -2745,7 +2745,7 @@ if (preg_match('/Confirm_pay_(\w+)/', $datain, $dataget) ) {
 #-------------------------#
 if (preg_match('/reject_pay_(\w+)/', $datain, $datagetr)) {
     $id_order = $datagetr[1];
-    $Payment_report = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM Payment_report WHERE id_order = '$id_order' LIMIT 1"));
+    $Payment_report = select("Payment_report", "*", "id_order", $id_order,"select");
     update("user", "Processing_value",$Payment_report['id_user'],"id",$from_id);
     update("user", "Processing_value_one",$id_order,"id",$from_id);
     if ($Payment_report['payment_Status'] == "reject" || $Payment_report['payment_Status']  == "paid") {
@@ -2937,7 +2937,7 @@ elseif ($user['step'] == "get_price_add") {
         return;
     }
     sendmessage($from_id, $textbotlang['Admin']['Balance']['AddBalanceUser'], $User_Services, 'HTML');
-    $Balance_user = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM user WHERE id = '{$user['Processing_value']}' LIMIT 1"));
+    $Balance_user = select("user", "*", "id", $user['Processing_value'],"select");
     $Balance_add_user = $Balance_user['Balance'] + $text;
     update("user", "Balance",$Balance_add_user,"id",$user['Processing_value']);
     $text = number_format($text);
@@ -2965,7 +2965,7 @@ elseif ($user['step'] == "get_price_Negative") {
         return;
     }
     sendmessage($from_id, $textbotlang['Admin']['Balance']['NegativeBalanceUser'], $User_Services, 'HTML');
-    $Balance_user = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM user WHERE id = '{$user['Processing_value']}' LIMIT 1"));
+    $Balance_user = select("user", "*", "id", $user['Processing_value'],"select");
     $Balance_Low_user = $Balance_user['Balance'] - $text;
     update("user", "Balance",$Balance_Low_user,"id",$user['Processing_value']);
     $text = number_format($text);
@@ -3192,7 +3192,7 @@ if ($text == "❌ حذف سرویس کاربر"  ) {
 }
 elseif ($user['step'] == "removeservice") {
     $info_product = select("invoice", "*", "username", $text,"select");
-    $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$info_product['Service_location']}'"));
+    $marzban_list_get = select("marzban_panel", "*", "name_panel",$info_product['Service_location'],"select");
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
     $get_username_Check = getuser($text, $Check_token['access_token'], $marzban_list_get['url_panel']);
     if(isset($get_username_Check['status'])){
