@@ -1,6 +1,6 @@
 <?php
 $NP_id = htmlspecialchars($_GET['NP_id'], ENT_QUOTES, 'UTF-8');
-$rootPath = $_SERVER['DOCUMENT_ROOT'];
+$rootPath = filter_input(INPUT_SERVER, 'DOCUMENT_ROOT', FILTER_SANITIZE_STRING); 
 $Pathfile = dirname(dirname($_SERVER['PHP_SELF'], 2));
 $Pathfiles = $rootPath.$Pathfile;
 $Pathfile = $Pathfiles.'/config.php';
