@@ -17,10 +17,16 @@ foreach ($post_vars as $key) {
         $form_data[$key] = '';
     }
 }
-
+$tokenbot = filter_var($form_data['tokenbot'], FILTER_SANITIZE_STRING);
+$form_data['idbot'] = filter_var($form_data['idbot'], FILTER_SANITIZE_STRING);
+$form_data['dbname'] = filter_var($form_data['dbname'], FILTER_SANITIZE_STRING);
+$form_data['dbuser'] = filter_var($form_data['dbuser'], FILTER_SANITIZE_STRING);
+$form_data['dbpassword'] = filter_var($form_data['dbpassword'], FILTER_SANITIZE_STRING);
+$form_data['idadmin'] = filter_var($form_data['idadmin'], FILTER_VALIDATE_INT);
 $domain = $_SERVER['HTTP_HOST'];
 $path = dirname($_SERVER['REQUEST_URI'],2);
 $domain_hosts = $domain . $path;
+$domain_hosts = filter_var($domain_hosts, FILTER_SANITIZE_URL);
 $fileContent = file_get_contents('../config.php');
 // تغییر مقدار $idbot
 $patternidbot = '/\$usernamebot\s*=\s*".*?";/';
@@ -43,7 +49,7 @@ $newFileContent = preg_replace($patternpass, '$passworddb = "'.$form_data['dbpas
 
 // تغییر مقدار $API_KEY
 $patterntoken = '/\$APIKEY\s*=\s*".*?";/';
-$newFileContent = preg_replace($patterntoken, '$APIKEY = "'.$form_data['tokenbot'].'";', $newFileContent);
+$newFileContent = preg_replace($patterntoken, '$APIKEY = "'.$tokenbot.'";', $newFileContent);
 
 // تغییر مقدار $adminnumber
 $patternidadmin = '/\$adminnumber\s*=\s*".*?";/';
@@ -63,10 +69,10 @@ try {
 } catch (Exception $e) {
     $textdatabase = 'خطا در اتصال به پایگاه داده: ' . $e->getMessage();
 }
-$delete = json_decode(file_get_contents("https://api.telegram.org/bot{$form_data['tokenbot']}/deleteWebhook?drop_pending_updates=true"),true);
-$response = json_decode(file_get_contents("https://api.telegram.org/bot" . $form_data['tokenbot'] . "/setWebhook?url=https://" .$domain_hosts."/index.php" ),true);
+$delete = json_decode(file_get_contents("https://api.telegram.org/bot{$tokenbot}/deleteWebhook?drop_pending_updates=true"),true);
+$response = json_decode(file_get_contents("https://api.telegram.org/bot" . $tokenbot . "/setWebhook?url=https://" .$domain_hosts."/index.php" ),true);
 if($response['description'] == "Webhook was set"){
-            $sendmessage =file_get_contents("https://api.telegram.org/bot" . $form_data['tokenbot'] . "/sendMessage?chat_id=" . $form_data['idadmin'] . "&text=✅| ربات میرزا پنل با موفقیت نصب شد");
+            $sendmessage =file_get_contents("https://api.telegram.org/bot" . $tokenbot . "/sendMessage?chat_id=" . $form_data['idadmin'] . "&text=✅| ربات میرزا پنل با موفقیت نصب شد");
             $webhook = "ست وبهوک با موفقیت تنظیم شد";
         }
         elseif($response['description'] == "Webhook is already set"){
@@ -75,7 +81,7 @@ if($response['description'] == "Webhook was set"){
         else{
             $webhook = "ست وبهوک ربات با موفقتیت انجام نشد.";
         }
-   unlink('data.php');
+   //unlink('data.php');
 ?>
 
 <html>
