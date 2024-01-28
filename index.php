@@ -206,7 +206,10 @@ if ($setting['Bot_Status'] == "❌ ربات خاموش است" && !in_array($fro
 }
 #-----------/start------------#
 if ($text == "/start") {
-    unlink('install/data.php');
+    $file_path = 'install/data.php';
+    if (file_exists($file_path)) {
+    unlink($file_path);
+}
     sendmessage($from_id, $datatextbot['text_start'], $keyboard, 'html');
     step('home',$from_id);
     return;
