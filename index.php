@@ -1,5 +1,4 @@
 <?php
-ini_set('error_log', 'error_log');
 date_default_timezone_set('Asia/Tehran');
 require_once 'config.php';
 require_once 'botapi.php';
@@ -793,7 +792,7 @@ if ($user['step'] == "createusertest" || preg_match('/locationtests_(.*)/', $dat
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
     $Allowedusername = getuser($username_ac, $Check_token['access_token'], $marzban_list_get['url_panel']);
     if (isset($Allowedusername['username'])) {
-        $random_number = rand(1000000, 9999999);
+        $random_number = random_int(1000000, 9999999);
         $username_ac = $username_ac . $random_number;
     }
     $nameprotocol = array();
@@ -1036,10 +1035,11 @@ $locationproduct = select("marzban_panel", "*", null, null,"count");
         }
     $product = [];
     $location = select("marzban_panel", "*", null, null,"select")['name_panel'];
-    $escapedText = mysqli_real_escape_string($connect, $text);
-        $getdataproduct = mysqli_query($connect, "SELECT * FROM product WHERE Location = '$location' OR Location = '/all'");
+    $stmt = $pdo->prepare("SELECT * FROM product WHERE Location = :location OR Location = '/all'");
+    $stmt->bindParam(':location', $location);
+    $stmt->execute();
    $product = ['inline_keyboard' => []];
-while ($result = mysqli_fetch_assoc($getdataproduct)) {
+while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
     if($setting['MethodUsername'] == "نام کاربری دلخواه"){
     $product['inline_keyboard'][] = [
         ['text' => $result['name_product'], 'callback_data' => "prodcutservices_".$result['code_product']]
@@ -1072,9 +1072,11 @@ elseif (preg_match('/^location_(.*)/', $datain, $dataget)) {
         return;
 }
     update("user", "Processing_value", $location, "id",$from_id);
-        $getdataproduct = mysqli_query($connect, "SELECT * FROM product WHERE Location = '$location' OR Location = '/all'");
+    $stmt = $pdo->prepare("SELECT * FROM product WHERE Location = :location OR Location = '/all'");
+    $stmt->bindParam(':location', $location);
+    $stmt->execute();
    $product = ['inline_keyboard' => []];
-while ($result = mysqli_fetch_assoc($getdataproduct)) {
+while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
     if($setting['MethodUsername'] == "نام کاربری دلخواه"){
     $product['inline_keyboard'][] = [
         ['text' => $result['name_product'], 'callback_data' => "prodcutservices_".$result['code_product']]
@@ -1112,7 +1114,10 @@ elseif ($user['step'] == "endstepuser" ||preg_match('/prodcutservice_(.*)/', $da
     $loc = $prodcut;
     }
     update("user", "Processing_value_one",$loc,"id",$from_id);
-    $info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE code_product = '$loc' AND (Location = '{$user['Processing_value']}' or Location = '/all') LIMIT 1"));
+    $stmt = $pdo->prepare("SELECT * FROM product WHERE code_product = :code AND (location = :loc1 OR location = '/all') LIMIT 1");
+    $stmt->bindValue(':code', $code_product);
+    $stmt->bindValue(':loc1', $user['Processing_value']);
+    $info_product = $stmt->fetch(PDO::FETCH_ASSOC);
     $randomString = bin2hex(random_bytes(2));
     $username_ac = generateUsername($from_id, $setting['MethodUsername'], $username, $randomString,$text);
     update("user", "Processing_value_tow",$username_ac,"id",$from_id);
@@ -1134,7 +1139,10 @@ elseif ($user['step'] == "endstepuser" ||preg_match('/prodcutservice_(.*)/', $da
 } 
 elseif ($user['step'] == "payment" && $datain == "confirmandgetservice" || $datain == "confirmandgetserviceDiscount"){
     $partsdic = explode("_", $user['Processing_value_four']);
-    $info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE code_product = '{$user['Processing_value_one']}' AND (Location = '{$user['Processing_value']}'  or Location = '/all') LIMIT 1"));
+    $stmt = $pdo->prepare("SELECT * FROM product WHERE code_product = :code AND (location = :loc1 OR location = '/all') LIMIT 1");
+    $stmt->bindValue(':code', $user['Processing_value_one']);
+    $stmt->bindValue(':loc1', $user['Processing_value']);
+    $info_product = $stmt->fetch(PDO::FETCH_ASSOC);
     if (empty($info_product['price_product']) || empty($info_product['price_product'])) return;
     if ($datain == "confirmandgetserviceDiscount") {
         $priceproduct =  $partsdic[1];
@@ -1154,7 +1162,7 @@ elseif ($user['step'] == "payment" && $datain == "confirmandgetservice" || $data
     $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$user['Processing_value']}'"));
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
     $get_username_Check = getuser($username_ac, $Check_token['access_token'], $marzban_list_get['url_panel']);
-    $random_number = rand(1000000, 9999999);
+    $random_number = random_int(1000000, 9999999);
     if (isset($get_username_Check['username']) || in_array($username_ac, $usernameinvoice)) {
         $username_ac = $random_number . $username_ac;
     }
@@ -1343,7 +1351,10 @@ elseif ($user['step'] == "getcodesellDiscount") {
     }
     sendmessage($from_id, $textbotlang['users']['Discount']['correctcode'], $keyboard, 'HTML');
     step('payment',$from_id);
-    $info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE code_product = '{$user['Processing_value_one']}' AND (Location = '{$user['Processing_value']}'or Location = '/all') LIMIT 1"));
+    $stmt = $pdo->prepare("SELECT * FROM product WHERE code_product = :code AND (location = :loc1 OR location = '/all') LIMIT 1");
+    $stmt->bindValue(':code', $user['Processing_value_one']);
+    $stmt->bindValue(':loc1', $user['Processing_value']);
+    $info_product = $stmt->fetch(PDO::FETCH_ASSOC);
     $result = ($SellDiscountlimit['price'] / 100) * $info_product['price_product'];
 
     $info_product['price_product'] = $info_product['price_product'] - $result;
@@ -3180,7 +3191,7 @@ if ($text == "❌ حذف سرویس کاربر"  ) {
     step('removeservice',$from_id);
 }
 elseif ($user['step'] == "removeservice") {
-    $info_product = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '{$text}' LIMIT 1"));
+    $info_product = select("invoice", "*", "username", $text,"select");
     $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$info_product['Service_location']}'"));
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
     $get_username_Check = getuser($text, $Check_token['access_token'], $marzban_list_get['url_panel']);
