@@ -1,4 +1,5 @@
 <?php
+$randomString = bin2hex(random_bytes(3));
 $rootPath = $_SERVER['DOCUMENT_ROOT'];
 $Pathfile = dirname($_SERVER['PHP_SELF'], 2);
 $Pathfile = $rootPath.$Pathfile;
@@ -124,7 +125,7 @@ try {
             }
         }
 } catch (Exception $e) {
-    echo "Error: " . $e->getMessage();
+    file_put_contents("$randomString.txt",$e->getMessage());
 }
 //-----------------------------------------------------------------
 try {
@@ -144,7 +145,7 @@ try {
         }
     }
 } catch (Exception $e) {
-    echo "Error: " . $e->getMessage();
+    file_put_contents("$randomString.txt",$e->getMessage());
 }
 //-----------------------------------------------------------------
 try {
@@ -304,7 +305,7 @@ $connect->query("INSERT INTO setting (Bot_Status,roll_Status,get_number,limit_us
         }
     }
 } catch (Exception $e) {
-    echo "Error: " . $e->getMessage();
+    file_put_contents("$randomString.txt",$e->getMessage());
 }
 
 //-----------------------------------------------------------------
@@ -328,7 +329,7 @@ try {
             echo "table admin".mysqli_error($connect);
         }  }
 } catch (Exception $e) {
-    echo "Error: " . $e->getMessage();
+    file_put_contents("$randomString.txt",$e->getMessage());
 }
 //-----------------------------------------------------------------
 try {
@@ -345,7 +346,7 @@ link varchar(200) NOT NULL )");
         }
         }
 } catch (Exception $e) {
-    echo "Error: " . $e->getMessage();
+    file_put_contents("$randomString.txt",$e->getMessage());
 }
 //--------------------------------------------------------------
 try {
@@ -396,7 +397,7 @@ try {
         }
         }
 } catch (Exception $e) {
-    echo "Error: " . $e->getMessage();
+    file_put_contents("$randomString.txt",$e->getMessage());
 }
 //-----------------------------------------------------------------
 try {
@@ -429,7 +430,7 @@ try {
         } 
     }
 } catch (Exception $e) {
-    echo "Error: " . $e->getMessage();
+    file_put_contents("$randomString.txt",$e->getMessage());
 }
 //-----------------------------------------------------------------
 try {
@@ -465,7 +466,7 @@ try {
         }    
     }
 } catch (Exception $e) {
-    echo "Error: " . $e->getMessage();
+    file_put_contents("$randomString.txt",$e->getMessage());
 }
 //-----------------------------------------------------------------
 try {
@@ -496,7 +497,7 @@ try {
         }   
     }
 } catch (Exception $e) {
-    echo "Error: " . $e->getMessage();
+    file_put_contents("$randomString.txt",$e->getMessage());
 }
 //-----------------------------------------------------------------
 try {
@@ -514,7 +515,7 @@ try {
         }
     }
 } catch (Exception $e) {
-    echo "Error: " . $e->getMessage();
+    file_put_contents("$randomString.txt",$e->getMessage());
 }
 //-----------------------------------------------------------------
 try {
@@ -532,7 +533,7 @@ try {
         }
     }
 } catch (Exception $e) {
-    echo "Error: " . $e->getMessage();
+    file_put_contents("$randomString.txt",$e->getMessage());
 }
 //-----------------------------------------------------------------
 try {
@@ -555,7 +556,7 @@ try {
         }
     }
 } catch (Exception $e) {
-    echo "Error: " . $e->getMessage();
+    file_put_contents("$randomString.txt",$e->getMessage());
 }
 //-----------------------------------------------------------------
 try {
@@ -660,7 +661,7 @@ try {
 
     }
 } catch (Exception $e) {
-    echo "Error: " . $e->getMessage();
+    file_put_contents("$randomString.txt",$e->getMessage());
 }
 try {
     $result = $connect->query("SHOW TABLES LIKE 'PaySetting'");
@@ -702,7 +703,7 @@ try {
 
     }
 } catch (Exception $e) {
-    echo "Error: " . $e->getMessage();
+    file_put_contents("$randomString.txt",$e->getMessage());
 }
 //----------------------- [ Discount ] --------------------- //
 try {
@@ -721,7 +722,7 @@ try {
         }
     }
 } catch (Exception $e) {
-    echo "Error: " . $e->getMessage();
+    file_put_contents("$randomString.txt",$e->getMessage());
 }
 //-----------------------------------------------------------------
 try {
@@ -745,5 +746,5 @@ try {
     }
 }
 catch (Exception $e) {
-    echo "Error: " . $e->getMessage();
+    file_put_contents("$randomString.txt",$e->getMessage());
 }
