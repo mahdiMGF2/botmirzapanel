@@ -1,5 +1,6 @@
 <?php
 include('config.php');
+require_once 'functions.php';
 #-----------------------------#
 function token_panel($url_panel,$username_panel,$password_panel){
     $url_get_token = $url_panel.'/api/admin/token';
@@ -164,7 +165,7 @@ curl_close($ch);
 function revoke_sub($username,$location)
 {
     global $connect;
-    $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '$location'"));
+    $marzban_list_get = select("marzban_panel", "name_panel", "name_panel", $location,"select");
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
     $usernameac = $username;
     $url =  $marzban_list_get['url_panel'].'/api/user/' . $usernameac.'/revoke_sub';
@@ -197,7 +198,7 @@ function formatBytes($bytes, $precision = 2): string
 function generateUsername($from_id,$Metode,$username,$randomString,$text)
 {
     global $connect;
-    $setting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM setting"));
+    $setting = select("setting", "*");
     global $connect;
     if($Metode == "آیدی عددی + حروف و عدد رندوم"){
         return $from_id."_".$randomString;
