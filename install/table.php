@@ -1,10 +1,6 @@
 <?php
 $randomString = bin2hex(random_bytes(3));
-$rootPath = $_SERVER['DOCUMENT_ROOT'];
-$Pathfile = dirname($_SERVER['PHP_SELF'], 2);
-$Pathfile = $rootPath.$Pathfile;
-$Pathfile = $Pathfile.'/config.php';
-require_once $Pathfile;
+require_once '../config.php';
 global $connect;
 //-----------------------------------------------------------------
 try {
