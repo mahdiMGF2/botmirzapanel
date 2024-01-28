@@ -1,4 +1,7 @@
 <?php
+ini_set('error_log', 'error_log');
+
+
 date_default_timezone_set('Asia/Tehran');
 require_once 'config.php';
 require_once 'botapi.php';
@@ -1126,9 +1129,10 @@ elseif ($user['step'] == "endstepuser" ||preg_match('/prodcutservice_(.*)/', $da
     $loc = $prodcut;
     }
     update("user", "Processing_value_one",$loc,"id",$from_id);
-    $stmt = $pdo->prepare("SELECT * FROM product WHERE code_product = :code AND (location = :loc1 OR location = '/all') LIMIT 1");
-    $stmt->bindValue(':code', $code_product);
+    $stmt = $pdo->prepare("SELECT * FROM product WHERE code_product = :code_product AND (location = :loc1 OR location = '/all') LIMIT 1");
+    $stmt->bindValue(':code_product', $loc);
     $stmt->bindValue(':loc1', $user['Processing_value']);
+    $stmt->execute();
     $info_product = $stmt->fetch(PDO::FETCH_ASSOC);
     $randomString = bin2hex(random_bytes(2));
     $username_ac = generateUsername($from_id, $setting['MethodUsername'], $username, $randomString,$text);
@@ -2709,7 +2713,7 @@ if ($text == "🔑 تنظیمات اکانت تست"  ) {
 #-------------------------#
 if (preg_match('/Confirm_pay_(\w+)/', $datain, $dataget) ) {
     $order_id = $dataget[1];
-    $Payment_report = select("Payment_report", "*", "id_order", $id_order,"select");
+    $Payment_report = select("Payment_report", "*", "id_order", $order_id,"select");
     $Balance_id = select("user", "*", "id", $Payment_report['id_user'],"select");
     if ($Payment_report['payment_Status'] == "paid" || $Payment_report['payment_Status'] == "reject") {
         telegram('answerCallbackQuery', array(
