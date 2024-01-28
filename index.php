@@ -248,11 +248,14 @@ if ($text == $datatextbot['text_Purchased_services'] || $datain == "backorder") 
     $page = 1;
     $items_per_page = 5;
     $start_index = ($page - 1) * $items_per_page;
-    $result = mysqli_query($connect, "SELECT * FROM invoice WHERE id_user = '$from_id' ORDER BY username ASC LIMIT $start_index, $items_per_page");
+    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user ORDER BY username ASC LIMIT $start_index, $items_per_page");
+    $stmt->bindParam(':id_user', $from_id);
+    $stmt->bindParam(':location', $location);
+    $stmt->execute();
     $keyboardlists = [
         'inline_keyboard' => [],
     ];
-    while ($row = mysqli_fetch_assoc($result)) {
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $keyboardlists['inline_keyboard'][] = [
             [
                 'text' => "⭕️" . $row['username'] . "⭕️",
@@ -367,11 +370,14 @@ if ($datain == 'next_page') {
         $next_page = $page + 1;
     }
     $start_index = ($next_page - 1) * $items_per_page;
-    $result = mysqli_query($connect, "SELECT * FROM invoice WHERE id_user = '$from_id'  LIMIT $start_index, $items_per_page");
+    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user ORDER BY username ASC LIMIT $start_index, $items_per_page");
+    $stmt->bindParam(':id_user', $from_id);
+    $stmt->bindParam(':location', $location);
+    $stmt->execute();
     $keyboardlists = [
         'inline_keyboard' => [],
     ];
-    while ($row = mysqli_fetch_assoc($result)) {
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $keyboardlists['inline_keyboard'][] = [
             [
                 'text' => "⭕️" . $row['username'] . "⭕️",
@@ -402,11 +408,14 @@ if ($datain == 'next_page') {
         $next_page = $page - 1;
     }
     $start_index = ($next_page - 1) * $items_per_page;
-    $result = mysqli_query($connect, "SELECT * FROM invoice WHERE id_user = '$from_id'  LIMIT $start_index, $items_per_page");
+    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user ORDER BY username ASC LIMIT $start_index, $items_per_page");
+    $stmt->bindParam(':id_user', $from_id);
+    $stmt->bindParam(':location', $location);
+    $stmt->execute();
     $keyboardlists = [
         'inline_keyboard' => [],
     ];
-    while ($row = mysqli_fetch_assoc($result)) {
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $keyboardlists['inline_keyboard'][] = [
             [
                 'text' => "⭕️" . $row['username'] . "⭕️",
@@ -1160,7 +1169,7 @@ elseif ($user['step'] == "payment" && $datain == "confirmandgetservice" || $data
     $username_ac = $user['Processing_value_tow'];
     $date = jdate('Y/m/d');
     $randomString = bin2hex(random_bytes(2));
-    $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$user['Processing_value']}'"));
+    $marzban_list_get = select("marzban_panel", "*", "name_panel", $user['Processing_value'],"select");
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
     $get_username_Check = getuser($username_ac, $Check_token['access_token'], $marzban_list_get['url_panel']);
     $random_number = random_int(1000000, 9999999);
@@ -1216,7 +1225,7 @@ if(isset($nameprotocol['vless']) && $setting['flow'] == "flowon"){
         return;
     }
     if ($datain == "confirmandgetserviceDiscount") {
-        $SellDiscountlimit = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM DiscountSell WHERE codeDiscount = '{$partsdic[0]}'"));
+        $SellDiscountlimit = select("DiscountSell", "*", "codeDiscount", $partsdic[0],"select");
         $value = intval($SellDiscountlimit['usedDiscount']) + 1;
         update("DiscountSell", "usedDiscount",$value,"codeDiscount",$partsdic[0]);
         $text_report = "⭕️ یک کاربر با نام کاربری @$username  و آیدی عددی $from_id از کد تخفیف {$partsdic[0]} استفاده کرد.";
@@ -1228,7 +1237,7 @@ if(isset($nameprotocol['vless']) && $setting['flow'] == "flowon"){
     if ($affiliatescommission['status_commission'] == "oncommission" &&($user['affiliates'] !== null || $user['affiliates'] != "0")) {
         $affiliatescommission = select("affiliates", "*", null, null,"select");
         $result = ($priceproduct * $affiliatescommission['affiliatespercentage']) / 100;
-        $user_Balance = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM user WHERE id = '{$user['affiliates']}'"));
+        $user_Balance = select("user", "*", "id", $user['affiliates'],"select");
         $Balance_prim = $user_Balance['Balance'] + $result;
         update("user", "Balance",$Balance_prim,"id",$user['affiliates']);
         $result = number_format($result);
@@ -1327,25 +1336,12 @@ elseif ($user['step'] == "getcodesellDiscount") {
         sendmessage($from_id, $textbotlang['users']['Discount']['notcode'], $backuser, 'HTML');
         return;
     }
-    $stmt = mysqli_prepare($connect, "SELECT * FROM DiscountSell WHERE codeDiscount =  ?");
-    mysqli_stmt_bind_param($stmt, "s", $text);
-    mysqli_stmt_execute($stmt);
-    $SellDiscountlimit = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
-    mysqli_stmt_close($stmt);
-    if ($SellDiscountlimit === null) {
+    $SellDiscountlimit = select("DiscountSell", "*", "codeDiscount",$text,"select");
+    if ($SellDiscountlimit == false) {
         sendmessage($from_id, $textbotlang['Admin']['Discount']['invalidcodedis'], null, 'HTML');
         return;
     }
-    $stmt = mysqli_prepare($connect, "SELECT * FROM DiscountSell WHERE codeDiscount =  ?");
-    mysqli_stmt_bind_param($stmt, "s", $text);
-    mysqli_stmt_execute($stmt);
-    $SellDiscountlimit = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
-    mysqli_stmt_close($stmt);
-    $stmt = mysqli_prepare($connect, "SELECT * FROM DiscountSell WHERE codeDiscount =  ?");
-    mysqli_stmt_bind_param($stmt, "s", $text);
-    mysqli_stmt_execute($stmt);
-    $SellDiscountlimit = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
-    mysqli_stmt_close($stmt);
+    $SellDiscountlimit = select("DiscountSell", "*", "codeDiscount",$text,"select");
     if ($SellDiscountlimit['limitDiscount'] == $SellDiscountlimit['usedDiscount']) {
         sendmessage($from_id, $textbotlang['users']['Discount']['erorrlimit'], null, 'HTML');
         return;
@@ -1781,9 +1777,12 @@ if ($datain == "Discount") {
         sendmessage($from_id, $textbotlang['users']['Discount']['notcode'], null, 'HTML');
         return;
     }
-    $Checkcodesql = mysqli_query($connect, "SELECT * FROM Giftcodeconsumed WHERE id_user = '$from_id'");
+    
+    $stmt = $pdo->prepare("SELECT * FROM Giftcodeconsumed WHERE id_user = :id_user");
+    $stmt->bindParam(':id_user', $from_id);
+    $stmt->execute();
     $Checkcode = [];
-    while ($row = mysqli_fetch_assoc($Checkcodesql)) {
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $Checkcode[] = $row['code'];
     }
     if (in_array($text, $Checkcode)) {
@@ -1793,10 +1792,11 @@ if ($datain == "Discount") {
     }
     $balance_user = $user['Balance'] + $get_codesql['price'];
     update("user", "Balance",$balance_user,"id",$from_id);
-    $stmt = mysqli_prepare($connect, "SELECT * FROM Discount WHERE code =  ?");
-    mysqli_stmt_bind_param($stmt, "s", $text);
-    mysqli_stmt_execute($stmt);
-    $get_codesql = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+    $stmt = $pdo->prepare("SELECT * FROM Discount WHERE code = :code");
+    $stmt->bindParam(':code', $text);
+    $stmt->bindParam(':location', $location);
+    $stmt->execute();
+    $get_codesql = $stmt->fetch(PDO::FETCH_ASSOC);
     mysqli_stmt_close($stmt);
     step('home',$from_id);
     number_format($get_codesql['price']);
@@ -1975,7 +1975,9 @@ if ($text == "📊 آمار ربات" ) {
     $timeacc = jdate('H:i:s', $one_hour_later); 
     $dayListSell =  select("invoice", "*", 'time_sell', $date,"count");
     $count_usertest =  select("TestAccount", "*", null, null,"count");
-    $Balanceall =  mysqli_fetch_assoc(mysqli_query($connect, "SELECT SUM(Balance) FROM user"));
+    $stmt = $pdo->prepare("SELECT SUM(Balance) FROM user");
+    $stmt->execute();
+    $Balanceall = $stmt->fetch(PDO::FETCH_ASSOC);
     $statistics =  select("user", "id", null, null,"count");
     $invoice =  select("invoice", "*", null, null,"count");
     $ping = sys_getloadavg();
@@ -2023,7 +2025,7 @@ if ($text == "🔌 وضعیت پنل"  ) {
     step('get_panel',$from_id);
 }
 elseif ($user['step'] == "get_panel") {
-    $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '$text' LIMIT 1"));
+    $marzban_list_get = select("marzban_panel", "*", "name_panel",$text,"select");
     ini_set('max_execution_time', 1);
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
     if (isset($Check_token['access_token'])) {
@@ -2494,9 +2496,7 @@ if ($text == "🔒 مسدود کردن کاربر" ) {
         sendmessage($from_id, $textbotlang['Admin']['not-user'], $backadmin, 'HTML');
         return;
     }
-    $query = sprintf("SELECT * FROM user WHERE id = '%d' LIMIT 1", $text);
-    $result = mysqli_query($connect, $query);
-    $userblock = mysqli_fetch_assoc($result);
+    $userblock = select("user", "*", "id",$text,"select");
     if ($userblock['User_Status'] == "block") {
         sendmessage($from_id, $textbotlang['Admin']['ManageUser']['BlockedUser'], $backadmin, 'HTML');
         return;
@@ -2517,9 +2517,7 @@ if ($text == "🔒 مسدود کردن کاربر" ) {
         sendmessage($from_id, $textbotlang['Admin']['not-user'], $backadmin, 'HTML');
         return;
     }
-    $query = sprintf("SELECT * FROM user WHERE id = '%d' LIMIT 1", $text);
-    $result = mysqli_query($connect, $query);
-    $userunblock = mysqli_fetch_assoc($result);
+    $userunblock = select("user", "*", "id",$text,"select");
     if ($userunblock['User_Status'] == "Active") {
         sendmessage($from_id, $textbotlang['Admin']['ManageUser']['UserNotBlock'], $backadmin, 'HTML');
         return;
@@ -2572,7 +2570,7 @@ elseif ($text == "📊 وضعیت تایید شماره کاربر" ) {
         sendmessage($from_id, $textbotlang['Admin']['not-user'], $backadmin, 'HTML');
         return;
     }
-    $user_phone_status = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM user WHERE id = '$text' LIMIT 1"));
+    $user_phone_status = select("user", "*", "id",$text,"select");
     if ($user_phone_status['number'] == "none") {
         sendmessage($from_id, $textbotlang['Admin']['phone']['notactive'], $User_Services, 'HTML');
     } else {
@@ -2609,7 +2607,7 @@ elseif ($user['step'] == "get_number_admin") {
         sendmessage($from_id, $textbotlang['Admin']['not-user'], $backadmin, 'HTML');
         return;
     }
-    $user_phone_number = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM user WHERE id = '$text' LIMIT 1"));
+    $user_phone_number = select("user", "*", "id",$text,"select");
     step('home',$from_id);
     if ($user_phone_number['number'] == "none") {
         sendmessage($from_id, $textbotlang['Admin']['phone']['NotSend'], $User_Services, 'HTML');
@@ -2983,7 +2981,7 @@ elseif ($user['step'] == "show_info") {
         sendmessage($from_id, $textbotlang['Admin']['not-user'], $backadmin, 'HTML');
         return;
     }
-    $user = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM user WHERE id = '$text' LIMIT 1"));
+    $user = select("user", "*", "id",$text,"select");
     $roll_Status = [
         '1' => $textbotlang['Admin']['ManageUser']['Acceptedphone'],
         '0' => $textbotlang['Admin']['ManageUser']['Failedphone'],
