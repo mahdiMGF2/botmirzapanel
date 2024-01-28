@@ -170,7 +170,8 @@ if($datain == "confirmchannel"){
     }
         return;
 }
-if ($channels !== false) {
+if ($channels == false) {
+    unset($channels);
     $channels['Channel_lock'] = "off";
     $channels['link'] = $textbotlang['users']['channel']['link'];
 }
@@ -294,7 +295,7 @@ if ($user['step'] == "getusernameinfo") {
     step('getdata',$from_id);
 } elseif (preg_match('/locationnotuser_(.*)/', $datain, $dataget)) {
     $location = $dataget[1];
-    $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '$location'"));
+    $marzban_list_get = select("marzban_panel", "name_panel", "name_panel", $location,"count");
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
     $data_useer = getuser($user['Processing_value'], $Check_token['access_token'], $marzban_list_get['url_panel']);
     if ($data_useer['detail'] == "User not found") {
@@ -356,11 +357,11 @@ if ($user['step'] == "getusernameinfo") {
     step('home',$from_id);
 }
 if ($datain == 'next_page') {
-    $numpage =  mysqli_fetch_assoc(mysqli_query($connect, "SELECT COUNT(id_user) FROM invoice WHERE id_user = '$from_id'"));
+    $numpage =  select("invoice", "id_user", "id_user", $from_id,"count");
     $page = $user['pagenumber'];
     $items_per_page  = 5;
     $sum = $user['pagenumber'] * $items_per_page;
-    if ($sum > $numpage['COUNT(id_user)']) {
+    if ($sum > $numpage) {
         $next_page = 1;
     } else {
         $next_page = $page + 1;
@@ -430,8 +431,8 @@ if ($datain == 'next_page') {
 }
 if (preg_match('/product_(\w+)/', $datain, $dataget)) {
     $username = $dataget[1];
-    $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '$username'"));
-    $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$nameloc['Service_location']}'"));
+    $nameloc = select("invoice", "*", "username", $username,"select");
+    $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'],"select");
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
     $data_useer = getuser($username, $Check_token['access_token'], $marzban_list_get['url_panel']);
     if ($data_useer['detail'] == "User not found" || !isset($data_useer['status'])) {
@@ -492,8 +493,8 @@ if (preg_match('/product_(\w+)/', $datain, $dataget)) {
 }
 if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
     $username = $dataget[1];
-    $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '$username'"));
-    $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$nameloc['Service_location']}'"));
+    $nameloc = select("invoice", "*", "username", $username,"select");
+    $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'],"select");
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
     $data_useer = getuser($username, $Check_token['access_token'], $marzban_list_get['url_panel']);
     $subscriptionurl = $data_useer['subscription_url'];
@@ -508,8 +509,8 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
 }
 elseif (preg_match('/config_(\w+)/', $datain, $dataget)) {
     $username = $dataget[1];
-    $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '$username'"));
-    $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$nameloc['Service_location']}'"));
+    $nameloc = select("invoice", "*", "username", $username,"select");
+    $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'],"select");
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
     $data_useer = getuser($username, $Check_token['access_token'], $marzban_list_get['url_panel']);
     foreach ($data_useer['links'] as $configs) {
@@ -522,8 +523,8 @@ elseif (preg_match('/config_(\w+)/', $datain, $dataget)) {
 }
 elseif (preg_match('/extend_(\w+)/', $datain, $dataget)) {
     $username = $dataget[1];
-    $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '$username'"));
-    $prodcut = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE name_product = '{$nameloc['name_product']}'"));
+    $nameloc = select("invoice", "*", "username", $username,"select");
+    $prodcut = select("product", "*", "name_product", $nameloc['name_product'],"select");
     if(!isset($prodcut['price_product'])){
             sendmessage($from_id,$textbotlang['users']['extend']['error'], null, 'HTML');
             return;
@@ -553,8 +554,8 @@ elseif (preg_match('/extend_(\w+)/', $datain, $dataget)) {
 }
 elseif (preg_match('/confirmserivce_(\w+)/', $datain, $dataget) && $user['step'] == "confirmextend") {
     $usernamepanel = $dataget[1];
-    $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '$usernamepanel'"));
-    $prodcut = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM product WHERE name_product = '{$nameloc['name_product']}'"));
+    $nameloc = select("invoice", "*", "username", $usernamepanel,"select");
+    $prodcut = select("product", "*", "name_product", $nameloc['name_product'],"select");
         if($user['Balance'] < $prodcut['price_product']){
     $Balance_prim = $prodcut['price_product'] - $user['Balance'];
     update("user", "Processing_value", $Balance_prim, "id",$from_id);
@@ -564,7 +565,7 @@ elseif (preg_match('/confirmserivce_(\w+)/', $datain, $dataget) && $user['step']
         }
     $Balance_Low_user = $user['Balance'] - $prodcut['price_product'];
     update("user", "Balance", $Balance_Low_user, "id",$from_id);
-    $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$nameloc['Service_location']}'"));
+    $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'],"select");
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
     $data_useer = getuser($usernamepanel, $Check_token['access_token'], $marzban_list_get['url_panel']);
     ResetUserDataUsage($usernamepanel, $Check_token['access_token'], $marzban_list_get['url_panel']);
@@ -605,7 +606,7 @@ elseif (preg_match('/confirmserivce_(\w+)/', $datain, $dataget) && $user['step']
 }
 elseif (preg_match('/changelink_(\w+)/', $datain, $dataget)) {
     $username = $dataget[1];
-    $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '$username'"));
+    $nameloc = select("invoice", "*", "username", $username,"select");
             $keyboardextend = json_encode([
         'inline_keyboard' => [
             [
@@ -617,8 +618,8 @@ elseif (preg_match('/changelink_(\w+)/', $datain, $dataget)) {
 }
 elseif (preg_match('/confirmchange_(\w+)/', $datain, $dataget)) {
     $usernameconfig = $dataget[1];
-    $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '$usernameconfig'"));
-    $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$nameloc['Service_location']}'"));
+    $nameloc = select("invoice", "*", "username", $usernameconfig,"select");
+    $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'],"select");
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
     $Allowedusername = getuser($username, $Check_token['access_token'], $marzban_list_get['url_panel']);
     $nameprotocol = array();
@@ -652,8 +653,8 @@ $datam = array(
 }
 elseif (preg_match('/qrcodelink_(\w+)/', $datain, $dataget)) {
     $username = $dataget[1];
-    $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '$username'"));
-    $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$nameloc['Service_location']}'"));
+    $nameloc = select("invoice", "*", "username", $username,"select");
+    $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'],"select");
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
     $data_useer = getuser($username, $Check_token['access_token'], $marzban_list_get['url_panel']);
     $subscriptionurl = $data_useer['subscription_url'];
@@ -706,7 +707,7 @@ elseif($user['step'] == "getvolumeextra"){
 }
 elseif (preg_match('/confirmaextra_(\w+)/', $datain, $dataget)) {
     $volume = $dataget[1];
-    $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '{$user['Processing_value']}'"));
+    $nameloc = select("invoice", "*", "username", $user['Processing_value'],"select");
         if($user['Balance'] <$volume){
     $Balance_prim = $volume - $user['Balance'];
     update("user", "Processing_value", $Balance_prim, "id",$from_id);
@@ -717,7 +718,7 @@ elseif (preg_match('/confirmaextra_(\w+)/', $datain, $dataget)) {
     deletemessage($from_id, $message_id);
     $Balance_Low_user = $user['Balance'] - $volume;
     update("user", "Balance", $Balance_Low_user, "id",$from_id);
-    $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$nameloc['Service_location']}'"));
+    $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'],"select");
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
     $data_useer = getuser($user['Processing_value'], $Check_token['access_token'], $marzban_list_get['url_panel']);
     $data_limit = $data_useer['data_limit'] + ($volume/$setting['Extra_volume'] *  pow(1024, 3));
@@ -748,8 +749,8 @@ elseif (preg_match('/confirmaextra_(\w+)/', $datain, $dataget)) {
 
 #-----------usertest------------#
 if ($text == $datatextbot['text_usertest']) {
-    $locationproduct = mysqli_query($connect, "SELECT * FROM marzban_panel");
-    if (mysqli_num_rows($locationproduct) == 0) {
+    $locationproduct = select("marzban_panel", "*", null, null,"count");
+    if ($locationproduct == 0) {
     sendmessage($from_id, $textbotlang['Admin']['managepanel']['nullpanel'], null, 'HTML');
     return;
 }
@@ -788,7 +789,7 @@ if ($user['step'] == "createusertest" || preg_match('/locationtests_(.*)/', $dat
         }
     $randomString = bin2hex(random_bytes(2));
     $username_ac = generateUsername($from_id, $setting['MethodUsername'], $user['username'], $randomString,$text);
-    $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '$name_panel'"));
+    $marzban_list_get = select("marzban_panel", "*", "name_panel", $name_panel,"select");
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
     $Allowedusername = getuser($username_ac, $Check_token['access_token'], $marzban_list_get['url_panel']);
     if (isset($Allowedusername['username'])) {
@@ -934,10 +935,7 @@ if ($text == $datatextbot['text_help'] || $datain == "helpbtn") {
     sendmessage($from_id, $textbotlang['users']['selectoption'], $json_list_help, 'HTML');
     step('sendhelp',$from_id);
 } elseif ($user['step'] == "sendhelp") {
-   $stmt = mysqli_prepare($connect, "SELECT * FROM help WHERE name_os = ?");
-   mysqli_stmt_bind_param($stmt, "s", $text);
-   mysqli_stmt_execute($stmt);
-   $helpdata = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+   $helpdata = select("help", "*", "name_os", $text,"select");
    mysqli_stmt_close($stmt);
     if (strlen($helpdata['Media_os']) != 0) {
         if ($helpdata['type_Media_os'] == "video") {
@@ -1004,14 +1002,14 @@ $current_time = time();
     $timeacc = jdate('H:i:s', $one_hour_later); if ($text == $datatextbot['text_account']) {
     $first_name = htmlspecialchars($first_name);
     $Balanceuser = number_format($user['Balance'], 0);
-    $countorder =  mysqli_fetch_assoc(mysqli_query($connect, "SELECT COUNT(id_user) FROM invoice WHERE id_user = '$from_id'"));
+    $countorder =  select("invoice", "id_user", 'id_user', $from_id,"count");
     $text_account = "
 👨🏻‍💻 وضعیت حساب کاربری شما:
         
 👤 نام: $first_name
 🕴🏻 شناسه کاربری: <code>$from_id</code>
 💰 موجودی: $Balanceuser تومان
-🛍 تعداد سرویس های خریداری شده : {$countorder['COUNT(id_user)']}
+🛍 تعداد سرویس های خریداری شده : $countorder
 🤝 تعداد زیر مجموعه های شما : {$user['affiliatescount']} نفر
 
 📆 $dateacc → ⏰ $timeacc
@@ -1019,8 +1017,8 @@ $current_time = time();
     sendmessage($from_id, $text_account, $keyboardPanel, 'HTML');
 }
 if ($text == $datatextbot['text_sell']) {
-$locationproduct = mysqli_query($connect, "SELECT * FROM marzban_panel");
-if (mysqli_num_rows($locationproduct) == 0) {
+$locationproduct = select("marzban_panel", "*", null, null,"count");
+    if ($locationproduct == 0) {
     sendmessage($from_id, $textbotlang['Admin']['managepanel']['nullpanel'], null, 'HTML');
     return;
 }
@@ -1030,14 +1028,14 @@ if (mysqli_num_rows($locationproduct) == 0) {
     }
     if ($user['number'] == "none" && $setting['get_number'] == "✅ تایید شماره موبایل روشن است") return;
     #-----------------------#
-        if (mysqli_num_rows($locationproduct) == 1) {
-        $nullproduct = mysqli_query($connect, "SELECT * FROM product");
-        if (mysqli_num_rows($nullproduct) == 0) {
+        if ($locationproduct == 1) {
+        $nullproduct = select("product", "*", null, null,"count");
+        if ($nullproduct == 0) {
             sendmessage($from_id, $textbotlang['Admin']['Product']['nullpProduct'], null, 'HTML');
             return;
         }
     $product = [];
-    $location = mysqli_fetch_assoc($locationproduct)['name_panel'];
+    $location = select("marzban_panel", "*", null, null,"select")['name_panel'];
     $escapedText = mysqli_real_escape_string($connect, $text);
         $getdataproduct = mysqli_query($connect, "SELECT * FROM product WHERE Location = '$location' OR Location = '/all'");
    $product = ['inline_keyboard' => []];
@@ -1068,8 +1066,8 @@ $product['inline_keyboard'][] = [
 } 
 elseif (preg_match('/^location_(.*)/', $datain, $dataget)) {
     $location = $dataget[1];
-    $nullproduct = mysqli_query($connect, "SELECT * FROM product");
-    if (mysqli_num_rows($nullproduct) == 0) {
+    $nullproduct = select("product", "*", null, null,"count");
+    if ($nullproduct == 0) {
         sendmessage($from_id, $textbotlang['Admin']['Product']['nullpProduct'], null, 'HTML');
         return;
 }
@@ -1391,7 +1389,7 @@ if ($text == $datatextbot['text_Add_Balance']) {
     step('get_step_payment',$from_id);
 } elseif ($user['step'] == "get_step_payment") {
     if ($datain == "cart_to_offline") {
-$PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'CartDescription'"))['ValuePay'];
+$PaySetting = select("PaySetting", "ValuePay", "NamePay", "CartDescription","select")['ValuePay'];
 $Processing_value = number_format($user['Processing_value']);
 $textcart = "برای افزایش موجودی به صورت دستی، مبلغ $Processing_value  تومان  را به شماره‌ی حساب زیر واریز کنید 👇🏻
 
@@ -1806,7 +1804,7 @@ if($datain == "colselist"){
     sendmessage($from_id, $textbotlang['users']['back'], $keyboard, 'HTML');
 }
 if ($text == "👥 زیر مجموعه گیری") {
-    $affiliatesvalue = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM affiliates"))['affiliatesstatus'];
+    $affiliatesvalue = select("affiliates", "*", null, null,"select")['affiliatesstatus'];
     if ($affiliatesvalue == "offaffiliates") {
         sendmessage($from_id, $textbotlang['users']['affiliates']['offaffiliates'], $keyboard, 'HTML');
         return;
@@ -1891,11 +1889,8 @@ elseif ($text == "📣 تنظیم کانال جوین اجباری") {
 elseif ($user['step'] == "addchannel") {
     sendmessage($from_id, $textbotlang['Admin']['channel']['setchannel'], $channelkeyboard, 'HTML');
     step('home',$from_id);
-    $stmt = $connect->prepare("SELECT COUNT(link) FROM channels");
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $channels_ch = $result->fetch_array(MYSQLI_NUM);
-    if ($channels_ch[0] == 0) {
+    $channels_ch = select("channels", "link", null, null,"count");
+    if ($channels_ch == 0) {
         $stmt = $connect->prepare("INSERT INTO channels (link,Channel_lock) VALUES (?,?)");
         $Channel_lock = 'off';
         $stmt->bind_param("ss", $text, $Channel_lock);
@@ -1967,21 +1962,21 @@ if ($text == "📊 آمار ربات" ) {
     $current_time = time();
     $one_hour_later = strtotime('-1 hour', $current_time); 
     $timeacc = jdate('H:i:s', $one_hour_later); 
-    $dayListSell =  mysqli_fetch_assoc(mysqli_query($connect, "SELECT COUNT(*) FROM invoice WHERE time_sell = '$date'"));
-    $count_usertest =  mysqli_fetch_assoc(mysqli_query($connect, "SELECT COUNT(*) FROM TestAccount"));
+    $dayListSell =  select("invoice", "*", 'time_sell', $date,"count");
+    $count_usertest =  select("TestAccount", "*", null, null,"count");
     $Balanceall =  mysqli_fetch_assoc(mysqli_query($connect, "SELECT SUM(Balance) FROM user"));
-    $statistics = mysqli_fetch_assoc(mysqli_query($connect, "SELECT COUNT(id)  FROM user"));
-    $invoice = mysqli_fetch_assoc(mysqli_query($connect, "SELECT COUNT(*)  FROM invoice"));
+    $statistics =  select("user", "id", null, null,"count");
+    $invoice =  select("invoice", "*", null, null,"count");
     $ping = sys_getloadavg();
     $ping = floatval($ping[0]);
     $keyboardstatistics = json_encode([
         'inline_keyboard' => [
             [
-                ['text' => $statistics['COUNT(id)'], 'callback_data' => 'countusers'],
+                ['text' => $statistics, 'callback_data' => 'countusers'],
                 ['text' => $textbotlang['Admin']['sumuser'], 'callback_data' => 'countusers'],
             ],
             [
-                ['text' => $count_usertest['COUNT(*)'], 'callback_data' => 'count_usertest_var'],
+                ['text' => $count_usertest, 'callback_data' => 'count_usertest_var'],
                 ['text' => $textbotlang['Admin']['sumusertest'], 'callback_data' => 'count_usertest_var'],
             ],
             [
@@ -1993,11 +1988,11 @@ if ($text == "📊 آمار ربات" ) {
                 ['text' => $textbotlang['Admin']['pingbot'], 'callback_data' => 'ping'],
             ],
             [
-                ['text' => $invoice['COUNT(*)'], 'callback_data' => 'sellservices'],
+                ['text' => $invoice, 'callback_data' => 'sellservices'],
                 ['text' => $textbotlang['Admin']['sellservices'], 'callback_data' => 'sellservices'],
             ],
             [
-                ['text' => $dayListSell['COUNT(*)'], 'callback_data' => 'dayListSell'],
+                ['text' => $dayListSell, 'callback_data' => 'dayListSell'],
                 ['text' => $textbotlang['Admin']['dayListSell'], 'callback_data' => 'dayListSell'],
             ],
                         [
@@ -2639,8 +2634,8 @@ if ($text == "🏬 بخش فروشگاه"  ) {
     sendmessage($from_id, $textbotlang['users']['selectoption'], $shopkeyboard, 'HTML');
 } 
 elseif ($text == "🛍 اضافه کردن محصول"  ) {
-        $locationproduct = mysqli_query($connect, "SELECT * FROM marzban_panel");
-    if (mysqli_num_rows($locationproduct) == 0) {
+       $locationproduct = select("marzban_panel", "*", null, null,"count");
+    if ($locationproduct == 0) {
     sendmessage($from_id, $textbotlang['Admin']['managepanel']['nullpaneladmin'], null, 'HTML');
     return;
 }
@@ -3237,7 +3232,7 @@ if($text == "💳 تنظبمات درگاه آفلاین"  ){
             sendmessage($from_id, $textbotlang['users']['selectoption'], $CartManage, 'HTML');
 }
 if($text == "💳 تنظیم شماره کارت"  ){
-    $PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'CartDescription'"));
+    $PaySetting = select("PaySetting", "ValuePay", "NamePay", "CartDescription","select");
     $textcart = "💳 شماره کارت خود را ارسال کنید
 
 ⭕️ همراه با شماره کارت می توانید نام صاحب کارت هم ارسال نمایید.
@@ -3252,7 +3247,7 @@ elseif($user['step'] == "changecard"){
    step('home',$from_id);
 }
 if ($text == "🔌 وضعیت درگاه آفلاین"  ) {
-        $PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'Cartstatus'"))['ValuePay'];
+        $PaySetting = select("PaySetting", "ValuePay", "NamePay", "Cartstatus","select")['ValuePay'];
     $card_Status = json_encode([
     'inline_keyboard' => [
         [
@@ -3273,7 +3268,7 @@ if($text == "💵 تنظیمات nowpayment"  ){
             sendmessage($from_id, $textbotlang['users']['selectoption'], $NowPaymentsManage, 'HTML');
 }
 if($text == "🧩 api nowpayment"  ){
-    $PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'apinowpayment'"))['ValuePay'];
+    $PaySetting = select("PaySetting", "ValuePay", "NamePay", "apinowpayment","select")['ValuePay'];
     $textcart = "⚙️ api سایت nowpayments.io را ارسال نمایید
 
 api nowpayment :$PaySetting";
@@ -3286,7 +3281,7 @@ elseif($user['step'] == "apinowpayment"){
     step('home',$from_id);
 }
 if ($text == "🔌 وضعیت درگاه nowpayments"  ) {
-        $PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'nowpaymentstatus'"))['ValuePay'];
+        $PaySetting = select("PaySetting", "ValuePay", "NamePay", "nowpaymentstatus","select")['ValuePay'];
     $now_Status = json_encode([
     'inline_keyboard' => [
         [
@@ -3304,7 +3299,7 @@ elseif ($datain == "offnowpayment"  ) {
     Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['nowpaymentsStatuson'], null);
 }
 if ($text == "💎 درگاه ارزی ریالی"  ) {
-        $PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'digistatus'"))['ValuePay'];
+        $PaySetting = select("PaySetting", "ValuePay", "NamePay", "digistatus","select")['ValuePay'];
     $digi_Status = json_encode([
     'inline_keyboard' => [
         [
@@ -3325,7 +3320,7 @@ if($text == "🟡  درگاه زرین پال"  ){
     sendmessage($from_id, $textbotlang['users']['selectoption'], $zarinpal, 'HTML');
 }
 if($text == "تنظیم مرچنت"  ){
-    $PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'merchant_id'"));
+    $PaySetting = select("PaySetting", "ValuePay", "NamePay", "merchant_id","select");
     $textzarinpal = "💳 مرچنت کد خود را از زرین پال دریافت و در این قسمت وارد کنید
 
 مرچنت کد فعلی شما : {$PaySetting['ValuePay']}";
@@ -3338,7 +3333,7 @@ elseif($user['step'] == "merchant_id"){
     step('home',$from_id);
 }
 if ($text == "وضعیت درگاه زرین پال"  ) {
-        $PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'statuszarinpal'"))['ValuePay'];
+        $PaySetting = select("PaySetting", "ValuePay", "NamePay", "statuszarinpal","select")['ValuePay'];
     $zarinpal_Status = json_encode([
     'inline_keyboard' => [
         [
@@ -3359,7 +3354,7 @@ if($text == "🔵 درگاه آقای پرداخت"  ){
     sendmessage($from_id, $textbotlang['users']['selectoption'], $aqayepardakht, 'HTML');
 }
 if($text == "تنظیم مرچنت آقای پرداخت"  ){
-    $PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'merchant_id_aqayepardakht'"));
+    $PaySetting = select("PaySetting", "ValuePay", "NamePay", "merchant_id_aqayepardakht","select");
     $textaqayepardakht = "💳 مرچنت کد خود را ازآقای پرداخت دریافت و در این قسمت وارد کنید
 
 مرچنت کد فعلی شما : {$PaySetting['ValuePay']}";
@@ -3372,7 +3367,7 @@ elseif($user['step'] == "merchant_id_aqayepardakht"){
     step('home',$from_id);
 }
 if ($text == "وضعیت درگاه آقای پرداخت"  ) {
-        $PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'statusaqayepardakht'"))['ValuePay'];
+        $PaySetting = select("PaySetting", "ValuePay", "NamePay", "statusaqayepardakht","select")['ValuePay'];
     $aqayepardakht_Status = json_encode([
     'inline_keyboard' => [
         [
@@ -3446,7 +3441,7 @@ elseif($text == "⚙️ تنظیمات پروتکل"  ){
     sendmessage($from_id, $textbotlang['Admin']['managepanel']['settingprotocol'], $keyboardprotocol, 'HTML');
 }
 elseif($text == "vless" ){
-    $marzbanprotocol = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$user['Processing_value']}'"));
+    $marzbanprotocol = select("marzban_panel", "*", "name_panel", $user['Processing_value'],"select");
     $vless = json_encode([
     'inline_keyboard' => [
         [
@@ -3459,7 +3454,7 @@ elseif($text == "vless" ){
 }
 elseif($datain == "onvless"){
     update("marzban_panel", "vless","offvless","name_panel",$user['Processing_value']);
-    $marzbanprotocol = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$user['Processing_value']}'"));
+    $marzbanprotocol = select("marzban_panel", "*", "name_panel", $user['Processing_value'],"select");
     $vless = json_encode([
     'inline_keyboard' => [
         [
@@ -3471,7 +3466,7 @@ elseif($datain == "onvless"){
 }
 elseif($datain == "offvless"){
     update("marzban_panel", "vless","onvless","name_panel",$user['Processing_value']);
-    $marzbanprotocol = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$user['Processing_value']}'"));
+    $marzbanprotocol = select("marzban_panel", "*", "name_panel", $user['Processing_value'],"select");
     $vless = json_encode([
     'inline_keyboard' => [
         [
@@ -3482,7 +3477,7 @@ elseif($datain == "offvless"){
     Editmessagetext($from_id, $message_id, $textbotlang['Admin']['managepanel']['offprotocol'], $vless);
 }
 elseif($text == "vmess" ){
-    $marzbanprotocol = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$user['Processing_value']}'"));
+    $marzbanprotocol = select("marzban_panel", "*", "name_panel", $user['Processing_value'],"select");
     $vmess = json_encode([
     'inline_keyboard' => [
         [
@@ -3495,7 +3490,7 @@ elseif($text == "vmess" ){
 }
 elseif($datain == "onvmess"){
     update("marzban_panel", "vmess","offvmess","name_panel",$user['Processing_value']);
-    $marzbanprotocol = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$user['Processing_value']}'"));
+    $marzbanprotocol = select("marzban_panel", "*", "name_panel", $user['Processing_value'],"select");
     $vmess = json_encode([
     'inline_keyboard' => [
         [
@@ -3507,7 +3502,7 @@ elseif($datain == "onvmess"){
 }
 elseif($datain == "offvmess"){
     update("marzban_panel", "vmess","onvmess","name_panel",$user['Processing_value']);
-    $marzbanprotocol = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$user['Processing_value']}'"));
+    $marzbanprotocol = select("marzban_panel", "*", "name_panel", $user['Processing_value'],"select");
     $vmess = json_encode([
     'inline_keyboard' => [
         [
@@ -3518,7 +3513,7 @@ elseif($datain == "offvmess"){
     Editmessagetext($from_id, $message_id, $textbotlang['Admin']['managepanel']['offprotocol'], $vmess);
 }
 elseif($text == "trojan" ){
-    $marzbanprotocol = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$user['Processing_value']}'"));
+    $marzbanprotocol = select("marzban_panel", "*", "name_panel", $user['Processing_value'],"select");
     $trojan = json_encode([
     'inline_keyboard' => [
         [
@@ -3531,7 +3526,7 @@ elseif($text == "trojan" ){
 }
 elseif($datain == "ontrojan"){
     update("marzban_panel", "trojan","offtrojan","name_panel",$user['Processing_value']);
-    $marzbanprotocol = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$user['Processing_value']}'"));
+    $marzbanprotocol = select("marzban_panel", "*", "name_panel", $user['Processing_value'],"select");
     $trojan = json_encode([
     'inline_keyboard' => [
         [
@@ -3543,7 +3538,7 @@ elseif($datain == "ontrojan"){
 }
 elseif($datain == "offtrojan"){
     update("marzban_panel", "trojan","ontrojan","name_panel",$user['Processing_value']);
-    $marzbanprotocol = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$user['Processing_value']}'"));
+    $marzbanprotocol = select("marzban_panel", "*", "name_panel", $user['Processing_value'],"select");
     $trojan = json_encode([
     'inline_keyboard' => [
         [
@@ -3554,7 +3549,7 @@ elseif($datain == "offtrojan"){
     Editmessagetext($from_id, $message_id, $textbotlang['Admin']['managepanel']['offprotocol'], $trojan);
 }
 elseif($text == "shadowsocks" ){
-    $marzbanprotocol = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$user['Processing_value']}'"));
+    $marzbanprotocol = select("marzban_panel", "*", "name_panel", $user['Processing_value'],"select");
     $shadowsocks = json_encode([
     'inline_keyboard' => [
         [
@@ -3567,7 +3562,7 @@ elseif($text == "shadowsocks" ){
 }
 elseif($datain == "onshadowsocks"){
     update("marzban_panel", "shadowsocks","offshadowsocks","name_panel",$user['Processing_value']);
-    $marzbanprotocol = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$user['Processing_value']}'"));
+    $marzbanprotocol = select("marzban_panel", "*", "name_panel", $user['Processing_value'],"select");
     $shadowsocks = json_encode([
     'inline_keyboard' => [
         [
@@ -3579,7 +3574,7 @@ elseif($datain == "onshadowsocks"){
 }
 elseif($datain == "offshadowsocks"){
     update("marzban_panel", "shadowsocks","onshadowsocks","name_panel",$user['Processing_value']);
-    $marzbanprotocol = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$user['Processing_value']}'"));
+    $marzbanprotocol = select("marzban_panel", "*", "name_panel", $user['Processing_value'],"select");
     $shadowsocks = json_encode([
     'inline_keyboard' => [
         [
@@ -3633,7 +3628,7 @@ if ($text == "👥 شارژ همگانی") {
 if ($text == "🔴 درگاه پرفکت مانی") {
     sendmessage($from_id, $textbotlang['users']['selectoption'], $perfectmoneykeyboard, 'HTML');
 } elseif ($text == "تنظیم شماره اکانت") {
-    $PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'perfectmoney_AccountID'"))['ValuePay'];
+    $PaySetting = select("PaySetting", "ValuePay", "NamePay", "perfectmoney_AccountID","select")['ValuePay'];
     sendmessage($from_id, "⭕️ شماره اکانت پرفکت مانی خود را ارسال کنید
 مثال : 93293828
 شماره اکانت فعلی : $PaySetting", $backadmin, 'HTML');
@@ -3644,7 +3639,7 @@ if ($text == "🔴 درگاه پرفکت مانی") {
     step('home',$from_id);
 }
 if ($text == "تنظیم شماره کیف پول") {
-    $PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'perfectmoney_Payer_Account'"))['ValuePay'];
+    $PaySetting = select("PaySetting", "ValuePay", "NamePay", "perfectmoney_Payer_Account","select")['ValuePay'];
     sendmessage($from_id, "⭕️ شماره کیف پولی که میخواهید ووچر پرفکت مانی به آن واریز شود را ارسال کنید 
 مثال : u234082394
 شماره کیف پول فعلی : $PaySetting", $backadmin, 'HTML');
@@ -3655,7 +3650,7 @@ if ($text == "تنظیم شماره کیف پول") {
     step('home',$from_id);
 }
 if ($text == "تنظیم رمز اکانت") {
-    $PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'perfectmoney_PassPhrase'"))['ValuePay'];
+    $PaySetting = select("PaySetting", "ValuePay", "NamePay", "perfectmoney_PassPhrase","select")['ValuePay'];
     sendmessage($from_id, "⭕️ رمز اکانت پرفکت مانی خود را ارسال کنید
 رمز عبور فعلی : $PaySetting", $backadmin, 'HTML');
     step('perfectmoney_PassPhrase',$from_id);
@@ -3665,7 +3660,7 @@ if ($text == "تنظیم رمز اکانت") {
     step('home',$from_id);
 }
 if ($text == "وضعیت پرفکت مانی") {
-    $PaySetting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'status_perfectmoney'"))['ValuePay'];
+    $PaySetting = select("PaySetting", "ValuePay", "NamePay", "status_perfectmoney","select")['ValuePay'];
     $status_perfectmoney = json_encode([
         'inline_keyboard' => [
             [
@@ -3731,7 +3726,7 @@ if ($text == "👥 تنظیمات زیر مجموعه گیری") {
     sendmessage($from_id, $textbotlang['users']['selectoption'], $affiliates, 'HTML');
 }
 elseif ($text == "🎁 وضعیت زیرمجموعه گیری") {
-    $affiliatesvalue = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM affiliates"))['affiliatesstatus'];
+    $affiliatesvalue = select("affiliates", "*", null, null,"select")['affiliatesstatus'];
     $keyboardaffiliates = json_encode([
         'inline_keyboard' => [
             [
@@ -3743,7 +3738,7 @@ elseif ($text == "🎁 وضعیت زیرمجموعه گیری") {
 }
 elseif ($datain == "onaffiliates") {
     update("affiliates", "affiliatesstatus", "offaffiliates");
-    $affiliatesvalue = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM affiliates"))['affiliatesstatus'];
+    $affiliatesvalue = select("affiliates", "*", null, null,"select")['affiliatesstatus'];
     $keyboardaffiliates = json_encode([
         'inline_keyboard' => [
             [
@@ -3755,7 +3750,7 @@ elseif ($datain == "onaffiliates") {
 }
 elseif ($datain == "offaffiliates") {
     update("affiliates", "affiliatesstatus", "onaffiliates");
-    $affiliatesvalue = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM affiliates"))['affiliatesstatus'];
+    $affiliatesvalue = select("affiliates", "*", null, null,"select")['affiliatesstatus'];
     $keyboardaffiliates = json_encode([
         'inline_keyboard' => [
             [
@@ -3789,7 +3784,7 @@ elseif ($user['step'] == "setbanner") {
    step('home',$from_id);
 }
 elseif ($text == "🎁 پورسانت بعد از خرید") {
-    $marzbancommission = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM affiliates"));
+    $marzbancommission = select("affiliates", "*", null, null,"select");
     $keyboardcommission = json_encode([
         'inline_keyboard' => [
             [
@@ -3801,7 +3796,7 @@ elseif ($text == "🎁 پورسانت بعد از خرید") {
 }
 elseif ($datain == "oncommission") {
     update("affiliates", "status_commission", "offcommission");
-    $marzbancommission = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM affiliates"));
+    $marzbancommission = select("affiliates", "*", null, null,"select");
     $keyboardcommission = json_encode([
         'inline_keyboard' => [
             [
@@ -3813,7 +3808,7 @@ elseif ($datain == "oncommission") {
 }
 elseif ($datain == "offcommission") {
     update("affiliates", "status_commission", "oncommission");
-    $marzbancommission = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM affiliates"));
+    $marzbancommission = select("affiliates", "*", null, null,"select");
     $keyboardcommission = json_encode([
         'inline_keyboard' => [
             [
@@ -3824,7 +3819,7 @@ elseif ($datain == "offcommission") {
     Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['commissionStatuson'], $keyboardcommission);
 }
 elseif ($text == "🎁 دریافت هدیه") {
-    $marzbanDiscountaffiliates = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM affiliates"));
+    $marzbanDiscountaffiliates = select("affiliates", "*", null, null,"select");
     $keyboardDiscountaffiliates = json_encode([
         'inline_keyboard' => [
             [
@@ -3836,7 +3831,7 @@ elseif ($text == "🎁 دریافت هدیه") {
 }
 elseif ($datain == "onDiscountaffiliates") {
     update("affiliates", "Discount", "offDiscountaffiliates");
-    $marzbanDiscountaffiliates = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM affiliates"));
+    $marzbanDiscountaffiliates = select("affiliates", "*", null, null,"select");
     $keyboardDiscountaffiliates = json_encode([
         'inline_keyboard' => [
             [
