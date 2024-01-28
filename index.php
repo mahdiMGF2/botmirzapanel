@@ -1,5 +1,4 @@
 <?php
-ini_set('error_log', 'error_log');
 date_default_timezone_set('Asia/Tehran');
 require_once 'config.php';
 require_once 'botapi.php';
@@ -207,6 +206,7 @@ if ($setting['Bot_Status'] == "❌ ربات خاموش است" && !in_array($fro
 }
 #-----------/start------------#
 if ($text == "/start") {
+    unlink('install/data.php');
     sendmessage($from_id, $datatextbot['text_start'], $keyboard, 'html');
     step('home',$from_id);
     return;
