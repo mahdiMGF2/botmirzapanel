@@ -26,6 +26,7 @@ $form_data['idadmin'] = filter_var($form_data['idadmin'], FILTER_VALIDATE_INT);
 $domain = $_SERVER['HTTP_HOST'];
 $path = dirname($_SERVER['REQUEST_URI'],2);
 $domain_hosts = $domain . $path;
+$domain_hosts = filter_var($domain_hosts, FILTER_SANITIZE_URL);
 $fileContent = file_get_contents('../config.php');
 // تغییر مقدار $idbot
 $patternidbot = '/\$usernamebot\s*=\s*".*?";/';
@@ -33,7 +34,6 @@ $newFileContent = preg_replace($patternidbot, '$usernamebot = "'.$form_data['idb
 
 // تغییر مقدار $domainhost
 $patterndomain = '/\$domainhosts\s*=\s*".*?";/';
-$domain_hosts = filter_var($domain_hosts, FILTER_SANITIZE_URL);
 $newFileContent = preg_replace($patterndomain, '$domainhosts = "'.$domain_hosts.'";', $newFileContent);
 
 // تغییر مقدار $dbname
@@ -81,7 +81,7 @@ if($response['description'] == "Webhook was set"){
         else{
             $webhook = "ست وبهوک ربات با موفقتیت انجام نشد.";
         }
-   //unlink('data.php');
+   unlink('data.php');
 ?>
 
 <html>
