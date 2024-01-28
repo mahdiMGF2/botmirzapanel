@@ -298,7 +298,7 @@ if ($user['step'] == "getusernameinfo") {
     step('getdata',$from_id);
 } elseif (preg_match('/locationnotuser_(.*)/', $datain, $dataget)) {
     $location = $dataget[1];
-    $marzban_list_get = select("marzban_panel", "name_panel", "name_panel", $location,"count");
+    $marzban_list_get = select("marzban_panel", "name_panel", "name_panel", $location,"select");
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
     $data_useer = getuser($user['Processing_value'], $Check_token['access_token'], $marzban_list_get['url_panel']);
     if ($data_useer['detail'] == "User not found") {
