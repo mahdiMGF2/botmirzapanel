@@ -1,11 +1,12 @@
 <?php
-$rootPath = $_SERVER['DOCUMENT_ROOT'];
-$Pathfile = dirname(dirname($_SERVER['PHP_SELF'], 2));
-$Pathfile = $rootPath.$Pathfile;
-$Pathfile = $Pathfile.'/config.php';
+$rootPath = filter_input(INPUT_SERVER, 'DOCUMENT_ROOT', FILTER_SANITIZE_STRING);
+$PHP_SELF = filter_input(INPUT_SERVER, 'PHP_SELF', FILTER_SANITIZE_STRING);
+$Pathfile = dirname(dirname($PHP_SELF, 2));
+$Pathfiles = $rootPath.$Pathfile;
+$Pathfile = $Pathfiles.'/config.php';
 $functions = $Pathfiles.'/functions.php';
-require_once $Pathfile;
 require_once $functions;
+require_once $Pathfile;
 $apinowpayments = select("PaySetting", "ValuePay", "NamePay", "apinowpayment","select")['ValuePay'];
 $amount =     htmlspecialchars($_GET['price'], ENT_QUOTES, 'UTF-8');
 $invoice_id = htmlspecialchars($_GET['order_id'], ENT_QUOTES, 'UTF-8');
