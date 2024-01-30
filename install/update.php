@@ -4,7 +4,7 @@ global $outputdownload,$outputzip,$Outputfnish,$outputdownload,$outputzip,$Outpu
 $version = file_get_contents('version');
 //----------------------latestRelease-------------------------------//
 function latestRelease(){
-$url = "https://api.github.com/repos/mahdigholipour3/bottelegrammarzban/releases/latest";
+$url = "https://api.github.com/repos/mahdiMGF2/bottelegrammarzban/releases/latest";
 $curl = curl_init($url);
 curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($curl, CURLOPT_HEADER, false);
@@ -17,7 +17,7 @@ return $latestRelease;
 }
 $latestRelease = latestRelease();
 //-----------------------download file------------------------------//
-$githubUrl = "https://github.com/mahdigholipour3/bottelegrammarzban/archive/".$latestRelease['tag_name'].".zip";
+$githubUrl = "https://github.com/mahdiMGF2/bottelegrammarzban/archive/".$latestRelease['tag_name'].".zip";
 $filezip = '../file.zip';
 if($version < $latestRelease['tag_name']){
 $fileContent = file_get_contents($githubUrl);
