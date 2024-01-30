@@ -377,7 +377,6 @@ if ($datain == 'next_page') {
     $start_index = ($next_page - 1) * $items_per_page;
     $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user ORDER BY username ASC LIMIT $start_index, $items_per_page");
     $stmt->bindParam(':id_user', $from_id);
-    $stmt->bindParam(':location', $location);
     $stmt->execute();
     $keyboardlists = [
         'inline_keyboard' => [],
@@ -415,7 +414,6 @@ if ($datain == 'next_page') {
     $start_index = ($next_page - 1) * $items_per_page;
     $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user ORDER BY username ASC LIMIT $start_index, $items_per_page");
     $stmt->bindParam(':id_user', $from_id);
-    $stmt->bindParam(':location', $location);
     $stmt->execute();
     $keyboardlists = [
         'inline_keyboard' => [],
@@ -1358,6 +1356,7 @@ elseif ($user['step'] == "getcodesellDiscount") {
     $stmt = $pdo->prepare("SELECT * FROM product WHERE code_product = :code AND (location = :loc1 OR location = '/all') LIMIT 1");
     $stmt->bindValue(':code', $user['Processing_value_one']);
     $stmt->bindValue(':loc1', $user['Processing_value']);
+    $stmt->execute();
     $info_product = $stmt->fetch(PDO::FETCH_ASSOC);
     $result = ($SellDiscountlimit['price'] / 100) * $info_product['price_product'];
 
@@ -2119,11 +2118,11 @@ if ($text == "📨 ارسال پیام" ) {
 sendmessage($from_id, "درحال ارسال پیام",$keyboardaadmin, 'HTML');
 step('home',$from_id);
 $filename = 'user.txt';
-$query = "SELECT id FROM user";
-$result = $connect->query($query);
+$stmt = $pdo->prepare("SELECT id FROM user");
+$stmt->execute();
 if ($result) {
     $ids = array();
-    while ($row = $result->fetch_assoc()) {
+     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $ids[] = $row['id'];
     }
     $idsText = implode("\n", $ids);
@@ -2147,11 +2146,11 @@ unlink($filename);
 sendmessage($from_id, "درحال ارسال پیام",$keyboardaadmin, 'HTML');
 step('home',$from_id);
 $filename = 'user.txt';
-$query = "SELECT id FROM user";
-$result = $connect->query($query);
+$stmt = $pdo->prepare("SELECT id FROM user");
+$stmt->execute();
 if ($result) {
     $ids = array();
-    while ($row = $result->fetch_assoc()) {
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $ids[] = $row['id'];
     }
     $idsText = implode("\n", $ids);
