@@ -858,6 +858,7 @@ if(isset($nameprotocol['vless']) && $setting['flow'] == "flowon"){
     $stmt = $pdo->prepare("INSERT IGNORE INTO TestAccount (id_user, id_invoice, username,Service_location,time_sell) VALUES (:id_user,:id_invoice,:username,:Service_location,:time_sell)");
     $stmt->bindParam(':id_user', $from_id);
     $stmt->bindParam(':id_invoice', $randomString);
+    $stmt->bindParam(':username', $username_ac);
     $stmt->bindParam(':Service_location', $name_panel);
     $stmt->bindParam(':time_sell', $date);
     $stmt->execute();
