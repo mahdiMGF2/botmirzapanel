@@ -432,7 +432,7 @@ $stmt = $pdo->prepare($sql);
   $table_exists = count($result) > 0;
   if ($table_exists) {
     $product = [];
-    $cleaned_text = $pdo->quote($connect, $text);
+    $cleaned_text = $pdo->quote($text);
     $stmt = $pdo->prepare("SELECT * FROM product WHERE Location = :Location OR Location = '/all'");
     $stmt->bindParam(':Location', $cleaned_text);
     $stmt->execute();
