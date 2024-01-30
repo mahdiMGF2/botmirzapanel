@@ -26,7 +26,11 @@ foreach ($telegram_ip_ranges as $telegram_ip_range) if (!$ok) {
 if (!$ok) die("دسترسی غیرمجاز");
 #-------------Variable----------#
 $setting = select("setting", "*");
-if($from_id != 0)$connect->query("INSERT IGNORE INTO user (id , step,limit_usertest,User_Status,number,Balance,pagenumber,username,message_count,last_message_time,affiliatescount,affiliates) VALUES ('$from_id', 'none','{$setting['limit_usertest_all']}','Active','none','0','1','$username','0','0','0','0')");
+$stmt = $pdo->prepare("INSERT IGNORE INTO user (id, step, limit_usertest, User_Status, number, Balance, pagenumber, username, message_count, last_message_time, affiliatescount, affiliates) VALUES (:from_id, 'none', :limit_usertest_all, 'Active', 'none', '0', '1', :username, '0', '0', '0', '0')");
+$stmt->bindParam(':from_id', $from_id);
+$stmt->bindParam(':limit_usertest_all', $setting['limit_usertest_all']);
+$stmt->bindParam(':username', $username);
+$stmt->execute();
 $version = file_get_contents('install/version');
 $user = select("user", "*", "id", $from_id,"select");
 if ($user == false) {
@@ -851,10 +855,12 @@ if(isset($nameprotocol['vless']) && $setting['flow'] == "flowon"){
     }
     $date = jdate('Y/m/d');
     $randomString = bin2hex(random_bytes(2));
-    $stmt = $connect->prepare("INSERT IGNORE INTO TestAccount (id_user, id_invoice, username,Service_location,time_sell) VALUES (?, ?, ?, ?,?)");
-    $stmt->bind_param("sssss", $from_id, $randomString, $username_ac, $name_panel, $date);
+    $stmt = $pdo->prepare("INSERT IGNORE INTO TestAccount (id_user, id_invoice, username,Service_location,time_sell) VALUES (:id_user,:id_invoice,:username,:Service_location,:time_sell)");
+    $stmt->bindParam(':id_user', $from_id);
+    $stmt->bindParam(':id_invoice', $randomString);
+    $stmt->bindParam(':Service_location', $name_panel);
+    $stmt->bindParam(':time_sell', $date);
     $stmt->execute();
-    $stmt->close();
     $text_config = "";
     $output_config_link = "";
     if ($setting['sublink'] == "✅ لینک اشتراک فعال است.") {
@@ -948,7 +954,6 @@ if ($text == $datatextbot['text_help'] || $datain == "helpbtn") {
     step('sendhelp',$from_id);
 } elseif ($user['step'] == "sendhelp") {
    $helpdata = select("help", "*", "name_os", $text,"select");
-   mysqli_stmt_close($stmt);
     if (strlen($helpdata['Media_os']) != 0) {
         if ($helpdata['type_Media_os'] == "video") {
             sendvideo($from_id, $helpdata['Media_os'], $helpdata['Description_os']);
@@ -1184,11 +1189,20 @@ elseif ($user['step'] == "payment" && $datain == "confirmandgetservice" || $data
         if(in_array($randomString,$id_invoice)){
         $randomString = $random_number.$randomString;
     }
-    $stmt = $connect->prepare("INSERT IGNORE INTO invoice (id_user, id_invoice, username,time_sell, Service_location, name_product, price_product, Volume, Service_time,Status) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?,?)");
-    $Status =  "active";
-    $stmt->bind_param("ssssssssss", $from_id, $randomString, $username_ac, $date, $user['Processing_value'], $info_product['name_product'], $info_product['price_product'], $info_product['Volume_constraint'], $info_product['Service_time'],$Status);
+    $sql = "INSERT IGNORE INTO invoice (id_user, id_invoice, username, time_sell, Service_location, name_product, price_product, Volume, Service_time, Status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $Status = "active";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(1, $from_id);
+    $stmt->bindParam(2, $randomString);
+    $stmt->bindParam(3, $username_ac);
+    $stmt->bindParam(4, $date);
+    $stmt->bindParam(5, $user['Processing_value']);
+    $stmt->bindParam(6, $info_product['name_product']);
+    $stmt->bindParam(7, $info_product['price_product']);
+    $stmt->bindParam(8, $info_product['Volume_constraint']);
+    $stmt->bindParam(9, $info_product['Service_time']);
+    $stmt->bindParam(10, $Status);
     $stmt->execute();
-    $stmt->close();
     $date = strtotime("+" . $info_product['Service_time'] . "days");
     $timestamp = strtotime(date("Y-m-d H:i:s", $date));
     $data_limit = $info_product['Volume_constraint'] * pow(1024, 3);
@@ -1427,11 +1441,18 @@ $PaySetting
         sendmessage($from_id, $textbotlang['users']['Balance']['linkpayments'], $keyboard, 'HTML');
         $dateacc = date('Y/m/d h:i:s');
         $randomString = bin2hex(random_bytes(5));
-        $stmt = $connect->prepare("INSERT INTO Payment_report (id_user,id_order,time,price,payment_Status,Payment_Method) VALUES (?,?,?,?,?,?)");
+        $sql = "INSERT INTO Payment_report (id_user, id_order, time, price, payment_Status, Payment_Method) VALUES (?, ?, ?, ?, ?, ?)";
         $payment_Status = "Unpaid";
         $Payment_Method = "zarinpal";
-        $stmt->bind_param("ssssss", $from_id, $randomString, $dateacc, $user['Processing_value'], $payment_Status,$Payment_Method);
-        $stmt->execute();
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(1, $from_id);
+        $stmt->bindParam(2, $randomString);
+        $stmt->bindParam(3, $dateacc);
+        $stmt->bindParam(4, $user['Processing_value']);
+$stmt->bindParam(5, $payment_Status);
+$stmt->bindParam(6, $Payment_Method);
+
+$stmt->execute();
         $paymentkeyboard = json_encode([
             'inline_keyboard' => [
                 [
@@ -1457,10 +1478,15 @@ $PaySetting
         sendmessage($from_id, $textbotlang['users']['Balance']['linkpayments'], $keyboard, 'HTML');
         $dateacc = date('Y/m/d h:i:s');
         $randomString = bin2hex(random_bytes(5));
-        $stmt = $connect->prepare("INSERT INTO Payment_report (id_user,id_order,time,price,payment_Status,Payment_Method) VALUES (?,?,?,?,?,?)");
         $payment_Status = "Unpaid";
         $Payment_Method = "aqayepardakht";
-        $stmt->bind_param("ssssss", $from_id, $randomString, $dateacc, $user['Processing_value'], $payment_Status,$Payment_Method);
+        $stmt = $pdo->prepare("INSERT INTO Payment_report (id_user, id_order, time, price, payment_Status, Payment_Method) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->bindParam(1, $from_id);
+        $stmt->bindParam(2, $randomString);
+        $stmt->bindParam(3, $dateacc);
+        $stmt->bindParam(4, $user['Processing_value']);
+        $stmt->bindParam(5, $payment_Status);
+        $stmt->bindParam(6, $Payment_Method);
         $stmt->execute();
         $paymentkeyboard = json_encode([
             'inline_keyboard' => [
@@ -1491,10 +1517,15 @@ $PaySetting
         sendmessage($from_id, $textbotlang['users']['Balance']['linkpayments'], $keyboard, 'HTML');
         $dateacc = date('Y/m/d h:i:s');
         $randomString = bin2hex(random_bytes(5));
-        $stmt = $connect->prepare("INSERT INTO Payment_report (id_user,id_order,time,price,payment_Status,Payment_Method) VALUES (?,?,?,?,?,?)");
         $payment_Status = "Unpaid";
         $Payment_Method = "Nowpayments";
-        $stmt->bind_param("ssssss", $from_id, $randomString, $dateacc, $user['Processing_value'], $payment_Status,$Payment_Method);
+        $stmt = $pdo->prepare("INSERT INTO Payment_report (id_user, id_order, time, price, payment_Status, Payment_Method) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->bindParam(1, $from_id);
+        $stmt->bindParam(2, $randomString);
+        $stmt->bindParam(3, $dateacc);
+        $stmt->bindParam(4, $user['Processing_value']);
+        $stmt->bindParam(5, $payment_Status);
+        $stmt->bindParam(6, $Payment_Method);
         $stmt->execute();
         $paymentkeyboard = json_encode([
             'inline_keyboard' => [
@@ -1534,10 +1565,15 @@ $PaySetting
         sendmessage($from_id, $textbotlang['users']['Balance']['linkpayments'], $keyboard, 'HTML');
         $dateacc = date('Y/m/d h:i:s');
         $randomString = bin2hex(random_bytes(5));
-        $stmt = $connect->prepare("INSERT INTO Payment_report (id_user,id_order,time,price,payment_Status,Payment_Method) VALUES (?,?,?,?,?,?)");
         $payment_Status = "Unpaid";
         $Payment_Method = "Currency Rial gateway";
-        $stmt->bind_param("ssssss", $from_id, $randomString, $dateacc, $user['Processing_value'], $payment_Status,$Payment_Method);
+        $stmt = $pdo->prepare("INSERT INTO Payment_report (id_user, id_order, time, price, payment_Status, Payment_Method) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->bindParam(1, $from_id);
+        $stmt->bindParam(2, $randomString);
+        $stmt->bindParam(3, $dateacc);
+        $stmt->bindParam(4, $user['Processing_value']);
+        $stmt->bindParam(5, $payment_Status);
+        $stmt->bindParam(6, $Payment_Method);
         $stmt->execute();
         $order_description = "weswap_" . $randomString . "_" . $trxprice;
         $pay = nowPayments('payment', $usdprice, $randomString, $order_description);
@@ -1653,10 +1689,15 @@ if ($user['step'] == "getvcodeuser") {
 ⚙️ کد پیگیری پرداخت شما :$randomString  ", $keyboard, 'HTML');
     $dateacc = date('Y/m/d h:i:s');
     $randomString = bin2hex(random_bytes(5));
-    $stmt = $connect->prepare("INSERT INTO Payment_report (id_user,id_order,time,price,payment_Status,Payment_Method) VALUES (?,?,?,?,?,?)");
     $payment_Status = "paid";
     $Payment_Method = "perfectmoney";
-    $stmt->bind_param("ssssss", $from_id, $randomString, $dateacc, $USD, $payment_Status, $Payment_Method);
+    $stmt = $pdo->prepare("INSERT INTO Payment_report (id_user, id_order, time, price, payment_Status, Payment_Method) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt->bindParam(1, $from_id);
+    $stmt->bindParam(2, $randomString);
+    $stmt->bindParam(3, $dateacc);
+    $stmt->bindParam(4, $USD);
+    $stmt->bindParam(5, $payment_Status);
+    $stmt->bindParam(6, $Payment_Method);
     $stmt->execute();
 }
 if (preg_match('/Confirmpay_user_(\w+)_(\w+)/', $datain, $dataget)) {
@@ -1737,10 +1778,15 @@ if (preg_match('/Confirmpay_user_(\w+)_(\w+)/', $datain, $dataget)) {
     }
     $dateacc = date('Y/m/d h:i:s');
     $randomString = bin2hex(random_bytes(5));
-    $stmt = $connect->prepare("INSERT INTO Payment_report (id_user,id_order,time,price,payment_Status,Payment_Method) VALUES (?,?,?,?,?,?)");
     $payment_Status = "Unpaid";
     $Payment_Method = "cart to cart";
-    $stmt->bind_param("ssssss", $from_id, $randomString, $dateacc, $user['Processing_value'], $payment_Status,$Payment_Method);
+    $stmt = $pdo->prepare("INSERT INTO Payment_report (id_user, id_order, time, price, payment_Status, Payment_Method) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt->bindParam(1, $from_id);
+    $stmt->bindParam(2, $randomString);
+    $stmt->bindParam(3, $dateacc);
+    $stmt->bindParam(4, $user['Processing_value']);
+    $stmt->bindParam(5, $payment_Status);
+    $stmt->bindParam(6, $Payment_Method);
     $stmt->execute();
     sendmessage($from_id, $textbotlang['users']['Balance']['Send-receipt'], $keyboard, 'HTML');
     $Confirm_pay = json_encode([
@@ -1800,17 +1846,17 @@ if ($datain == "Discount") {
     update("user", "Balance",$balance_user,"id",$from_id);
     $stmt = $pdo->prepare("SELECT * FROM Discount WHERE code = :code");
     $stmt->bindParam(':code', $text);
-    $stmt->bindParam(':location', $location);
     $stmt->execute();
     $get_codesql = $stmt->fetch(PDO::FETCH_ASSOC);
-    mysqli_stmt_close($stmt);
     step('home',$from_id);
     number_format($get_codesql['price']);
     $text_balance_code = "کد هدیه با موفقیت ثبت شد و به موجودی شما مبلغ {$get_codesql['price']} تومان اضافه گردید. 🥳";
     sendmessage($from_id, $text_balance_code, $keyboard, 'HTML');
-    $stmt = $connect->prepare("INSERT INTO Giftcodeconsumed (id_user,code) VALUES (?,?)");
-    $stmt->bind_param("ss", $from_id, $text);
-    $stmt->execute();
+    $stmt = $pdo->prepare("INSERT INTO Giftcodeconsumed (id_user, code) VALUES (?, ?)");
+    $stmt->bindParam(1, $from_id);
+    $stmt->bindParam(2, $text);
+
+$stmt->execute();
 }
 #----------------[  text_Tariff_list  ]------------------#
 if ($text == $datatextbot['text_Tariff_list']) {
@@ -1908,10 +1954,12 @@ elseif ($user['step'] == "addchannel") {
     step('home',$from_id);
     $channels_ch = select("channels", "link", null, null,"count");
     if ($channels_ch == 0) {
-        $stmt = $connect->prepare("INSERT INTO channels (link,Channel_lock) VALUES (?,?)");
         $Channel_lock = 'off';
-        $stmt->bind_param("ss", $text, $Channel_lock);
-        $stmt->execute();
+        $stmt = $pdo->prepare( "INSERT INTO channels (link, Channel_lock) VALUES (?, ?)");
+        $stmt->bindParam(1, $text);
+        $stmt->bindParam(2, $Channel_lock);
+
+$stmt->execute();
     } else {
         update("channels", "link",$text);
     }
@@ -1923,8 +1971,8 @@ if ($text == "👨‍💻 اضافه کردن ادمین") {
 if ($user['step'] == "addadmin") {
     sendmessage($from_id, $textbotlang['Admin']['manageadmin']['addadminset'], $keyboardadmin, 'HTML');
     step('home',$from_id);
-    $stmt = $connect->prepare("INSERT INTO admin (id_admin) VALUES (?)");
-    $stmt->bind_param("s", $text);
+    $stmt = $pdo->prepare("INSERT INTO admin (id_admin) VALUES (?)");
+    $stmt->bindParam(1, $text);
     $stmt->execute();
 }
 if ($text == "❌ حذف ادمین"  ) {
@@ -1934,8 +1982,8 @@ if ($text == "❌ حذف ادمین"  ) {
 elseif ($user['step'] == "deleteadmin") {
     if (!is_numeric($text) || !in_array($text, $admin_ids)) return;
     sendmessage($from_id, $textbotlang['Admin']['manageadmin']['removedadmin'], $keyboardadmin, 'HTML');
-    $stmt = $connect->prepare("DELETE FROM admin WHERE id_admin = ?");
-    $stmt->bind_param("s", $text);
+    $stmt = $pdo->prepare("DELETE FROM admin WHERE id_admin = ?");
+    $stmt->bindParam(1, $text);
     $stmt->execute();
     step('home',$from_id);
 }
@@ -1965,9 +2013,6 @@ if ($text == "➕ محدودیت ساخت اکانت تست برای همه"  ) 
 elseif ($user['step'] == "limit_usertest_allusers") {
     sendmessage($from_id, $textbotlang['Admin']['getlimitusertest']['setlimitall'], $keyboard_usertest, 'HTML');
     step('home',$from_id);
-    $stmt = $connect->prepare("UPDATE user SET limit_usertest = ?");
-    $stmt->bind_param("s", $text);
-    $stmt->execute();
     update("setting", "limit_usertest_all",$text);
 }
 if ($text == "📯 تنظیمات کانال"  ) {
@@ -2081,13 +2126,12 @@ if ($text == "🖥 اضافه کردن پنل  مرزبان"  ) {
     sendmessage($from_id, $textbotlang['Admin']['managepanel']['Repeatpanel'], $backadmin, 'HTML');
     return;
     }
-    $stmt = $connect->prepare("INSERT INTO marzban_panel (name_panel,vless,vmess,trojan,shadowsocks) VALUES (?,?,?,?,?)");
-    $vless= "onvless";
+    $vless = "onvless";
     $vmess = "offvmess";
     $trojan = "offtrojan";
     $shadowsocks = "offshadowsocks";
-    $stmt->bind_param("sssss", $text,$vless,$vmess,$trojan,$shadowsocks);
-    $stmt->execute();
+    $stmt = $pdo->prepare("INSERT INTO marzban_panel (name_panel, vless, vmess, trojan, shadowsocks) VALUES (?, ?, ?, ?, ?)");
+    $stmt->execute([$text, $vless, $vmess, $trojan, $shadowsocks]);
     sendmessage($from_id, $textbotlang['Admin']['managepanel']['addpanelurl'], $backadmin, 'HTML');
     step('add_link_panel',$from_id);
      update("user", "Processing_value",$text,"id",$from_id);
@@ -2373,8 +2417,8 @@ elseif ($text == "📚 اضافه کردن آموزش"  ) {
     step('add_name_help',$from_id);
 }
 elseif ($user['step'] == "add_name_help") {
-    $stmt = $connect->prepare("INSERT IGNORE INTO help (name_os) VALUES (?)");
-    $stmt->bind_param("s", $text);
+    $stmt = $pdo->prepare("INSERT IGNORE INTO help (name_os) VALUES (?)");
+    $stmt->bindParam(1, $text);
     $stmt->execute();
     sendmessage($from_id, $textbotlang['Admin']['Help']['GetAddDecHelp'], $backadmin, 'HTML');
     step('add_dec',$from_id);
@@ -2400,9 +2444,8 @@ elseif ($text == "❌ حذف آموزش") {
     step('remove_help',$from_id);
 }
 elseif ($user['step'] == "remove_help") {
-    $stmt = $connect->prepare("DELETE FROM help WHERE name_os = ?");
-    $stmt->bind_param("s", $text);
-    $stmt->execute();
+    $stmt = $pdo->prepare("DELETE FROM help WHERE name_os = ?");
+    $stmt->execute([$text]);
     sendmessage($from_id, $textbotlang['Admin']['Help']['RemoveHelp'], $keyboardhelpadmin, 'HTML');
     step('home',$from_id);
 }
@@ -2659,9 +2702,11 @@ elseif ($text == "🛍 اضافه کردن محصول"  ) {
 }
 elseif ($user['step'] == "get_limit") {
     $randomString = bin2hex(random_bytes(2));
-    $stmt = $connect->prepare("INSERT IGNORE INTO product (name_product,code_product) VALUES (?,?)");
-    $stmt->bind_param("ss", $text,$randomString);
-    $stmt->execute();
+    $stmt = $pdo->prepare("INSERT IGNORE INTO product (name_product, code_product) VALUES (?, ?)");
+    $stmt->bindParam(1, $text);
+    $stmt->bindParam(2, $randomString);
+
+$stmt->execute();
     update("user", "Processing_value",$randomString,"id",$from_id);
     sendmessage($from_id, $textbotlang['Admin']['Product']['Service_location'], $json_list_marzban_panel, 'HTML');
     step('get_location',$from_id);
@@ -2789,10 +2834,9 @@ elseif ($user['step'] == "remove-product") {
         sendmessage($from_id, $textbotlang['users']['sell']['error-product'], null, 'HTML');
         return;
     }
-    $stmt = $connect->prepare("DELETE FROM product WHERE name_product = ? AND (Location= ? or Location= ?)");
     $ydf = '/all';
-    $stmt->bind_param("sss", $text,$user['Processing_value'],$ydf);
-    $stmt->execute();
+    $stmt = $pdo->prepare("DELETE FROM product WHERE name_product = ? AND (Location = ? OR Location = ?)");
+    $stmt->execute([$text, $user['Processing_value'], $ydf]);
     sendmessage($from_id, $textbotlang['Admin']['Product']['RemoveedProduct'], $shopkeyboard, 'HTML');
     step('home',$from_id);
 }
@@ -2825,13 +2869,11 @@ elseif ($user['step'] == "change_price") {
         sendmessage($from_id, $textbotlang['Admin']['Product']['InvalidPrice'], $backadmin, 'HTML');
         return;
     }
-    $stmt = $connect->prepare("UPDATE product SET price_product = ? WHERE name_product = ? AND (Location = ? OR Location = ?)");
     $location = '/all';
-    $stmt->bind_param("ssss", $text, $user['Processing_value'],$user['Processing_value_one'],$location);
-    $stmt->execute();
-    $stmt = $connect->prepare("UPDATE invoice SET price_product = ? WHERE name_product = ? AND Service_location = ? ");
-    $stmt->bind_param("sss", $text, $user['Processing_value'],$user['Processing_value_one']);
-    $stmt->execute();
+    $stmtFirst = $pdo->prepare("UPDATE product SET price_product = ? WHERE name_product = ? AND (Location = ? OR Location = ?)");
+    $stmtFirst->execute([$text, $user['Processing_value'], $user['Processing_value_one'], $location]);
+    $stmtSecond = $pdo->prepare("UPDATE invoice SET price_product = ? WHERE name_product = ? AND Service_location = ?");
+    $stmtSecond->execute([$text, $user['Processing_value'], $user['Processing_value_one']]);
     sendmessage($from_id, "✅ قیمت محصول بروزرسانی شد", $shopkeyboard, 'HTML');
     step('home',$from_id);
 }
@@ -2841,13 +2883,12 @@ if ($text == "نام محصول"  ) {
     step('change_name',$from_id);
 }
 elseif ($user['step'] == "change_name") {
-    $stmt = $connect->prepare("UPDATE product SET name_product = ? WHERE name_product = ? AND (Location = ?  || Location = ?)");
     $value = "/all";
-    $stmt->bind_param("ssss", $text, $user['Processing_value'],$user['Processing_value_one'],$value);
-    $stmt->execute();
-    $stmt = $connect->prepare("UPDATE invoice SET name_product = ? WHERE name_product = ? AND Service_location = ? ");
-    $stmt->bind_param("sss", $text, $user['Processing_value'],$user['Processing_value_one']);
-    $stmt->execute();
+    $stmtFirst = $pdo->prepare("UPDATE product SET name_product = ? WHERE name_product = ? AND (Location = ? OR Location = ?)");
+    $stmtFirst->execute([$text, $user['Processing_value'], $user['Processing_value_one'], $value]);
+    $sqlSecond = "UPDATE invoice SET name_product = ? WHERE name_product = ? AND Service_location = ?";
+    $stmtSecond = $pdo->prepare($sqlSecond);
+    $stmtSecond->execute([$text, $user['Processing_value'], $user['Processing_value_one']]);
     sendmessage($from_id, "✅نام محصول بروزرسانی شد", $shopkeyboard, 'HTML');
     step('home',$from_id);
 }
@@ -2861,12 +2902,12 @@ elseif ($user['step'] == "change_val") {
         sendmessage($from_id, $textbotlang['Admin']['Product']['Invalidvolume'], $backadmin, 'HTML');
         return;
     }
-    $stmt = $connect->prepare("UPDATE invoice SET Volume = ? WHERE name_product = ? AND Service_location = ? ");
-    $stmt->bind_param("sss", $text, $user['Processing_value'],$user['Processing_value_one']);
-    $stmt->execute();
-    $stmt = $connect->prepare("UPDATE product SET Volume_constraint = ? WHERE name_product = ?  AND Location = ? ");
-    $stmt->bind_param("sss", $text, $user['Processing_value'],$user['Processing_value_one']);
-    $stmt->execute();
+    $sqlInvoice = "UPDATE invoice SET Volume = ? WHERE name_product = ? AND Service_location = ?";
+    $stmtInvoice = $pdo->prepare($sqlInvoice);
+    $stmtInvoice->execute([$text, $user['Processing_value'], $user['Processing_value_one']]);
+    $sqlProduct = "UPDATE product SET Volume_constraint = ? WHERE name_product = ? AND Location = ?";
+    $stmtProduct = $pdo->prepare($sqlProduct);
+    $stmtProduct->execute([$text, $user['Processing_value'], $user['Processing_value_one']]);
     sendmessage($from_id, $textbotlang['Admin']['Product']['volumeUpdated'], $shopkeyboard, 'HTML');
     step('home',$from_id);
 }
@@ -2880,12 +2921,16 @@ elseif ($user['step'] == "change_time") {
         sendmessage($from_id, $textbotlang['Admin']['Product']['InvalidTime'], $backadmin, 'HTML');
         return;
     }
-    $stmt = $connect->prepare("UPDATE invoice SET Service_time = ? WHERE name_product = ? AND Service_location = ? ");
-    $stmt->bind_param("sss", $text, $user['Processing_value'],$user['Processing_value_one']);
-    $stmt->execute();
-    $stmt = $connect->prepare("UPDATE product SET Service_time = ? WHERE name_product = ? AND Location = ? ");
-    $stmt->bind_param("sss", $text, $user['Processing_value'],$user['Processing_value_one']);
-    $stmt->execute();
+    $stmtInvoice = $pdo->prepare("UPDATE invoice SET Service_time = ? WHERE name_product = ? AND Service_location = ?");
+    $stmtInvoice->bindParam(1, $text);
+    $stmtInvoice->bindParam(2, $user['Processing_value']);
+    $stmtInvoice->bindParam(3, $user['Processing_value_one']);
+    $stmtInvoice->execute();
+    $stmtProduct = $pdo->prepare("UPDATE product SET Service_time = ? WHERE name_product = ? AND Location = ?");
+    $stmtProduct->bindParam(1, $text);
+    $stmtProduct->bindParam(2, $user['Processing_value']);
+    $stmtProduct->bindParam(3, $user['Processing_value_one']);
+    $stmtProduct->execute();
     sendmessage($from_id, $textbotlang['Admin']['Product']['TimeUpdated'], $shopkeyboard, 'HTML');
     step('home',$from_id);
 }
@@ -3048,9 +3093,10 @@ elseif ($user['step'] == "get_code") {
         sendmessage($from_id, $textbotlang['Admin']['Discount']['ErrorCode'], null, 'HTML');
         return;
     }
-    $stmt = $connect->prepare("INSERT INTO Discount (code) VALUES (?)");
-    $stmt->bind_param("s", $text);
-    $stmt->execute();
+$stmt = $pdo->prepare("INSERT INTO Discount (code) VALUES (?)");
+$stmt->bindParam(1, $text);
+$stmt->execute();
+    
     sendmessage($from_id, $textbotlang['Admin']['Discount']['PriceCode'], null, 'HTML');
     step('get_price_code',$from_id);
     update("user", "Processing_value",$text,"id",$from_id);
@@ -3136,7 +3182,7 @@ elseif ($user['step'] == "GetIdAndOrdedrs") {
         sendmessage($from_id, $textbotlang['Admin']['not-user'], $backadmin, 'HTML');
         return;
     }
-    $OrderUsers = mysqli_query($connect, "SELECT * FROM invoice WHERE id_user = '$text'");
+    $OrderUsers = select("invoice", "*","id_user" ,$text ,"fetchAll");
     foreach ($OrderUsers as $OrderUser) {
         if (isset($OrderUser['time_sell'])) {
             $datatime = $OrderUser['time_sell'];
@@ -3169,8 +3215,8 @@ elseif ($user['step'] == "remove-Discount") {
         sendmessage($from_id, $textbotlang['Admin']['Discount']['NotCode'], null, 'HTML');
         return;
     }
-    $stmt = $connect->prepare("DELETE FROM Discount WHERE code = ?");
-    $stmt->bind_param("s", $text);
+    $stmt = $pdo->prepare("DELETE FROM Discount WHERE code = ?");
+    $stmt->bindParam(1, $text);
     $stmt->execute();
     sendmessage($from_id, $textbotlang['Admin']['Discount']['RemovedCode'], $shopkeyboard, 'HTML');
 }
@@ -3185,8 +3231,8 @@ elseif ($user['step'] == "removeprotocol") {
         return;
     }
     sendmessage($from_id, $textbotlang['Admin']['Protocol']['RemovedProtocol'], $keyboardmarzban, 'HTML');
-    $stmt = $connect->prepare("DELETE FROM protocol WHERE NameProtocol = ?");
-    $stmt->bind_param("s", $text);
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(1, $text);
     $stmt->execute();
     step('home',$from_id);
 }
@@ -3202,8 +3248,8 @@ elseif ($user['step'] == "removeservice") {
     if(isset($get_username_Check['status'])){
         removeuser($Check_token['access_token'], $marzban_list_get['url_panel'], $text);
     }
-    $stmt = $connect->prepare("DELETE FROM invoice WHERE username = ?");
-    $stmt->bind_param("s", $text);
+    $stmt = $pdo->prepare("DELETE FROM invoice WHERE username = ?");
+    $stmt->bindParam(1, $text);
     $stmt->execute();
     sendmessage($from_id, $textbotlang['Admin']['ManageUser']['RemovedService'], $keyboardadmin, 'HTML');
     step('home',$from_id);
@@ -3606,8 +3652,8 @@ elseif($user['step'] == "GetpaawordNew"){
 }
 if($text == "❌ حذف پنل"  ) {
     sendmessage($from_id, $textbotlang['Admin']['managepanel']['RemovedPanel'], $keyboardmarzban, 'HTML');
-    $stmt = $connect->prepare("DELETE FROM marzban_panel WHERE name_panel = ?");
-    $stmt->bind_param("s", $user['Processing_value']);
+    $stmt = $pdo->prepare("DELETE FROM marzban_panel WHERE name_panel = ?");
+    $stmt->bindParam(1, $user['Processing_value']);
     $stmt->execute();
 }
 if($text == "➕ تنظیم قیمت حجم اضافه"  ){
@@ -3633,7 +3679,7 @@ if ($text == "👥 شارژ همگانی") {
         return;
     }
     sendmessage($from_id, $textbotlang['Admin']['Balance']['AddBalanceUsers'], $User_Services, 'HTML');
-    $Balance_user = mysqli_query($connect, "SELECT * FROM user");
+    $Balance_user = select("user", "*",null ,null ,"fetchAll");
     foreach ($Balance_user as $balance) {
     $Balance_add_user = $balance['Balance'] + $text;
     update("user", "Balance",$Balance_add_user,"id",$balance['id']);
@@ -3701,10 +3747,14 @@ elseif ($user['step'] == "get_codesell") {
         sendmessage($from_id, $textbotlang['Admin']['Discount']['ErrorCode'], null, 'HTML');
         return;
     }
-    $stmt = $connect->prepare("INSERT INTO DiscountSell (codeDiscount,usedDiscount,price,limitDiscount) VALUES (?,?,?,?)");
-    $values = "0";
-    $stmt->bind_param("ssss", $text, $values, $values, $values);
-    $stmt->execute();
+   $values = "0";
+   $stmt = $pdo->prepare("INSERT INTO DiscountSell (codeDiscount, usedDiscount, price, limitDiscount) VALUES (?, ?, ?, ?)");
+   $stmt->bindParam(1, $text);
+   $stmt->bindParam(2, $values);
+   $stmt->bindParam(3, $values);
+   $stmt->bindParam(4, $values);
+   $stmt->execute();
+
     sendmessage($from_id, $textbotlang['Admin']['Discount']['PriceCodesell'], null, 'HTML');
     step('get_price_codesell',$from_id);
     update("user", "Processing_value",$text,"id",$from_id);
@@ -3732,8 +3782,8 @@ elseif ($user['step'] == "remove-Discountsell") {
         sendmessage($from_id, $textbotlang['Admin']['Discount']['NotCode'], null, 'HTML');
         return;
     }
-    $stmt = $connect->prepare("DELETE FROM DiscountSell WHERE codeDiscount = ?");
-    $stmt->bind_param("s", $text);
+    $stmt = $pdo->prepare("DELETE FROM DiscountSell WHERE codeDiscount = ?");
+    $stmt->bindParam(1, $text);
     $stmt->execute();
     sendmessage($from_id, $textbotlang['Admin']['Discount']['RemovedCode'], $shopkeyboard, 'HTML');
 }
