@@ -1,9 +1,14 @@
 <?php
 require_once 'config.php';
-$setting = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM setting"));
+require_once 'functions.php';
+$setting = select("setting", "*");
+$admin_ids = select("admin", "id_admin",null,null,"FETCH_COLUMN");
 //-----------------------------[  text panel  ]-------------------------------
-$result = $connect->query("SHOW TABLES LIKE 'textbot'");
-$table_exists = ($result->num_rows > 0);
+$sql = "SHOW TABLES LIKE 'textbot'";
+$stmt = $pdo->prepare($sql);
+  $stmt->execute();
+  $result = $stmt->fetchAll();
+  $table_exists = count($result) > 0;
 $datatextbot = array(
     'text_usertest' => '',
     'text_Purchased_services' => '',
@@ -22,7 +27,7 @@ $datatextbot = array(
 
 );
 if ($table_exists) {
-    $textdatabot =  mysqli_query($connect, "SELECT * FROM textbot");
+    $textdatabot = select("textbot", "*",null ,null ,"fetchAll");
     $data_text_bot = array();
     foreach ($textdatabot as $row) {
         $data_text_bot[] = array(
@@ -36,8 +41,6 @@ if ($table_exists) {
         }
     }
 }
-$result = mysqli_query($connect, "SELECT id_admin FROM admin");
-$admin_ids = array_column(mysqli_fetch_all($result, MYSQLI_ASSOC), 'id_admin');
 $keyboard = [
     'keyboard' => [
         [['text' => $datatextbot['text_sell']],['text' => $datatextbot['text_usertest']]],
@@ -152,11 +155,11 @@ $valid_Number =  json_encode([
     ],
     'resize_keyboard' => true
 ]);
-$PaySettingcard = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'Cartstatus'"))['ValuePay'];
-$PaySettingnow = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'nowpaymentstatus'"))['ValuePay'];
-$PaySettingdigi = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'digistatus'"))['ValuePay'];
-$PaySettingaqayepardakht = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'statusaqayepardakht'"))['ValuePay'];
-$PaySettingperfectmoney = mysqli_fetch_assoc(mysqli_query($connect, "SELECT (ValuePay) FROM PaySetting WHERE NamePay = 'status_perfectmoney'"))['ValuePay'];
+$PaySettingcard = select("PaySetting", "ValuePay", "NamePay", 'Cartstatus',"select")['ValuePay'];
+$PaySettingnow = select("PaySetting", "ValuePay", "NamePay", 'nowpaymentstatus',"select")['ValuePay'];
+$PaySettingdigi = select("PaySetting", "ValuePay", "NamePay", 'digistatus',"select")['ValuePay'];
+$PaySettingaqayepardakht = select("PaySetting", "ValuePay", "NamePay", 'statusaqayepardakht',"select")['ValuePay'];
+$PaySettingperfectmoney = select("PaySetting", "ValuePay", "NamePay", 'status_perfectmoney',"select")['ValuePay'];
 $step_payment = [
     'inline_keyboard' => []
     ];
@@ -288,12 +291,15 @@ $backadmin = json_encode([
     'resize_keyboard' => true,
     'input_field_placeholder' =>"برای بازگشت روی دکمه زیر کلیک کنید"
 ]);
-$result = $connect->query("SHOW TABLES LIKE 'marzban_panel'");
-$table_exists = ($result->num_rows > 0);
-$namepanel = [];
-if ($table_exists) {
-    $marzbnget = mysqli_query($connect, "SELECT * FROM marzban_panel");
-    while ($row = mysqli_fetch_assoc($marzbnget)) {
+$stmt = $pdo->prepare("SHOW TABLES LIKE 'marzban_panel'");
+  $stmt->execute();
+  $result = $stmt->fetchAll();
+  $table_exists = count($result) > 0;
+  $namepanel = [];
+  if ($table_exists) {
+    $stmt = $pdo->prepare("SELECT * FROM marzban_panel");
+    $stmt->execute();
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $namepanel[] = [$row['name_panel']];
     }
     $list_marzban_panel = [
@@ -310,13 +316,16 @@ if ($table_exists) {
     }
     $json_list_marzban_panel = json_encode($list_marzban_panel);
 }
-    $result = $connect->query("SHOW TABLES LIKE 'help'");
-    $table_exists = ($result->num_rows > 0);
-
-    if ($table_exists) {
+$sql = "SHOW TABLES LIKE 'marzban_panel'";
+$stmt = $pdo->prepare($sql);
+  $stmt->execute();
+  $result = $stmt->fetchAll();
+  $table_exists = count($result) > 0;
+  if ($table_exists) {
         $help = [];
-        $helpname = mysqli_query($connect, "SELECT * FROM help");
-        while ($row = mysqli_fetch_assoc($helpname)) {
+        $stmt = $pdo->prepare("SELECT * FROM help");
+        $stmt->execute();
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $help[] = [$row['name_os']];
         }
         $help_arr = [
@@ -334,17 +343,11 @@ if ($table_exists) {
         $json_list_help = json_encode($help_arr);
     }
 
-$query = mysqli_query($connect, "SELECT * FROM user WHERE id = '$from_id' LIMIT 1");
-if (mysqli_num_rows($query) > 0) {
-    $users = mysqli_fetch_assoc($query);
-} else {
+$users = select("user", "*", "id", $from_id,"select");
+if ($users == false) {
     $users = array();
     $users = array(
         'step' => '',
-        'Processing_value' => '',
-        'User_Status' => '',
-        'username' => '',
-        'limit_usertest' =>'',
     );
 }
 $list_marzban_panel_users = [
@@ -406,10 +409,13 @@ $textbot = json_encode([
     'resize_keyboard' => true
 ]);
 //--------------------------------------------------
-$result = $connect->query("SHOW TABLES LIKE 'protocol'");
-$table_exists = ($result->num_rows > 0);
-if ($table_exists) {
-        $getdataprotocol = mysqli_query($connect, "SELECT * FROM protocol");
+$sql = "SHOW TABLES LIKE 'protocol'";
+$stmt = $pdo->prepare($sql);
+  $stmt->execute();
+  $result = $stmt->fetchAll();
+  $table_exists = count($result) > 0;
+  if ($table_exists) {
+    $getdataprotocol = select("protocol", "*",null ,null ,"fetchAll");
     $protocol = [];
     foreach($getdataprotocol as $result)
     {
@@ -419,18 +425,18 @@ if ($table_exists) {
     $keyboardprotocollist = json_encode(['resize_keyboard'=>true,'keyboard'=> $protocol]);
  }
 //--------------------------------------------------
-$result = $connect->query("SHOW TABLES LIKE 'product'");
-$table_exists = ($result->num_rows > 0);
-if ($table_exists) {
+$sql = "SHOW TABLES LIKE 'product'";
+$stmt = $pdo->prepare($sql);
+  $stmt->execute();
+  $result = $stmt->fetchAll();
+  $table_exists = count($result) > 0;
+  if ($table_exists) {
     $product = [];
-    $cleaned_text = mysqli_real_escape_string($connect, $text);
-    $stmt = mysqli_prepare($connect, "SELECT * FROM product WHERE Location = ? OR Location = '/all'");
-    mysqli_stmt_bind_param($stmt, "s", $cleaned_text);
-    mysqli_stmt_execute($stmt);
-    $getdataproduct = mysqli_stmt_get_result($stmt);
-    mysqli_stmt_close($stmt);
-    if(isset($getdataproduct)){
-    while ($row = mysqli_fetch_assoc($getdataproduct)) {
+    $cleaned_text = $pdo->quote($connect, $text);
+    $stmt = $pdo->prepare("SELECT * FROM product WHERE Location = :Location OR Location = '/all'");
+    $stmt->bindParam(':Location', $cleaned_text);
+    $stmt->execute();
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $product[] = [$row['name_product']];
     }
     $list_product = [
@@ -447,14 +453,17 @@ if ($table_exists) {
     }
     $json_list_product_list_admin = json_encode($list_product);
     }
-}
 //--------------------------------------------------
-$result = $connect->query("SHOW TABLES LIKE 'Discount'");
-$table_exists = ($result->num_rows > 0);
-if ($table_exists) {
+$sql = "SHOW TABLES LIKE 'Discount'";
+$stmt = $pdo->prepare($sql);
+  $stmt->execute();
+  $result = $stmt->fetchAll();
+  $table_exists = count($result) > 0;
+  if ($table_exists) {
     $Discount = [];
-    $getdataDiscount = mysqli_query($connect, "SELECT * FROM Discount");
-    while ($row = mysqli_fetch_assoc($getdataDiscount)) {
+    $stmt = $pdo->prepare("SELECT * FROM Discount");
+    $stmt->execute();
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $Discount[] = [$row['code']];
     }
     $list_Discount = [
@@ -472,12 +481,17 @@ if ($table_exists) {
     $json_list_Discount_list_admin = json_encode($list_Discount);
 }
 //--------------------------------------------------
-$result = $connect->query("SHOW TABLES LIKE 'DiscountSell'");
-$table_exists = ($result->num_rows > 0);
-if ($table_exists) {
+$sql = "SHOW TABLES LIKE 'DiscountSell'";
+$stmt = $pdo->prepare($sql);
+  $stmt->execute();
+  $result = $stmt->fetchAll();
+  $table_exists = count($result) > 0;
+  $namepanel = [];
+  if ($table_exists) {
     $DiscountSell = [];
-    $getdataDiscountsell = mysqli_query($connect, "SELECT * FROM DiscountSell");
-    while ($row = mysqli_fetch_assoc($getdataDiscountsell)) {
+    $stmt = $pdo->prepare("SELECT * FROM DiscountSell");
+    $stmt->execute();
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $DiscountSell[] = [$row['codeDiscount']];
     }
     $list_Discountsell = [
@@ -562,29 +576,6 @@ $perfectmoneykeyboard = json_encode([
     ],
     'resize_keyboard' => true
 ]);
-//--------------------------------------------------
-$result = $connect->query("SHOW TABLES LIKE 'DiscountSell'");
-$table_exists = ($result->num_rows > 0);
-if ($table_exists) {
-    $DiscountSell = [];
-    $getdataDiscountsell = mysqli_query($connect, "SELECT * FROM DiscountSell");
-    while ($row = mysqli_fetch_assoc($getdataDiscountsell)) {
-        $DiscountSell[] = [$row['codeDiscount']];
-    }
-    $list_Discountsell = [
-        'keyboard' => [],
-        'resize_keyboard' => true,
-    ];
-    $list_Discountsell['keyboard'][] = [
-        ['text' => "🏠 بازگشت به منوی مدیریت"],
-    ];
-    foreach ($DiscountSell as $button) {
-        $list_Discountsell['keyboard'][] = [
-            ['text' => $button[0]]
-        ];
-    }
-    $json_list_Discount_list_admin_sell = json_encode($list_Discountsell);
-}
 //--------------------------------------------------
 
 $affiliates =  json_encode([
