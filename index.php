@@ -2209,7 +2209,8 @@ elseif ($user['step'] == "get_panel") {
     } elseif ($Check_token['detail'] == "Incorrect username or password") {
         $text_marzban = "❌ نام کاربری یا رمز عبور پنل اشتباه است";
     } else {
-        $text_marzban = $textbotlang['Admin']['managepanel']['errorstateuspanel'];
+        $text_marzban = $textbotlang['Admin']['managepanel']['errorstateuspanel']."\n\rدلیل خطا : 
+            {$Check_token['errror']}";
     }
 
     sendmessage($from_id, $text_marzban, $keyboardmarzban, 'HTML');
