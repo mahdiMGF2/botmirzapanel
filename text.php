@@ -174,6 +174,7 @@ $textbotlang['users']['Discount']['getcodesell']  = "🧑‍💻 کد تخفیف
 $textbotlang['users']['Discount']['correctcode']  = "🤩 کد تخفیف شما درست بود و مبلغ روی فاکتور شما اعمال شد.";
 $textbotlang['users']['Discount']['erorrlimit']  = "❌ محدودیت استفاده از این کد تخفیف به پایان رسیده است";
 $textbotlang['users']['Discount']['erorrlimitdiscount']  = "❌ محدودیت استفاده از این کد هدیه به پایان رسیده است";
+$textbotlang['users']['Discount']['firstdiscount']  = "❌ این کد تخفیف مخصوص خرید اول است";
 
 
 

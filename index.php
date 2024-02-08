@@ -1454,6 +1454,17 @@ elseif ($user['step'] == "getcodesellDiscount") {
         sendmessage($from_id, $textbotlang['users']['Discount']['erorrlimit'], null, 'HTML');
         return;
     }
+    if($SellDiscountlimit['usefirst'] == "1"){
+            $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user");
+            $stmt->bindParam(':id_user', $from_id);
+            $stmt->execute();
+            $countinvoice = $stmt->rowCount();
+            if($countinvoice != 0){
+                        sendmessage($from_id, $textbotlang['users']['Discount']['firstdiscount'], null, 'HTML');
+                        return;
+            }
+
+    }
     sendmessage($from_id, $textbotlang['users']['Discount']['correctcode'], $keyboard, 'HTML');
     step('payment',$from_id);
     $stmt = $pdo->prepare("SELECT * FROM product WHERE code_product = :code AND (location = :loc1 OR location = '/all') LIMIT 1");
@@ -3859,6 +3870,12 @@ elseif ($user['step'] == "get_price_codesell") {
 }
 elseif ($user['step'] == "getlimitcode") {
     update("DiscountSell", "limitDiscount",$text,"codeDiscount",$user['Processing_value']);
+    sendmessage($from_id, "📌 کد تخفیف برای خرید اول باشد یا همه خرید ها
+0 : همه خرید ها
+1 : خرید اول ", $backadmin, 'HTML');
+    step('getusefirst',$from_id);
+}elseif ($user['step'] == "getusefirst") {
+    update("DiscountSell", "usefirst",$text,"codeDiscount",$user['Processing_value']);
     sendmessage($from_id, $textbotlang['Admin']['Discount']['SaveCode'], $keyboardadmin, 'HTML');
     step('home',$from_id);
 }

@@ -712,10 +712,17 @@ try {
         codeDiscount varchar(1000)  NOT NULL,
         price varchar(200)  NOT NULL,
         limitDiscount varchar(500)  NOT NULL,
-        usedDiscount varchar(500) NOT NULL)");
+        usedDiscount varchar(500) NOT NULL,
+        usefirst varchar(500) NOT NULL)");
         if (!$result) {
             echo "table DiscountSell".mysqli_error($connect);
         }
+    }else{
+      $Check_filde = $connect->query("SHOW COLUMNS FROM DiscountSell LIKE 'usefirst'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE DiscountSell ADD usefirst VARCHAR(500)");
+            echo "The DiscountSell field was added ✅";
+        }   
     }
 } catch (Exception $e) {
     file_put_contents("$randomString.txt",$e->getMessage());
