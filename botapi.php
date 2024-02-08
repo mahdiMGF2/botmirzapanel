@@ -31,11 +31,12 @@ function forwardMessage($chat_id,$message_id,$chat_id_user){
         'chat_id'=> $chat_id_user,
     ]);
 }
-function sendphoto($chat_id,$photoid,$caption){
+function sendphoto($chat_id,$photoid,$caption,$parse_mode = "HTML"){
     telegram('sendphoto',[
         'chat_id' => $chat_id,
         'photo'=> $photoid,
         'caption'=> $caption,
+        'parse_mode' => $parse_mode,
     ]);
 }
 function sendvideo($chat_id,$videoid,$caption){
