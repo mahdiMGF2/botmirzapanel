@@ -374,7 +374,8 @@ $textbotlang['Admin']['Status']['flowStatusOff'] = "flow غیرفعال شد";
 $textbotlang['Admin']['Status']['flowStatuson'] = "flow روشن شد";
 $textbotlang['Admin']['Status']['BotStatusOff'] = "❌ ربات خاموش گردید ";
 $textbotlang['Admin']['Status']['BotStatuson'] = "🤖 ربات روشن گردید";
-$textbotlang['Admin']['Status']['UsernameTitle'] = "وضعیت دکمه نام کاربری";
+$textbotlang['Admin']['Status']['UsernameTitle'] = "وضعیت دکمه نام کاربری
+در صورت فعال بودن این قابلیت  در قسمت مدیریت سرویس ها یک  دکمه اضافه میشود که  کاربر از طریق اون میتواند نام کاربری را ارسال   و اطلاعات اکانت  را مشاهده کند.";
 $textbotlang['Admin']['Status']['UsernameStatusOff'] = "وضعیت دکمه نام کاربری خاموش شد";
 $textbotlang['Admin']['Status']['UsernameStatuson'] = "دکمه نام کاربری روشن شد";
 $textbotlang['Admin']['Status']['rollTitle'] = "وضعیت قانون";

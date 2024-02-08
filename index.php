@@ -458,6 +458,12 @@ if (preg_match('/product_(\w+)/', $datain, $dataget)) {
         sendmessage($from_id, $textbotlang['users']['stateus']['error'], $keyboard, 'html');
         return;
     }
+    if(isset($data_useer['online_at']) && $data_useer['online_at'] !== null){
+        $dateString = $data_useer['online_at'];
+        $lastonline = jdate('Y/m/d h:i:s',strtotime($dateString));
+    }else{
+        $lastonline = "متصل نشده";
+    }
     #-------------status----------------#
     $status = $data_useer['status'];
     $status_var = [
@@ -501,6 +507,8 @@ if (preg_match('/product_(\w+)/', $datain, $dataget)) {
 نام کاربری سرویس : {$data_useer['username']}
 لوکیشن :{$nameloc['Service_location']}
 کد سرویس:{$nameloc['id_invoice']}
+
+🟢 اخرین زمان اتصال شما : $lastonline
 
 📥 حجم مصرفی : $usedTrafficGb
 ♾ حجم سرویس : $LastTraffic
