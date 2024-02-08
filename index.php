@@ -249,8 +249,11 @@ if ($user['step'] == 'get_number') {
 
 #-----------Purchased services------------#
 if ($text == $datatextbot['text_Purchased_services'] || $datain == "backorder") {
-    $invoices = select("invoice", "*", "id_user", $from_id,"select");
-    if (is_null($invoices) && $setting['NotUser'] == "offnotuser") {
+    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user AND status = 'active'");
+    $stmt->bindParam(':id_user', $from_id);
+    $stmt->execute();
+    $invoices = $stmt->rowCount();
+    if ($invoices == 0 && $setting['NotUser'] == "offnotuser") {
         sendmessage($from_id, $textbotlang['users']['sell']['service_not_available'], null, 'html');
         return;
     }
@@ -258,7 +261,7 @@ if ($text == $datatextbot['text_Purchased_services'] || $datain == "backorder") 
     $page = 1;
     $items_per_page = 5;
     $start_index = ($page - 1) * $items_per_page;
-    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user ORDER BY username ASC LIMIT $start_index, $items_per_page");
+    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user AND status = 'active' ORDER BY username ASC LIMIT $start_index, $items_per_page");
     $stmt->bindParam(':id_user', $from_id);
     $stmt->execute();
     $keyboardlists = [
@@ -379,7 +382,7 @@ if ($datain == 'next_page') {
         $next_page = $page + 1;
     }
     $start_index = ($next_page - 1) * $items_per_page;
-    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user ORDER BY username ASC LIMIT $start_index, $items_per_page");
+    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user WWHERE status = 'active' ORDER BY username ASC LIMIT $start_index, $items_per_page");
     $stmt->bindParam(':id_user', $from_id);
     $stmt->execute();
     $keyboardlists = [
@@ -416,7 +419,7 @@ if ($datain == 'next_page') {
         $next_page = $page - 1;
     }
     $start_index = ($next_page - 1) * $items_per_page;
-    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user ORDER BY username ASC LIMIT $start_index, $items_per_page");
+    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user AND status = 'active' ORDER BY username ASC LIMIT $start_index, $items_per_page");
     $stmt->bindParam(':id_user', $from_id);
     $stmt->execute();
     $keyboardlists = [
@@ -486,7 +489,7 @@ if (preg_match('/product_(\w+)/', $datain, $dataget)) {
                 ['text' => $textbotlang['users']['changelink']['btntitle'], 'callback_data' => 'changelink_'.$username],
             ],
             [
-                ['text' => $textbotlang['users']['qrcode']['manageservice']['getqrcodelink'], 'callback_data' => 'qrcodelink_'.$username],
+                ['text' => $textbotlang['users']['removeconfig']['btnremoveuser'], 'callback_data' => 'removeserviceuserco-'.$username],
                 ['text' => $textbotlang['users']['Extra_volume']['sellextra'], 'callback_data' => 'Extra_volume_'.$username],
                 ],
             [
@@ -521,7 +524,11 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
     {$textbotlang['users']['stateus']['linksub']}
     
     <code>$subscriptionurl</code>";
-    sendmessage($from_id, $textsub, null, 'html');
+    $randomString = bin2hex(random_bytes(2));
+    $urlimage = "$from_id$randomString.png";
+    QRcode::png($subscriptionurl,$urlimage, QR_ECLEVEL_L, 7);
+    sendphoto($from_id, "https://$domainhosts/$urlimage", $textsub);
+    unlink($urlimage);
 }
 elseif (preg_match('/config_(\w+)/', $datain, $dataget)) {
     $username = $dataget[1];
@@ -667,22 +674,6 @@ $datam = array(
     Editmessagetext($from_id, $message_id,  $textbotlang['users']['changelink']['confirmed'], null);
 
 }
-elseif (preg_match('/qrcodelink_(\w+)/', $datain, $dataget)) {
-    $username = $dataget[1];
-    $nameloc = select("invoice", "*", "username", $username,"select");
-    $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'],"select");
-    $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
-    $data_useer = getuser($username, $Check_token['access_token'], $marzban_list_get['url_panel']);
-    $subscriptionurl = $data_useer['subscription_url'];
-    if (!preg_match('/^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?((\/[^\s\/]+)+)?$/', $subscriptionurl)) {
-        $subscriptionurl = $marzban_list_get['url_panel'] . "/" . ltrim($subscriptionurl, "/");
-    }
-    $randomString = bin2hex(random_bytes(3));
-    $urlimage = "$from_id$randomString.png";
-    QRcode::png($subscriptionurl,$urlimage, QR_ECLEVEL_L, 7);
-    sendphoto($from_id, "https://$domainhosts/$urlimage", $textbotlang['users']['qrcode']['manageservice']['getqrcodelink']);
-    unlink($urlimage);
-}
 elseif (preg_match('/Extra_volume_(\w+)/', $datain, $dataget)) {
     $username = $dataget[1];
     update("user", "Processing_value", $username, "id",$from_id);
@@ -762,7 +753,104 @@ elseif (preg_match('/confirmaextra_(\w+)/', $datain, $dataget)) {
          sendmessage($setting['Channel_Report'], $text_report, null, 'HTML');
          }
 }
+elseif (preg_match('/removeserviceuserco-(\w+)/', $datain, $dataget)) {
+    $username = $dataget[1];
+    $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '$username'"));
+    $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$nameloc['Service_location']}'"));
+    $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
+    $DataUserOut = getuser($username, $Check_token['access_token'], $marzban_list_get['url_panel']);
+    if(isset($DataUserOut['status']) && in_array($DataUserOut['status'], ["expired", "limited", "disabled"])){
+        sendmessage($from_id, $textbotlang['users']['stateus']['error'], null, 'html');
+        return;
+    }
+    $requestcheck = mysqli_query($connect, "SELECT * FROM cancel_service WHERE username = '$username' LIMIT 1");
+    if (mysqli_num_rows($requestcheck) != 0) {
+        sendmessage($from_id, $textbotlang['users']['stateus']['errorexits'], null, 'html');
+        return;
+    }
+    $confirmremove = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => "✅  درخواست حذف سرویس را دارم", 'callback_data' => "confirmremoveservices-$username"],
+            ],
+        ]
+    ]);
+    Editmessagetext($from_id, $message_id, $textbotlang['users']['stateus']['descriptions_removeservice'], $confirmremove);
+}
+elseif (preg_match('/confirmremoveservices-(\w+)/', $datain, $dataget)) {
+    $checkcancelservice = mysqli_query($connect, "SELECT * FROM cancel_service WHERE id_user = '$from_id' AND status = 'waiting'");
+    if (mysqli_num_rows($checkcancelservice) != 0) {
+        sendmessage($from_id,$textbotlang['users']['stateus']['exitsrequsts'], null, 'HTML');
+        return;
+    }
+    $usernamepanel = $dataget[1];
+    $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '$usernamepanel'"));
+    $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$nameloc['Service_location']}'"));
+    $stmt = $connect->prepare("INSERT IGNORE INTO cancel_service (id_user, username,description,status) VALUES (?, ?, ?, ?)");
+    $descriptions = "0";
+    $Status = "waiting";
+    $stmt->bind_param("ssss", $from_id, $usernamepanel, $descriptions, $Status);
+    $stmt->execute();
+    $stmt->close();
+    $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
+    $DataUserOut = getuser($usernamepanel, $Check_token['access_token'], $marzban_list_get['url_panel']);
+        #-------------status----------------#
+    $status = $DataUserOut['status'];
+    $status_var = [
+        'active' =>  $textbotlang['users']['stateus']['active'],
+        'limited' => $textbotlang['users']['stateus']['limited'],
+        'disabled' => $textbotlang['users']['stateus']['disabled'],
+        'expired' => $textbotlang['users']['stateus']['expired'],
+        'on_hold' => $textbotlang['users']['stateus']['on_hold']
+    ][$status];
+    #--------------[ expire ]---------------#
+    $expirationDate = $DataUserOut['expire'] ? jdate('Y/m/d', $DataUserOut['expire']) : $textbotlang['users']['stateus']['Unlimited'];
+    #-------------[ data_limit ]----------------#
+    $LastTraffic = $DataUserOut['data_limit'] ? formatBytes($DataUserOut['data_limit']) : $textbotlang['users']['stateus']['Unlimited'];
+    #---------------[ RemainingVolume ]--------------#
+    $output =  $DataUserOut['data_limit'] - $DataUserOut['used_traffic'];
+    $RemainingVolume = $DataUserOut['data_limit'] ? formatBytes($output) : "نامحدود";
+    #---------------[ used_traffic ]--------------#
+    $usedTrafficGb = $DataUserOut['used_traffic'] ? formatBytes($DataUserOut['used_traffic']) : $textbotlang['users']['stateus']['Notconsumed'];
+    #--------------[ day ]---------------#
+    $timeDiff = $DataUserOut['expire'] - time();
+    $day = $DataUserOut['expire'] ? floor($timeDiff / 86400) . $textbotlang['users']['stateus']['day'] : $textbotlang['users']['stateus']['Unlimited'];
+    #-----------------------------#
+        $textinfoadmin = "سلام ادمین 👋
+        
+📌 یک درخواست حذف سرویس  توسط کاربر برای شما ارسال شده است. لطفا بررسی کرده و در صورت درست بودن و موافقت تایید کنید. 
+⚠️ نکات تایید :
+1 -  مبلغ قابل بازگشت به کاربر توسط شما تعیین خواهد شد.
+        
+        
+📊 اطلاعات سرویس کاربر :
+آیدی عددی کاربر : $from_id
+نام کاربری کاربر : @$username
+نام کاربری کانفیگ : {$nameloc['username']}
+وضعیت سرویس : $status_var
+لوکیشن : {$nameloc['Service_location']}
+کد سرویس:{$nameloc['id_invoice']}
 
+📥 حجم مصرفی : $usedTrafficGb
+♾ حجم سرویس : $LastTraffic
+🪫 حجم باقی مانده : $RemainingVolume
+📅 فعال تا تاریخ : $expirationDate ($day)";
+    $confirmremoveadmin = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => "❌حذف سرویس", 'callback_data' => "remoceserviceadmin-$usernamepanel"],
+                ['text' => "❌عدم تایید حذف", 'callback_data' => "rejectremoceserviceadmin-$usernamepanel"],
+            ],
+        ]
+    ]);
+    foreach ($admin_ids as $admin) {
+        sendmessage($admin, $textinfoadmin, $confirmremoveadmin, 'html');
+        step('home', $admin);
+    }
+    deletemessage($from_id, $message_id);
+    sendmessage($from_id, "✅ درخواست شما ارسال گردید پس از بررسی مدیریت نتیجه به شما اطلاع رسانی خواهد شد", $keyboard, 'html');
+
+}
 #-----------usertest------------#
 if ($text == $datatextbot['text_usertest']) {
     $locationproduct = select("marzban_panel", "*", null, null,"count");
@@ -3928,4 +4016,92 @@ elseif ($user['step'] == "getdiscont") {
     update("affiliates", "price_Discount", $text);
     step('home',$from_id);
 }
+
+
+elseif (preg_match('/rejectremoceserviceadmin-(\w+)/', $datain, $dataget)) {
+    $usernamepanel = $dataget[1];
+    $requestcheck = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM cancel_service WHERE username = '$usernamepanel' LIMIT 1"));
+    if ($requestcheck['status'] == "accept" || $requestcheck['status'] == "reject") {
+        telegram('answerCallbackQuery', array(
+            'callback_query_id' => $callback_query_id,
+            'text' => "این درخواست توسط ادمین دیگری بررسی شده است",
+            'show_alert' => true,
+            'cache_time' => 5,
+        ));
+        return;
+    }
+    step("descriptionsrequsts",$from_id);
+    update("user","Processing_value",$usernamepanel, "id",$from_id);
+    sendmessage($from_id, "📌 درخواست رد کردن حذف با موفقیت ثبت شد دلیل عدم تایید را ارسال کنید", $backuser, 'HTML');
+
+}
+elseif($user['step'] == "descriptionsrequsts"){
+    sendmessage($from_id, "✅ با موفقیت ثبت گردید", $keyboardadmin, 'HTML');
+    $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '{$user['Processing_value']}'"));
+    update("cancel_service","status","reject", "username",$user['Processing_value']);
+    update("cancel_service","description",$text, "username",$user['Processing_value']);
+    step("home",$from_id);
+    sendmessage($nameloc['id_user'], "❌ کاربری گرامی درخواست حذف شما با نام کاربری  {$user['Processing_value']} موافقت نگردید.
+        
+        دلیل عدم تایید : $text", null, 'HTML');
+
+}
+elseif (preg_match('/remoceserviceadmin-(\w+)/', $datain, $dataget)) {
+    $username = $dataget[1];
+    $requestcheck = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM cancel_service WHERE username = '$username' LIMIT 1"));
+    if ($requestcheck['status'] == "accept" || $requestcheck['status'] == "reject") {
+        telegram('answerCallbackQuery', array(
+            'callback_query_id' => $callback_query_id,
+            'text' => "این درخواست توسط ادمین دیگری بررسی شده است",
+            'show_alert' => true,
+            'cache_time' => 5,
+        ));
+        return;
+    }
+    step("getpricerequests",$from_id);
+    update("user","Processing_value",$username, "id",$from_id);
+    sendmessage($from_id, "💰 مقدار مبلغی که میخواهید به موجودی کاربر اضافه شود را ارسال کنید.", $backuser, 'HTML');
+
+}
+elseif($user['step'] == "getpricerequests"){
+    if (!ctype_digit($text)) {
+        sendmessage($from_id,"⭕️ ورودی نا معتبر", null, 'HTML');
+    }
+    $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '{$user['Processing_value']}'"));
+    if($nameloc['price_product'] < $text){
+        sendmessage($from_id, "❌ مبلغ بازگشتی بزرگ تر از مبلغ محصول است!", $backuser, 'HTML');
+        return;
+    }
+    sendmessage($from_id, "✅ با موفقیت ثبت گردید", $keyboardadmin, 'HTML');
+    step("home",$from_id);
+    $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$nameloc['Service_location']}'"));
+    $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
+    $get_username_Check = getuser($user['Processing_value'], $Check_token['access_token'], $marzban_list_get['url_panel']);
+    if(isset($get_username_Check['status'])){
+        removeuser($Check_token['access_token'], $marzban_list_get['url_panel'], $user['Processing_value']);
+    }
+    update("cancel_service","status","accept", "username",$user['Processing_value']);
+    update("invoice","status","removedbyadmin", "username",$user['Processing_value']);
+    step("home",$from_id);
+    sendmessage($nameloc['id_user'],"✅ کاربری گرامی درخواست حذف شما با نام کاربری  {$user['Processing_value']} موافقت گردید.", null, 'HTML');
+    $pricecancel = number_format(intval($text));
+    if(intval($text) != 0){
+        $Balance_id_cancel = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM user WHERE id = '{$nameloc['id_user']}' LIMIT 1"));
+        $Balance_id_cancel_fee = intval($Balance_id_cancel['Balance']) + intval($text);
+        update("user","Balance",$Balance_id_cancel_fee, "id",$nameloc['id_user']);
+        sendmessage($nameloc['id_user'],"💰کاربر گرامی مبلغ $pricecancel تومان به موجودی شما اضافه گردید.", null, 'HTML');
+    }
+    $text_report = "⭕️ یک ادمین سرویس کاربر که درخواست حذف داشت را تایید کرد
+        
+        اطلاعات کاربر تایید کننده  : 
+        
+        🪪 آیدی عددی : <code>$from_id</code>
+        💰 مبلغ بازگشتی : $pricecancel تومان
+        👤 نام کاربری : $username
+        آیدی عددی درخواست کننده کنسل کردن : {$nameloc['id_user']}";
+    if (strlen($setting['Channel_Report']) > 0) {
+        sendmessage($setting['Channel_Report'], $text_report, null, 'HTML');
+    }
+}
+
 $connect->close();
