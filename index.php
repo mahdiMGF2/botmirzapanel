@@ -382,7 +382,7 @@ if ($datain == 'next_page') {
         $next_page = $page + 1;
     }
     $start_index = ($next_page - 1) * $items_per_page;
-    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user WWHERE status = 'active' ORDER BY username ASC LIMIT $start_index, $items_per_page");
+    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user AND status = 'active' ORDER BY username ASC LIMIT $start_index, $items_per_page");
     $stmt->bindParam(':id_user', $from_id);
     $stmt->execute();
     $keyboardlists = [
@@ -2122,6 +2122,7 @@ elseif ($user['step'] == "limit_usertest_allusers") {
     sendmessage($from_id, $textbotlang['Admin']['getlimitusertest']['setlimitall'], $keyboard_usertest, 'HTML');
     step('home',$from_id);
     update("setting", "limit_usertest_all",$text);
+    update("user", "limit_usertest",null,null);
 }
 if ($text == "📯 تنظیمات کانال"  ) {
     sendmessage($from_id, $textbotlang['users']['selectoption'], $channelkeyboard, 'HTML');
