@@ -1,79 +1,69 @@
 <?php
-$post_vars = [
-    'tokenbot',
-    'idadmin',
-    'dbname',
-    'dbuser', 
-    'idbot',
-    'dbpassword'
-];
-
-
-$form_data = [];
-
+ini_set('error_log', 'error_log');
 $user_agent = $_SERVER['HTTP_USER_AGENT'];
 
 if (!preg_match('/Chrome|Firefox|Edge|Safari/i', $user_agent)) {
  die("دسترسی غیرمجاز");
 } 
-foreach ($post_vars as $key) {
-    if (isset($_POST[$key])) {
-        $form_data[$key] = htmlspecialchars($_POST[$key], ENT_QUOTES, 'UTF-8');
-    } else {
-        $form_data[$key] = '';
-    }
-}
-$tokenbot = $form_data['tokenbot'];
+
+// varable 
+$form_data = [];
+$form_data['tokenbot'] = htmlspecialchars($_POST['tokenbot'], ENT_QUOTES, 'UTF-8');
+$form_data['idadmin'] = htmlspecialchars($_POST['idadmin'], ENT_QUOTES, 'UTF-8');
+$form_data['dbname'] = htmlspecialchars($_POST['dbname'], ENT_QUOTES, 'UTF-8');
+$form_data['dbuser'] = htmlspecialchars($_POST['dbuser'], ENT_QUOTES, 'UTF-8');
+$form_data['idbot'] = htmlspecialchars($_POST['idbot'], ENT_QUOTES, 'UTF-8');
+$form_data['dbpassword'] = htmlspecialchars($_POST['dbpassword'], ENT_QUOTES, 'UTF-8');
 $domain = $_SERVER['HTTP_HOST'];
 $path = dirname($_SERVER['REQUEST_URI'],2);
 $domain_hosts = $domain . $path;
 $domain_hosts = filter_var($domain_hosts, FILTER_SANITIZE_URL);
 $fileContent = file_get_contents('../config.php');
-// تغییر مقدار $idbot
+$dsn = "mysql:host=localhost;dbname={$form_data['dbname']};charset=utf8mb4";
+$connected = false;
+try {
+  $pdo = new PDO($dsn, $form_data['dbuser'], $form_data['dbpassword']);
+  $connected = true;
+} catch (\PDOException $e) {
+  echo "ERROR : " . $e->getMessage();
+  die();
+}
+
 $patternidbot = '/\$usernamebot\s*=\s*".*?";/';
 $newFileContent = preg_replace($patternidbot, '$usernamebot = "'.$form_data['idbot'].'";', $fileContent);
 
-// تغییر مقدار $domainhost
+
 $patterndomain = '/\$domainhosts\s*=\s*".*?";/';
 $newFileContent = preg_replace($patterndomain, '$domainhosts = "'.$domain_hosts.'";', $newFileContent);
 
-// تغییر مقدار $dbname
+
 $patterndbname = '/\$dbname\s*=\s*".*?";/';
 $newFileContent = preg_replace($patterndbname, '$dbname = "'.$form_data['dbname'].'";', $newFileContent);
 
-// تغییر مقدار $dbuser
 $patternuser = '/\$usernamedb\s*=\s*".*?";/';
 $newFileContent = preg_replace($patternuser, '$usernamedb = "'.$form_data['dbuser'].'";', $newFileContent);
-// تغییر مقدار $dbdbpassword
+
 $patternpass = '/\$passworddb\s*=\s*".*?";/';
 $newFileContent = preg_replace($patternpass, '$passworddb = "'.$form_data['dbpassword'].'";', $newFileContent);
 
-// تغییر مقدار $API_KEY
-$patterntoken = '/\$APIKEY\s*=\s*".*?";/';
-$newFileContent = preg_replace($patterntoken, '$APIKEY = "'.$tokenbot.'";', $newFileContent);
 
-// تغییر مقدار $adminnumber
+$patterntoken = '/\$APIKEY\s*=\s*".*?";/';
+$newFileContent = preg_replace($patterntoken, '$APIKEY = "'.$form_data['tokenbot'].'";', $newFileContent);
+
 $patternidadmin = '/\$adminnumber\s*=\s*".*?";/';
 $newFileContent = preg_replace($patternidadmin, '$adminnumber = "'.$form_data['idadmin'].'";', $newFileContent);
 
-try {
-    $connect = new mysqli('localhost', $form_data['dbuser'], $form_data['dbpassword'], $$form_data['dbname']);
-    
-    if ($connect->connect_errno) {
-        $textdatabase = 'خطا در اتصال به پایگاه داده: ' . $connect->connect_error;
+file_put_contents('../config.php', $newFileContent);
+require_once 'table.php';
+if ($connected) {
+    $textdatabase = "ارتباط به دیتابیس برقرارشد و جداول ساخته شدند";
     } else {
-        $textdatabase = "ارتباط به دیتابیس برقرارشد و جداول ساخته شدند";
-        file_put_contents('../config.php', $newFileContent);
-        require_once 'table.php';
-                $connect->close();
+        $textdatabase = "ارتباط به دیتابیس برقرارشد و جداول ساخته نشدند";
     }
-} catch (Exception $e) {
-    $textdatabase = 'خطا در اتصال به پایگاه داده: ' . $e->getMessage();
-}
-$delete = json_decode(file_get_contents("https://api.telegram.org/bot$tokenbot/deleteWebhook?drop_pending_updates=true"),true);
-$response = json_decode(file_get_contents("https://api.telegram.org/bot" . $tokenbot . "/setWebhook?url=https://" .$domain_hosts."/index.php" ),true);
+$delete = json_decode(file_get_contents("https://api.telegram.org/{$form_data['tokenbot']}/deleteWebhook?drop_pending_updates=true"),true);
+$response = json_decode(file_get_contents("https://api.telegram.org/bot" . $form_data['tokenbot'] . "/setWebhook?url=https://" .$domain_hosts."/index.php" ),true);
 if($response['description'] == "Webhook was set"){
-            $sendmessage =file_get_contents("https://api.telegram.org/bot" . $tokenbot . "/sendMessage?chat_id=" . $form_data['idadmin'] . "&text=✅| ربات میرزا پنل با موفقیت نصب شد");
+            $sendmessage =file_get_contents("https://api.telegram.org/bot" . $form_data['tokenbot'] . "/sendMessage?chat_id=" . $form_data['idadmin'] . "&text=✅| ربات میرزا پنل با موفقیت نصب شد");
             $webhook = "ست وبهوک با موفقیت تنظیم شد";
         }
         elseif($response['description'] == "Webhook is already set"){
@@ -82,7 +72,7 @@ if($response['description'] == "Webhook was set"){
         else{
             $webhook = "ست وبهوک ربات با موفقتیت انجام نشد.";
         }
-   unlink('data.php');
+   //unlink('data.php');
 ?>
 
 <html>
