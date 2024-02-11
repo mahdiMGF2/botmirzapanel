@@ -72,7 +72,6 @@ $datatextbot = array(
     'text_help' => '',
     'text_start' => '',
     'text_bot_off' => '',
-    'text_dec_info' => '',
     'text_roll' => '',
     'text_fq' => '',
     'text_dec_fq' => '',
@@ -2361,19 +2360,7 @@ if ($text  == "📝 تنظیم متن ربات"  ) {
     sendmessage($from_id, $textbotlang['Admin']['ManageUser']['SaveText'], $textbot, 'HTML');
     update("textbot", "text", $text, "id_text","text_usertest");
     step('home',$from_id);
-} elseif ($text == "📝 تنظیم متن توضیحات اطلاعات سرویس"  ) {
-    $textstart = $textbotlang['Admin']['ManageUser']['ChangeTextGet'] . $datatextbot['text_dec_info'];
-    sendmessage($from_id, $textstart, $backadmin, 'HTML');
-    step('changetextinfodec',$from_id);
-} elseif ($user['step'] == "changetextinfodec") {
-    if (!$text) {
-        sendmessage($from_id, $textbotlang['Admin']['ManageUser']['ErrorText'], $textbot, 'HTML');
-        return;
-    }
-    sendmessage($from_id, $textbotlang['Admin']['ManageUser']['SaveText'], $textbot, 'HTML');
-    update("textbot", "text", $text, "id_text","text_dec_info");
-    step('home',$from_id);
-} elseif ($text == "متن دکمه 📚 آموزش" ) {
+}elseif ($text == "متن دکمه 📚 آموزش" ) {
     sendmessage($from_id, $textbotlang['Admin']['ManageUser']['ChangeTextGet'] . $datatextbot['text_help'], $backadmin, 'HTML');
     step('text_help',$from_id);
 } elseif ($user['step'] == "text_help") {
@@ -2462,18 +2449,7 @@ if ($text  == "📝 تنظیم متن ربات"  ) {
     sendmessage($from_id, $textbotlang['Admin']['ManageUser']['SaveText'], $textbot, 'HTML');
     update("textbot", "text", $text, "id_text","text_sell");
     step('home',$from_id);
-} elseif ($text == "متن دکمه سرویس های خریداری شده"  ) {
-    sendmessage($from_id, $textbotlang['Admin']['ManageUser']['ChangeTextGet'] . $datatextbot['text_Purchased_services'], $backadmin, 'HTML');
-    step('text_Purchased_services',$from_id);
-} elseif ($user['step'] == "text_Purchased_services") {
-    if (!$text) {
-        sendmessage($from_id, $textbotlang['Admin']['ManageUser']['ErrorText'], $textbot, 'HTML');
-        return;
-    }
-    sendmessage($from_id, $textbotlang['Admin']['ManageUser']['SaveText'], $textbot, 'HTML');
-    update("textbot", "text", $text, "id_text","text_Purchased_services");
-    step('home',$from_id);
-} elseif ($text == "متن دکمه لیست تعرفه"  ) {
+}elseif ($text == "متن دکمه لیست تعرفه"  ) {
     sendmessage($from_id, $textbotlang['Admin']['ManageUser']['ChangeTextGet'] . $datatextbot['text_Tariff_list'], $backadmin, 'HTML');
     step('text_Tariff_list',$from_id);
 } elseif ($user['step'] == "text_Tariff_list") {
