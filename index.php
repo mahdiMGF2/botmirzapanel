@@ -2121,7 +2121,7 @@ elseif ($user['step'] == "limit_usertest_allusers") {
     sendmessage($from_id, $textbotlang['Admin']['getlimitusertest']['setlimitall'], $keyboard_usertest, 'HTML');
     step('home',$from_id);
     update("setting", "limit_usertest_all",$text);
-    update("user", "limit_usertest",null,null);
+    update("user", "limit_usertest",$text);
 }
 if ($text == "📯 تنظیمات کانال"  ) {
     sendmessage($from_id, $textbotlang['users']['selectoption'], $channelkeyboard, 'HTML');
