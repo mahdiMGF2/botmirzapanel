@@ -9,8 +9,7 @@ $result = mysqli_query($connect, $query);
 $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
 foreach($rows as $row) {
     $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$row['Service_location']}'"));
-    $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
-    $get_username_Check = getuser($row['username'], $Check_token['access_token'], $marzban_list_get['url_panel']);
+    $get_username_Check = getuser($row['username'], $marzban_list_get['name_panel']);
     if(isset($get_username_Check['status'])){
 
     if ($get_username_Check['status'] != "active" && isset($get_username_Check['status'])) {
@@ -33,7 +32,7 @@ foreach($rows as $row) {
                 break;
         }
 
-        removeuser($Check_token['access_token'], $marzban_list_get['url_panel'], $row['username']);
+        removeuser($marzban_list_get['name_panel'], $row['username']);
     }
     }
 }

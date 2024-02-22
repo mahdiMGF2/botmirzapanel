@@ -1,4 +1,4 @@
-    <?php
+<?php
 // کرون جاب هر 1 روز تنظیم شود
 require_once 'config.php';
 require_once 'apipanel.php';
@@ -7,8 +7,7 @@ require_once 'botapi.php';
 $list_service = mysqli_query($connect, "SELECT * FROM invoice");
 while ($row = mysqli_fetch_assoc($list_service)) {
     $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$row['Service_location']}'"));
-    $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
-    $get_username_Check = getuser($row['username'], $Check_token['access_token'], $marzban_list_get['url_panel']);
+    $get_username_Check = getuser($row['username'], $marzban_list_get['name_panel']);
     if(isset($get_username_Check['status'])){
     $timeservice = $get_username_Check['expire'] - time();
     $day = floor($timeservice / 86400) + 1 ;
@@ -33,7 +32,7 @@ sendmessage($row['id_user'], $text, null,'HTML');
 sendmessage($row['id_user'], $text, null,'HTML');
     }
 if($day == "-3"){
-    removeuser($Check_token['access_token'], $marzban_list_get['url_panel'], $row['username']);
+    removeuser($marzban_list_get['name_panel'], $row['username']);
     $stmt = $connect->prepare("DELETE FROM invoice WHERE username = ? ");
     $stmt->bind_param("s", $row['username']);
     $stmt->execute();

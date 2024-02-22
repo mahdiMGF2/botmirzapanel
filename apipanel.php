@@ -33,10 +33,11 @@ function token_panel($url_panel,$username_panel,$password_panel){
 }
 #-----------------------------#
 
-function getuser($username,$token,$url_panel)
+function getuser($usernameac,$location)
 {
-    $usernameac = $username;
-    $url =  $url_panel.'/api/user/' . $usernameac;
+    $marzban_list_get = select("marzban_panel", "*", "name_panel", $location,"select");
+    $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
+    $url =  $marzban_list_get['url_panel'].'/api/user/' . $usernameac;
     $header_value = 'Bearer ';
 
     $ch = curl_init();
@@ -45,7 +46,7 @@ function getuser($username,$token,$url_panel)
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array(
         'Accept: application/json',
-        'Authorization: ' . $header_value .  $token
+        'Authorization: ' . $header_value .  $Check_token['access_token']
     ));
 
     $output = curl_exec($ch);
@@ -54,10 +55,10 @@ function getuser($username,$token,$url_panel)
     return $data_useer;
 }
 #-----------------------------#
-function ResetUserDataUsage($username,$token,$url_panel)
+function ResetUserDataUsage($usernameac,$location)
 {
-    $usernameac = $username;
-    $url =  $url_panel.'/api/user/' . $usernameac.'/reset';
+    $marzban_list_get = select("marzban_panel", "*", "name_panel", $location,"select");
+    $url =  $marzban_list_get['url_panel'].'/api/user/' . $usernameac.'/reset';
     $header_value = 'Bearer ';
 
     $ch = curl_init();
@@ -66,7 +67,7 @@ function ResetUserDataUsage($username,$token,$url_panel)
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array(
         'Accept: application/json',
-        'Authorization: ' . $header_value .  $token
+        'Authorization: ' . $header_value .  $Check_token['access_token']
     ));
 
     $output = curl_exec($ch);
@@ -75,9 +76,11 @@ function ResetUserDataUsage($username,$token,$url_panel)
     return $data_useer;
 }
 #-----------------------------#
-function adduser($username,$expire,$data_limit,$token,$url_panel,array $protocol)
+function adduser($username,$expire,$data_limit,$location,array $protocol)
 {
-    $url = $url_panel."/api/user";
+    $marzban_list_get = select("marzban_panel", "*", "name_panel", $location,"select");
+    $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
+    $url = $marzban_list_get['url_panel']."/api/user";
     $header_value = 'Bearer ';
     $data = array(
         "proxies" => $protocol,
@@ -94,7 +97,7 @@ function adduser($username,$expire,$data_limit,$token,$url_panel,array $protocol
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array(
         'Accept: application/json',
-        'Authorization: ' . $header_value .  $token,
+        'Authorization: ' . $header_value .  $Check_token['access_token'],
         'Content-Type: application/json'
     ));
     curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
@@ -105,8 +108,10 @@ function adduser($username,$expire,$data_limit,$token,$url_panel,array $protocol
     return $response;
 }
 //----------------------------------
-function Get_System_Stats($url_panel,$token){
-    $url =  $url_panel.'/api/system';
+function Get_System_Stats($url_panel,$location){
+    $marzban_list_get = select("marzban_panel", "*", "name_panel", $location,"select");
+    $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
+    $url =  $marzban_list_get['url_panel'].'/api/system';
     $header_value = 'Bearer ';
 
     $ch = curl_init();
@@ -115,7 +120,7 @@ function Get_System_Stats($url_panel,$token){
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array(
         'Accept: application/json',
-        'Authorization: ' . $header_value .  $token
+        'Authorization: ' . $header_value .  $Check_token['access_token'],
     ));
 
     $output = curl_exec($ch);
@@ -124,9 +129,11 @@ function Get_System_Stats($url_panel,$token){
     return $Get_System_Stats;
 }
 //----------------------------------
-function removeuser($token,$url_panel,$username)
+function removeuser($location,$username)
 {
-    $url =  $url_panel.'/api/user/'.$username;
+    $marzban_list_get = select("marzban_panel", "*", "name_panel", $location,"select");
+    $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
+    $url =  $marzban_list_get['url_panel'].'/api/user/'.$username;
     $header_value = 'Bearer ';
 
     $ch = curl_init();
@@ -136,7 +143,7 @@ function removeuser($token,$url_panel,$username)
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array(
         'Accept: application/json',
-        'Authorization: ' . $header_value .  $token
+        'Authorization: ' . $header_value .  $Check_token['access_token']
     ));
 
     $output = curl_exec($ch);
@@ -145,9 +152,11 @@ function removeuser($token,$url_panel,$username)
     return $data_useer;
 }
 //----------------------------------
-function Modifyuser($token,$url_panel,$username,array $data)
+function Modifyuser($location,$username,array $data)
 {
-$url =  $url_panel.'/api/user/'.$username;
+    $marzban_list_get = select("marzban_panel", "*", "name_panel", $location,"select");
+    $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
+    $url =  $marzban_list_get['url_panel'].'/api/user/'.$username;
     $payload = json_encode($data);
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $url);
@@ -156,7 +165,7 @@ curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
 curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
 $headers = array();
 $headers[] = 'Accept: application/json';
-$headers[] = 'Authorization: Bearer '.$token;
+$headers[] = 'Authorization: Bearer '.$Check_token['access_token'];
 $headers[] = 'Content-Type: application/json';
 curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
@@ -189,33 +198,4 @@ function revoke_sub($username,$location)
     curl_close($ch);
     $data_useer = json_decode($output, true);
     return $data_useer;
-}
-
-#-----------------------------------------------#
-function formatBytes($bytes, $precision = 2): string
-{
-    $base = log($bytes, 1024);
-    $power = $bytes > 0 ? floor($base) : 0;
-    $suffixes = ['بایت', 'کیلوبایت', 'مگابایت', 'گیگابایت', 'ترابایت'];
-    return round(pow(1024, $base - $power), $precision) . ' ' . $suffixes[$power];
-}
-#---------------------[ ]--------------------------#
-function generateUsername($from_id,$Metode,$username,$randomString,$text)
-{
-    global $connect;
-    $setting = select("setting", "*");
-    global $connect;
-    if($Metode == "آیدی عددی + حروف و عدد رندوم"){
-        return $from_id."_".$randomString;
-    }
-    elseif($Metode == "نام کاربری + حروف و عدد رندوم"){
-        return $username."_".$randomString;
-    }
-    elseif($Metode == "نام کاربری + عدد به ترتیب"){
-        $statistics = mysqli_fetch_assoc(mysqli_query($connect, "SELECT COUNT(id_user)  FROM invoice WHERE id_user = '$from_id'"));
-        $countInvoice = intval($statistics['COUNT(id_user)']) + 1 ;
-        return $username."_".$countInvoice;
-    }
-    elseif($Metode == "نام کاربری دلخواه")return $text;
-    elseif($Metode == "متن دلخواه + عدد رندوم")return $setting['namecustome']."_".$randomString;
 }

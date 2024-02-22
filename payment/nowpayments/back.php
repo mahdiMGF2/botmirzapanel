@@ -51,7 +51,7 @@ curl_close($curl);
     $setting = select("setting", "*");
 $text_report = "💵 پرداخت جدید
         
-آیدی عددی کاربر : $from_id
+آیدی عددی کاربر : {$Payment_report['id_user']}
 مبلغ تراکنش $price
 روش پرداخت :  درگاه آقای پرداخت";
     if (strlen($setting['Channel_Report']) > 0) {
