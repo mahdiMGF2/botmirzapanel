@@ -76,14 +76,34 @@ function ResetUserDataUsage($usernameac,$location)
     return $data_useer;
 }
 #-----------------------------#
-function adduser($username,$expire,$data_limit,$location,array $protocol)
+function adduser($username,$expire,$data_limit,$location)
 {
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $location,"select");
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
     $url = $marzban_list_get['url_panel']."/api/user";
+    $nameprotocol = array();
+if(isset($marzban_list_get['vless']) && $marzban_list_get['vless'] == "onvless"){
+    $nameprotocol['vless'] = array();
+}
+
+if(isset($marzban_list_get['vmess']) && $marzban_list_get['vmess'] == "onvmess"){
+    $nameprotocol['vmess'] = array();
+}
+
+if(isset($marzban_list_get['trojan']) && $marzban_list_get['trojan'] == "ontrojan"){
+    $nameprotocol['trojan'] = array();
+}
+
+if(isset($marzban_list_get['shadowsocks']) && $marzban_list_get['shadowsocks'] == "onshadowsocks"){
+    $nameprotocol['shadowsocks'] = array();
+}
+
+if(isset($nameprotocol['vless']) && $marzban_list_get['flow'] == "flowon"){
+    $nameprotocol['vless']['flow'] = 'xtls-rprx-vision';
+}
     $header_value = 'Bearer ';
     $data = array(
-        "proxies" => $protocol,
+        "proxies" => $nameprotocol,
         "expire" => $expire,
         "data_limit" => $data_limit,
         "username" => $username
@@ -108,7 +128,7 @@ function adduser($username,$expire,$data_limit,$location,array $protocol)
     return $response;
 }
 //----------------------------------
-function Get_System_Stats($url_panel,$location){
+function Get_System_Stats($location){
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $location,"select");
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
     $url =  $marzban_list_get['url_panel'].'/api/system';

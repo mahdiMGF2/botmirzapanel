@@ -9,6 +9,7 @@ require_once 'jdf.php';
 require_once 'keyboard.php';
 require_once 'text.php';
 require_once 'functions.php';
+require_once 'panels.php';
 require_once 'vendor/autoload.php';
 use Endroid\QrCode\Encoding\Encoding;
 use Endroid\QrCode\ErrorCorrectionLevel;
@@ -49,6 +50,7 @@ if ($user == false) {
         'affiliates' => '',
     );
 }
+
 $channels = array();
 $helpdata = select("help", "*");
 $datatextbotget = select("textbot", "*",null ,null ,"fetchAll");
@@ -61,6 +63,7 @@ $users_ids = select("user", "id",null,null,"FETCH_COLUMN");
 $marzban_list = select("marzban_panel", "name_panel",null,null,"FETCH_COLUMN");
 $name_product = select("product", "name_product",null,null,"FETCH_COLUMN");
 $SellDiscount = select("DiscountSell", "codeDiscount",null,null,"FETCH_COLUMN");
+$ManagePanel = new ManagePanel();
 $datatxtbot = array();
 foreach ($datatextbotget as $row) {
     $datatxtbot[] = array(
@@ -158,7 +161,7 @@ update("user", "message_count", $addmessage, "id",$from_id);
 if($user['message_count'] >= "35"){
     $User_Status = "block";
     update("user", "User_Status", $User_Status, "id",$from_id);
-    update("user", "description_blocking", $textbotlang['users']['spam']['spamed'], "id",$from_id);
+    update("user", "description_blocking", 'اسپم در ربات', "id",$from_id);
     sendmessage($from_id, $textbotlang['users']['spam']['spamedmessage'], null, 'html');
     return;
 }        
@@ -314,14 +317,16 @@ if ($user['step'] == "getusernameinfo") {
 } elseif (preg_match('/locationnotuser_(.*)/', $datain, $dataget)) {
     $location = $dataget[1];
     $marzban_list_get = select("marzban_panel", "name_panel", "name_panel", $location,"select");
-    $data_useer = getuser($user['Processing_value'],$marzban_list_get['name_panel']);
-    if ($data_useer['detail'] == "User not found") {
+    $DataUserOut = $ManagePanel->DataUser($marzban_list_get['name_panel'],$user['Processing_value']);
+    if($DataUserOut['status'] == "Unsuccessful"){
+    if ($DataUserOut['msg'] == "User not found") {
         sendmessage($from_id, $textbotlang['users']['stateus']['notUsernameget'], $keyboard, 'html');
         step('home',$from_id);
         return;
     }
+    }
     #-------------[ status ]----------------#
-    $status = $data_useer['status'];
+    $status = $DataUserOut['status'];
     $status_var = [
         'active' =>  $textbotlang['users']['stateus']['active'],
         'limited' => $textbotlang['users']['stateus']['limited'],
@@ -329,24 +334,24 @@ if ($user['step'] == "getusernameinfo") {
         'expired' => $textbotlang['users']['stateus']['expired']
     ][$status];
     #--------------[ expire ]---------------#
-    $expirationDate = $data_useer['expire'] ? jdate('Y/m/d', $data_useer['expire']) : $textbotlang['users']['stateus']['Unlimited'];
+    $expirationDate = $DataUserOut['expire'] ? jdate('Y/m/d', $DataUserOut['expire']) : $textbotlang['users']['stateus']['Unlimited'];
     #-------------[ data_limit ]----------------#
-    $LastTraffic = $data_useer['data_limit'] ? formatBytes($data_useer['data_limit']) : $textbotlang['users']['stateus']['Unlimited'];
+    $LastTraffic = $DataUserOut['data_limit'] ? formatBytes($DataUserOut['data_limit']) : $textbotlang['users']['stateus']['Unlimited'];
     #---------------[ RemainingVolume ]--------------#
-    $output =  $data_useer['data_limit'] - $data_useer['used_traffic'];
-    $RemainingVolume = $data_useer['data_limit'] ? formatBytes($output) : "نامحدود";
+    $output =  $DataUserOut['data_limit'] - $DataUserOut['used_traffic'];
+    $RemainingVolume = $DataUserOut['data_limit'] ? formatBytes($output) : "نامحدود";
     #---------------[ used_traffic ]--------------#
-    $usedTrafficGb = $data_useer['used_traffic'] ? formatBytes($data_useer['used_traffic']) : $textbotlang['users']['stateus']['Notconsumed'];
+    $usedTrafficGb = $DataUserOut['used_traffic'] ? formatBytes($DataUserOut['used_traffic']) : $textbotlang['users']['stateus']['Notconsumed'];
     #--------------[ day ]---------------#
-    $timeDiff = $data_useer['expire'] - time();
-    $day = $data_useer['expire'] ? floor($timeDiff / 86400) + 1 . $textbotlang['users']['stateus']['day'] : $textbotlang['users']['stateus']['Unlimited'];
+    $timeDiff = $DataUserOut['expire'] - time();
+    $day = $DataUserOut['expire'] ? floor($timeDiff / 86400) + 1 . $textbotlang['users']['stateus']['day'] : $textbotlang['users']['stateus']['Unlimited'];
     #-----------------------------#
 
 
     $keyboardinfo = json_encode([
         'inline_keyboard' => [
             [
-                ['text' => $data_useer['username'], 'callback_data' => "username"],
+                ['text' => $DataUserOut['username'], 'callback_data' => "username"],
                 ['text' => $textbotlang['users']['stateus']['username'], 'callback_data' => 'username'],
             ], [
                 ['text' => $status_var, 'callback_data' => 'status_var'],
@@ -454,19 +459,19 @@ if (preg_match('/product_(\w+)/', $datain, $dataget)) {
     $username = $dataget[1];
     $nameloc = select("invoice", "*", "username", $username,"select");
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'],"select");
-    $data_useer = getuser($username, $marzban_list_get['name_panel']);
-    if ($data_useer['detail'] == "User not found" || !isset($data_useer['status'])) {
+    $DataUserOut = $ManagePanel->DataUser($nameloc['Service_location'],$username);
+    if ($DataUserOut['msg'] == "User not found") {
         sendmessage($from_id, $textbotlang['users']['stateus']['error'], $keyboard, 'html');
         return;
     }
-    if(isset($data_useer['online_at']) && $data_useer['online_at'] !== null){
-        $dateString = $data_useer['online_at'];
+    if(isset($DataUserOut['online_at']) && $DataUserOut['online_at'] !== null){
+        $dateString = $DataUserOut['online_at'];
         $lastonline = jdate('Y/m/d h:i:s',strtotime($dateString));
     }else{
         $lastonline = "متصل نشده";
     }
     #-------------status----------------#
-    $status = $data_useer['status'];
+    $status = $DataUserOut['status'];
     $status_var = [
         'active' =>  $textbotlang['users']['stateus']['active'],
         'limited' => $textbotlang['users']['stateus']['limited'],
@@ -474,17 +479,17 @@ if (preg_match('/product_(\w+)/', $datain, $dataget)) {
         'expired' => $textbotlang['users']['stateus']['expired']
     ][$status];
     #--------------[ expire ]---------------#
-        $expirationDate = $data_useer['expire'] ? jdate('Y/m/d', $data_useer['expire']) : $textbotlang['users']['stateus']['Unlimited'];
+        $expirationDate = $DataUserOut['expire'] ? jdate('Y/m/d', $DataUserOut['expire']) : $textbotlang['users']['stateus']['Unlimited'];
     #-------------[ data_limit ]----------------#
-    $LastTraffic = $data_useer['data_limit'] ? formatBytes($data_useer['data_limit']) : $textbotlang['users']['stateus']['Unlimited'];
+    $LastTraffic = $DataUserOut['data_limit'] ? formatBytes($DataUserOut['data_limit']) : $textbotlang['users']['stateus']['Unlimited'];
     #---------------[ RemainingVolume ]--------------#
-    $output =  $data_useer['data_limit'] - $data_useer['used_traffic'];
-    $RemainingVolume = $data_useer['data_limit'] ? formatBytes($output) : "نامحدود";
+    $output =  $DataUserOut['data_limit'] - $DataUserOut['used_traffic'];
+    $RemainingVolume = $DataUserOut['data_limit'] ? formatBytes($output) : "نامحدود";
     #---------------[ used_traffic ]--------------#
-    $usedTrafficGb = $data_useer['used_traffic'] ? formatBytes($data_useer['used_traffic']) : $textbotlang['users']['stateus']['Notconsumed'];
+    $usedTrafficGb = $DataUserOut['used_traffic'] ? formatBytes($DataUserOut['used_traffic']) : $textbotlang['users']['stateus']['Notconsumed'];
     #--------------[ day ]---------------#
-    $timeDiff = $data_useer['expire'] - time();
-    $day = $data_useer['expire'] ? floor($timeDiff / 86400) + 1 . $textbotlang['users']['stateus']['day'] : $textbotlang['users']['stateus']['Unlimited'];
+    $timeDiff = $DataUserOut['expire'] - time();
+    $day = $DataUserOut['expire'] ? floor($timeDiff / 86400) + 1 . $textbotlang['users']['stateus']['day'] : $textbotlang['users']['stateus']['Unlimited'];
     #-----------------------------#
     $keyboardsetting = json_encode([
         'inline_keyboard' => [
@@ -505,7 +510,7 @@ if (preg_match('/product_(\w+)/', $datain, $dataget)) {
         ]
     ]);
     $textinfo = "وضعیت سرویس : $status_var
-نام کاربری سرویس : {$data_useer['username']}
+نام کاربری سرویس : {$DataUserOut['username']}
 لوکیشن :{$nameloc['Service_location']}
 کد سرویس:{$nameloc['id_invoice']}
 
@@ -523,11 +528,8 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
     $username = $dataget[1];
     $nameloc = select("invoice", "*", "username", $username,"select");
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'],"select");
-    $data_useer = getuser($username, $marzban_list_get['name_panel']);
-    $subscriptionurl = $data_useer['subscription_url'];
-    if (!preg_match('/^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?((\/[^\s\/]+)+)?$/', $subscriptionurl)) {
-        $subscriptionurl = $marzban_list_get['url_panel'] . "/" . ltrim($subscriptionurl, "/");
-    }
+    $DataUserOut = $ManagePanel->DataUser($nameloc['Service_location'],$username);
+    $subscriptionurl = $DataUserOut['subscription_url'];
     $textsub = "
     {$textbotlang['users']['stateus']['linksub']}
     
@@ -550,8 +552,8 @@ elseif (preg_match('/config_(\w+)/', $datain, $dataget)) {
     $username = $dataget[1];
     $nameloc = select("invoice", "*", "username", $username,"select");
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'],"select");
-    $data_useer = getuser($username, $marzban_list_get['name_panel']);
-    foreach ($data_useer['links'] as $configs) {
+    $DataUserOut = $ManagePanel->DataUser($nameloc['Service_location'],$username);
+    foreach ($DataUserOut['configs'] as $configs) {
             $config .= "\n\n" . $configs;
         }
     $textsub = "
@@ -604,8 +606,7 @@ elseif (preg_match('/confirmserivce_(\w+)/', $datain, $dataget) && $user['step']
     $Balance_Low_user = $user['Balance'] - $prodcut['price_product'];
     update("user", "Balance", $Balance_Low_user, "id",$from_id);
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'],"select");
-    $data_useer = getuser($usernamepanel,$marzban_list_get['name_panel']);
-    ResetUserDataUsage($usernamepanel, $marzban_list_get['name_panel']);
+    $ManagePanel->ResetUserDataUsage($usernamepanel, $marzban_list_get['name_panel']);
     $date = strtotime("+" . $prodcut['Service_time'] . "day");
     $newDate = strtotime(date("Y-m-d H:i:s", $date));
     $data_limit = $prodcut['Volume_constraint'] * pow(1024, 3);
@@ -613,7 +614,7 @@ elseif (preg_match('/confirmserivce_(\w+)/', $datain, $dataget) && $user['step']
         "expire" => $newDate,
         "data_limit" => $data_limit
         );
-    $Modifyuser =Modifyuser($marzban_list_get['name_panel'],$usernamepanel,$datam);
+    $Modifyuser = $ManagePanel->Modifyuser($marzban_list_get['name_panel'],$usernamepanel,$datam);
             $keyboardextendfnished = json_encode([
         'inline_keyboard' => [
             [
@@ -657,33 +658,7 @@ elseif (preg_match('/confirmchange_(\w+)/', $datain, $dataget)) {
     $usernameconfig = $dataget[1];
     $nameloc = select("invoice", "*", "username", $usernameconfig,"select");
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'],"select");
-    $Allowedusername = getuser($username,$marzban_list_get['name_panel']);
-    $nameprotocol = array();
-if(isset($marzban_list_get['vless']) && $marzban_list_get['vless'] == "onvless"){
-    $nameprotocol['vless'] = array(
-        "id" => generateUUID(),
-        "status" => "active");
-}
-if(isset($marzban_list_get['vmess']) && $marzban_list_get['vmess'] == "onvmess"){
-    $nameprotocol['vmess'] = array(
-                "id" => generateUUID(),
-        "status" => "active");
-}
-if(isset($marzban_list_get['trojan']) && $marzban_list_get['trojan'] == "ontrojan"){
-    $nameprotocol['trojan'] = array(
-        "id" => generateUUID(),
-        "status" => "active");
-}
-if(isset($marzban_list_get['shadowsocks']) && $marzban_list_get['shadowsocks'] == "onshadowsocks"){
-    $nameprotocol['shadowsocks'] = array(
-        "id" => generateUUID(),
-        "status" => "active");
-}
-$datam = array(
-        "proxies" => $nameprotocol
-        );
-    Modifyuser($marzban_list_get['name_panel'],$usernameconfig,$datam);
-    revoke_sub($usernameconfig,$nameloc['Service_location']);
+    $ManagePanel->Revoke_sub($marzban_list_get['name_panel'],$usernameconfig);
     Editmessagetext($from_id, $message_id,  $textbotlang['users']['changelink']['confirmed'], null);
 
 }
@@ -739,12 +714,12 @@ elseif (preg_match('/confirmaextra_(\w+)/', $datain, $dataget)) {
     $Balance_Low_user = $user['Balance'] - $volume;
     update("user", "Balance", $Balance_Low_user, "id",$from_id);
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'],"select");
-    $data_useer = getuser($user['Processing_value'], $marzban_list_get['name_panel']);
-    $data_limit = $data_useer['data_limit'] + ($volume/$setting['Extra_volume'] *  pow(1024, 3));
+    $DataUserOut = $ManagePanel->DataUser($marzban_list_get['name_panel'],$user['Processing_value']);
+    $data_limit = $DataUserOut['data_limit'] + ($volume/$setting['Extra_volume'] *  pow(1024, 3));
     $datam = array(
         "data_limit" => $data_limit
         );
-     Modifyuser($marzban_list_get['name_panel'],$user['Processing_value'],$datam);
+     $ManagePanel->Modifyuser($marzban_list_get['name_panel'],$user['Processing_value'],$datam);
             $keyboardextrafnished = json_encode([
         'inline_keyboard' => [
             [
@@ -769,7 +744,7 @@ elseif (preg_match('/removeserviceuserco-(\w+)/', $datain, $dataget)) {
     $username = $dataget[1];
     $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '$username'"));
     $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$nameloc['Service_location']}'"));
-    $DataUserOut = getuser($username, $marzban_list_get['name_panel']);
+    $DataUserOut = $ManagePanel->DataUser($marzban_list_get['name_panel'],$username);
     if(isset($DataUserOut['status']) && in_array($DataUserOut['status'], ["expired", "limited", "disabled"])){
         sendmessage($from_id, $textbotlang['users']['stateus']['notusername'], null, 'html');
         return;
@@ -803,7 +778,7 @@ elseif (preg_match('/confirmremoveservices-(\w+)/', $datain, $dataget)) {
     $stmt->bind_param("ssss", $from_id, $usernamepanel, $descriptions, $Status);
     $stmt->execute();
     $stmt->close();
-    $DataUserOut = getuser($usernamepanel, $marzban_list_get['name_panel']);
+    $DataUserOut = $ManagePanel->DataUser($marzban_list_get['name_panel'],$usernamepanel);
         #-------------status----------------#
     $status = $DataUserOut['status'];
     $status_var = [
@@ -878,7 +853,6 @@ if ($text == $datatextbot['text_usertest']) {
         return;
     }
     sendmessage($from_id, $textbotlang['users']['Service']['Location'], $list_marzban_usertest, 'html');
-    if($setting['MethodUsername'] == "نام کاربری دلخواه")return;
 }
 if (preg_match('/locationtest_(.*)/', $datain, $dataget)) {
     $location = $dataget[1];
@@ -892,56 +866,36 @@ if ($user['step'] == "createusertest" || preg_match('/locationtests_(.*)/', $dat
         return;
     }
     $location = $dataget[1];
-        if($setting['MethodUsername'] == "نام کاربری دلخواه" && $user['step'] == "createusertest"){
+        $marzban_list_get = select("marzban_panel", "*", "name_panel", $user['Processing_value_tow'],"select");
+        if($marzban_list_get['MethodUsername'] == "نام کاربری دلخواه" && $user['step'] == "createusertest"){
             if (!preg_match('~(?!_)^[a-z][a-z\d_]{2,32}(?<!_)$~i', $text)) {
         sendmessage($from_id, $textbotlang['users']['invalidusername'], $backuser,'HTML');
         return;
     }
-    $name_panel = $user['Processing_value_tow'];
+            $name_panel = $user['Processing_value_tow'];
         }else{
-    $name_panel =$location ;
+            $name_panel =$location ;
         }
     $randomString = bin2hex(random_bytes(2));
-    $username_ac = generateUsername($from_id, $setting['MethodUsername'], $user['username'], $randomString,$text);
+    $username_ac = generateUsername($from_id, $marzban_list_get['MethodUsername'], $user['username'], $randomString,$text);
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $name_panel,"select");
-    $Allowedusername = getuser($username_ac,$marzban_list_get['name_panel']);
-    if (isset($Allowedusername['username'])) {
+    $DataUserOut = $ManagePanel->DataUser($marzban_list_get['name_panel'],$username_ac);
+    if (isset($DataUserOut['username'])) {
         $random_number = random_int(1000000, 9999999);
         $username_ac = $username_ac . $random_number;
     }
-    $nameprotocol = array();
-if(isset($marzban_list_get['vless']) && $marzban_list_get['vless'] == "onvless"){
-    $nameprotocol['vless'] = array();
-}
-
-if(isset($marzban_list_get['vmess']) && $marzban_list_get['vmess'] == "onvmess"){
-    $nameprotocol['vmess'] = array();
-}
-
-if(isset($marzban_list_get['trojan']) && $marzban_list_get['trojan'] == "ontrojan"){
-    $nameprotocol['trojan'] = array();
-}
-
-if(isset($marzban_list_get['shadowsocks']) && $marzban_list_get['shadowsocks'] == "onshadowsocks"){
-    $nameprotocol['shadowsocks'] = array();
-}
-
-if(isset($nameprotocol['vless']) && $setting['flow'] == "flowon"){
-    $nameprotocol['vless']['flow'] = 'xtls-rprx-vision';
-}
-    $date = strtotime("+" . $setting['time_usertest'] . "hours");
-    $timestamp = strtotime(date("Y-m-d H:i:s", $date));
-    $expire = $timestamp;
-    $data_limit = $setting['val_usertest'] * 1048576;
-    $config_test = adduser($username_ac, $expire, $data_limit,$marzban_list_get['name_panel'], $nameprotocol);
-    $data_test = json_decode($config_test, true);
-    if (!isset($data_test['username'])) {
-        $data_test['detail'] = json_encode($data_test['detail']);
+    $datac = array(
+    'expire' => strtotime(date("Y-m-d H:i:s",strtotime("+" . $setting['time_usertest'] . "hours"))),
+    'data_limit' => $setting['val_usertest'] * 1048576,
+    );
+    $dataoutput = $ManagePanel->createUser($name_panel,$username_ac,$datac);
+    if ($dataoutput['username'] == null) {
+        $dataoutput['msg'] = json_encode($dataoutput['msg']);
         sendmessage($from_id, $textbotlang['users']['usertest']['errorcreat'], $keyboard, 'html');
         $texterros = "
     ⭕️ یک کاربر قصد دریافت اکانت تست داشت که ساخت کانفیگ با خطا مواجه شده و به کاربر کانفیگ داده نشد
     ✍️ دلیل خطا : 
-    {$data_test['detail']}
+    {$dataoutput['msg']}
     آیدی کابر : $from_id
     نام کاربری کاربر : @$username";
         foreach ($admin_ids as $admin) {
@@ -962,21 +916,16 @@ if(isset($nameprotocol['vless']) && $setting['flow'] == "flowon"){
     $text_config = "";
     $output_config_link = "";
     if ($setting['sublink'] == "✅ لینک اشتراک فعال است.") {
-        $output_config_link = $data_test['subscription_url'];
-        if (!preg_match('/^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?((\/[^\s\/]+)+)?$/', $output_config_link)) {
-            $output_config_link = $marzban_list_get['url_panel'] . "/" . ltrim($output_config_link, "/");
-        }
+        $output_config_link = $dataoutput['subscription_url'];
         $link_config = "            
     {$textbotlang['users']['stateus']['linksub']}
     $output_config_link";
     }
     if ($setting['configManual'] == "✅ ارسال کانفیگ بعد خرید فعال است.") {
-        foreach ($data_test['links'] as $configs) {
+        foreach ($dataoutput['configs'] as $configs) {
             $config .= "\n\n" . $configs;
         }
-        $text_config = "            
-   {$textbotlang['users']['config']}
-    $config";
+        $text_config = $config;
     }
     $usertestinfo = json_encode([
         'inline_keyboard' => [
@@ -1157,13 +1106,13 @@ $locationproduct = select("marzban_panel", "*", null, null,"count");
             return;
         }
     $product = [];
-    $location = select("marzban_panel", "*", null, null,"select")['name_panel'];
+    $location = select("marzban_panel", "*", null, null,"select");
     $stmt = $pdo->prepare("SELECT * FROM product WHERE Location = :location OR Location = '/all'");
-    $stmt->bindParam(':location', $location);
+    $stmt->bindParam(':location', $location['name_panel']);
     $stmt->execute();
-   $product = ['inline_keyboard' => []];
+    $product = ['inline_keyboard' => []];
 while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
-    if($setting['MethodUsername'] == "نام کاربری دلخواه"){
+    if($location['MethodUsername'] == "نام کاربری دلخواه"){
     $product['inline_keyboard'][] = [
         ['text' => $result['name_product'], 'callback_data' => "prodcutservices_".$result['code_product']]
     ];
@@ -1189,6 +1138,7 @@ $product['inline_keyboard'][] = [
 } 
 elseif (preg_match('/^location_(.*)/', $datain, $dataget)) {
     $location = $dataget[1];
+    $panellist = select("marzban_panel", "*", "name_panel", $location,"select");
     $nullproduct = select("product", "*", null, null,"count");
     if ($nullproduct == 0) {
         sendmessage($from_id, $textbotlang['Admin']['Product']['nullpProduct'], null, 'HTML');
@@ -1198,9 +1148,9 @@ elseif (preg_match('/^location_(.*)/', $datain, $dataget)) {
     $stmt = $pdo->prepare("SELECT * FROM product WHERE Location = :location OR Location = '/all'");
     $stmt->bindParam(':location', $location);
     $stmt->execute();
-   $product = ['inline_keyboard' => []];
+    $product = ['inline_keyboard' => []];
 while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
-    if($setting['MethodUsername'] == "نام کاربری دلخواه"){
+    if($panellist['MethodUsername'] == "نام کاربری دلخواه"){
     $product['inline_keyboard'][] = [
         ['text' => $result['name_product'], 'callback_data' => "prodcutservices_".$result['code_product']]
     ];
@@ -1226,7 +1176,8 @@ elseif (preg_match('/^prodcutservices_(.*)/', $datain, $dataget)){
 }
 elseif ($user['step'] == "endstepuser" ||preg_match('/prodcutservice_(.*)/', $datain, $dataget)) {
         $prodcut = $dataget[1];
-        if($setting['MethodUsername'] == "نام کاربری دلخواه"){
+        $panellist = select("marzban_panel", "*", "name_panel", $user['Processing_value'],"select");
+        if($panellist['MethodUsername'] == "نام کاربری دلخواه"){
             if (!preg_match('~(?!_)^[a-z][a-z\d_]{2,32}(?<!_)$~i', $text)) {
         sendmessage($from_id, $textbotlang['users']['invalidusername'], $backuser,'HTML');
         return;
@@ -1243,7 +1194,8 @@ elseif ($user['step'] == "endstepuser" ||preg_match('/prodcutservice_(.*)/', $da
     $stmt->execute();
     $info_product = $stmt->fetch(PDO::FETCH_ASSOC);
     $randomString = bin2hex(random_bytes(2));
-    $username_ac = generateUsername($from_id, $setting['MethodUsername'], $username, $randomString,$text);
+    $panellist = select("marzban_panel", "*", "name_panel", $user['Processing_value'],"select");
+    $username_ac = generateUsername($from_id, $panellist['MethodUsername'], $username, $randomString,$text);
     update("user", "Processing_value_tow",$username_ac,"id",$from_id);
     if($info_product['Volume_constraint'] == 0 )$info_product['Volume_constraint'] = $textbotlang['users']['stateus']['Unlimited'];
     $info_product['price_product'] = number_format($info_product['price_product'], 0);
@@ -1285,9 +1237,9 @@ elseif ($user['step'] == "payment" && $datain == "confirmandgetservice" || $data
     $date = jdate('Y/m/d');
     $randomString = bin2hex(random_bytes(2));
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $user['Processing_value'],"select");
-    $get_username_Check = getuser($username_ac, $marzban_list_get['name_panel']);
+    $DataUserOut = $ManagePanel->DataUser($marzban_list_get['name_panel'],$username_ac);
     $random_number = random_int(1000000, 9999999);
-    if (isset($get_username_Check['username']) || in_array($username_ac, $usernameinvoice)) {
+    if (isset($DataUserOut['username']) || in_array($username_ac, $usernameinvoice)) {
         $username_ac = $random_number . $username_ac;
     }
         if(in_array($randomString,$id_invoice)){
@@ -1308,37 +1260,18 @@ elseif ($user['step'] == "payment" && $datain == "confirmandgetservice" || $data
     $stmt->bindParam(10, $Status);
     $stmt->execute();
     $date = strtotime("+" . $info_product['Service_time'] . "days");
-    $timestamp = strtotime(date("Y-m-d H:i:s", $date));
-    $data_limit = $info_product['Volume_constraint'] * pow(1024, 3);
-    $nameprotocol = array();
-if(isset($marzban_list_get['vless']) && $marzban_list_get['vless'] == "onvless"){
-    $nameprotocol['vless'] = array();
-}
-
-if(isset($marzban_list_get['vmess']) && $marzban_list_get['vmess'] == "onvmess"){
-    $nameprotocol['vmess'] = array();
-}
-
-if(isset($marzban_list_get['trojan']) && $marzban_list_get['trojan'] == "ontrojan"){
-    $nameprotocol['trojan'] = array();
-}
-
-if(isset($marzban_list_get['shadowsocks']) && $marzban_list_get['shadowsocks'] == "onshadowsocks"){
-    $nameprotocol['shadowsocks'] = array();
-}
-
-if(isset($nameprotocol['vless']) && $setting['flow'] == "flowon"){
-    $nameprotocol['vless']['flow'] = 'xtls-rprx-vision';
-}
-    $configuser = adduser($username_ac, $timestamp, $data_limit,$marzban_list_get['name_panel'], $nameprotocol);
-    $data = json_decode($configuser, true);
-    if (!isset($data['username'])) {
-        $data['detail'] = json_encode($data);
+    $datac = array(
+    'expire' => strtotime(date("Y-m-d H:i:s", $date)),
+    'data_limit' => $info_product['Volume_constraint'] * pow(1024, 3),
+    );
+    $dataoutput = $ManagePanel->createUser($marzban_list_get['name_panel'],$username_ac,$datac);
+    if ($dataoutput['username'] == null) {
+        $dataoutput['msg'] = json_encode($dataoutput['msg']);
         sendmessage($from_id, $textbotlang['users']['sell']['ErrorConfig'], $keyboard, 'HTML');
         $texterros = "
     ⭕️ یک کاربر قصد دریافت اکانت داشت که ساخت کانفیگ با خطا مواجه شده و به کاربر کانفیگ داده نشد
     ✍️ دلیل خطا : 
-    {$data['detail']}
+    {$dataoutput['msg']}
     آیدی کابر : $from_id
     نام کاربری کارب : @$username";
         foreach ($admin_ids as $admin) {
@@ -1374,20 +1307,15 @@ if(isset($nameprotocol['vless']) && $setting['flow'] == "flowon"){
     $config = "";
     $configqr = "";
     if ($setting['sublink'] == "✅ لینک اشتراک فعال است.") {
-        $output_config_link = $data['subscription_url'];
-        if (!preg_match('/^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?((\/[^\s\/]+)+)?$/', $output_config_link)) {
-            $output_config_link = $marzban_list_get['url_panel'] . "/" . ltrim($output_config_link, "/");
-        }
+        $output_config_link = $dataoutput['subscription_url'];
         $link_config = "<code>$output_config_link</code>";
     }
     if ($setting['configManual'] == "✅ ارسال کانفیگ بعد خرید فعال است.") {
-        foreach ($data['links'] as $configs) {
+        foreach ($dataoutput['configs'] as $configs) {
             $config .= "\n\n" . $configs;
             $configqr .= $configs;
         }
-        $text_config = "            
-    {$textbotlang['users']['config']}
-<code>$config</code>";
+        $text_config = "<code>$config</code>";
     }
     $Shoppinginfo = json_encode([
         'inline_keyboard' => [
@@ -2200,35 +2128,47 @@ if ($text == "🔌 وضعیت پنل"  ) {
 }
 elseif ($user['step'] == "get_panel") {
     $marzban_list_get = select("marzban_panel", "*", "name_panel",$text,"select");
-    ini_set('max_execution_time', 1);
+    if($marzban_list_get['type'] == "marzban"){
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
     if (isset($Check_token['access_token'])) {
-        $System_Stats = Get_System_Stats($marzban_list_get['url_panel'], $marzban_list_get['name_panel']);
+        $System_Stats = Get_System_Stats($text);
         $active_users = $System_Stats['users_active'];
         $total_user = $System_Stats['total_user'];
         $mem_total = formatBytes($System_Stats['mem_total']);
         $mem_used = formatBytes($System_Stats['mem_used']);
-        $bandwidth =formatBytes($System_Stats['outgoing_bandwidth']+$System_Stats['incoming_bandwidth']);
+        $bandwidth = formatBytes($System_Stats['outgoing_bandwidth'] + $System_Stats['incoming_bandwidth']);
         $Condition_marzban = "";
         $text_marzban = "
-                اطلاعات پنل شما👇:
-                     
+آمار پنل شما👇:
+                             
 🖥 وضعیت اتصال پنل مرزبان: ✅ پنل متصل است
 👥  تعداد کل کاربران: $total_user
 👤 تعداد کاربران فعال: $active_users
 📡 نسخه پنل مرزبان :  {$System_Stats['version']}
-💻 مصرف کل  رم پنل مرزبان  : $mem_total
+💻 رم  کل سرور  : $mem_total
 💻 مصرف رم پنل مرزبان  : $mem_used
-🌐 ترافیک کل مصرف شده  ( آپلود / دانلود) : $bandwidth
-";
-    } elseif ($Check_token['detail'] == "Incorrect username or password") {
+🌐 ترافیک کل مصرف شده  ( آپلود / دانلود) : $bandwidth";
+        sendmessage($from_id, $text_marzban, $keyboardmarzban, 'HTML');
+    } elseif (isset($Check_token['detail']) && $Check_token['detail'] == "Incorrect username or password") {
         $text_marzban = "❌ نام کاربری یا رمز عبور پنل اشتباه است";
+        sendmessage($from_id, $text_marzban, $keyboardmarzban, 'HTML');
     } else {
-        $text_marzban = $textbotlang['Admin']['managepanel']['errorstateuspanel']."\n\rدلیل خطا : 
-            {$Check_token['errror']}";
+        $text_marzban = $textbotlang['Admin']['managepanel']['errorstateuspanel'].json_encode($Check_token);
+        sendmessage($from_id, $text_marzban, $keyboardmarzban, 'HTML');
     }
-
-    sendmessage($from_id, $text_marzban, $keyboardmarzban, 'HTML');
+    }
+    elseif($marzban_list_get['type'] == "x-ui_single"){
+        $x_ui_check_connect = login($marzban_list_get['url_panel'],$marzban_list_get['username_panel'],$marzban_list_get['password_panel']);
+        if($x_ui_check_connect['success']){
+            sendmessage($from_id, $textbotlang['Admin']['managepanel']['connectx-ui'], $keyboardmarzban, 'HTML');
+    } elseif ($x_ui_check_connect['msg'] == "Invalid username or password.") {
+        $text_marzban = "❌ نام کاربری یا رمز عبور پنل اشتباه است";
+        sendmessage($from_id, $text_marzban, $keyboardmarzban, 'HTML');
+    } else {
+        $text_marzban = $textbotlang['Admin']['managepanel']['errorstateuspanel'];
+        sendmessage($from_id, $text_marzban, $keyboardmarzban, 'HTML');
+        }
+    }
     step('home',$from_id);
 }
 if ($text == "📜 مشاهده لیست ادمین ها"  ) {
@@ -2254,8 +2194,9 @@ if ($text == "🖥 اضافه کردن پنل  مرزبان"  ) {
     $vmess = "offvmess";
     $trojan = "offtrojan";
     $shadowsocks = "offshadowsocks";
-    $stmt = $pdo->prepare("INSERT INTO marzban_panel (name_panel, vless, vmess, trojan, shadowsocks) VALUES (?, ?, ?, ?, ?)");
-    $stmt->execute([$text, $vless, $vmess, $trojan, $shadowsocks]);
+    $inboundid = "0";
+    $stmt = $pdo->prepare("INSERT INTO marzban_panel (name_panel, vless, vmess, trojan, shadowsocks,inboundid) VALUES (?, ?, ?, ?, ?,?)");
+    $stmt->execute([$text, $vless, $vmess, $trojan, $shadowsocks,$inboundid]);
     sendmessage($from_id, $textbotlang['Admin']['managepanel']['addpanelurl'], $backadmin, 'HTML');
     step('add_link_panel',$from_id);
      update("user", "Processing_value",$text,"id",$from_id);
@@ -2267,15 +2208,24 @@ if ($text == "🖥 اضافه کردن پنل  مرزبان"  ) {
     sendmessage($from_id, $textbotlang['Admin']['managepanel']['usernameset'], $backadmin, 'HTML');
     step('add_username_panel',$from_id);
     update("marzban_panel", "url_panel", $text, "name_panel",$user['Processing_value']);
+    update("marzban_panel", "linksubx", $text, "name_panel",$user['Processing_value']);
 } elseif ($user['step'] == "add_username_panel") {
     sendmessage($from_id, $textbotlang['Admin']['managepanel']['getpassword'], $backadmin, 'HTML');
     step('add_password_panel',$from_id);
     update("marzban_panel", "username_panel", $text, "name_panel",$user['Processing_value']);
-} elseif ($user['step'] == "add_password_panel") {
+}elseif ($user['step'] == "add_password_panel") {
+    update("marzban_panel", "password_panel", $text, "name_panel",$user['Processing_value']);
+    $textx = "📌 نوع پنل را ارسال نمایید
+
+⚠️ پنل x-ui فقط با پنل ثنایی نوع تک پورت سازگار است.
+⚠️ در صورت انتخاب پنل ثنایی پس از اضافه کردن پنل به بخش ویرایش پنل > تنظیم شناسه اینباند رفته و شناسه اینباند را ثبت کنید";
+    sendmessage($from_id, $textx, $typepanel, 'HTML');
+    step('gettyppepanel',$from_id);
+} elseif ($user['step'] == "gettyppepanel") {
+    update("marzban_panel", "type", $text, "name_panel",$user['Processing_value']);
     sendmessage($from_id, $textbotlang['Admin']['managepanel']['addedpanel'], $backadmin, 'HTML');
     sendmessage($from_id, "🥳", $keyboardmarzban, 'HTML');
     step('home',$from_id);
-    update("marzban_panel", "password_panel", $text, "name_panel",$user['Processing_value']);
 }
 if ($text == "📨 ارسال پیام" ) {
     sendmessage($from_id, $textbotlang['users']['selectoption'], $sendmessageuser, 'HTML');
@@ -2602,22 +2552,39 @@ elseif ($datain == "❌ ربات خاموش است"  ) {
 }
 
 //_________________________________________________
-$flow_Status = json_encode([
+if ($text == "🍀 قابلیت flow") {
+    $panel = select("marzban_panel","*","name_panel",$user['Processing_value'],"select");
+    $flow_Status = json_encode([
     'inline_keyboard' => [
         [
-            ['text' => $setting['flow'], 'callback_data' => $setting['flow']],
+            ['text' => $panel['flow'], 'callback_data' => $panel['flow']],
         ],
     ]
 ]);
-if ($text == "🍀 قابلیت flow"  ) {
     sendmessage($from_id, $textbotlang['Admin']['Status']['flow'], $flow_Status, 'HTML');
 }
-if ($datain == "flowon"  ) {
-    update("setting", "flow","offflow");
-    Editmessagetext($from_id, $message_id,  $textbotlang['Admin']['Status']['flowStatusOff'], null);}
-elseif ($datain == "offflow"  ) {
-    update("setting", "flow","flowon");
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['flowStatuson'], null);
+if ($datain == "flowon") {
+    update("marzban_panel", "flow","offflow","name_panel",$user['Processing_value']);
+    $panel = select("marzban_panel","*","name_panel",$user['Processing_value'],"select");
+    $flow_Status = json_encode([
+    'inline_keyboard' => [
+        [
+            ['text' => $panel['flow'], 'callback_data' => $panel['flow']],
+        ],
+    ]
+]);
+    Editmessagetext($from_id, $message_id,  $textbotlang['Admin']['Status']['flowStatusOff'], $flow_Status);
+}elseif ($datain == "offflow") {
+    update("marzban_panel", "flow","flowon","name_panel",$user['Processing_value']);
+    $panel = select("marzban_panel","*","name_panel",$user['Processing_value'],"select");
+    $flow_Status = json_encode([
+    'inline_keyboard' => [
+        [
+            ['text' => $panel['flow'], 'callback_data' => $panel['flow']],
+        ],
+    ]
+]);
+    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['flowStatuson'], $flow_Status);
 }
 #-----------------[ not user change status ]-----------------#
 $not_user = json_encode([
@@ -2942,7 +2909,7 @@ elseif ($user['step'] == "remove-product") {
     step('home',$from_id);
 }
 #-------------------------#
-if ($text == "✏️ ویرایش محصول"  ) {
+if ($text == "✏️ ویرایش محصول") {
     sendmessage($from_id,$textbotlang['Admin']['Product']['Rmove_location'], $json_list_marzban_panel, 'HTML');
     step('selectlocedite',$from_id);
 }
@@ -3344,9 +3311,9 @@ if ($text == "❌ حذف سرویس کاربر"  ) {
 elseif ($user['step'] == "removeservice") {
     $info_product = select("invoice", "*", "username", $text,"select");
     $marzban_list_get = select("marzban_panel", "*", "name_panel",$info_product['Service_location'],"select");
-    $get_username_Check = getuser($text,$marzban_list_get['name_panel']);
-    if(isset($get_username_Check['status'])){
-        removeuser($marzban_list_get['name_panel'], $text);
+    $DataUserOut = $ManagePanel->DataUser($marzban_list_get['name_panel'],$text);
+    if(isset($DataUserOut['status'])){
+        $ManagePanel->RemoveUser($marzban_list_get['name_panel'], $text);
     }
     $stmt = $pdo->prepare("DELETE FROM invoice WHERE username = ?");
     $stmt->bindParam(1, $text);
@@ -3359,14 +3326,12 @@ if ($text == "💡 روش ساخت نام کاربری"  ) {
 
 ⚠️ در صورتی که کاربری نام کاربری نداشته باشه کلمه NOT_USERNAME جای نام کاربری اعمال خواهد شد.
 
-⚠️ در صورتی که نام کاربری وجود داشته باشه یک عدد رندوم به نام کاربری اضافه خواهد شد
-
-روش فعلی : {$setting['MethodUsername']}";
+⚠️ در صورتی که نام کاربری وجود داشته باشه یک عدد رندوم به نام کاربری اضافه خواهد شد";
     sendmessage($from_id, $text_username, $MethodUsername, 'HTML');
     step('updatemethodusername',$from_id);
 }
 elseif ($user['step'] == "updatemethodusername") {
-    update("setting", "MethodUsername",$text);
+    update("marzbn_panel", "MethodUsername",$text,"name_panel",$user['Processing_value']);
     sendmessage($from_id, $textbotlang['Admin']['AlgortimeUsername']['SaveData'], $keyboardmarzban, 'HTML');
         if ($text == "متن دلخواه + عدد رندوم") {
     step('getnamecustom',$from_id);
@@ -3550,8 +3515,13 @@ if($text == "✏️ ویرایش پنل"  ){
     step('GetLocationEdit',$from_id);
 }
 elseif($user['step'] == "GetLocationEdit"){
+    $listpanel = select("marzban_panel","*","name_panel",$text,"select");
     update("user", "Processing_value",$text,"id",$from_id);
+    if($listpanel['type'] == "marzban"){
     sendmessage($from_id, $textbotlang['users']['selectoption'], $optionMarzban, 'HTML');
+    }elseif($listpanel['type'] == "x-ui_single"){
+    sendmessage($from_id, $textbotlang['users']['selectoption'], $optionX_ui_single, 'HTML');
+    }
     step('home',$from_id);
 }
 elseif($text == "✍️ نام پنل"  ){
@@ -3559,7 +3529,12 @@ elseif($text == "✍️ نام پنل"  ){
     step('GetNameNew',$from_id);
 }
 elseif($user['step'] == "GetNameNew"){
-    sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedNmaePanel'], $optionMarzban, 'HTML');
+    $typepanel = select("marzban_panel", "*", "name_panel", $user['Processing_value'],"select");
+    if($typepanel['type'] == "marzban"){
+    sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedNmaePanel'], $keyboardmarzban, 'HTML');
+    }elseif($typepanel['type'] == "x-ui_single"){
+    sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedNmaePanel'], $optionX_ui_single, 'HTML');
+    }
     update("marzban_panel", "name_panel",$text,"name_panel",$user['Processing_value']);
     update("invoice", "Service_location",$text,"Service_location",$user['Processing_value']);
     update("product", "Location",$text,"Location",$user['Processing_value']);
@@ -3576,7 +3551,12 @@ elseif($user['step'] == "GeturlNew"){
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['Invalid-domain'], $backadmin, 'HTML');
         return;
     }
-    sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedurlPanel'], $optionMarzban, 'HTML');
+    $typepanel = select("marzban_panel", "*", "name_panel", $user['Processing_value'],"select");
+    if($typepanel['type'] == "marzban"){
+    sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedurlPanel'], $keyboardmarzban, 'HTML');
+    }elseif($typepanel['type'] == "x-ui_single"){
+    sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedurlPanel'], $optionX_ui_single, 'HTML');
+    }
     update("marzban_panel", "url_panel",$text,"name_panel",$user['Processing_value']);
     step('home',$from_id);
 }
@@ -3585,7 +3565,12 @@ elseif($text == "👤 ویرایش نام کاربری"  ){
     step('GetusernameNew',$from_id);
 }
 elseif($user['step'] == "GetusernameNew"){
-    sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedusernamePanel'], $optionMarzban, 'HTML');
+    $typepanel = select("marzban_panel", "*", "name_panel", $user['Processing_value'],"select");
+    if($typepanel['type'] == "marzban"){
+    sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedusernamePanel'], $keyboardmarzban, 'HTML');
+    }elseif($typepanel['type'] == "x-ui_single"){
+    sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedusernamePanel'], $optionX_ui_single, 'HTML');
+    }
     update("marzban_panel", "username_panel",$text,"name_panel",$user['Processing_value']);
     step('home',$from_id);
 }
@@ -3594,9 +3579,32 @@ elseif($text == "🔐 ویرایش رمز عبور"  ){
     step('GetpaawordNew',$from_id);
 }
 elseif($user['step'] == "GetpaawordNew"){
+    $typepanel = select("marzban_panel", "*", "name_panel", $user['Processing_value'],"select");
+    if($typepanel['type'] == "marzban"){
     sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedpasswordPanel'], $optionMarzban, 'HTML');
+    }elseif($typepanel['type'] == "x-ui_single"){
+    sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedpasswordPanel'], $optionX_ui_single, 'HTML');
+    }
     update("marzban_panel", "password_panel",$text,"name_panel",$user['Processing_value']);
     step('home',$from_id);
+}elseif ($text == "💎 تنظیم شناسه اینباند") {
+    sendmessage($from_id, "📌 شناسه اینباندی که می خواهید کانفیگ از آن ساخته شود را ارسال نمایید.", $backadmin, 'HTML');
+    step('getinboundiid', $from_id);
+} elseif ($user['step'] == "getinboundiid") {
+    sendmessage($from_id, "✅ شناسه اینباند با موفقیت ذخیره گردید", $optionX_ui_single, 'HTML');
+    update("marzban_panel","inboundid",$text, "name_panel",$user['Processing_value']);
+    step('home', $from_id);
+}elseif ($text == "🔗 دامنه لینک ساب") {
+    sendmessage($from_id, $textbotlang['Admin']['managepanel']['geturlnew'], $backadmin, 'HTML');
+    step('GeturlNewx', $from_id);
+} elseif ($user['step'] == "GeturlNewx") {
+    if (!filter_var($text, FILTER_VALIDATE_URL)) {
+        sendmessage($from_id, $textbotlang['Admin']['managepanel']['Invalid-domain'], $backadmin, 'HTML');
+        return;
+    }
+    sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedurlPanel'], $optionX_ui_single, 'HTML');
+    update("marzban_panel","linksubx",$text, "name_panel",$user['Processing_value']);
+    step('home', $from_id);
 }
 elseif($text == "⚙️ تنظیمات پروتکل"  ){
     sendmessage($from_id, $textbotlang['Admin']['managepanel']['settingprotocol'], $keyboardprotocol, 'HTML');
@@ -3750,8 +3758,13 @@ elseif($user['step'] == "GetpaawordNew"){
     update("marzban_panel", "password_panel",$text,"name_panel",$user['Processing_value']);
     step('home',$from_id);
 }
-if($text == "❌ حذف پنل"  ) {
+if($text == "❌ حذف پنل") {
+    $typepanel = select("marzban_panel", "*", "name_panel", $user['Processing_value'],"select");
+    if($typepanel['type'] == "marzban"){
     sendmessage($from_id, $textbotlang['Admin']['managepanel']['RemovedPanel'], $keyboardmarzban, 'HTML');
+    }elseif($typepanel['type'] == "x-ui_single"){
+    sendmessage($from_id, $textbotlang['Admin']['managepanel']['RemovedPanel'], $keyboardmarzban, 'HTML');
+    }
     $stmt = $pdo->prepare("DELETE FROM marzban_panel WHERE name_panel = ?");
     $stmt->bindParam(1, $user['Processing_value']);
     $stmt->execute();
@@ -4092,9 +4105,9 @@ elseif($user['step'] == "getpricerequests"){
     sendmessage($from_id, "✅ با موفقیت ثبت گردید", $keyboardadmin, 'HTML');
     step("home",$from_id);
     $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$nameloc['Service_location']}'"));
-    $get_username_Check = getuser($user['Processing_value'],$marzban_list_get['name_panel']);
-    if(isset($get_username_Check['status'])){
-        removeuser($marzban_list_get['name_panel'], $user['Processing_value']);
+    $DataUserOut = $ManagePanel->DataUser($marzban_list_get['name_panel'],$user['Processing_value']);
+    if(isset($DataUserOut['status'])){
+        $ManagePanel->RemoveUser($marzban_list_get['name_panel'], $user['Processing_value']);
     }
     update("cancel_service","status","accept", "username",$user['Processing_value']);
     update("invoice","status","removedbyadmin", "username",$user['Processing_value']);

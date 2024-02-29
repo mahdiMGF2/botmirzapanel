@@ -80,15 +80,9 @@ function generateUUID() {
 function tronratee(){
     $tronrate = [];
     $tronrate['results'] = [];
-    $requests = json_decode(file_get_contents('https://api.bitpin.ir/v1/mkt/currencies/'), true)['results'];
-    foreach($requests as  $request){
-        if($request['id'] == 15){
-            $tronrate['result']['TRX'] = $request['price_info']['price'];
-        }
-        if($request['id'] == 4){
-            $tronrate['result']['USD'] = $request['price_info']['price'];
-        }
-    }
+    $requests = json_decode(file_get_contents('https://eswap.ir/fa/rates'), true);
+    $tronrate['result']['USD'] = $requests['fiats'][0]['price'];
+    $tronrate['result']['TRX'] = $requests['coins'][0]['price']*$requests['fiats'][0]['price'];
     return $tronrate;
 }
 function nowPayments($payment, $price_amount, $order_id, $order_description){

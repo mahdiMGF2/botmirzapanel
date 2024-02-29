@@ -263,8 +263,6 @@ $keyboardmarzban =  json_encode([
         [['text' => '🔌 وضعیت پنل'], ['text' => "🖥 اضافه کردن پنل  مرزبان"]],
         [['text' => "⚙️ارسال کانفیگ"], ['text' => "✏️ ویرایش پنل"]],
         [['text' => "🔗 ارسال لینک سابسکرایبشن"]],
-        [['text' => "💡 روش ساخت نام کاربری"]],
-        [['text' => "🍀 قابلیت flow"]],
         [['text' => "🏠 بازگشت به منوی مدیریت"]]
     ],
     'resize_keyboard' => true
@@ -316,7 +314,7 @@ $stmt = $pdo->prepare("SHOW TABLES LIKE 'marzban_panel'");
     }
     $json_list_marzban_panel = json_encode($list_marzban_panel);
 }
-$sql = "SHOW TABLES LIKE 'marzban_panel'";
+$sql = "SHOW TABLES LIKE 'help'";
 $stmt = $pdo->prepare($sql);
   $stmt->execute();
   $result = $stmt->fetchAll();
@@ -430,9 +428,8 @@ $stmt = $pdo->prepare($sql);
   $table_exists = count($result) > 0;
   if ($table_exists) {
     $product = [];
-    $cleaned_text = $pdo->quote($text);
     $stmt = $pdo->prepare("SELECT * FROM product WHERE Location = :Location OR Location = '/all'");
-    $stmt->bindParam(':Location', $cleaned_text);
+    $stmt->bindParam(':Location', $text);
     $stmt->execute();
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $product[] = [$row['name_product']];
@@ -552,6 +549,18 @@ $optionMarzban = json_encode([
         [['text' => "✍️ نام پنل"],['text' => "❌ حذف پنل"]],
         [['text'=>"🔗 ویرایش آدرس پنل"],['text' => "👤 ویرایش نام کاربری"]],
         [['text' => "🔐 ویرایش رمز عبور"],['text' => "⚙️ تنظیمات پروتکل"]],
+        [['text' => "🍀 قابلیت flow"],['text' => "💡 روش ساخت نام کاربری"]],
+        [['text' => "🏠 بازگشت به منوی مدیریت"]]
+    ],
+    'resize_keyboard' => true
+]);
+$optionX_ui_single = json_encode([
+    'keyboard' => [
+        [['text' => "✍️ نام پنل"],['text' => "❌ حذف پنل"]],
+        [['text' => "🔐 ویرایش رمز عبور"],['text' => "👤 ویرایش نام کاربری"]],
+        [['text'=>"🔗 ویرایش آدرس پنل"],['text' => "💎 تنظیم شناسه اینباند"]],
+        [['text' => "⚙️ارسال کانفیگ"],['text' => "🔗 ارسال لینک سابسکرایبشن"]],
+        [['text' => '🔗 دامنه لینک ساب']],
         [['text' => "🏠 بازگشت به منوی مدیریت"]]
     ],
     'resize_keyboard' => true
@@ -574,8 +583,6 @@ $perfectmoneykeyboard = json_encode([
     ],
     'resize_keyboard' => true
 ]);
-//--------------------------------------------------
-
 $affiliates =  json_encode([
     'keyboard' => [
         [['text' => "🎁 وضعیت زیرمجموعه گیری"]],
@@ -583,6 +590,13 @@ $affiliates =  json_encode([
         [['text' => "🏞 تنظیم بنر زیرمجموعه گیری"]],
         [['text' => "🎁 پورسانت بعد از خرید"],['text' => "🎁 دریافت هدیه "]],
         [['text' => "🌟 مبلغ هدیه استارت"]],
+        [['text' => "🏠 بازگشت به منوی مدیریت"]]
+    ],
+    'resize_keyboard' => true
+]);
+$typepanel =  json_encode([
+    'keyboard' => [
+        [['text' => "marzban"],['text' => "x-ui_single"]],
         [['text' => "🏠 بازگشت به منوی مدیریت"]]
     ],
     'resize_keyboard' => true
