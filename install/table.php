@@ -163,7 +163,6 @@ try {
         time_usertest varchar(600)  NULL,
         val_usertest varchar(600)  NULL,
         Extra_volume varchar(600)  NULL,
-        MethodUsername varchar(900)  NULL,
         namecustome varchar(100)  NULL)
         ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin");
         if (!$result) {
@@ -177,8 +176,7 @@ try {
         $sublink = "✅ لینک اشتراک فعال است.";
         $configManual = "❌ ارسال کانفیگ دستی خاموش است";
         $configManual = "❌ ارسال کانفیگ دستی خاموش است";
-        $MethodUsername ="آیدی عددی + حروف و عدد رندوم";
-$connect->query("INSERT INTO setting (Bot_Status,roll_Status,get_number,limit_usertest_all,time_usertest,val_usertest,help_Status,iran_number,sublink,configManual,NotUser,MethodUsername,namecustome) VALUES ('$active_bot_text','$active_roll_text','$active_phone_text','1','1','100','$active_help','$active_phone_iran_text','$sublink','$configManual','offnotuser','$MethodUsername','0')");
+$connect->query("INSERT INTO setting (Bot_Status,roll_Status,get_number,limit_usertest_all,time_usertest,val_usertest,help_Status,iran_number,sublink,configManual,NotUser,namecustome) VALUES ('$active_bot_text','$active_roll_text','$active_phone_text','1','1','100','$active_help','$active_phone_iran_text','$sublink','$configManual','offnotuser','0')");
     } else {
         $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'namecustome'");
         if (mysqli_num_rows($Check_filde) != 1) {
@@ -194,11 +192,6 @@ $connect->query("INSERT INTO setting (Bot_Status,roll_Status,get_number,limit_us
         if (mysqli_num_rows($Check_filde) != 1) {
             $connect->query("ALTER TABLE setting ADD Extra_volume VARCHAR(200)");
             echo "The Extra_volume field was added ✅";
-        }
-        $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'MethodUsername'");
-        if (mysqli_num_rows($Check_filde) != 1) {
-            $connect->query("ALTER TABLE setting ADD MethodUsername VARCHAR(900)");
-            echo "The MethodUsername field was added ✅";
         }
         $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'NotUser'");
         if (mysqli_num_rows($Check_filde) != 1) {
@@ -260,7 +253,6 @@ $connect->query("INSERT INTO setting (Bot_Status,roll_Status,get_number,limit_us
         $sublink = "✅ لینک اشتراک فعال است.";
         $active_phone_iran_text = "❌ بررسی شماره ایرانی غیرفعال است";
         $configManual = "❌ ارسال کانفیگ دستی خاموش است";
-        $MethodUsernameupdate = "آیدی عددی + حروف و عدد رندوم";
         if(!isset($settingsql['configManual'])){
         $stmt = $connect->prepare("UPDATE setting SET configManual = ?");
         $stmt->bind_param("s", $configManual);
@@ -280,11 +272,6 @@ $connect->query("INSERT INTO setting (Bot_Status,roll_Status,get_number,limit_us
         $stmt = $connect->prepare("UPDATE setting SET NotUser = ?");
         $text = "offnotuser";
         $stmt->bind_param("s", $text);
-        $stmt->execute();
-        }
-        if(!isset($settingsql['MethodUsername'])){
-        $stmt = $connect->prepare("UPDATE setting SET MethodUsername = ?");
-        $stmt->bind_param("s", $MethodUsernameupdate);
         $stmt->execute();
         }
     }
@@ -352,6 +339,7 @@ try {
         linksubx varchar(500) NULL,
         inboundid varchar(200) NULL,
         flow varchar(200)  NULL,
+        MethodUsername varchar(900)  NULL,
         password_panel varchar(200) NULL )
         ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin");
         if (!$result) {
@@ -364,6 +352,13 @@ try {
             $connect->query("ALTER TABLE marzban_panel ADD shadowsocks VARCHAR(100)");
             $connect->query("UPDATE marzban_panel SET shadowsocks = 'offshadowsocks'");
             echo "The shadowsocks field was added ✅";
+        }
+        $Check_filde = $connect->query("SHOW COLUMNS FROM marzban_panel LIKE 'MethodUsername'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $MethodUsername ="آیدی عددی + حروف و عدد رندوم";
+            $connect->query("ALTER TABLE marzban_panel ADD MethodUsername VARCHAR(900)");
+            $connect->query("UPDATE marzban_panel SET MethodUsername = '$MethodUsername'");
+            echo "The MethodUsername field was added ✅";
         }
         $Check_filde = $connect->query("SHOW COLUMNS FROM marzban_panel LIKE 'flow'");
         if (mysqli_num_rows($Check_filde) != 1) {
