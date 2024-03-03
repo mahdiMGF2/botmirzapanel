@@ -20,7 +20,7 @@ $telegram_ip_ranges = [
     ['lower' => '149.154.160.0', 'upper' => '149.154.175.255'],
     ['lower' => '91.108.4.0',    'upper' => '91.108.7.255']
 ];
-$trust_ips = ['104.255.68.103'];
+$trust_ips = [''];
 $ip = "";
 if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && preg_match_all('#\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}#s', $_SERVER['HTTP_X_FORWARDED_FOR'], $matches)) {
     if (count($trust_ips)<1 || in_array($_SERVER['REMOTE_ADDR'], $trust_ips)) {
@@ -3190,7 +3190,7 @@ elseif ($user['step'] == "get_price_Negative") {
     $Balance_user = select("user", "*", "id", $user['Processing_value'],"select");
     $Balance_Low_user = $Balance_user['Balance'] - $text;
     update("user", "Balance",$Balance_Low_user,"id",$user['Processing_value']);
-    $text = number_format($text);
+    $text = number_format($text,2);
     $textkam = "❌ کاربر عزیز مبلغ $text تومان از  موجودی کیف پول تان کسر گردید.";
     sendmessage($user['Processing_value'], $textkam, null, 'HTML');
     step('home',$from_id);
@@ -3881,7 +3881,7 @@ if ($text == "👥 شارژ همگانی") {
     sendmessage($from_id, $textbotlang['Admin']['Balance']['addallbalance'], $backadmin, 'HTML');
     step('add_Balance_all',$from_id);
 } elseif ($user['step'] == "add_Balance_all") {
-    if (!ctype_digit($text)) {
+    if (!preg_match('/^[\d\.]+$/', $text)) {
         sendmessage($from_id, $textbotlang['Admin']['Balance']['Invalidprice'], $backadmin, 'HTML');
         return;
     }
