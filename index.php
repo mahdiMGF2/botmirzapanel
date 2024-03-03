@@ -20,7 +20,30 @@ $telegram_ip_ranges = [
     ['lower' => '149.154.160.0', 'upper' => '149.154.175.255'],
     ['lower' => '91.108.4.0',    'upper' => '91.108.7.255']
 ];
-$ip_dec = (float) sprintf("%u", ip2long($_SERVER['REMOTE_ADDR']));
+$trust_ips = ['104.255.68.103'];
+$ip = "";
+if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && preg_match_all('#\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}#s', $_SERVER['HTTP_X_FORWARDED_FOR'], $matches)) {
+    if (count($trust_ips)<1 || in_array($_SERVER['REMOTE_ADDR'], $trust_ips)) {
+        $ips = explode(", ", $_SERVER['HTTP_X_FORWARDED_FOR']);
+        $ip = $ips[0];
+    }
+} elseif (isset($_SERVER['HTTP_CLIENT_IP']) && preg_match('/^([0-9]{1,3}\.){3}[0-9]{1,3}$/', $_SERVER['HTTP_CLIENT_IP'])) {
+    if (in_array($_SERVER['REMOTE_ADDR'], $trust_ips)) {
+        $ip = $_SERVER['HTTP_CLIENT_IP'];
+    }
+} elseif (isset($_SERVER['HTTP_CF_CONNECTING_IP']) && preg_match('/^([0-9]{1,3}\.){3}[0-9]{1,3}$/', $_SERVER['HTTP_CF_CONNECTING_IP'])) {
+    if (in_array($_SERVER['REMOTE_ADDR'], $trust_ips)) {
+        $ip = $_SERVER['HTTP_CF_CONNECTING_IP'];
+    }
+} elseif (isset($_SERVER['HTTP_X_REAL_IP']) && preg_match('/^([0-9]{1,3}\.){3}[0-9]{1,3}$/', $_SERVER['HTTP_X_REAL_IP'])) {
+    if (in_array($_SERVER['REMOTE_ADDR'], $trust_ips)) {
+        $ip = $_SERVER['HTTP_X_REAL_IP'];
+    }
+} else {
+    $ip = $_SERVER['REMOTE_ADDR'];
+}
+
+$ip_dec = (float)sprintf("%u", ip2long($ip));
 $ok = false;
 foreach ($telegram_ip_ranges as $telegram_ip_range) if (!$ok) {
     $lower_dec = (float) sprintf("%u", ip2long($telegram_ip_range['lower']));
