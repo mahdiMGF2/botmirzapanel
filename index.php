@@ -3533,14 +3533,14 @@ elseif ($datain == "offnowpayment"  ) {
     Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['nowpaymentsStatuson'], null);
 }
 
-if ($text == "🟡 Plisio 设置") {
+if ($text == "💵 تنظیمات plisio") {
     sendmessage($from_id, $textbotlang['users']['selectoption'], $PlisioManage, 'HTML');
 }
-if ($text == "🧩 Plisio API") {
+if ($text == "🧩 api plisio") {
     $PaySetting = select("PaySetting", "ValuePay", "NamePay", "apiplisio", "select")['ValuePay'];
-    $textcart = "⚙️ Plisios.io API 密钥
+    $textcart = "⚙️ api سایت plisio.net را ارسال نمایید
 
-Plisio API 密钥:$PaySetting";
+api plisio :$PaySetting";
     sendmessage($from_id, $textcart, $backadmin, 'HTML');
     step('apiplisio', $from_id);
 } elseif ($user['step'] == "apiplisio") {
@@ -3548,7 +3548,7 @@ Plisio API 密钥:$PaySetting";
     update("PaySetting", "ValuePay", $text, "NamePay", "apiplisio");
     step('home', $from_id);
 }
-if ($text == "🔌 plisio 状态") {
+if ($text == "🔌 وضعیت درگاه plisio") {
     $PaySetting = select("PaySetting", "ValuePay", "NamePay", "plisiostatus", "select")['ValuePay'];
     $now_Status = json_encode([
         'inline_keyboard' => [
