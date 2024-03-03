@@ -121,9 +121,9 @@ $NowPaymentsManage = json_encode([
 ]);
 $PlisioManage = json_encode([
     'keyboard' => [
-        [['text' => "🧩 Plisio API"]],
-        [['text' => "🔌 plisio 状态"]],
-        [['text' => "🏠 返回管理菜单"]]
+        [['text' => "🧩 api plisio"]],
+        [['text' => "🔌 وضعیت درگاه plisio"]],
+        [['text' => "🏠 بازگشت به منوی مدیریت"]]
     ],
     'resize_keyboard' => true
 ]);
