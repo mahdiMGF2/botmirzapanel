@@ -1833,7 +1833,7 @@ if (preg_match('/Confirmpay_user_(\w+)_(\w+)/', $datain, $dataget)) {
         ));
         return;
     }
-    $StatusPayment = StatusPayment($id_payment);
+    $StatusPayment = StatusPayment($Payment_report['Payment_Method'], $id_payment)
     if ($StatusPayment['payment_status'] == "finished") {
         telegram('answerCallbackQuery', array(
             'callback_query_id' => $callback_query_id,
