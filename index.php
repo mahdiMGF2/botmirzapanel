@@ -1727,18 +1727,19 @@ $stmt->execute();
         ]);
         $Processing_value = number_format($user['Processing_value'], 2);
         $USD = number_format($USD, 2);
-        $textplisio = "
-✅ Plisio 支付发票已创建.
+        $textnowpayments = "
+        ✅ فاکتور پرداخت ارزی Plisio ایجاد شد.
     
-🔢 发票号码 : $randomString
-💰 发票金额 : $Processing_value USD
+🔢 شماره فاکتور : $randomString
+💰 مبلغ فاکتور : $Processing_value تومان
     
-📊 当日汇率 : $USD
-💵 最终存入 : $usdprice USD 
-
-🌟 可以用不同的货币支付，充值产生的手续费由您承担
+📊 قیمت دلار روز : $USD تومان
+💵 نهایی:$usdprice دلار 
     
-使用下面的按钮付款👇🏻
+    
+🌟 امکان پرداخت با ارز های مختلف وجود دارد
+    
+جهت پرداخت از دکمه زیر استفاده کنید👇🏻
     ";
         sendmessage($from_id, $textplisio, $paymentkeyboard, 'HTML');
     }
