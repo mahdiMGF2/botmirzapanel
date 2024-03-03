@@ -19,7 +19,7 @@ try {
         step varchar(1000) NOT NULL,
         description_blocking TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL,
         number varchar(2000) NOT null ,
-        Balance int(255) NOT null ,
+        Balance double NOT null ,
         User_Status varchar(500) NOT NULL,
         pagenumber int(10) NOT NULL,
         message_count varchar(100) NOT NULL,
@@ -88,7 +88,7 @@ try {
             }
             $Check_filde = $connect->query("SHOW COLUMNS FROM user LIKE 'Balance'");
             if (mysqli_num_rows($Check_filde) != 1) {
-                $connect->query("ALTER TABLE user ADD Balance int(255)");
+                $connect->query("ALTER TABLE user ADD Balance double");
                 $connect->query("UPDATE user SET Balance = '0'");
                 echo "The Balance field was added ✅";
             }
@@ -713,7 +713,7 @@ try {
         price varchar(200)  NOT NULL,
         limitDiscount varchar(500)  NOT NULL,
         usedDiscount varchar(500) NOT NULL,
-        usefirst varchar(500) NOT NULL)");
+        usefirst varchar(500) NOT NULL DEFAULT 1)");
         if (!$result) {
             echo "table DiscountSell".mysqli_error($connect);
         }
