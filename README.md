@@ -27,7 +27,7 @@
 
 # Overview
 
-Bot Mirza Panel is a bot for selling VPN services specifically for the Mirzapanel. It is not currently compatible with other panels. This bot offers features such as purchasing VPNs, automatic configuration building, viewing purchased services, and test accounts.
+Bot Mirza Panel is a bot for selling VPN services specifically for the Marzban. It is not currently compatible with other panels. This bot offers features such as purchasing VPNs, automatic configuration building, viewing purchased services, and test accounts.
 
 ### Features
 
