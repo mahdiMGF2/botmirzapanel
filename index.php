@@ -1709,7 +1709,7 @@ $stmt->execute();
         $dateacc = date('Y/m/d h:i:s');
         $randomString = bin2hex(random_bytes(5));
         $payment_Status = "Unpaid";
-        $Payment_Method = "Nowpayments";
+        $Payment_Method = "Plisio";
         $stmt = $pdo->prepare("INSERT INTO Payment_report (id_user, id_order, time, price, payment_Status, Payment_Method) VALUES (?, ?, ?, ?, ?, ?)");
         $stmt->bindParam(1, $from_id);
         $stmt->bindParam(2, $randomString);
