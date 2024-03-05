@@ -39,12 +39,12 @@ curl_close($curl);
     $payment_status = "پرداخت موفق";
     $price = intval($usd*$response['price_amount']);
     $dec_payment_status = "از انجام تراکنش متشکریم!";
-    $Payment_report = select("Payment_report", "price", "id_order", $response['order_id'],"select");
+    $Payment_report = select("Payment_report", "*", "id_order", $response['order_id'],"select");
     if($Payment_report['payment_Status'] != "paid"){
-    $Balance_id = select("user", "*", "id", $Payment_report['id_user'],"select");
+    $Balance_id = select("user", "Balance", "id", $Payment_report['id_user'],"select");
     $Balance_confrim = intval($Balance_id['Balance']) + $price;
     update("user", "Balance", $Balance_confrim, "id",$Payment_report['id_user']);
-    update("Payment_report", "payment_Status", "paid", "id",$Payment_report['id_order']);
+    update("Payment_report", "payment_Status", "paid", "id_order",$Payment_report['id_order']);
     sendmessage($Payment_report['id_user'],"💎 کاربر گرامی مبلغ $price تومان به کیف پول شما واریز گردید با تشکر از پرداخت شما.
     
     🛒 کد پیگیری شما: {$Payment_report['id_order']}",$keyboard,'HTML');
