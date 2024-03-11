@@ -158,9 +158,9 @@ if ($user['User_Status'] == "block") {
         if ($marzbanDiscountaffiliates['Discount'] == "onDiscountaffiliates") {
             $marzbanDiscountaffiliates = select("affiliates", "*", null, null,"select");
             $Balance_user =  select("user", "*", "id", $affiliatesid,"select");
-            $Balance_add_user = $Balance_user['Balance'] + $marzbanDiscountaffiliates['price_Discount'];
+            $Balance_add_user = number_format($Balance_user['Balance'] + $marzbanDiscountaffiliates['price_Discount'],2);
             update("user", "Balance", $Balance_add_user, "id",$affiliatesid);
-            $addbalancediscount = number_format($marzbanDiscountaffiliates['price_Discount'], 0);
+            $addbalancediscount = number_format($marzbanDiscountaffiliates['price_Discount'], 2);
             sendmessage($affiliatesid, "🎁 مبلغ $addbalancediscount به موجودی شما از طرف زیر مجموعه با شناسه کاربری $from_id اضافه گردید.", null, 'html');
         }
         sendmessage($from_id, $datatextbot['text_start'], $keyboard, 'html');
@@ -597,7 +597,7 @@ elseif (preg_match('/extend_(\w+)/', $datain, $dataget)) {
             ]
         ]
     ]);
-     $prodcut['price_product'] = number_format($prodcut['price_product'],0);
+     $prodcut['price_product'] = number_format($prodcut['price_product'],2);
     $textextend = "🧾 فاکتور تمدید شما برای نام کاربری @$username ایجاد شد.
 
 🛍 نام محصول :  {$nameloc['name_product']}
@@ -648,7 +648,7 @@ elseif (preg_match('/confirmserivce_(\w+)/', $datain, $dataget) && $user['step']
         ]
     ]);
     sendmessage($from_id,$textbotlang['users']['extend']['thanks'],$keyboardextendfnished, 'HTML');
-    $prodcut['price_product'] = number_format($prodcut['price_product']);
+    $prodcut['price_product'] = number_format($prodcut['price_product'],2);
     
      $text_report = "⭕️ یک کاربر سرویس خود را تمدید کرد.
 
@@ -738,7 +738,7 @@ elseif($user['step'] == "getvolumeextra"){
         ]
     ]);
     $priceextra = number_format($priceextra, 2);
-    $setting['Extra_volume'] = number_format($setting['Extra_volume']);
+    $setting['Extra_volume'] = number_format($setting['Extra_volume'],2);
     $textextra = "📇 فاکتور خرید حجم اضافه برای شما ایجاد شد.
 
 💰 قیمت هر گیگابایت حجم اضافه :  {$setting['Extra_volume']} تومان
@@ -1294,12 +1294,12 @@ elseif ($user['step'] == "payment" && $datain == "confirmandgetservice" || $data
     $info_product = $stmt->fetch(PDO::FETCH_ASSOC);
     if (empty($info_product['price_product']) || empty($info_product['price_product'])) return;
     if ($datain == "confirmandgetserviceDiscount") {
-        $priceproduct =  $partsdic[1];
+        $priceproduct =  number_format($partsdic[1], 2);
     } else {
-        $priceproduct =  $info_product['price_product'];
+        $priceproduct =  number_format($info_product['price_product'], 2);
     }
     if ($priceproduct > $user['Balance']) {
-    $Balance_prim = $priceproduct - $user['Balance'];
+    $Balance_prim = number_format($priceproduct - $user['Balance'], 2);
     update("user", "Processing_value",$Balance_prim,"id",$from_id);
     sendmessage($from_id, $textbotlang['users']['sell']['None-credit'], $step_payment, 'HTML');
     step('get_step_payment',$from_id);
@@ -1382,8 +1382,8 @@ if(isset($nameprotocol['vless']) && $setting['flow'] == "flowon"){
     }
     $affiliatescommission = select("affiliates", "*", null, null,"select");
     if ($affiliatescommission['status_commission'] == "oncommission" &&($user['affiliates'] !== null || $user['affiliates'] != "0")) {
-        $affiliatescommission = select("affiliates", "*", null, null,"select");
-        $result = ($priceproduct * $affiliatescommission['affiliatespercentage']) / 100;
+        //$affiliatescommission = select("affiliates", "*", null, null, "select");
+        $result = number_format(($priceproduct * number_format($affiliatescommission['affiliatespercentage'], 2)) / 100, 2);
         $user_Balance = select("user", "*", "id", $user['affiliates'],"select");
         $Balance_prim = $user_Balance['Balance'] + $result;
         update("user", "Balance",$Balance_prim,"id",$user['affiliates']);
@@ -1519,7 +1519,7 @@ elseif ($user['step'] == "getcodesellDiscount") {
     $result = ($SellDiscountlimit['price'] / 100) * number_format($info_product['price_product'], 2);
 
     $info_product['price_product'] = number_format($info_product['price_product'], 2) - $result;
-    $info_product['price_product'] = round($info_product['price_product']);
+    //$info_product['price_product'] = number_format($info_product['price_product'], 2);
     if ($info_product['price_product'] < 0) $info_product['price_product'] = 0;
     $textin = "
          📇 پیش فاکتور شما:
@@ -2356,7 +2356,7 @@ if ($text == "📨 ارسال پیام" ) {
     sendmessage($from_id, $textbotlang['Admin']['ManageUser']['GetText'], $backadmin, 'HTML');
     step('gettextforsendall',$from_id);
 } elseif ($user['step'] == "gettextforsendall") {
-sendmessage($from_id, "درحال ارسال پیام",$keyboardaadmin, 'HTML');
+sendmessage($from_id, "درحال ارسال پیام",$keyboardadmin, 'HTML');
 step('home',$from_id);
 $filename = 'user.txt';
 $stmt = $pdo->prepare("SELECT id FROM user");
@@ -2376,7 +2376,7 @@ if ($file) {
     sendmessage($line, $text, null, 'HTML');
     usleep(1000000);
     }
-    sendmessage($from_id, "✅ پیام به تمامی کاربران ارسال شد",$keyboardaadmin, 'HTML');
+    sendmessage($from_id, "✅ پیام به تمامی کاربران ارسال شد",$keyboardadmin, 'HTML');
     fclose($file);
 }
 unlink($filename);
@@ -2384,7 +2384,7 @@ unlink($filename);
     sendmessage($from_id, $textbotlang['Admin']['ManageUser']['ForwardGetext'], $backadmin, 'HTML');
     step('gettextforwardMessage',$from_id);
 } elseif ($user['step'] == "gettextforwardMessage") {
-sendmessage($from_id, "درحال ارسال پیام",$keyboardaadmin, 'HTML');
+sendmessage($from_id, "درحال ارسال پیام",$keyboardadmin, 'HTML');
 step('home',$from_id);
 $filename = 'user.txt';
 $stmt = $pdo->prepare("SELECT id FROM user");
@@ -2404,7 +2404,7 @@ if ($file) {
     forwardMessage($from_id, $message_id, $line);
     usleep(2000000);
     }
-    sendmessage($from_id, "✅ پیام به تمامی کاربران ارسال شد",$keyboardaadmin, 'HTML');
+    sendmessage($from_id, "✅ پیام به تمامی کاربران ارسال شد",$keyboardadmin, 'HTML');
     fclose($file);
 }
 unlink($filename);
@@ -2897,7 +2897,7 @@ $stmt->execute();
     sendmessage($from_id, $textbotlang['Admin']['Product']['GettIime'], $backadmin, 'HTML');
     step('get_price',$from_id);
 }elseif ($user['step'] == "get_price") {
-    if (!ctype_digit($text)) {
+    if (!preg_match('/^[\d\.]+$/', $text)) {
         sendmessage($from_id, $textbotlang['Admin']['Product']['InvalidTime'], $backadmin, 'HTML');
         return;
     }
@@ -2905,7 +2905,7 @@ $stmt->execute();
     sendmessage($from_id, $textbotlang['Admin']['Product']['GetPrice'], $backadmin, 'HTML');
     step('endstep',$from_id);
 } elseif ($user['step'] == "endstep") {
-    if (!ctype_digit($text)) {
+    if (!preg_match('/^[\d\.]+$/', $text)) {
         sendmessage($from_id, $textbotlang['Admin']['Product']['InvalidPrice'], $backadmin, 'HTML');
         return;
     }
@@ -3533,6 +3533,39 @@ elseif ($datain == "offnowpayment"  ) {
     Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['nowpaymentsStatuson'], null);
 }
 
+if ($text == "💵 تنظیمات plisio") {
+    sendmessage($from_id, $textbotlang['users']['selectoption'], $PlisioManage, 'HTML');
+}
+if ($text == "🧩 api plisio") {
+    $PaySetting = select("PaySetting", "ValuePay", "NamePay", "apiplisio", "select")['ValuePay'];
+    $textcart = "⚙️ api سایت plisio.net را ارسال نمایید
+
+api plisio :$PaySetting";
+    sendmessage($from_id, $textcart, $backadmin, 'HTML');
+    step('apiplisio', $from_id);
+} elseif ($user['step'] == "apiplisio") {
+    sendmessage($from_id, $textbotlang['Admin']['SettingnowPayment']['Savaapi'], $PlisioManage, 'HTML');
+    update("PaySetting", "ValuePay", $text, "NamePay", "apiplisio");
+    step('home', $from_id);
+}
+if ($text == "🔌 وضعیت درگاه plisio") {
+    $PaySetting = select("PaySetting", "ValuePay", "NamePay", "plisiostatus", "select")['ValuePay'];
+    $now_Status = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $PaySetting, 'callback_data' => $PaySetting],
+            ],
+        ]
+    ]);
+    sendmessage($from_id, $textbotlang['Admin']['Status']['plisioTitle'], $now_Status, 'HTML');
+}
+if ($datain == "onplisio") {
+    update("PaySetting", "ValuePay", "offplisio", "NamePay", "plisiostatus");
+    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['plisioStatusOff'], null);
+} elseif ($datain == "offplisio") {
+    update("PaySetting", "ValuePay", "onplisio", "NamePay", "plisiostatus");
+    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['plisioStatuson'], null);
+}
 if ($text == "💵 تنظیمات plisio") {
     sendmessage($from_id, $textbotlang['users']['selectoption'], $PlisioManage, 'HTML');
 }
