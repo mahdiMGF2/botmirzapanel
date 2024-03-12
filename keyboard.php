@@ -166,7 +166,7 @@ $valid_Number =  json_encode([
 ]);
 $PaySettingcard = select("PaySetting", "ValuePay", "NamePay", 'Cartstatus',"select")['ValuePay'];
 $PaySettingnow = select("PaySetting", "ValuePay", "NamePay", 'nowpaymentstatus',"select")['ValuePay'];
-$PaySettingpl = select("PaySetting", "ValuePay", "NamePay", 'plisiotatus', "select")['ValuePay'];
+$PaySettingpl = select("PaySetting", "ValuePay", "NamePay", 'plisiostatus', "select")['ValuePay'];
 $PaySettingdigi = select("PaySetting", "ValuePay", "NamePay", 'digistatus',"select")['ValuePay'];
 $PaySettingaqayepardakht = select("PaySetting", "ValuePay", "NamePay", 'statusaqayepardakht',"select")['ValuePay'];
 $PaySettingperfectmoney = select("PaySetting", "ValuePay", "NamePay", 'status_perfectmoney',"select")['ValuePay'];
