@@ -62,7 +62,7 @@ class ManagePanel{
         $Get_Data_Panel = select("marzban_panel", "*", "name_panel", $name_panel,"select");
         if($Get_Data_Panel['type'] == "marzban"){
             $UsernameData = getuser($username,$Get_Data_Panel['name_panel']);
-            if($UsernameData['detail']){
+            if(isset($UsernameData['detail']) && $UsernameData['detail']){
                 $Output = array(
                     'status' => 'Unsuccessful',
                     'msg' => $UsernameData['detail']
