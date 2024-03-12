@@ -31,11 +31,13 @@ foreach ($telegram_ip_ranges as $telegram_ip_range) if (!$ok) {
 if (!$ok) die("دسترسی غیرمجاز");
 #-------------Variable----------#
 $setting = select("setting", "*");
+if($from_id != "0"){
 $stmt = $pdo->prepare("INSERT IGNORE INTO user (id, step, limit_usertest, User_Status, number, Balance, pagenumber, username, message_count, last_message_time, affiliatescount, affiliates) VALUES (:from_id, 'none', :limit_usertest_all, 'Active', 'none', '0', '1', :username, '0', '0', '0', '0')");
 $stmt->bindParam(':from_id', $from_id);
 $stmt->bindParam(':limit_usertest_all', $setting['limit_usertest_all']);
 $stmt->bindParam(':username', $username  , PDO::PARAM_STR);
 $stmt->execute();
+}
 $version = file_get_contents('install/version');
 $user = select("user", "*", "id", $from_id,"select");
 if ($user == false) {
@@ -2289,6 +2291,10 @@ if ($text == "📨 ارسال پیام" ) {
     sendmessage($from_id, $textbotlang['Admin']['ManageUser']['GetText'], $backadmin, 'HTML');
     step('gettextforsendall',$from_id);
 } elseif ($user['step'] == "gettextforsendall") {
+    if(!$text){
+        sendmessage($from_id,$textbotlang['Admin']['mesage']['nottextmessage'], $backadmin, 'HTML');
+        return;
+    }
 sendmessage($from_id, "درحال ارسال پیام",$keyboardaadmin, 'HTML');
 step('home',$from_id);
 $filename = 'user.txt';
@@ -3962,6 +3968,7 @@ elseif ($user['step'] == "remove-Discountsell") {
     $stmt->bindParam(1, $text);
     $stmt->execute();
     sendmessage($from_id, $textbotlang['Admin']['Discount']['RemovedCode'], $shopkeyboard, 'HTML');
+    step('home',$from_id);
 }
 if ($text == "👥 تنظیمات زیر مجموعه گیری") {
     sendmessage($from_id, $textbotlang['users']['selectoption'], $affiliates, 'HTML');
@@ -4189,5 +4196,4 @@ elseif($user['step'] == "getpricerequests"){
         sendmessage($setting['Channel_Report'], $text_report, null, 'HTML');
     }
 }
-
 $connect->close();

@@ -536,3 +536,6 @@ $textbotlang['Admin']['Discountsell']['GetCode'] ="کدی را برای کد ت�
 $textbotlang['Admin']['Discountsell']['getlimit'] ="محدودیت استفاده برای کاربر را ارسال کنید";
 $textbotlang['Admin']['Discount']['PriceCodesell'] ="کد دریافت شد حالا درصد کد  را بفرست";
 $textbotlang['Admin']['Discount']['invalidcodedis'] ="❌  کد تخفیف نامعتبر است";
+
+
+$textbotlang['Admin']['mesage']['nottextmessage'] ="❌  در ارسال همگانی فقط متن می توانید ارسال نمایید.";
