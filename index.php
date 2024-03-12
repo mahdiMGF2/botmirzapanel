@@ -565,82 +565,138 @@ elseif (preg_match('/extend_(\w+)/', $datain, $dataget)) {
     $username = $dataget[1];
     $nameloc = select("invoice", "*", "username", $username,"select");
     $prodcut = select("product", "*", "name_product", $nameloc['name_product'],"select");
-    if(!isset($prodcut['price_product'])){
-            sendmessage($from_id,$textbotlang['users']['extend']['error'], null, 'HTML');
-            return;
+    $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'],"select");
+    $DataUserOut = $ManagePanel->DataUser($nameloc['Service_location'],$username);
+    if($DataUserOut['status'] == "Unsuccessful"){
+        sendmessage($from_id, $textbotlang['users']['stateus']['error'], null, 'html');
+        return;
     }
-            $keyboardextend = json_encode([
+    update("user","Processing_value",$username, "id",$from_id);
+    $stmt = $pdo->prepare("SELECT * FROM product WHERE AND (Location = :loc1 OR location = '/all') LIMIT 1");
+    $stmt->bindValue(':Location', $nameloc['Service_location']);
+    $stmt->execute();
+    $productextend = ['inline_keyboard' => []];
+    while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $productextend['inline_keyboard'][] = [
+            ['text' => $result['name_product'], 'callback_data' => "serviceextendselect_" . $result['code_product']]
+        ];
+    }
+    $productextend['inline_keyboard'][] = [
+        ['text' => "🏠 بازگشت به اطلاعات سرویس", 'callback_data' => "product_" . $username]
+    ];
+
+    $json_list_product_lists = json_encode($productextend);
+    Editmessagetext($from_id, $message_id, $textbotlang['users']['extend']['selectservice'], $json_list_product_lists);
+}elseif (preg_match('/serviceextendselect_(\w+)/', $datain, $dataget)) {
+    $codeproduct = $dataget[1];
+    $nameloc = select("invoice", "*", "username", $username,"select");
+    $stmt = $pdo->prepare("SELECT * FROM product WHERE AND (Location = :loc1 OR location = '/all') AND code_product = :code_product LIMIT 1");
+    $stmt->bindValue(':Location', $nameloc['Service_location']);
+    $stmt->bindValue(':code_product', $codeproduct);
+    $stmt->execute();
+    $product = $stmt->fetch(PDO::FETCH_ASSOC);
+    update("invoice","name_product",$prodcut['name_product'], "username",$user['Processing_value']);
+    update("user","Processing_value_one",$codeproduct, "id",$from_id);
+    $keyboardextend = json_encode([
         'inline_keyboard' => [
             [
-                ['text' => $textbotlang['users']['extend']['confirm'], 'callback_data' => "confirmserivce_".$username],
-            ]
+                ['text' => $textbotlang['users']['extend']['confirm'], 'callback_data' => "confirmserivce-" . $codeproduct],
+            ],[
+                ['text' => "🏠 بازگشت به منوی اصلی", 'callback_data' => "backuser"]
+
+]
         ]
     ]);
-     $prodcut['price_product'] = number_format($prodcut['price_product'],0);
-    $textextend = "🧾 فاکتور تمدید شما برای نام کاربری $username ایجاد شد.
-
-🛍 نام محصول :  {$nameloc['name_product']}
+    $textextend = "🧾 فاکتور تمدید شما برای نام کاربری {$nameloc['username']} ایجاد شد.
+        
+🛍 نام محصول :  {$prodcut['name_product']}
 مبلغ تمدید :  {$prodcut['price_product']}
 مدت زمان تمدید : {$prodcut['Service_time']} روز
 حجم تمدید : {$prodcut['Volume_constraint']} گیگ
-
-⚠️ پس از تمدید حجم شما ریست خواهد شدو اگر حجمی باقی مانده باشد حذف می شود
-
+        
+        
 ✅ برای تایید و تمدید سرویس روی دکمه زیر کلیک کنید
-
+        
 ❌ برای تمدید باید کیف پول خود را شارژ کنید.";
-    sendmessage($from_id,$textextend, $keyboardextend, 'HTML');
-    step('confirmextend',$from_id);
+    Editmessagetext($from_id, $message_id, $textextend, $keyboardextend);
 }
 elseif (preg_match('/confirmserivce_(\w+)/', $datain, $dataget) && $user['step'] == "confirmextend") {
-    $usernamepanel = $dataget[1];
-    $nameloc = select("invoice", "*", "username", $usernamepanel,"select");
-    $prodcut = select("product", "*", "name_product", $nameloc['name_product'],"select");
-        if($user['Balance'] < $prodcut['price_product']){
-    $Balance_prim = $prodcut['price_product'] - $user['Balance'];
-    update("user", "Processing_value", $Balance_prim, "id",$from_id);
-    sendmessage($from_id, $textbotlang['users']['sell']['None-credit'], $step_payment, 'HTML');
-    step('get_step_payment',$from_id);
-        return;
-        }
-    $Balance_Low_user = $user['Balance'] - $prodcut['price_product'];
-    update("user", "Balance", $Balance_Low_user, "id",$from_id);
+    $codeproduct = $dataget[1];
+    deletemessage($from_id, $message_id);
+    $nameloc = select("invoice", "*", "username", $user['Processing_value'],"select");
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'],"select");
-    $ManagePanel->ResetUserDataUsage($marzban_list_get['name_panel'],$usernamepanel);
-    $date = strtotime("+" . $prodcut['Service_time'] . "day");
+    $stmt = $pdo->prepare("SELECT * FROM product WHERE AND (Location = :loc1 OR location = '/all') AND code_product = :code_product LIMIT 1");
+    $stmt->bindValue(':Location', $nameloc['Service_location']);
+    $stmt->bindValue(':code_product', $codeproduct);
+    $stmt->execute();
+    $product = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($user['Balance'] < $prodcut['price_product'] && $user['agent'] != "n2") {
+        $Balance_prim = $prodcut['price_product'] - $user['Balance'];
+        update("user","Processing_value",$Balance_prim, "id",$from_id);
+        sendmessage($from_id, $textbotlang['users']['sell']['None-credit'], $step_payment, 'HTML');
+        sendmessage($from_id, $textbotlang['users']['sell']['selectpayment'], $backuser, 'HTML');
+        step('get_step_payment', $from_id);
+        return;
+    }
+    $usernamepanel = $nameloc['username'];
+    $Balance_Low_user = $user['Balance'] - $prodcut['price_product'];
+    update("user","Balance",$Balance_Low_user, "id",$from_id);
+    if($marzban_list_get['type'] == "marzban"){
+    $ManagePanel->ResetUserDataUsage($namepanel,$usernamepanel);
+    $date = strtotime("+" . $nameloc['Service_time'] . "day");
     $newDate = strtotime(date("Y-m-d H:i:s", $date));
-    $data_limit = $prodcut['Volume_constraint'] * pow(1024, 3);
-        $datam = array(
+    $data_limit = intval($prodcut['Volume_constraint']) * pow(1024, 3);
+    $datam = array(
         "expire" => $newDate,
         "data_limit" => $data_limit
-        );
-    $Modifyuser = $ManagePanel->Modifyuser($marzban_list_get['name_panel'],$usernamepanel,$datam);
-            $keyboardextendfnished = json_encode([
+    );
+    $ManagePanel->Modifyuser($usernamepanel,$namepanel, $datam);
+    }elseif($marzban_list_get['type'] =="x-ui_single"){
+    $date = strtotime("+" . $nameloc['Service_time'] . "day");
+    $newDate = strtotime(date("Y-m-d H:i:s", $date))*1000;
+    $data_limit = intval($prodcut['Volume_constraint']) * pow(1024, 3);
+    $config = array(
+        'id' => intval($marzban_list_get['inboundid']),
+        'settings' => json_encode(array(
+            'clients' => array(
+                array(
+                "id" => $clients['id'],
+                "totalGB" => $data_limit,
+                "expiryTime" => $newDate,
+                "enable" => true,
+            )),
+    )
+),
+);
+    $ManagePanel->Modifyuser($usernamepanel,$namepanel, $config);
+    }
+    $keyboardextendfnished = json_encode([
         'inline_keyboard' => [
             [
                 ['text' => $textbotlang['users']['stateus']['backlist'], 'callback_data' => "backorder"],
             ],
             [
-                                ['text' => $textbotlang['users']['stateus']['backservice'], 'callback_data' => "product_" . $usernamepanel],
-]
+                ['text' => $textbotlang['users']['stateus']['backservice'], 'callback_data' => "product_" . $usernamepanel],
+            ]
         ]
     ]);
-    sendmessage($from_id,$textbotlang['users']['extend']['thanks'],$keyboardextendfnished, 'HTML');
-    $prodcut['price_product'] = number_format($prodcut['price_product']);
-    
-     $text_report = "⭕️ یک کاربر سرویس خود را تمدید کرد.
-
+    $priceproductformat = number_format($prodcut['price_product']);
+    $balanceformatsell = number_format(select("user", "Balance", "id", $from_id,"select")['Balance']);
+    sendmessage($from_id, $textbotlang['users']['extend']['thanks'], $keyboardextendfnished, 'HTML');
+    $text_report = "⭕️ یک کاربر سرویس خود را تمدید کرد.
+        
 اطلاعات کاربر : 
-
+        
 🪪 آیدی عددی : <code>$from_id</code>
+🪪  نام کاربری : @$username
 🛍 نام محصول :  {$prodcut['name_product']}
-💰 مبلغ تمدید :  {$prodcut['price_product']} تومان
+💰 مبلغ تمدید $priceproductformat تومان
 👤 نام کاربری مشتری در پنل مرزبان : $usernamepanel
-لوکیشن سرویس کاربر : {$nameloc['Service_location']}"; 
-     if (strlen($setting['Channel_Report']) > 0) {    
-         sendmessage($setting['Channel_Report'], $text_report, null, 'HTML');
-         }
-    step('home',$from_id);
+موجودی کاربر : $balanceformatsell تومان
+لوکیشن سرویس کاربر : {$nameloc['Service_location']}";
+    if (strlen($setting['Channel_Report']) > 0) {
+        sendmessage($setting['Channel_Report'], $text_report, null, 'HTML');
+    }
 }
 elseif (preg_match('/changelink_(\w+)/', $datain, $dataget)) {
     $username = $dataget[1];
