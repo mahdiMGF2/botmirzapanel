@@ -158,7 +158,7 @@ if ($user['User_Status'] == "block") {
         if ($marzbanDiscountaffiliates['Discount'] == "onDiscountaffiliates") {
             $marzbanDiscountaffiliates = select("affiliates", "*", null, null,"select");
             $Balance_user =  select("user", "*", "id", $affiliatesid,"select");
-            $Balance_add_user = number_format($Balance_user['Balance'] + $marzbanDiscountaffiliates['price_Discount'],2);
+            $Balance_add_user = $Balance_user['Balance'] + number_format($marzbanDiscountaffiliates['price_Discount'],2);
             update("user", "Balance", $Balance_add_user, "id",$affiliatesid);
             $addbalancediscount = number_format($marzbanDiscountaffiliates['price_Discount'], 2);
             sendmessage($affiliatesid, "🎁 مبلغ $addbalancediscount به موجودی شما از طرف زیر مجموعه با شناسه کاربری $from_id اضافه گردید.", null, 'html');
@@ -749,7 +749,7 @@ elseif($user['step'] == "getvolumeextra"){
     sendmessage($from_id,$textextra, $keyboardsetting, 'HTML');
     step('home',$from_id);
 }
-elseif (preg_match('/confirmaextra_(\w+)/', $datain, $dataget)) {
+elseif (preg_match('/confirmaextra_(\w+\.\w+)/', $datain, $dataget)) {
     $volume = number_format($dataget[1], 2);
     $nameloc = select("invoice", "*", "username", $user['Processing_value'],"select");
         if($user['Balance'] <$volume){
@@ -778,7 +778,7 @@ elseif (preg_match('/confirmaextra_(\w+)/', $datain, $dataget)) {
     ]);
     sendmessage($from_id, $textbotlang['users']['Extra_volume']['extraadded'], $keyboardextrafnished, 'HTML');
     $volumes = number_format($volume / $setting['Extra_volume'], 2);
-    $volume = number_format($volume);
+    //$volume = number_format($volume);
      $text_report = "⭕️ یک کاربر حجم اضافه خریده است
 
 اطلاعات کاربر : 
@@ -1906,7 +1906,7 @@ if (preg_match('/Confirmpay_user_(\w+)_(\w+)/', $datain, $dataget)) {
         ));
         return;
     }
-    $StatusPayment = StatusPayment($Payment_report['Payment_Method'], $id_payment)
+    $StatusPayment = StatusPayment($Payment_report['Payment_Method'], $id_payment);
     if ($StatusPayment['payment_status'] == "finished") {
         telegram('answerCallbackQuery', array(
             'callback_query_id' => $callback_query_id,
@@ -4222,7 +4222,7 @@ elseif (preg_match('/remoceserviceadmin-(\w+)/', $datain, $dataget)) {
 
 }
 elseif($user['step'] == "getpricerequests"){
-    if (!ctype_digit($text)) {
+    if (!preg_match('/^[\d\.]+$/', $text)) {
         sendmessage($from_id,"⭕️ ورودی نا معتبر", null, 'HTML');
     }
     $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '{$user['Processing_value']}'"));
