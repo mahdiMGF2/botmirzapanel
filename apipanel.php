@@ -82,11 +82,18 @@ function adduser($username,$expire,$data_limit,$location,array $protocol)
     $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
     $url = $marzban_list_get['url_panel']."/api/user";
     $header_value = 'Bearer ';
+    $inbounds = array(
+//        "vmess" => array("VMess TCP", "VMess Websocket"),
+//        "vless" => array("VLESS TCP REALITY", "VLESS GRPC REALITY"),
+//        "trojan" => array("Trojan Websocket TLS"),
+//        "shadowsocks" => array("Shadowsocks TCP")
+    );
     $data = array(
         "proxies" => $protocol,
         "expire" => $expire,
         "data_limit" => $data_limit,
-        "username" => $username
+        "username" => $username,
+        "inbounds" => $inbounds
     );
 
     $payload = json_encode($data);

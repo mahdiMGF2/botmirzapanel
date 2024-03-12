@@ -119,25 +119,50 @@ function nowPayments($payment, $price_amount, $order_id, $order_description){
     curl_close($curl);
     return json_decode($response);
 }
-function StatusPayment($paymentid){
-    $apinowpayments = select("PaySetting", "ValuePay", "NamePay", 'apinowpayment',"select")['ValuePay'];
+function StatusPayment($paymentmethod, $paymentid)
+{
+    $response = "";
     $curl = curl_init();
-    curl_setopt_array($curl, array(
-        CURLOPT_URL => 'https://api.nowpayments.io/v1/payment/' . $paymentid,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => '',
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 0,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => 'GET',
-        CURLOPT_HTTPHEADER => array(
-            'x-api-key:' . $apinowpayments
-        ),
-    ));
-    $response = curl_exec($curl);
-    $response = json_decode($response, true);
+    if($paymentid=='Nowpayments') {
+        $apinowpayments = select("PaySetting", "ValuePay", "NamePay", 'apinowpayment', "select")['ValuePay'];
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'https://api.nowpayments.io/v1/payment/' . $paymentid,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET',
+            CURLOPT_HTTPHEADER => array(
+                'x-api-key:' . $apinowpayments
+            ),
+        ));
+        $response = curl_exec($curl);
+
+    }
+    if($paymentid=='Plisio') {
+        $apiplisio = select("PaySetting", "ValuePay", "NamePay", 'apiplisio', "select")['ValuePay'];
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'https://plisio.net/api/v1/operations/' . $paymentid,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET',
+            CURLOPT_HTTPHEADER => array(
+                'x-api-key:' . $apiplisio
+            ),
+        ));
+        curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode([
+            'api_key' => $apiplisio
+        ]));
+        $response = curl_exec($curl);
+    }
     curl_close($curl);
+    $response = json_decode($response, true);
     return $response;
 }
 function formatBytes($bytes, $precision = 2): string

@@ -20,7 +20,30 @@ $telegram_ip_ranges = [
     ['lower' => '149.154.160.0', 'upper' => '149.154.175.255'],
     ['lower' => '91.108.4.0',    'upper' => '91.108.7.255']
 ];
-$ip_dec = (float) sprintf("%u", ip2long($_SERVER['REMOTE_ADDR']));
+$trust_ips = [''];
+$ip = "";
+if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && preg_match_all('#\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}#s', $_SERVER['HTTP_X_FORWARDED_FOR'], $matches)) {
+    if (count($trust_ips)<1 || in_array($_SERVER['REMOTE_ADDR'], $trust_ips)) {
+        $ips = explode(", ", $_SERVER['HTTP_X_FORWARDED_FOR']);
+        $ip = $ips[0];
+    }
+} elseif (isset($_SERVER['HTTP_CLIENT_IP']) && preg_match('/^([0-9]{1,3}\.){3}[0-9]{1,3}$/', $_SERVER['HTTP_CLIENT_IP'])) {
+    if (in_array($_SERVER['REMOTE_ADDR'], $trust_ips)) {
+        $ip = $_SERVER['HTTP_CLIENT_IP'];
+    }
+} elseif (isset($_SERVER['HTTP_CF_CONNECTING_IP']) && preg_match('/^([0-9]{1,3}\.){3}[0-9]{1,3}$/', $_SERVER['HTTP_CF_CONNECTING_IP'])) {
+    if (in_array($_SERVER['REMOTE_ADDR'], $trust_ips)) {
+        $ip = $_SERVER['HTTP_CF_CONNECTING_IP'];
+    }
+} elseif (isset($_SERVER['HTTP_X_REAL_IP']) && preg_match('/^([0-9]{1,3}\.){3}[0-9]{1,3}$/', $_SERVER['HTTP_X_REAL_IP'])) {
+    if (in_array($_SERVER['REMOTE_ADDR'], $trust_ips)) {
+        $ip = $_SERVER['HTTP_X_REAL_IP'];
+    }
+} else {
+    $ip = $_SERVER['REMOTE_ADDR'];
+}
+
+$ip_dec = (float)sprintf("%u", ip2long($ip));
 $ok = false;
 foreach ($telegram_ip_ranges as $telegram_ip_range) if (!$ok) {
     $lower_dec = (float) sprintf("%u", ip2long($telegram_ip_range['lower']));
@@ -135,9 +158,9 @@ if ($user['User_Status'] == "block") {
         if ($marzbanDiscountaffiliates['Discount'] == "onDiscountaffiliates") {
             $marzbanDiscountaffiliates = select("affiliates", "*", null, null,"select");
             $Balance_user =  select("user", "*", "id", $affiliatesid,"select");
-            $Balance_add_user = $Balance_user['Balance'] + $marzbanDiscountaffiliates['price_Discount'];
+            $Balance_add_user = $Balance_user['Balance'] + number_format($marzbanDiscountaffiliates['price_Discount'],2);
             update("user", "Balance", $Balance_add_user, "id",$affiliatesid);
-            $addbalancediscount = number_format($marzbanDiscountaffiliates['price_Discount'], 0);
+            $addbalancediscount = number_format($marzbanDiscountaffiliates['price_Discount'], 2);
             sendmessage($affiliatesid, "🎁 مبلغ $addbalancediscount به موجودی شما از طرف زیر مجموعه با شناسه کاربری $from_id اضافه گردید.", null, 'html');
         }
         sendmessage($from_id, $datatextbot['text_start'], $keyboard, 'html');
@@ -574,7 +597,7 @@ elseif (preg_match('/extend_(\w+)/', $datain, $dataget)) {
             ]
         ]
     ]);
-     $prodcut['price_product'] = number_format($prodcut['price_product'],0);
+     $prodcut['price_product'] = number_format($prodcut['price_product'],2);
     $textextend = "🧾 فاکتور تمدید شما برای نام کاربری @$username ایجاد شد.
 
 🛍 نام محصول :  {$nameloc['name_product']}
@@ -625,7 +648,7 @@ elseif (preg_match('/confirmserivce_(\w+)/', $datain, $dataget) && $user['step']
         ]
     ]);
     sendmessage($from_id,$textbotlang['users']['extend']['thanks'],$keyboardextendfnished, 'HTML');
-    $prodcut['price_product'] = number_format($prodcut['price_product']);
+    $prodcut['price_product'] = number_format($prodcut['price_product'],2);
     
      $text_report = "⭕️ یک کاربر سرویس خود را تمدید کرد.
 
@@ -697,11 +720,12 @@ elseif (preg_match('/Extra_volume_(\w+)/', $datain, $dataget)) {
     step('getvolumeextra',$from_id);
 }
 elseif($user['step'] == "getvolumeextra"){
-        if (!ctype_digit($text)) {
+    if (!preg_match('/^[\d\.]+$/', $text)) {
         sendmessage($from_id, $textbotlang['Admin']['Product']['Invalidvolume'], $backuser, 'HTML');
         return;
     }
-    if($text<1){
+    $text = number_format($text, 2);
+    if($text<0.01){
         sendmessage($from_id, $textbotlang['users']['Extra_volume']['invalidprice'], $backuser, 'HTML');
         return;
     }
@@ -713,8 +737,8 @@ elseif($user['step'] == "getvolumeextra"){
             ]
         ]
     ]);
-    $priceextra = number_format($priceextra);
-    $setting['Extra_volume'] = number_format($setting['Extra_volume']);
+    $priceextra = number_format($priceextra, 2);
+    $setting['Extra_volume'] = number_format($setting['Extra_volume'],2);
     $textextra = "📇 فاکتور خرید حجم اضافه برای شما ایجاد شد.
 
 💰 قیمت هر گیگابایت حجم اضافه :  {$setting['Extra_volume']} تومان
@@ -725,8 +749,8 @@ elseif($user['step'] == "getvolumeextra"){
     sendmessage($from_id,$textextra, $keyboardsetting, 'HTML');
     step('home',$from_id);
 }
-elseif (preg_match('/confirmaextra_(\w+)/', $datain, $dataget)) {
-    $volume = $dataget[1];
+elseif (preg_match('/confirmaextra_(\w+\.\w+)/', $datain, $dataget)) {
+    $volume = number_format($dataget[1], 2);
     $nameloc = select("invoice", "*", "username", $user['Processing_value'],"select");
         if($user['Balance'] <$volume){
     $Balance_prim = $volume - $user['Balance'];
@@ -740,7 +764,7 @@ elseif (preg_match('/confirmaextra_(\w+)/', $datain, $dataget)) {
     update("user", "Balance", $Balance_Low_user, "id",$from_id);
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'],"select");
     $data_useer = getuser($user['Processing_value'], $marzban_list_get['name_panel']);
-    $data_limit = $data_useer['data_limit'] + ($volume/$setting['Extra_volume'] *  pow(1024, 3));
+    $data_limit = $data_useer['data_limit'] + (number_format($volume / $setting['Extra_volume'], 2) * pow(1024, 3));
     $datam = array(
         "data_limit" => $data_limit
         );
@@ -753,8 +777,8 @@ elseif (preg_match('/confirmaextra_(\w+)/', $datain, $dataget)) {
         ]
     ]);
     sendmessage($from_id, $textbotlang['users']['Extra_volume']['extraadded'], $keyboardextrafnished, 'HTML');
-    $volumes  =  $volume/$setting['Extra_volume'];
-    $volume = number_format($volume);
+    $volumes = number_format($volume / $setting['Extra_volume'], 2);
+    //$volume = number_format($volume);
      $text_report = "⭕️ یک کاربر حجم اضافه خریده است
 
 اطلاعات کاربر : 
@@ -1246,8 +1270,8 @@ elseif ($user['step'] == "endstepuser" ||preg_match('/prodcutservice_(.*)/', $da
     $username_ac = generateUsername($from_id, $setting['MethodUsername'], $username, $randomString,$text);
     update("user", "Processing_value_tow",$username_ac,"id",$from_id);
     if($info_product['Volume_constraint'] == 0 )$info_product['Volume_constraint'] = $textbotlang['users']['stateus']['Unlimited'];
-    $info_product['price_product'] = number_format($info_product['price_product'], 0);
-    $user['Balance'] = number_format($user['Balance']);
+    $info_product['price_product'] = number_format($info_product['price_product'], 2);
+    $user['Balance'] = number_format($user['Balance'], 2);
     $textin = "
          📇 پیش فاکتور شما:
 👤 نام کاربری: <code>$username_ac</code>
@@ -1270,12 +1294,12 @@ elseif ($user['step'] == "payment" && $datain == "confirmandgetservice" || $data
     $info_product = $stmt->fetch(PDO::FETCH_ASSOC);
     if (empty($info_product['price_product']) || empty($info_product['price_product'])) return;
     if ($datain == "confirmandgetserviceDiscount") {
-        $priceproduct =  $partsdic[1];
+        $priceproduct =  number_format($partsdic[1], 2);
     } else {
-        $priceproduct =  $info_product['price_product'];
+        $priceproduct =  number_format($info_product['price_product'], 2);
     }
     if ($priceproduct > $user['Balance']) {
-    $Balance_prim = $priceproduct - $user['Balance'];
+    $Balance_prim = number_format($priceproduct - $user['Balance'], 2);
     update("user", "Processing_value",$Balance_prim,"id",$from_id);
     sendmessage($from_id, $textbotlang['users']['sell']['None-credit'], $step_payment, 'HTML');
     step('get_step_payment',$from_id);
@@ -1358,12 +1382,12 @@ if(isset($nameprotocol['vless']) && $setting['flow'] == "flowon"){
     }
     $affiliatescommission = select("affiliates", "*", null, null,"select");
     if ($affiliatescommission['status_commission'] == "oncommission" &&($user['affiliates'] !== null || $user['affiliates'] != "0")) {
-        $affiliatescommission = select("affiliates", "*", null, null,"select");
-        $result = ($priceproduct * $affiliatescommission['affiliatespercentage']) / 100;
+        //$affiliatescommission = select("affiliates", "*", null, null, "select");
+        $result = number_format(($priceproduct * number_format($affiliatescommission['affiliatespercentage'], 2)) / 100, 2);
         $user_Balance = select("user", "*", "id", $user['affiliates'],"select");
         $Balance_prim = $user_Balance['Balance'] + $result;
         update("user", "Balance",$Balance_prim,"id",$user['affiliates']);
-        $result = number_format($result);
+        $result = number_format($result, 2);
         $textadd = "🎁  پرداخت پورسانت 
 
 مبلغ $result تومان به حساب شما از طرف  زیر مجموعه تان به کیف پول شما واریز گردید";
@@ -1435,7 +1459,7 @@ $urlimage = "$from_id$randomString.png";
 }
     $Balance_prim = $user['Balance'] - $priceproduct;
     update("user", "Balance",$Balance_prim,"id",$from_id);
-    $user['Balance'] = number_format($user['Balance'],0);
+    $user['Balance'] = number_format($user['Balance'], 2);
     $text_report = " 🛍 خرید جدید
         
 ⚙️ یک کاربر اکانت  با نام کانفیگ <code>$username_ac</code> خریداری کرد
@@ -1492,10 +1516,10 @@ elseif ($user['step'] == "getcodesellDiscount") {
     $stmt->bindValue(':loc1', $user['Processing_value']);
     $stmt->execute();
     $info_product = $stmt->fetch(PDO::FETCH_ASSOC);
-    $result = ($SellDiscountlimit['price'] / 100) * $info_product['price_product'];
+    $result = ($SellDiscountlimit['price'] / 100) * number_format($info_product['price_product'], 2);
 
-    $info_product['price_product'] = $info_product['price_product'] - $result;
-    $info_product['price_product'] = round($info_product['price_product']);
+    $info_product['price_product'] = number_format($info_product['price_product'], 2) - $result;
+    //$info_product['price_product'] = number_format($info_product['price_product'], 2);
     if ($info_product['price_product'] < 0) $info_product['price_product'] = 0;
     $textin = "
          📇 پیش فاکتور شما:
@@ -1538,7 +1562,7 @@ if ($text == $datatextbot['text_Add_Balance']) {
 } elseif ($user['step'] == "get_step_payment") {
     if ($datain == "cart_to_offline") {
 $PaySetting = select("PaySetting", "ValuePay", "NamePay", "CartDescription","select")['ValuePay'];
-$Processing_value = number_format($user['Processing_value']);
+$Processing_value = number_format($user['Processing_value'], 2);
 $textcart = "برای افزایش موجودی به صورت دستی، مبلغ $Processing_value  تومان  را به شماره‌ی حساب زیر واریز کنید 👇🏻
 
 ==================== 
@@ -1580,7 +1604,7 @@ $stmt->execute();
                 ]
             ]
         ]);
-        $user['Processing_value'] = number_format($user['Processing_value'], 0);
+        $user['Processing_value'] = number_format($user['Processing_value'], 2);
         $textnowpayments = "
         ✅ فاکتور پرداخت ایجاد شد.
     
@@ -1615,7 +1639,7 @@ $stmt->execute();
                 ]
             ]
         ]);
-        $user['Processing_value'] = number_format($user['Processing_value'], 0);
+        $user['Processing_value'] = number_format($user['Processing_value'], 2);
         $textnowpayments = "
         ✅ فاکتور پرداخت ایجاد شد.
     
@@ -1654,8 +1678,8 @@ $stmt->execute();
                 ]
             ]
         ]);
-        $Processing_value = number_format($user['Processing_value'], 0);
-        $USD = number_format($USD, 0);
+        $Processing_value = number_format($user['Processing_value'], 2);
+        $USD = number_format($USD, 2);
         $textnowpayments = "
         ✅ فاکتور پرداخت ارزی NOWPayments ایجاد شد.
     
@@ -1672,6 +1696,55 @@ $stmt->execute();
     ";
         sendmessage($from_id, $textnowpayments, $paymentkeyboard, 'HTML');
     }
+    
+    if ($datain == "plisio") {
+        $price_rate = tronratee();
+        $USD = $price_rate['result']['USD'];
+        $usdprice = round($user['Processing_value'] / $USD, 2);
+        if ($usdprice < 1) {
+            sendmessage($from_id, $textbotlang['users']['Balance']['plisio'] . ", 当前金额: " . $usdprice . ".", null, 'HTML');
+            return;
+        }
+        sendmessage($from_id, $textbotlang['users']['Balance']['linkpayments'], $keyboard, 'HTML');
+        $dateacc = date('Y/m/d h:i:s');
+        $randomString = bin2hex(random_bytes(5));
+        $payment_Status = "Unpaid";
+        $Payment_Method = "Plisio";
+        $stmt = $pdo->prepare("INSERT INTO Payment_report (id_user, id_order, time, price, payment_Status, Payment_Method) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->bindParam(1, $from_id);
+        $stmt->bindParam(2, $randomString);
+        $stmt->bindParam(3, $dateacc);
+        $stmt->bindParam(4, $user['Processing_value']);
+        $stmt->bindParam(5, $payment_Status);
+        $stmt->bindParam(6, $Payment_Method);
+        $stmt->execute();
+        $paymentkeyboard = json_encode([
+            'inline_keyboard' => [
+                [
+                    ['text' => $textbotlang['users']['Balance']['payments'], 'url' => "https://" . "$domainhosts" . "/payment/plisio/plisio.php?price=$usdprice&order_description=Add_Balance&order_id=$randomString"],
+                ]
+            ]
+        ]);
+        $Processing_value = number_format($user['Processing_value'], 2);
+        $USD = number_format($USD, 2);
+        $textnowpayments = "
+        ✅ فاکتور پرداخت ارزی Plisio ایجاد شد.
+    
+🔢 شماره فاکتور : $randomString
+💰 مبلغ فاکتور : $Processing_value تومان
+    
+📊 قیمت دلار روز : $USD تومان
+💵 نهایی:$usdprice دلار 
+    
+    
+🌟 امکان پرداخت با ارز های مختلف وجود دارد
+    
+جهت پرداخت از دکمه زیر استفاده کنید👇🏻
+    ";
+        sendmessage($from_id, $textplisio, $paymentkeyboard, 'HTML');
+    }
+
+    
     if ($datain == "iranpay") {
         $price_rate = tronratee();
         $trx = $price_rate['result']['TRX'];
@@ -1802,7 +1875,7 @@ if ($user['step'] == "getvcodeuser") {
         $USD = $voucherAmount * json_decode(file_get_contents('https://api.tetherland.com/currencies'), true)['data']['currencies']['USDT']['price'];
         $Balance_confrim = intval($user['Balance']) + intval($USD);
         update("user", "Balance",$Balance_confrim,"id",$from_id);
-        $USD = number_format($USD, 0);
+        $USD = number_format($USD, 2);
         sendmessage($from_id, "💎 با تشکر از پرداخت شما 
 
 پرداخت شما با  موفقیت تایید گردید و مبلغ $USD به موجودی شما اضافه گردید.
@@ -1833,7 +1906,7 @@ if (preg_match('/Confirmpay_user_(\w+)_(\w+)/', $datain, $dataget)) {
         ));
         return;
     }
-    $StatusPayment = StatusPayment($id_payment);
+    $StatusPayment = StatusPayment($Payment_report['Payment_Method'], $id_payment);
     if ($StatusPayment['payment_status'] == "finished") {
         telegram('answerCallbackQuery', array(
             'callback_query_id' => $callback_query_id,
@@ -1846,7 +1919,7 @@ if (preg_match('/Confirmpay_user_(\w+)_(\w+)/', $datain, $dataget)) {
         update("user", "Balance",$Balance_confrim,"id",$Payment_report['id_user']);
         update("Payment_report", "payment_Status","paid","id_order",$Payment_report['id_order']);
         sendmessage($from_id, $textbotlang['users']['Balance']['Confirmpay'], null, 'HTML');
-        $Payment_report['price'] = number_format($Payment_report['price']);
+        $Payment_report['price'] = number_format($Payment_report['price'], 2);
     $text_report = "💵 پرداخت جدید
         
 آیدی عددی کاربر : $from_id
@@ -1966,14 +2039,14 @@ if ($datain == "Discount") {
     $stmt->bindParam(':code', $text);
     $stmt->execute();
     $get_codesql = $stmt->fetch(PDO::FETCH_ASSOC);
-    $balance_user = $user['Balance'] + $get_codesql['price'];
+    $balance_user = $user['Balance'] + number_format($get_codesql['price'], 2);
     update("user", "Balance",$balance_user,"id",$from_id);
     $stmt = $pdo->prepare("SELECT * FROM Discount WHERE code = :code");
     $stmt->bindParam(':code', $text);
     $stmt->execute();
     $get_codesql = $stmt->fetch(PDO::FETCH_ASSOC);
     step('home',$from_id);
-    number_format($get_codesql['price']);
+    number_format($get_codesql['price'], 2);
     $text_balance_code = "کد هدیه با موفقیت ثبت شد و به موجودی شما مبلغ {$get_codesql['price']} تومان اضافه گردید. 🥳";
     sendmessage($from_id, $text_balance_code, $keyboard, 'HTML');
     $stmt = $pdo->prepare("INSERT INTO Giftcodeconsumed (id_user, code) VALUES (?, ?)");
@@ -2283,7 +2356,7 @@ if ($text == "📨 ارسال پیام" ) {
     sendmessage($from_id, $textbotlang['Admin']['ManageUser']['GetText'], $backadmin, 'HTML');
     step('gettextforsendall',$from_id);
 } elseif ($user['step'] == "gettextforsendall") {
-sendmessage($from_id, "درحال ارسال پیام",$keyboardaadmin, 'HTML');
+sendmessage($from_id, "درحال ارسال پیام",$keyboardadmin, 'HTML');
 step('home',$from_id);
 $filename = 'user.txt';
 $stmt = $pdo->prepare("SELECT id FROM user");
@@ -2303,7 +2376,7 @@ if ($file) {
     sendmessage($line, $text, null, 'HTML');
     usleep(1000000);
     }
-    sendmessage($from_id, "✅ پیام به تمامی کاربران ارسال شد",$keyboardaadmin, 'HTML');
+    sendmessage($from_id, "✅ پیام به تمامی کاربران ارسال شد",$keyboardadmin, 'HTML');
     fclose($file);
 }
 unlink($filename);
@@ -2311,7 +2384,7 @@ unlink($filename);
     sendmessage($from_id, $textbotlang['Admin']['ManageUser']['ForwardGetext'], $backadmin, 'HTML');
     step('gettextforwardMessage',$from_id);
 } elseif ($user['step'] == "gettextforwardMessage") {
-sendmessage($from_id, "درحال ارسال پیام",$keyboardaadmin, 'HTML');
+sendmessage($from_id, "درحال ارسال پیام",$keyboardadmin, 'HTML');
 step('home',$from_id);
 $filename = 'user.txt';
 $stmt = $pdo->prepare("SELECT id FROM user");
@@ -2331,7 +2404,7 @@ if ($file) {
     forwardMessage($from_id, $message_id, $line);
     usleep(2000000);
     }
-    sendmessage($from_id, "✅ پیام به تمامی کاربران ارسال شد",$keyboardaadmin, 'HTML');
+    sendmessage($from_id, "✅ پیام به تمامی کاربران ارسال شد",$keyboardadmin, 'HTML');
     fclose($file);
 }
 unlink($filename);
@@ -2824,7 +2897,7 @@ $stmt->execute();
     sendmessage($from_id, $textbotlang['Admin']['Product']['GettIime'], $backadmin, 'HTML');
     step('get_price',$from_id);
 }elseif ($user['step'] == "get_price") {
-    if (!ctype_digit($text)) {
+    if (!preg_match('/^[\d\.]+$/', $text)) {
         sendmessage($from_id, $textbotlang['Admin']['Product']['InvalidTime'], $backadmin, 'HTML');
         return;
     }
@@ -2832,7 +2905,7 @@ $stmt->execute();
     sendmessage($from_id, $textbotlang['Admin']['Product']['GetPrice'], $backadmin, 'HTML');
     step('endstep',$from_id);
 } elseif ($user['step'] == "endstep") {
-    if (!ctype_digit($text)) {
+    if (!preg_match('/^[\d\.]+$/', $text)) {
         sendmessage($from_id, $textbotlang['Admin']['Product']['InvalidPrice'], $backadmin, 'HTML');
         return;
     }
@@ -2873,7 +2946,7 @@ if (preg_match('/Confirm_pay_(\w+)/', $datain, $dataget) ) {
     $Balance_confrim = intval($Balance_id['Balance']) + intval($Payment_report['price']);
     update("user", "Balance",$Balance_confrim,"id",$Payment_report['id_user']);
     update("Payment_report", "payment_Status","paid","id_order",$Payment_report['id_order']);
-    $Payment_report['price'] = number_format($Payment_report['price']);
+    $Payment_report['price'] = number_format($Payment_report['price'], 2);
     $textconfrom = "
             💵 پرداخت با موفقیت تایید گردید.
               به موجودی کاربر مبلغ {$Payment_report['price']} اضافه گردید.
@@ -2966,7 +3039,7 @@ if ($text == "قیمت"  ) {
     step('change_price',$from_id);
 }
 elseif ($user['step'] == "change_price") {
-    if (!ctype_digit($text)) {
+    if (!preg_match('/^[\d\.]+$/', $text)) {
         sendmessage($from_id, $textbotlang['Admin']['Product']['InvalidPrice'], $backadmin, 'HTML');
         return;
     }
@@ -2999,7 +3072,7 @@ if ($text == "حجم"  ) {
     step('change_val',$from_id);
 } 
 elseif ($user['step'] == "change_val") {
-    if (!ctype_digit($text)) {
+    if (!preg_match('/^[\d\.]+$/', $text)) {
         sendmessage($from_id, $textbotlang['Admin']['Product']['Invalidvolume'], $backadmin, 'HTML');
         return;
     }
@@ -3082,7 +3155,7 @@ elseif ($user['step'] == "add_Balance") {
     step('get_price_add',$from_id);
 }
 elseif ($user['step'] == "get_price_add") {
-    if (!ctype_digit($text)) {
+    if (!preg_match('/^[\d\.]+$/', $text)) {
         sendmessage($from_id, $textbotlang['Admin']['Balance']['Invalidprice'], $backadmin, 'HTML');
         return;
     }
@@ -3090,7 +3163,7 @@ elseif ($user['step'] == "get_price_add") {
     $Balance_user = select("user", "*", "id", $user['Processing_value'],"select");
     $Balance_add_user = $Balance_user['Balance'] + $text;
     update("user", "Balance",$Balance_add_user,"id",$user['Processing_value']);
-    $text = number_format($text);
+    $text = number_format($text, 2);
     $textadd = "💎 کاربر عزیز مبلغ $text تومان به موجودی کیف پول تان اضافه گردید.";
     sendmessage($user['Processing_value'], $textadd, null, 'HTML');
     step('home',$from_id);
@@ -3110,7 +3183,7 @@ elseif ($user['step'] == "Negative_Balance") {
     step('get_price_Negative',$from_id);
 }
 elseif ($user['step'] == "get_price_Negative") {
-    if (!ctype_digit($text)) {
+    if (!preg_match('/^[\d\.]+$/', $text)) {
         sendmessage($from_id, $textbotlang['Admin']['Balance']['Invalidprice'], $backadmin, 'HTML');
         return;
     }
@@ -3118,7 +3191,7 @@ elseif ($user['step'] == "get_price_Negative") {
     $Balance_user = select("user", "*", "id", $user['Processing_value'],"select");
     $Balance_Low_user = $Balance_user['Balance'] - $text;
     update("user", "Balance",$Balance_Low_user,"id",$user['Processing_value']);
-    $text = number_format($text);
+    $text = number_format($text,2);
     $textkam = "❌ کاربر عزیز مبلغ $text تومان از  موجودی کیف پول تان کسر گردید.";
     sendmessage($user['Processing_value'], $textkam, null, 'HTML');
     step('home',$from_id);
@@ -3203,7 +3276,7 @@ $stmt->execute();
     update("user", "Processing_value",$text,"id",$from_id);
 }
 elseif ($user['step'] == "get_price_code") {
-    if (!ctype_digit($text)) {
+    if (!preg_match('/^[\d\.]+$/', $text)) {
         sendmessage($from_id, $textbotlang['Admin']['Balance']['Invalidprice'], $backadmin, 'HTML');
         return;
     }
@@ -3459,6 +3532,74 @@ elseif ($datain == "offnowpayment"  ) {
     update("PaySetting", "ValuePay","onnowpayment","NamePay","nowpaymentstatus");
     Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['nowpaymentsStatuson'], null);
 }
+
+if ($text == "💵 تنظیمات plisio") {
+    sendmessage($from_id, $textbotlang['users']['selectoption'], $PlisioManage, 'HTML');
+}
+if ($text == "🧩 api plisio") {
+    $PaySetting = select("PaySetting", "ValuePay", "NamePay", "apiplisio", "select")['ValuePay'];
+    $textcart = "⚙️ api سایت plisio.net را ارسال نمایید
+
+api plisio :$PaySetting";
+    sendmessage($from_id, $textcart, $backadmin, 'HTML');
+    step('apiplisio', $from_id);
+} elseif ($user['step'] == "apiplisio") {
+    sendmessage($from_id, $textbotlang['Admin']['SettingnowPayment']['Savaapi'], $PlisioManage, 'HTML');
+    update("PaySetting", "ValuePay", $text, "NamePay", "apiplisio");
+    step('home', $from_id);
+}
+if ($text == "🔌 وضعیت درگاه plisio") {
+    $PaySetting = select("PaySetting", "ValuePay", "NamePay", "plisiostatus", "select")['ValuePay'];
+    $now_Status = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $PaySetting, 'callback_data' => $PaySetting],
+            ],
+        ]
+    ]);
+    sendmessage($from_id, $textbotlang['Admin']['Status']['plisioTitle'], $now_Status, 'HTML');
+}
+if ($datain == "onplisio") {
+    update("PaySetting", "ValuePay", "offplisio", "NamePay", "plisiostatus");
+    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['plisioStatusOff'], null);
+} elseif ($datain == "offplisio") {
+    update("PaySetting", "ValuePay", "onplisio", "NamePay", "plisiostatus");
+    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['plisioStatuson'], null);
+}
+if ($text == "💵 تنظیمات plisio") {
+    sendmessage($from_id, $textbotlang['users']['selectoption'], $PlisioManage, 'HTML');
+}
+if ($text == "🧩 api plisio") {
+    $PaySetting = select("PaySetting", "ValuePay", "NamePay", "apiplisio", "select")['ValuePay'];
+    $textcart = "⚙️ api سایت plisio.net را ارسال نمایید
+
+api plisio :$PaySetting";
+    sendmessage($from_id, $textcart, $backadmin, 'HTML');
+    step('apiplisio', $from_id);
+} elseif ($user['step'] == "apiplisio") {
+    sendmessage($from_id, $textbotlang['Admin']['SettingnowPayment']['Savaapi'], $PlisioManage, 'HTML');
+    update("PaySetting", "ValuePay", $text, "NamePay", "apiplisio");
+    step('home', $from_id);
+}
+if ($text == "🔌 وضعیت درگاه plisio") {
+    $PaySetting = select("PaySetting", "ValuePay", "NamePay", "plisiostatus", "select")['ValuePay'];
+    $now_Status = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $PaySetting, 'callback_data' => $PaySetting],
+            ],
+        ]
+    ]);
+    sendmessage($from_id, $textbotlang['Admin']['Status']['plisioTitle'], $now_Status, 'HTML');
+}
+if ($datain == "onplisio") {
+    update("PaySetting", "ValuePay", "offplisio", "NamePay", "plisiostatus");
+    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['plisioStatusOff'], null);
+} elseif ($datain == "offplisio") {
+    update("PaySetting", "ValuePay", "onplisio", "NamePay", "plisiostatus");
+    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['plisioStatuson'], null);
+}
+
 if ($text == "💎 درگاه ارزی ریالی"  ) {
         $PaySetting = select("PaySetting", "ValuePay", "NamePay", "digistatus","select")['ValuePay'];
     $digi_Status = json_encode([
@@ -3761,7 +3902,7 @@ if($text == "➕ تنظیم قیمت حجم اضافه"  ){
     step('GetPriceExtra',$from_id);
 }
 elseif($user['step'] == "GetPriceExtra"){
-        if (!ctype_digit($text)) {
+    if (!preg_match('/^[\d\.]+$/', $text)) {
         sendmessage($from_id, $textbotlang['Admin']['Balance']['Invalidprice'], $backadmin, 'HTML');
         return;
     }
@@ -3774,7 +3915,7 @@ if ($text == "👥 شارژ همگانی") {
     sendmessage($from_id, $textbotlang['Admin']['Balance']['addallbalance'], $backadmin, 'HTML');
     step('add_Balance_all',$from_id);
 } elseif ($user['step'] == "add_Balance_all") {
-    if (!ctype_digit($text)) {
+    if (!preg_match('/^[\d\.]+$/', $text)) {
         sendmessage($from_id, $textbotlang['Admin']['Balance']['Invalidprice'], $backadmin, 'HTML');
         return;
     }
@@ -3860,7 +4001,7 @@ elseif ($user['step'] == "get_codesell") {
     update("user", "Processing_value",$text,"id",$from_id);
 }
 elseif ($user['step'] == "get_price_codesell") {
-    if (!ctype_digit($text)) {
+    if (!preg_match('/^[\d\.]+$/', $text)) {
         sendmessage($from_id, $textbotlang['Admin']['Balance']['Invalidprice'], $backadmin, 'HTML');
         return;
     }
@@ -4081,7 +4222,7 @@ elseif (preg_match('/remoceserviceadmin-(\w+)/', $datain, $dataget)) {
 
 }
 elseif($user['step'] == "getpricerequests"){
-    if (!ctype_digit($text)) {
+    if (!preg_match('/^[\d\.]+$/', $text)) {
         sendmessage($from_id,"⭕️ ورودی نا معتبر", null, 'HTML');
     }
     $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '{$user['Processing_value']}'"));
@@ -4100,7 +4241,7 @@ elseif($user['step'] == "getpricerequests"){
     update("invoice","status","removedbyadmin", "username",$user['Processing_value']);
     step("home",$from_id);
     sendmessage($nameloc['id_user'],"✅ کاربری گرامی درخواست حذف شما با نام کاربری  {$user['Processing_value']} موافقت گردید.", null, 'HTML');
-    $pricecancel = number_format(intval($text));
+    $pricecancel = number_format(intval($text), 2);
     if(intval($text) != 0){
         $Balance_id_cancel = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM user WHERE id = '{$nameloc['id_user']}' LIMIT 1"));
         $Balance_id_cancel_fee = intval($Balance_id_cancel['Balance']) + intval($text);

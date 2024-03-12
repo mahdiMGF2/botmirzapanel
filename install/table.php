@@ -19,7 +19,7 @@ try {
         step varchar(1000) NOT NULL,
         description_blocking TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL,
         number varchar(2000) NOT null ,
-        Balance int(255) NOT null ,
+        Balance double NOT null ,
         User_Status varchar(500) NOT NULL,
         pagenumber int(10) NOT NULL,
         message_count varchar(100) NOT NULL,
@@ -88,7 +88,7 @@ try {
             }
             $Check_filde = $connect->query("SHOW COLUMNS FROM user LIKE 'Balance'");
             if (mysqli_num_rows($Check_filde) != 1) {
-                $connect->query("ALTER TABLE user ADD Balance int(255)");
+                $connect->query("ALTER TABLE user ADD Balance double");
                 $connect->query("UPDATE user SET Balance = '0'");
                 echo "The Balance field was added ✅";
             }
@@ -674,6 +674,8 @@ try {
         $connect->query("INSERT INTO PaySetting (NamePay,ValuePay) VALUES ('Cartstatus','oncard') ");
         $connect->query("INSERT INTO PaySetting (NamePay,ValuePay) VALUES ('apinowpayment','0') ");
         $connect->query("INSERT INTO PaySetting (NamePay,ValuePay) VALUES ('nowpaymentstatus','offnowpayment') ");
+        $connect->query("INSERT INTO PaySetting (NamePay,ValuePay) VALUES ('apiplisio','0') ");
+        $connect->query("INSERT INTO PaySetting (NamePay,ValuePay) VALUES ('plisiostatus','offplisio') ");
         $connect->query("INSERT INTO PaySetting (NamePay,ValuePay) VALUES ('digistatus','offdigi') ");
         $connect->query("INSERT INTO PaySetting (NamePay,ValuePay) VALUES ('statusaqayepardakht','offaqayepardakht') ");
         $connect->query("INSERT INTO PaySetting (NamePay,ValuePay) VALUES ('merchant_id_aqayepardakht','0')");
@@ -687,6 +689,8 @@ try {
         $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('CartDescription','603700000000') ");
         $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('apinowpayment','0')");
         $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('nowpaymentstatus','offnowpayment')");
+        $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('apiplisio','0')");
+        $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('plisiostatus','offplisio')");
         $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('digistatus','offdigi')");
         $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('statusaqayepardakht','offaqayepardakht')");
         $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('merchant_id_aqayepardakht','0')");
@@ -713,7 +717,7 @@ try {
         price varchar(200)  NOT NULL,
         limitDiscount varchar(500)  NOT NULL,
         usedDiscount varchar(500) NOT NULL,
-        usefirst varchar(500) NOT NULL)");
+        usefirst varchar(500) NOT NULL DEFAULT 1)");
         if (!$result) {
             echo "table DiscountSell".mysqli_error($connect);
         }

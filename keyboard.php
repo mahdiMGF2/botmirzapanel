@@ -82,6 +82,7 @@ $keyboardpaymentManage = json_encode([
     'keyboard' => [
         [['text' => "💳 تنظبمات درگاه آفلاین"]],
         [['text' => "💵 تنظیمات nowpayment"]],
+        [['text' => "💵 تنظیمات plisio"]],
         [['text' => "💎 درگاه ارزی ریالی"],['text' => "🟡  درگاه آل سات"]],
         [['text' => "🔵 درگاه آقای پرداخت"],['text' => "🔴 درگاه پرفکت مانی"]],
         [['text' => "🏠 بازگشت به منوی مدیریت"]]
@@ -114,6 +115,14 @@ $NowPaymentsManage = json_encode([
     'keyboard' => [
         [['text' => "🧩 api nowpayment"]],
         [['text' => "🔌 وضعیت درگاه nowpayments"]],
+        [['text' => "🏠 بازگشت به منوی مدیریت"]]
+    ],
+    'resize_keyboard' => true
+]);
+$PlisioManage = json_encode([
+    'keyboard' => [
+        [['text' => "🧩 api plisio"]],
+        [['text' => "🔌 وضعیت درگاه plisio"]],
         [['text' => "🏠 بازگشت به منوی مدیریت"]]
     ],
     'resize_keyboard' => true
@@ -157,6 +166,7 @@ $valid_Number =  json_encode([
 ]);
 $PaySettingcard = select("PaySetting", "ValuePay", "NamePay", 'Cartstatus',"select")['ValuePay'];
 $PaySettingnow = select("PaySetting", "ValuePay", "NamePay", 'nowpaymentstatus',"select")['ValuePay'];
+$PaySettingpl = select("PaySetting", "ValuePay", "NamePay", 'plisiostatus', "select")['ValuePay'];
 $PaySettingdigi = select("PaySetting", "ValuePay", "NamePay", 'digistatus',"select")['ValuePay'];
 $PaySettingaqayepardakht = select("PaySetting", "ValuePay", "NamePay", 'statusaqayepardakht',"select")['ValuePay'];
 $PaySettingperfectmoney = select("PaySetting", "ValuePay", "NamePay", 'status_perfectmoney',"select")['ValuePay'];
@@ -172,6 +182,11 @@ $step_payment = [
         $step_payment['inline_keyboard'][] = [
             ['text' => "💵 پرداخت nowpayments", 'callback_data' => "nowpayments" ]
     ];
+    }
+    if ($PaySettingpl == "onplisio") {
+        $step_payment['inline_keyboard'][] = [
+            ['text' => "💵 پرداخت plisio", 'callback_data' => "plisio"]
+        ];
     }
    if($PaySettingdigi == "ondigi"){
         $step_payment['inline_keyboard'][] = [
