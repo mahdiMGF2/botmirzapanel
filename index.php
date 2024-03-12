@@ -3923,7 +3923,7 @@ elseif ($user['step'] == "get_codesell") {
         return;
     }
    $values = "0";
-   $stmt = $pdo->prepare("INSERT INTO DiscountSell (codeDiscount, usedDiscount, price, limitDiscountوusefirst) VALUES (?, ?, ?, ?,?)");
+   $stmt = $pdo->prepare("INSERT INTO DiscountSell (codeDiscount, usedDiscount, price, limitDiscount, usefirst) VALUES (?, ?, ?, ?,?)");
    $stmt->bindParam(1, $text);
    $stmt->bindParam(2, $values);
    $stmt->bindParam(3, $values);
