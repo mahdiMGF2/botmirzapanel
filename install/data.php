@@ -60,7 +60,7 @@ if ($connected) {
     } else {
         $textdatabase = "ارتباط به دیتابیس برقرارشد و جداول ساخته نشدند";
     }
-$delete = json_decode(file_get_contents("https://api.telegram.org/{$form_data['tokenbot']}/deleteWebhook?drop_pending_updates=true"),true);
+$delete = json_decode(file_get_contents("https://api.telegram.org/bot" . $form_data['tokenbot'] . "/deleteWebhook?drop_pending_updates=true"), true);
 $response = json_decode(file_get_contents("https://api.telegram.org/bot" . $form_data['tokenbot'] . "/setWebhook?url=https://" .$domain_hosts."/index.php" ),true);
 if($response['description'] == "Webhook was set"){
             $sendmessage =file_get_contents("https://api.telegram.org/bot" . $form_data['tokenbot'] . "/sendMessage?chat_id=" . $form_data['idadmin'] . "&text=✅| ربات میرزا پنل با موفقیت نصب شد");
