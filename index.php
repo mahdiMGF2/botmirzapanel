@@ -34,7 +34,7 @@ $setting = select("setting", "*");
 $stmt = $pdo->prepare("INSERT IGNORE INTO user (id, step, limit_usertest, User_Status, number, Balance, pagenumber, username, message_count, last_message_time, affiliatescount, affiliates) VALUES (:from_id, 'none', :limit_usertest_all, 'Active', 'none', '0', '1', :username, '0', '0', '0', '0')");
 $stmt->bindParam(':from_id', $from_id);
 $stmt->bindParam(':limit_usertest_all', $setting['limit_usertest_all']);
-$stmt->bindParam(':username', $username);
+$stmt->bindParam(':username', $username  , PDO::PARAM_STR);
 $stmt->execute();
 $version = file_get_contents('install/version');
 $user = select("user", "*", "id", $from_id,"select");
@@ -577,7 +577,7 @@ elseif (preg_match('/extend_(\w+)/', $datain, $dataget)) {
         ]
     ]);
      $prodcut['price_product'] = number_format($prodcut['price_product'],0);
-    $textextend = "🧾 فاکتور تمدید شما برای نام کاربری @$username ایجاد شد.
+    $textextend = "🧾 فاکتور تمدید شما برای نام کاربری $username ایجاد شد.
 
 🛍 نام محصول :  {$nameloc['name_product']}
 مبلغ تمدید :  {$prodcut['price_product']}
@@ -606,7 +606,7 @@ elseif (preg_match('/confirmserivce_(\w+)/', $datain, $dataget) && $user['step']
     $Balance_Low_user = $user['Balance'] - $prodcut['price_product'];
     update("user", "Balance", $Balance_Low_user, "id",$from_id);
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'],"select");
-    $ManagePanel->ResetUserDataUsage($usernamepanel, $marzban_list_get['name_panel']);
+    $ManagePanel->ResetUserDataUsage($marzban_list_get['name_panel'],$usernamepanel);
     $date = strtotime("+" . $prodcut['Service_time'] . "day");
     $newDate = strtotime(date("Y-m-d H:i:s", $date));
     $data_limit = $prodcut['Volume_constraint'] * pow(1024, 3);
@@ -909,8 +909,8 @@ if ($user['step'] == "createusertest" || preg_match('/locationtests_(.*)/', $dat
     $stmt = $pdo->prepare("INSERT IGNORE INTO TestAccount (id_user, id_invoice, username,Service_location,time_sell) VALUES (:id_user,:id_invoice,:username,:Service_location,:time_sell)");
     $stmt->bindParam(':id_user', $from_id);
     $stmt->bindParam(':id_invoice', $randomString);
-    $stmt->bindParam(':username', $username_ac);
-    $stmt->bindParam(':Service_location', $name_panel);
+    $stmt->bindParam(':username', $username_ac  , PDO::PARAM_STR);
+    $stmt->bindParam(':Service_location', $name_panel  , PDO::PARAM_STR);
     $stmt->bindParam(':time_sell', $date);
     $stmt->execute();
     $text_config = "";
@@ -1108,7 +1108,7 @@ $locationproduct = select("marzban_panel", "*", null, null,"count");
     $product = [];
     $location = select("marzban_panel", "*", null, null,"select");
     $stmt = $pdo->prepare("SELECT * FROM product WHERE Location = :location OR Location = '/all'");
-    $stmt->bindParam(':location', $location['name_panel']);
+    $stmt->bindParam(':location', $location['name_panel']  , PDO::PARAM_STR);
     $stmt->execute();
     $product = ['inline_keyboard' => []];
 while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -1146,7 +1146,7 @@ elseif (preg_match('/^location_(.*)/', $datain, $dataget)) {
 }
     update("user", "Processing_value", $location, "id",$from_id);
     $stmt = $pdo->prepare("SELECT * FROM product WHERE Location = :location OR Location = '/all'");
-    $stmt->bindParam(':location', $location);
+    $stmt->bindParam(':location', $location  , PDO::PARAM_STR);
     $stmt->execute();
     $product = ['inline_keyboard' => []];
 while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -1250,10 +1250,10 @@ elseif ($user['step'] == "payment" && $datain == "confirmandgetservice" || $data
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(1, $from_id);
     $stmt->bindParam(2, $randomString);
-    $stmt->bindParam(3, $username_ac);
+    $stmt->bindParam(3, $username_ac  , PDO::PARAM_STR);
     $stmt->bindParam(4, $date);
-    $stmt->bindParam(5, $user['Processing_value']);
-    $stmt->bindParam(6, $info_product['name_product']);
+    $stmt->bindParam(5, $user['Processing_value']  , PDO::PARAM_STR);
+    $stmt->bindParam(6, $info_product['name_product']  , PDO::PARAM_STR);
     $stmt->bindParam(7, $info_product['price_product']);
     $stmt->bindParam(8, $info_product['Volume_constraint']);
     $stmt->bindParam(9, $info_product['Service_time']);
@@ -1496,7 +1496,7 @@ $PaySetting
         $stmt->bindParam(1, $from_id);
         $stmt->bindParam(2, $randomString);
         $stmt->bindParam(3, $dateacc);
-        $stmt->bindParam(4, $user['Processing_value']);
+        $stmt->bindParam(4, $user['Processing_value']  , PDO::PARAM_STR);
 $stmt->bindParam(5, $payment_Status);
 $stmt->bindParam(6, $Payment_Method);
 
@@ -1532,7 +1532,7 @@ $stmt->execute();
         $stmt->bindParam(1, $from_id);
         $stmt->bindParam(2, $randomString);
         $stmt->bindParam(3, $dateacc);
-        $stmt->bindParam(4, $user['Processing_value']);
+        $stmt->bindParam(4, $user['Processing_value']  , PDO::PARAM_STR);
         $stmt->bindParam(5, $payment_Status);
         $stmt->bindParam(6, $Payment_Method);
         $stmt->execute();
@@ -1571,7 +1571,7 @@ $stmt->execute();
         $stmt->bindParam(1, $from_id);
         $stmt->bindParam(2, $randomString);
         $stmt->bindParam(3, $dateacc);
-        $stmt->bindParam(4, $user['Processing_value']);
+        $stmt->bindParam(4, $user['Processing_value']  , PDO::PARAM_STR);
         $stmt->bindParam(5, $payment_Status);
         $stmt->bindParam(6, $Payment_Method);
         $stmt->execute();
@@ -1619,7 +1619,7 @@ $stmt->execute();
         $stmt->bindParam(1, $from_id);
         $stmt->bindParam(2, $randomString);
         $stmt->bindParam(3, $dateacc);
-        $stmt->bindParam(4, $user['Processing_value']);
+        $stmt->bindParam(4, $user['Processing_value']  , PDO::PARAM_STR);
         $stmt->bindParam(5, $payment_Status);
         $stmt->bindParam(6, $Payment_Method);
         $stmt->execute();
@@ -1832,7 +1832,7 @@ if (preg_match('/Confirmpay_user_(\w+)_(\w+)/', $datain, $dataget)) {
     $stmt->bindParam(1, $from_id);
     $stmt->bindParam(2, $randomString);
     $stmt->bindParam(3, $dateacc);
-    $stmt->bindParam(4, $user['Processing_value']);
+    $stmt->bindParam(4, $user['Processing_value']  , PDO::PARAM_STR);
     $stmt->bindParam(5, $payment_Status);
     $stmt->bindParam(6, $Payment_Method);
     $stmt->execute();
@@ -1891,13 +1891,13 @@ if ($datain == "Discount") {
         return;
     }
     $stmt = $pdo->prepare("SELECT * FROM Discount WHERE code = :code LIMIT 1");
-    $stmt->bindParam(':code', $text);
+    $stmt->bindParam(':code', $text  , PDO::PARAM_STR);
     $stmt->execute();
     $get_codesql = $stmt->fetch(PDO::FETCH_ASSOC);
     $balance_user = $user['Balance'] + $get_codesql['price'];
     update("user", "Balance",$balance_user,"id",$from_id);
     $stmt = $pdo->prepare("SELECT * FROM Discount WHERE code = :code");
-    $stmt->bindParam(':code', $text);
+    $stmt->bindParam(':code', $text  , PDO::PARAM_STR);
     $stmt->execute();
     $get_codesql = $stmt->fetch(PDO::FETCH_ASSOC);
     step('home',$from_id);
@@ -1906,7 +1906,7 @@ if ($datain == "Discount") {
     sendmessage($from_id, $text_balance_code, $keyboard, 'HTML');
     $stmt = $pdo->prepare("INSERT INTO Giftcodeconsumed (id_user, code) VALUES (?, ?)");
     $stmt->bindParam(1, $from_id);
-    $stmt->bindParam(2, $text);
+    $stmt->bindParam(2, $text  , PDO::PARAM_STR);
 
 $stmt->execute();
 }
@@ -2008,7 +2008,7 @@ elseif ($user['step'] == "addchannel") {
     if ($channels_ch == 0) {
         $Channel_lock = 'off';
         $stmt = $pdo->prepare( "INSERT INTO channels (link, Channel_lock) VALUES (?, ?)");
-        $stmt->bindParam(1, $text);
+        $stmt->bindParam(1, $text  , PDO::PARAM_STR);
         $stmt->bindParam(2, $Channel_lock);
 
 $stmt->execute();
@@ -2469,7 +2469,7 @@ elseif ($text == "📚 اضافه کردن آموزش"  ) {
 }
 elseif ($user['step'] == "add_name_help") {
     $stmt = $pdo->prepare("INSERT IGNORE INTO help (name_os) VALUES (?)");
-    $stmt->bindParam(1, $text);
+    $stmt->bindParam(1, $text  , PDO::PARAM_STR);
     $stmt->execute();
     sendmessage($from_id, $textbotlang['Admin']['Help']['GetAddDecHelp'], $backadmin, 'HTML');
     step('add_dec',$from_id);
@@ -3861,11 +3861,12 @@ elseif ($user['step'] == "get_codesell") {
         return;
     }
    $values = "0";
-   $stmt = $pdo->prepare("INSERT INTO DiscountSell (codeDiscount, usedDiscount, price, limitDiscount) VALUES (?, ?, ?, ?)");
+   $stmt = $pdo->prepare("INSERT INTO DiscountSell (codeDiscount, usedDiscount, price, limitDiscountوusefirst) VALUES (?, ?, ?, ?,?)");
    $stmt->bindParam(1, $text);
    $stmt->bindParam(2, $values);
    $stmt->bindParam(3, $values);
    $stmt->bindParam(4, $values);
+   $stmt->bindParam(5, $values);
    $stmt->execute();
 
     sendmessage($from_id, $textbotlang['Admin']['Discount']['PriceCodesell'], null, 'HTML');

@@ -49,7 +49,7 @@ function select($table, $field, $whereField = null, $whereValue = null, $type = 
         $stmt = $pdo->prepare($query);
 
         if ($whereField !== null) {
-            $stmt->bindParam(':whereValue', $whereValue);
+            $stmt->bindParam(':whereValue', $whereValue , PDO::PARAM_STR);
         }
 
         $stmt->execute();

@@ -429,7 +429,7 @@ $stmt = $pdo->prepare($sql);
   if ($table_exists) {
     $product = [];
     $stmt = $pdo->prepare("SELECT * FROM product WHERE Location = :Location OR Location = '/all'");
-    $stmt->bindParam(':Location', $text);
+    $stmt->bindParam(':Location', $text, PDO::PARAM_STR);
     $stmt->execute();
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $product[] = [$row['name_product']];

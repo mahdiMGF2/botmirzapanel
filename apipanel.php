@@ -58,6 +58,7 @@ function getuser($usernameac,$location)
 function ResetUserDataUsage($usernameac,$location)
 {
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $location,"select");
+    $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
     $url =  $marzban_list_get['url_panel'].'/api/user/' . $usernameac.'/reset';
     $header_value = 'Bearer ';
 
