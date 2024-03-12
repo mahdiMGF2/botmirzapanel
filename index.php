@@ -806,7 +806,7 @@ elseif (preg_match('/removeserviceuserco-(\w+)/', $datain, $dataget)) {
         sendmessage($from_id, $textbotlang['users']['stateus']['notusername'], null, 'html');
         return;
     }
-    $requestcheck = mysqli_query($connect, "SELECT * FROM cancel_service WHERE username = '$username' LIMIT 1");
+    $requestcheck = select("cancel_service","*","username",$username,"select");
     if (mysqli_num_rows($requestcheck) != 0) {
         sendmessage($from_id, $textbotlang['users']['stateus']['errorexits'], null, 'html');
         return;
@@ -827,8 +827,8 @@ elseif (preg_match('/confirmremoveservices-(\w+)/', $datain, $dataget)) {
         return;
     }
     $usernamepanel = $dataget[1];
-    $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '$usernamepanel'"));
-    $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$nameloc['Service_location']}'"));
+    $nameloc = select("invoice","*","username",$usernamepanel,"select");
+    $marzban_list_get = select("marzban_panel","*","name_panel",$nameloc['Service_location'],"select");
     $stmt = $connect->prepare("INSERT IGNORE INTO cancel_service (id_user, username,description,status) VALUES (?, ?, ?, ?)");
     $descriptions = "0";
     $Status = "waiting";
@@ -4113,7 +4113,7 @@ elseif ($user['step'] == "getdiscont") {
 
 elseif (preg_match('/rejectremoceserviceadmin-(\w+)/', $datain, $dataget)) {
     $usernamepanel = $dataget[1];
-    $requestcheck = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM cancel_service WHERE username = '$usernamepanel' LIMIT 1"));
+    $requestcheck = select("cancel_service","*","username",$usernamepanel,"select");
     if ($requestcheck['status'] == "accept" || $requestcheck['status'] == "reject") {
         telegram('answerCallbackQuery', array(
             'callback_query_id' => $callback_query_id,
@@ -4130,7 +4130,7 @@ elseif (preg_match('/rejectremoceserviceadmin-(\w+)/', $datain, $dataget)) {
 }
 elseif($user['step'] == "descriptionsrequsts"){
     sendmessage($from_id, "✅ با موفقیت ثبت گردید", $keyboardadmin, 'HTML');
-    $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '{$user['Processing_value']}'"));
+    $nameloc = select("invoice","*","username",$user['Processing_value'],"select");
     update("cancel_service","status","reject", "username",$user['Processing_value']);
     update("cancel_service","description",$text, "username",$user['Processing_value']);
     step("home",$from_id);
@@ -4141,7 +4141,7 @@ elseif($user['step'] == "descriptionsrequsts"){
 }
 elseif (preg_match('/remoceserviceadmin-(\w+)/', $datain, $dataget)) {
     $username = $dataget[1];
-    $requestcheck = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM cancel_service WHERE username = '$username' LIMIT 1"));
+    $requestcheck = select("cancel_service","*","username",$username,"select");
     if ($requestcheck['status'] == "accept" || $requestcheck['status'] == "reject") {
         telegram('answerCallbackQuery', array(
             'callback_query_id' => $callback_query_id,
@@ -4160,7 +4160,7 @@ elseif($user['step'] == "getpricerequests"){
     if (!ctype_digit($text)) {
         sendmessage($from_id,"⭕️ ورودی نا معتبر", null, 'HTML');
     }
-    $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '{$user['Processing_value']}'"));
+    $nameloc = select("invoice","*","username",$user['Processing_value'],"select");
     if($nameloc['price_product'] < $text){
         sendmessage($from_id, "❌ مبلغ بازگشتی بزرگ تر از مبلغ محصول است!", $backuser, 'HTML');
         return;
