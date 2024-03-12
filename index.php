@@ -1186,9 +1186,9 @@ $product['inline_keyboard'][] = [
 
     $json_list_product_list = json_encode($product);
     $textproduct = "🛍 برای خرید اشتراک سرویس مدنظر خود را انتخاب کنید
-    لوکیشن سرویس  :$location ";
+    لوکیشن سرویس  :{$location['name_panel']} ";
     sendmessage($from_id,$textproduct, $json_list_product_list, 'HTML');
-    update("user", "Processing_value", $location, "id",$from_id);
+    update("user", "Processing_value", $location['name_panel'], "id",$from_id);
         }else{
                 sendmessage($from_id, $textbotlang['users']['Service']['Location'], $list_marzban_panel_user, 'HTML');
         }
