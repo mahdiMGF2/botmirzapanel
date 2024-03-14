@@ -912,43 +912,33 @@
         sendmessage($from_id, $textbotlang['users']['Service']['Location'], $list_marzban_usertest, 'html');
     }
     if ($user['step'] == "createusertest" || preg_match('/locationtests_(.*)/', $datain, $dataget)) {
-            if ($user['limit_usertest'] <= 0) {
+      if ($user['limit_usertest'] <= 0) {
             sendmessage($from_id, $textbotlang['users']['usertest']['limitwarning'], $keyboard, 'html');
             return;
         }
-        if($user['step'] == "createusertest"){
-        $location = $user['Processing_value_one'];  
+      if($user['step'] == "createusertest"){
+        $name_panel = $user['Processing_value_one'];  
         if (!preg_match('~(?!_)^[a-z][a-z\d_]{2,32}(?<!_)$~i', $text)) {
             sendmessage($from_id, $textbotlang['users']['invalidusername'], $backuser, 'HTML');
             return;
         }
     }
-    else{
+      else{
         deletemessage($from_id, $message_id);
-        $location = $dataget[1];
+        $name_panel = $dataget[1];
     }
-        $marzban_list_get = select("marzban_panel", "*", "name_panel", $location,"select");
+        $randomString = bin2hex(random_bytes(2));
+        $marzban_list_get = select("marzban_panel", "*", "name_panel", $name_panel,"select");
+        
     if ($marzban_list_get['MethodUsername'] == "نام کاربری دلخواه") {
         if($user['step'] != "createusertest"){
         step('createusertest', $from_id);
-        update("user","Processing_value_one",$location, "id",$from_id);
+        update("user","Processing_value_one",$name_panel, "id",$from_id);
         sendmessage($from_id, $textbotlang['users']['selectusername'], $backuser, 'html');
         return;
         }
     }
-            $marzban_list_get = select("marzban_panel", "*", "name_panel", $location,"select");
-            if($marzban_list_get['MethodUsername'] == "نام کاربری دلخواه" && $user['step'] == "createusertest"){
-                if (!preg_match('~(?!_)^[a-z][a-z\d_]{2,32}(?<!_)$~i', $text)) {
-            sendmessage($from_id, $textbotlang['users']['invalidusername'], $backuser,'HTML');
-            return;
-        }
-                $name_panel = $user['Processing_value_tow'];
-            }else{
-                $name_panel =$location ;
-            }
-        $randomString = bin2hex(random_bytes(2));
         $username_ac = generateUsername($from_id, $marzban_list_get['MethodUsername'], $user['username'], $randomString,$text);
-        $marzban_list_get = select("marzban_panel", "*", "name_panel", $name_panel,"select");
         $DataUserOut = $ManagePanel->DataUser($marzban_list_get['name_panel'],$username_ac);
         if (isset($DataUserOut['username'])) {
             $random_number = random_int(1000000, 9999999);
