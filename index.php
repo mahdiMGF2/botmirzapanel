@@ -911,19 +911,32 @@
         }
         sendmessage($from_id, $textbotlang['users']['Service']['Location'], $list_marzban_usertest, 'html');
     }
-    if (preg_match('/locationtest_(.*)/', $datain, $dataget)) {
-        $location = $dataget[1];
-        update("user", "Processing_value_tow", $location, "id",$from_id);
-        sendmessage($from_id, $textbotlang['users']['selectusername'], $backuser, 'html');
-        step('createusertest',$from_id);
-    }
     if ($user['step'] == "createusertest" || preg_match('/locationtests_(.*)/', $datain, $dataget)) {
             if ($user['limit_usertest'] <= 0) {
             sendmessage($from_id, $textbotlang['users']['usertest']['limitwarning'], $keyboard, 'html');
             return;
         }
+        if($user['step'] == "createusertest"){
+        $location = $user['Processing_value_one'];  
+        if (!preg_match('~(?!_)^[a-z][a-z\d_]{2,32}(?<!_)$~i', $text)) {
+            sendmessage($from_id, $textbotlang['users']['invalidusername'], $backuser, 'HTML');
+            return;
+        }
+    }
+    else{
+        deletemessage($from_id, $message_id);
         $location = $dataget[1];
-            $marzban_list_get = select("marzban_panel", "*", "name_panel", $user['Processing_value_tow'],"select");
+    }
+        $marzban_list_get = select("marzban_panel", "*", "name_panel", $location,"select");
+    if ($marzban_list_get['MethodUsername'] == "نام کاربری دلخواه") {
+        if($user['step'] != "createusertest"){
+        step('createusertest', $from_id);
+        update("user","Processing_value_one",$location, "id",$from_id);
+        sendmessage($from_id, $textbotlang['users']['selectusername'], $backuser, 'html');
+        return;
+        }
+    }
+            $marzban_list_get = select("marzban_panel", "*", "name_panel", $location,"select");
             if($marzban_list_get['MethodUsername'] == "نام کاربری دلخواه" && $user['step'] == "createusertest"){
                 if (!preg_match('~(?!_)^[a-z][a-z\d_]{2,32}(?<!_)$~i', $text)) {
             sendmessage($from_id, $textbotlang['users']['invalidusername'], $backuser,'HTML');
@@ -3264,7 +3277,7 @@
             ],
         ]
     ]);
-            if ($panel['configManual'] == "onconfig") {
+    if ($panel['configManual'] == "onconfig") {
                     sendmessage($from_id, "ابتدا  ارسال کانفیگ را خاموش کنید", null, 'HTML');
                     return;
         }
@@ -3305,7 +3318,7 @@
             ],
         ]
     ]);
-        if ($marzban_list_get['sublink'] == "onsublink") {
+        if ($panel['sublink'] == "onsublink") {
                     sendmessage($from_id, "ابتدا لینک اشتراک را خاموش کنید", null, 'HTML');
                     return;
         }

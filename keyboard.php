@@ -365,18 +365,10 @@ $list_marzban_panel_user = json_encode($list_marzban_panel_users);
   $list_marzban_panel_usertest = [
         'inline_keyboard' => [],
     ];
-        if($setting['MethodUsername'] == "نام کاربری دلخواه"){
     foreach ($namepanel as $buttons) {
     $list_marzban_panel_usertest['inline_keyboard'][] = [
-        ['text' => $buttons[0] , 'callback_data' => "locationtest_".$buttons[0]]
+        ['text' => $buttons[0] , 'callback_data' => "locationtests_".$buttons[0]]
     ];
-}
-}else{
-     foreach ($namepanel as $button) {
-    $list_marzban_panel_usertest['inline_keyboard'][] = [
-        ['text' => $button[0] , 'callback_data' => "locationtests_{$button[0]}"]
-    ];
-}  
 }
 $list_marzban_panel_usertest['inline_keyboard'][] = [
     ['text' => "🏠 بازگشت به منوی اصلی", 'callback_data' => "backuser"],
