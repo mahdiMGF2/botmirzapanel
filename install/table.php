@@ -155,9 +155,7 @@ try {
         roll_Status varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
         get_number varchar(200)  CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
         iran_number varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
-        sublink varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
         NotUser varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
-        configManual varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
         Channel_Report varchar(600)  NULL,
         limit_usertest_all varchar(600)  NULL,
         time_usertest varchar(600)  NULL,
@@ -176,13 +174,8 @@ try {
         $sublink = "✅ لینک اشتراک فعال است.";
         $configManual = "❌ ارسال کانفیگ دستی خاموش است";
         $configManual = "❌ ارسال کانفیگ دستی خاموش است";
-$connect->query("INSERT INTO setting (Bot_Status,roll_Status,get_number,limit_usertest_all,time_usertest,val_usertest,help_Status,iran_number,sublink,configManual,NotUser,namecustome) VALUES ('$active_bot_text','$active_roll_text','$active_phone_text','1','1','100','$active_help','$active_phone_iran_text','$sublink','$configManual','offnotuser','0')");
+$connect->query("INSERT INTO setting (Bot_Status,roll_Status,get_number,limit_usertest_all,time_usertest,val_usertest,help_Status,iran_number,NotUser,namecustome) VALUES ('$active_bot_text','$active_roll_text','$active_phone_text','1','1','100','$active_help','$active_phone_iran_text','offnotuser','0')");
     } else {
-        $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'namecustome'");
-        if (mysqli_num_rows($Check_filde) != 1) {
-            $connect->query("ALTER TABLE setting ADD namecustome VARCHAR(100)");
-            echo "The namecustome field was added ✅";
-        }
         $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'namecustome'");
         if (mysqli_num_rows($Check_filde) != 1) {
             $connect->query("ALTER TABLE setting ADD namecustome VARCHAR(200)");
@@ -197,11 +190,6 @@ $connect->query("INSERT INTO setting (Bot_Status,roll_Status,get_number,limit_us
         if (mysqli_num_rows($Check_filde) != 1) {
             $connect->query("ALTER TABLE setting ADD NotUser VARCHAR(200)");
             echo "The NotUser field was added ✅";
-        }
-                $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'sublink'");
-        if (mysqli_num_rows($Check_filde) != 1) {
-            $connect->query("ALTER TABLE setting ADD sublink VARCHAR(200)");
-            echo "The sublink field was added ✅";
         }
         $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'iran_number'");
         if (mysqli_num_rows($Check_filde) != 1) {
@@ -253,19 +241,9 @@ $connect->query("INSERT INTO setting (Bot_Status,roll_Status,get_number,limit_us
         $sublink = "✅ لینک اشتراک فعال است.";
         $active_phone_iran_text = "❌ بررسی شماره ایرانی غیرفعال است";
         $configManual = "❌ ارسال کانفیگ دستی خاموش است";
-        if(!isset($settingsql['configManual'])){
-        $stmt = $connect->prepare("UPDATE setting SET configManual = ?");
-        $stmt->bind_param("s", $configManual);
-        $stmt->execute();
-        }
         if(!isset($settingsql['iran_number'])){
         $stmt = $connect->prepare("UPDATE setting SET iran_number = ?");
         $stmt->bind_param("s", $active_phone_iran_text);
-        $stmt->execute();
-        }
-        if(!isset($settingsql['sublink'])){
-        $stmt = $connect->prepare("UPDATE setting SET sublink = ?");
-        $stmt->bind_param("s", $sublink);
         $stmt->execute();
         }
         if(!isset($settingsql['NotUser'])){
@@ -340,6 +318,8 @@ try {
         inboundid varchar(200) NULL,
         flow varchar(200)  NULL,
         MethodUsername varchar(900)  NULL,
+        sublink varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
+        configManual varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
         password_panel varchar(200) NULL )
         ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin");
         if (!$result) {
@@ -352,6 +332,18 @@ try {
             $connect->query("ALTER TABLE marzban_panel ADD shadowsocks VARCHAR(100)");
             $connect->query("UPDATE marzban_panel SET shadowsocks = 'offshadowsocks'");
             echo "The shadowsocks field was added ✅";
+        }
+        $Check_filde = $connect->query("SHOW COLUMNS FROM marzban_panel LIKE 'sublink'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE marzban_panel ADD sublink VARCHAR(200)");
+            $connect->query("UPDATE marzban_panel SET sublink = 'onsublink'");
+            echo "The sublink field was added ✅";
+        }
+        $Check_filde = $connect->query("SHOW COLUMNS FROM marzban_panel LIKE 'configManual'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE marzban_panel ADD configManual VARCHAR(200)");
+            $connect->query("UPDATE marzban_panel SET configManual = 'offconfig'");
+            echo "The configManual field was added ✅";
         }
         $Check_filde = $connect->query("SHOW COLUMNS FROM marzban_panel LIKE 'MethodUsername'");
         if (mysqli_num_rows($Check_filde) != 1) {
