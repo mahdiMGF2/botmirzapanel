@@ -462,7 +462,7 @@
         $nameloc = select("invoice", "*", "username", $username,"select");
         $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'],"select");
         $DataUserOut = $ManagePanel->DataUser($nameloc['Service_location'],$username);
-        if ($DataUserOut['msg'] == "User not found") {
+        if (isset($DataUserOut['msg']) && $DataUserOut['msg'] == "User not found") {
             sendmessage($from_id, $textbotlang['users']['stateus']['error'], $keyboard, 'html');
             return;
         }
@@ -760,7 +760,7 @@
     elseif (preg_match('/confirmaextra_(\w+)/', $datain, $dataget)) {
         $volume = $dataget[1];
         $nameloc = select("invoice", "*", "username", $user['Processing_value'],"select");
-            if($user['Balance'] <$volume){
+        if($user['Balance'] <$volume){
         $Balance_prim = $volume - $user['Balance'];
         update("user", "Processing_value", $Balance_prim, "id",$from_id);
         sendmessage($from_id, $textbotlang['users']['sell']['None-credit'], $step_payment, 'HTML');
@@ -776,7 +776,7 @@
         $datam = array(
             "data_limit" => $data_limit
             );
-         $ManagePanel->Modifyuser($marzban_list_get['name_panel'],$user['Processing_value'],$datam);
+         $w = $ManagePanel->Modifyuser($user['Processing_value'],$marzban_list_get['name_panel'],$datam);
                 $keyboardextrafnished = json_encode([
             'inline_keyboard' => [
                 [
@@ -806,8 +806,8 @@
             sendmessage($from_id, $textbotlang['users']['stateus']['notusername'], null, 'html');
             return;
         }
-        $requestcheck = select("cancel_service","*","username",$username,"select");
-        if (mysqli_num_rows($requestcheck) != 0) {
+        $requestcheck = select("cancel_service","*","username",$username,"count");
+        if ($requestcheck != 0) {
             sendmessage($from_id, $textbotlang['users']['stateus']['errorexits'], null, 'html');
             return;
         }
@@ -2248,8 +2248,10 @@
         $trojan = "offtrojan";
         $shadowsocks = "offshadowsocks";
         $inboundid = "0";
-        $stmt = $pdo->prepare("INSERT INTO marzban_panel (name_panel, vless, vmess, trojan, shadowsocks,inboundid) VALUES (?, ?, ?, ?, ?,?)");
-        $stmt->execute([$text, $vless, $vmess, $trojan, $shadowsocks,$inboundid]);
+        $sublink = "onsublink";
+        $config = "offconfig";
+        $stmt = $pdo->prepare("INSERT INTO marzban_panel (name_panel, vless, vmess, trojan, shadowsocks,inboundid,sublink,configManual) VALUES (?, ?, ?, ?, ?,?,?,?)");
+        $stmt->execute([$text, $vless, $vmess, $trojan, $shadowsocks,$inboundid,$sublink,$config]);
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['addpanelurl'], $backadmin, 'HTML');
         step('add_link_panel',$from_id);
          update("user", "Processing_value",$text,"id",$from_id);
@@ -3260,6 +3262,10 @@
     #-------------------------#
     if ($text == "🔗 ارسال لینک سابسکرایبشن") {
         $panel = select("marzban_panel","*","name_panel",$user['Processing_value'],"select");
+        if($panel['sublink'] == null){
+            update("marzban_panel","sublink","onsublink","name_panel",$user['Processing_value']);
+        }
+        $panel = select("marzban_panel","*","name_panel",$user['Processing_value'],"select");
         $sublinkkeyboard = json_encode([
         'inline_keyboard' => [
             [
@@ -3300,6 +3306,10 @@
     }
     #-------------------------#
     if ($text == "⚙️ارسال کانفیگ") {
+        $panel = select("marzban_panel","*","name_panel",$user['Processing_value'],"select");
+        if($panel['configManual'] == null){
+            update("marzban_panel","configManual","offconfig","name_panel",$user['Processing_value']);
+        }
         $panel = select("marzban_panel","*","name_panel",$user['Processing_value'],"select");
         $configkeyboard = json_encode([
         'inline_keyboard' => [
