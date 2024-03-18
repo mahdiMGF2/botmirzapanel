@@ -564,7 +564,7 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
     $result->saveToFile($urlimage);
     telegram('sendphoto', [
             'chat_id' => $from_id,
-            'photo' => new CURLFile($urlimage),,
+            'photo' => new CURLFile($urlimage),
             'caption' => $textsub,
             'parse_mode' => "HTML",
         ]);
@@ -1033,7 +1033,7 @@ if ($user['step'] == "createusertest" || preg_match('/locationtests_(.*)/', $dat
         $result->saveToFile($urlimage);
         telegram('sendphoto', [
             'chat_id' => $from_id,
-            'photo' => new CURLFile($urlimage),,
+            'photo' => new CURLFile($urlimage),
             'reply_markup' => $usertestinfo,
             'caption' => $textcreatuser,
             'parse_mode' => "HTML",
