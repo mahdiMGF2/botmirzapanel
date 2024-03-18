@@ -161,3 +161,21 @@ function generateUsername($from_id,$Metode,$username,$randomString,$text)
     elseif($Metode == "نام کاربری دلخواه")return $text;
     elseif($Metode == "متن دلخواه + عدد رندوم")return $setting['namecustome']."_".$randomString;
 }
+
+function outputlunk($text){
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $text);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+$userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36';
+curl_setopt($ch, CURLOPT_USERAGENT, $userAgent);
+$response = curl_exec($ch);
+if($response === false) {
+    $error = curl_error($ch);
+    return "";
+} else {
+    return $response;
+}
+
+curl_close($ch);
+}
