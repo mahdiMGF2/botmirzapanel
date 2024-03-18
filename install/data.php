@@ -85,7 +85,7 @@ unlink('data.php');
     <style>
         @font-face {
             font-family: 'vazir';
-            src: url('../Vazir.eot');
+            src: url('../fonts/Vazir.eot');
             src: local('vazirmatn'), url('../fonts/Vazir.woff') format('woff'), url('../fonts/Vazir.ttf') format('truetype');
         }
 
