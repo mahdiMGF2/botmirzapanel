@@ -79,7 +79,7 @@ if ($response['description'] == "Webhook was set") {
 unlink('data.php');
 ?>
 
-<html>
+<html lang="fa">
 <head>
     <title>نصب ربات</title>
     <style>
