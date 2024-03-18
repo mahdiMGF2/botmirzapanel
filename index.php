@@ -134,7 +134,7 @@ if (strpos($text, "/start ") !== false) {
     if (!ctype_digit($affiliatesid))
         return;
     if (!in_array($affiliatesid, $users_ids)) {
-        sendmessage($from_id, "❌امکان زیرمجموعه شدن با این شناسه کاربری وجود ندارد.", null, 'html');
+        sendmessage($from_id,$textbotlang['users']['affiliates']['affiliatesyou'], null, 'html');
         return;
     }
     if ($affiliatesid == $from_id) {
@@ -484,7 +484,7 @@ if (preg_match('/product_(\w+)/', $datain, $dataget)) {
         $dateString = $DataUserOut['online_at'];
         $lastonline = jdate('Y/m/d h:i:s', strtotime($dateString));
     } else {
-        $lastonline = "متصل نشده";
+        $lastonline = $textbotlang['users']['stateus']['notconnected'];
     }
     #-------------status----------------#
     $status = $DataUserOut['status'];
@@ -547,10 +547,7 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'], "select");
     $DataUserOut = $ManagePanel->DataUser($nameloc['Service_location'], $username);
     $subscriptionurl = $DataUserOut['subscription_url'];
-    $textsub = "
-        {$textbotlang['users']['stateus']['linksub']}
-        
-        <code>$subscriptionurl</code>";
+    $textsub = "<code>$subscriptionurl</code>";
     $randomString = bin2hex(random_bytes(2));
     $urlimage = "$from_id$randomString.png";
     $writer = new PngWriter();
@@ -574,13 +571,26 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
     $nameloc = select("invoice", "*", "username", $username, "select");
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'], "select");
     $DataUserOut = $ManagePanel->DataUser($nameloc['Service_location'], $username);
-    foreach ($DataUserOut['configs'] as $configs) {
-        $config .= "\n\n" . $configs;
+    foreach ($DataUserOut['links'] as $configs) {
+        $randomString = bin2hex(random_bytes(2));
+    $urlimage = "$from_id$randomString.png";
+    $writer = new PngWriter();
+    $qrCode = QrCode::create($configs)
+        ->setEncoding(new Encoding('UTF-8'))
+        ->setErrorCorrectionLevel(ErrorCorrectionLevel::Low)
+        ->setSize(400)
+        ->setMargin(0)
+        ->setRoundBlockSizeMode(RoundBlockSizeMode::Margin);
+    $result = $writer->write($qrCode, null, null);
+    $result->saveToFile($urlimage);
+    telegram('sendphoto', [
+            'chat_id' => $from_id,
+            'photo' => new CURLFile($urlimage),
+            'caption' => "<code>$configs</code>",
+            'parse_mode' => "HTML",
+        ]);
+    unlink($urlimage);
     }
-    $textsub = "
-        {$textbotlang['users']['config']}
-    <code>$config</code>";
-    sendmessage($from_id, $textsub, null, 'html');
 } elseif (preg_match('/extend_(\w+)/', $datain, $dataget)) {
     $username = $dataget[1];
     $nameloc = select("invoice", "*", "username", $username, "select");
@@ -892,8 +902,8 @@ if (strlen($setting['Channel_Report']) > 0) {
     $confirmremoveadmin = json_encode([
         'inline_keyboard' => [
             [
-                ['text' => "❌حذف سرویس", 'callback_data' => "remoceserviceadmin-$usernamepanel"],
-                ['text' => "❌عدم تایید حذف", 'callback_data' => "rejectremoceserviceadmin-$usernamepanel"],
+                ['text' => $textbotlang['users']['removeconfig']['btnremoveuser'] , 'callback_data' => "remoceserviceadmin-$usernamepanel"],
+                ['text' => $textbotlang['users']['removeconfig']['rejectremove'], 'callback_data' => "rejectremoceserviceadmin-$usernamepanel"],
             ],
         ]
     ]);
@@ -902,7 +912,7 @@ if (strlen($setting['Channel_Report']) > 0) {
         step('home', $admin);
     }
     deletemessage($from_id, $message_id);
-    sendmessage($from_id, "✅ درخواست شما ارسال گردید پس از بررسی مدیریت نتیجه به شما اطلاع رسانی خواهد شد", $keyboard, 'html');
+    sendmessage($from_id, $textbotlang['users']['removeconfig']['accepetrequest'], $keyboard, 'html');
 
 }
 #-----------usertest------------#
@@ -2151,6 +2161,9 @@ if ($text == "📊 آمار ربات") {
     $stmt = $pdo->prepare("SELECT SUM(Balance) FROM user");
     $stmt->execute();
     $Balanceall = $stmt->fetch(PDO::FETCH_ASSOC);
+    $stmt = $pdo->prepare("SELECT SUM(price_product) FROM invoice WHERE time_sell = '$date' AND status = 'active'");
+    $stmt->execute();
+    $suminvoiceday = number_format($stmt->fetchColumn());
     $statistics = select("user", "id", null, null, "count");
     $invoice = select("invoice", "*", null, null, "count");
     $ping = sys_getloadavg();
@@ -2184,6 +2197,10 @@ if ($text == "📊 آمار ربات") {
             [
                 ['text' => $Balanceall['SUM(Balance)'], 'callback_data' => 'Balanceall'],
                 ['text' => $textbotlang['Admin']['Balanceall'], 'callback_data' => 'Balanceall'],
+            ],
+            [
+                ['text' => $suminvoiceday." تومان", 'callback_data' => 'sumpro'],
+                ['text' => $textbotlang['Admin']['sumporoduct'], 'callback_data' => 'sumpro'],
             ],
         ]
     ]);

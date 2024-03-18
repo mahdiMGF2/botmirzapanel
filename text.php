@@ -62,6 +62,7 @@ $textbotlang['users']['stateus']['Invalidusername'] = "❌ نام کاربری �
 $textbotlang['users']['stateus']['manageService'] = "⚙️ تنظیمات سرویس";
 $textbotlang['users']['stateus']['DecManageService '] = "⭕️ در این بخش می توانید سرویس خود را مدیریت کنید";
 $textbotlang['users']['stateus']['config'] ="🔰 کانفیگ دستی";
+$textbotlang['users']['stateus']['notconnected'] ="متصل نشده";
 
 
 $textbotlang['users']['extend']['title'] ="📌 تمدید سرویس";
@@ -143,6 +144,8 @@ $textbotlang['users']['changelink']['confirmed'] = "✅ لینک اتصال شم
 
 
 $textbotlang['users']['removeconfig']['btnremoveuser'] = "🗑 حذف سرویس";
+$textbotlang['users']['removeconfig']['rejectremove'] = "❌عدم تایید حذف";
+$textbotlang['users']['removeconfig']['accepetrequest'] = "✅ درخواست شما ارسال گردید پس از بررسی مدیریت نتیجه به شما اطلاع رسانی خواهد شد";
 $textbotlang['users']['stateus']['notusername'] = "❌ امکان حذف سرویس وجود ندارد.";
 $textbotlang['users']['stateus']['errorexits'] = "❌ یک درخواست از قبل ثبت شده است لطفا منتظر بمانید تا درخواست قبلی بررسی سپس درخواست جدید ارسال کنید.";
 $textbotlang['users']['stateus']['descriptions_removeservice'] = " با کلیک بر روی دکمه \"✅ درخواست حذف سرویس را دارم\"، درخواست حذف سرویس شما به مدیریت ارسال خواهد شد و پس از بررسی، سرویس شما کنسل خواهد شد.\n\n❌ در صورت تأیید مدیریت، مبلغ مصرفی باقی‌مانده به کیف پول شما واریز خواهد شد.\n\nمتشکریم که از خدمات ما استفاده می‌کنید.";
@@ -202,8 +205,8 @@ $textbotlang['users']['invalidusername'] ="❌نام کاربری نامعتبر
 $textbotlang['users']['affiliates']['setpercentage'] = "📌 درصدی که می‌خواهید بعد خرید  به کاربر واریز شود  را ارسال کنید";
 $textbotlang['users']['affiliates']['changedpercentage'] = "✅ درصد واریز به کاربر با موفقیت تنظیم شد";
 $textbotlang['users']['affiliates']['banner'] = "⭕️ بنر زیرمجموعه گیری خود را ارسال کنید 
-
 ❌ بنر باید حتما همراه با عکس باشد";
+$textbotlang['users']['affiliates']['affiliatesyou'] = "❌امکان زیرمجموعه شدن با این شناسه کاربری وجود ندارد";
 $textbotlang['users']['affiliates']['invalidbanner'] = "❌ بنر ارسال شده نامعتبر است ( بنر حتما باید با عکس ارسال شود)";
 $textbotlang['users']['affiliates']['insertbanner'] = "✅ بنر شما با موفقیت ثبت گردید.";
 $textbotlang['users']['affiliates']['invalidaffiliates'] = "❌ شما نمی توانید زیر مجموعه خودتان باشید";
@@ -253,6 +256,7 @@ $textbotlang['Admin']['pingbot'] = "🚀 پینگ ربات";
 $textbotlang['Admin']['sellservices'] = "🛍 فروش کل ";
 $textbotlang['Admin']['dayListSell'] = "☀️ فروش امروز";
 $textbotlang['Admin']['Balanceall'] = "💰 موجودی کل کاربران";
+$textbotlang['Admin']['sumporoduct'] = "🛍 جمع کل سفارشات";
 
 
 $textbotlang['Admin']['managepanel']['selectpanel'] = "پنل خود را انتخاب کنید";
