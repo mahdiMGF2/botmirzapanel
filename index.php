@@ -696,7 +696,6 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
                 array(
                     'clients' => array(
                         array(
-                            "id" => $clients['id'],
                             "totalGB" => $data_limit,
                             "expiryTime" => $newDate,
                             "enable" => true,
