@@ -480,11 +480,17 @@ if (preg_match('/product_(\w+)/', $datain, $dataget)) {
         sendmessage($from_id, $textbotlang['users']['stateus']['error'], $keyboard, 'html');
         return;
     }
-    if (isset ($DataUserOut['online_at']) && $DataUserOut['online_at'] !== null) {
+    if($DataUserOut['online_at'] == "online"){
+        $lastonline = 'آنلاین';
+    }elseif($DataUserOut['online_at'] == "offline"){
+        $lastonline = 'آفلاین';
+    }else{
+    if(isset($DataUserOut['online_at']) && $DataUserOut['online_at'] !== null){
         $dateString = $DataUserOut['online_at'];
-        $lastonline = jdate('Y/m/d h:i:s', strtotime($dateString));
-    } else {
+        $lastonline = jdate('Y/m/d h:i:s',strtotime($dateString));
+    }else{
         $lastonline = $textbotlang['users']['stateus']['notconnected'];
+    }
     }
     #-------------status----------------#
     $status = $DataUserOut['status'];
