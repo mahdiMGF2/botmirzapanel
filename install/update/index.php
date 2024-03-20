@@ -1,20 +1,22 @@
 <?php
-function latestRelease(){
-    $url = "https://api.github.com/repos/mahdigholipour3/bottelegrammarzban/releases/latest";
-$curl = curl_init($url);
-curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($curl, CURLOPT_HEADER, false);
-curl_setopt($curl, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3');
-$response = curl_exec($curl);
-curl_close($curl);
-$latestRelease = json_decode($response, true);
-$tagName = "";
-if ($latestRelease) {
-    $tagName = $latestRelease['tag_name'];
-}
-return $tagName;
+function latestRelease()
+{
+	$url = "https://api.github.com/repos/mahdigholipour3/bottelegrammarzban/releases/latest";
+	$curl = curl_init($url);
+	curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($curl, CURLOPT_HEADER, false);
+	curl_setopt($curl, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3');
+	$response = curl_exec($curl);
+	curl_close($curl);
+	$latestRelease = json_decode($response, true);
+	$tagName = "";
+	if ($latestRelease) {
+		$tagName = $latestRelease['tag_name'];
+	}
+	return $tagName;
 
 }
+
 $latestRelease = latestRelease();
 $version = file_get_contents('../version');
 ?>
@@ -29,14 +31,14 @@ $version = file_get_contents('../version');
     <style>
         @font-face {
             font-family: 'vazir';
-            src: url('/Vazir.eot');
-            src: local('☺'), url('../fonts/Vazir.woff') format('woff'), url('../fonts/Vazir.ttf') format('truetype');
+            src: url('../../fonts/Vazir.eot');
+            src: local('☺'), url('../../fonts/Vazir.woff') format('woff'), url('../../fonts/Vazir.ttf') format('truetype');
         }
 
         input,
         button,
         body {
-            font-family: vazir;
+            font-family: 'vazir', Tahoma;
         }
 
         * {
@@ -90,29 +92,28 @@ $version = file_get_contents('../version');
 </head>
 
 <body>
-    <div class="boxversion">
-        <div>
-            <section style="border-right: 2px solid #fff">
-                <h2>نسخه فعلی</h2>
-                <h2><?php echo $version ?></h2>
-            </section>
-            <section>
-                <h2>نسخه آخر منتشر شده</h2>
-                <h2><?php echo $latestRelease ?></h2>
-            </section>
-        </div>
-        <?php
-        if($latestRelease > $version){
-            ?>
-        <a class="btn" href="../update.php">آپدیت ربات</a>
-        <?Php
-        }
-        else{
-        ?>
-        <?php
-        }
-        ?>
+<div class="boxversion">
+    <div>
+        <section style="border-right: 2px solid #fff">
+            <h2>نسخه فعلی</h2>
+            <h2><?php echo $version ?></h2>
+        </section>
+        <section>
+            <h2>نسخه آخر منتشر شده</h2>
+            <h2><?php echo $latestRelease ?></h2>
+        </section>
     </div>
+	<?php
+	if ($latestRelease > $version) {
+		?>
+        <a class="btn" href="../update.php">آپدیت ربات</a>
+		<?php
+	} else {
+		?>
+		<?php
+	}
+	?>
+</div>
 </body>
 
 </html>

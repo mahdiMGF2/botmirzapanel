@@ -1,21 +1,20 @@
     @font-face {
         font-family: 'vazir';
-        src: url('/Vazir.eot');
-        src: local('☺'), url('../fonts/Vazir.woff') format('woff'), url('../fonts/Vazir.ttf') format('truetype');
+        src: url('../../fonts/Vazir.eot');
+        src: local('vazirmatn'), url('../../fonts/Vazir.woff') format('woff'), url('../../fonts/Vazir.ttf') format('truetype');
     }
 
     input,
     button {
-        font-family: vazir;
+        font-family: 'vazir', tahoma;
     }
 
     body {
+        font-family: 'vazir', tahoma;
         direction: rtl;
-        font-family: vazir;
         padding-top: 15px;
         text-align: center;
         background: linear-gradient(45deg, #464444, #575757);
-        font-family: vazir;
     }
 
 
