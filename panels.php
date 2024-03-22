@@ -104,7 +104,7 @@ class ManagePanel{
                         $UsernameData['enable'] = "disabled";
                     }
             $domain = explode(":", $Get_Data_Panel['linksubx']);
-            $subId = json_decode($UsernameData['settings'],true)['clients'][0]['subId'];
+            $subId = $UsernameData2['subId'];
             $status_user = get_onlinecli($Get_Data_Panel['name_panel'],$username);
             $Output = array(
                 'status' => $UsernameData['enable'],

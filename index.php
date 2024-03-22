@@ -803,10 +803,25 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'], "select");
     $DataUserOut = $ManagePanel->DataUser($marzban_list_get['name_panel'], $user['Processing_value']);
     $data_limit = $DataUserOut['data_limit'] + ($volume / $setting['Extra_volume'] * pow(1024, 3));
-    $datam = array(
+     if ($marzban_list_get['type'] == "marzban") {
+        $datam = array(
         "data_limit" => $data_limit
     );
-    $w = $ManagePanel->Modifyuser($user['Processing_value'], $marzban_list_get['name_panel'], $datam);
+    } elseif ($marzban_list_get['type'] == "x-ui_single") {
+        $datam = array(
+            'id' => intval($marzban_list_get['inboundid']),
+            'settings' => json_encode(
+                array(
+                    'clients' => array(
+                        array(
+                            "totalGB" => $data_limit,
+                        )
+                    ),
+                )
+            ),
+        );
+    }
+    $ManagePanel->Modifyuser($user['Processing_value'], $marzban_list_get['name_panel'], $datam);
     $keyboardextrafnished = json_encode([
         'inline_keyboard' => [
             [
