@@ -885,7 +885,6 @@ if (strlen($setting['Channel_Report']) > 0) {
         'limited' => $textbotlang['users']['stateus']['limited'],
         'disabled' => $textbotlang['users']['stateus']['disabled'],
         'expired' => $textbotlang['users']['stateus']['expired'],
-        'on_hold' => $textbotlang['users']['stateus']['on_hold']
     ][$status];
     #--------------[ expire ]---------------#
     $expirationDate = $DataUserOut['expire'] ? jdate('Y/m/d', $DataUserOut['expire']) : $textbotlang['users']['stateus']['Unlimited'];
@@ -2183,7 +2182,9 @@ if ($text == "📊 آمار ربات") {
     $Balanceall = $stmt->fetch(PDO::FETCH_ASSOC);
     $stmt = $pdo->prepare("SELECT SUM(price_product) FROM invoice WHERE time_sell = '$date' AND status = 'active'");
     $stmt->execute();
-    $suminvoiceday = number_format($stmt->fetchColumn());
+    $value = $stmt->fetchColumn();
+    if($value == null )$value = 0;
+    $suminvoiceday = number_format($value);
     $statistics = select("user", "id", null, null, "count");
     $invoice = select("invoice", "*", null, null, "count");
     $ping = sys_getloadavg();
