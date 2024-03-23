@@ -1,6 +1,6 @@
 <?php
-$rootPath = filter_input(INPUT_SERVER, 'DOCUMENT_ROOT', FILTER_SANITIZE_STRING);
-$PHP_SELF = filter_input(INPUT_SERVER, 'PHP_SELF', FILTER_SANITIZE_STRING);
+$rootPath = filter_input(INPUT_SERVER, 'DOCUMENT_ROOT');
+$PHP_SELF = filter_input(INPUT_SERVER, 'PHP_SELF');
 $Pathfile = dirname(dirname($PHP_SELF, 2));
 $Pathfiles = $rootPath.$Pathfile;
 $Pathfile = $Pathfiles.'/config.php';
