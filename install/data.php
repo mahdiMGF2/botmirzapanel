@@ -6,10 +6,8 @@ if (!preg_match('/Chrome|Firefox|Edge|Safari/i', $user_agent)) {
 	die("دسترسی غیرمجاز");
 }
 $php_version = phpversion();
-if (version_compare($php_version, '8.1', '<')) {
-	echo "PHP version is below 8.1: $php_version";
-} else {
-	echo "PHP version is equal to or greater than 8.1: $php_version";
+if (intval($php_version) < 8) {
+	die("PHP version is below 8.1: $php_version");
 }
 
 // varable 

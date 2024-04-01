@@ -10,6 +10,11 @@ $textbotlang['users']['channel']['notconfirmed'] = "❌ هنوز عضو کانا
 
 $textbotlang['users']['Rules'] = "✅ قوانین تایید شد از الان می توانید از خدمات ربات استفاده نمایید.";
 $textbotlang['users']['back'] = "به صفحه اصلی بازگشتید!";
+$textbotlang['users']['backorder'] = "🏠 بازگشت به اطلاعات سرویس";
+$textbotlang['users']['spamtext'] = "اسپم در ربات";
+$textbotlang['users']['online'] = "آنلاین";
+$textbotlang['users']['offline'] = "آفلاین";
+$textbotlang['users']['unlimited'] = "نامحدود";
 
 
 $textbotlang['users']['number']['false'] = "❌ شماره تلفن صحبح نیست شماره تلفن صحبح را ارسال نمایید.";

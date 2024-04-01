@@ -168,7 +168,7 @@ if (floor($TimeLastMessage / 60) >= 1) {
         if ($user['message_count'] >= "35") {
             $User_Status = "block";
             update("user", "User_Status", $User_Status, "id", $from_id);
-            update("user", "description_blocking", 'اسپم در ربات', "id", $from_id);
+            update("user", "description_blocking", $textbotlang['users']['spamtext'], "id", $from_id);
             sendmessage($from_id, $textbotlang['users']['spam']['spamedmessage'], null, 'html');
             return;
         }
@@ -348,7 +348,7 @@ if ($user['step'] == "getusernameinfo") {
     $LastTraffic = $DataUserOut['data_limit'] ? formatBytes($DataUserOut['data_limit']) : $textbotlang['users']['stateus']['Unlimited'];
     #---------------[ RemainingVolume ]--------------#
     $output = $DataUserOut['data_limit'] - $DataUserOut['used_traffic'];
-    $RemainingVolume = $DataUserOut['data_limit'] ? formatBytes($output) : "نامحدود";
+    $RemainingVolume = $DataUserOut['data_limit'] ? formatBytes($output) : $textbotlang['users']['unlimited'];
     #---------------[ used_traffic ]--------------#
     $usedTrafficGb = $DataUserOut['used_traffic'] ? formatBytes($DataUserOut['used_traffic']) : $textbotlang['users']['stateus']['Notconsumed'];
     #--------------[ day ]---------------#
@@ -373,7 +373,7 @@ if ($user['step'] == "getusernameinfo") {
             ],
             [],
             [
-                ['text' => $day, 'callback_data' => 'روز'],
+                ['text' => $day, 'callback_data' => 'day'],
                 ['text' => $textbotlang['users']['stateus']['daysleft'], 'callback_data' => 'day'],
             ],
             [
@@ -481,9 +481,9 @@ if (preg_match('/product_(\w+)/', $datain, $dataget)) {
         return;
     }
     if($DataUserOut['online_at'] == "online"){
-        $lastonline = 'آنلاین';
+        $lastonline = $textbotlang['users']['online'];
     }elseif($DataUserOut['online_at'] == "offline"){
-        $lastonline = 'آفلاین';
+        $lastonline = $textbotlang['users']['offline'];
     }else{
     if(isset($DataUserOut['online_at']) && $DataUserOut['online_at'] !== null){
         $dateString = $DataUserOut['online_at'];
@@ -506,7 +506,7 @@ if (preg_match('/product_(\w+)/', $datain, $dataget)) {
     $LastTraffic = $DataUserOut['data_limit'] ? formatBytes($DataUserOut['data_limit']) : $textbotlang['users']['stateus']['Unlimited'];
     #---------------[ RemainingVolume ]--------------#
     $output = $DataUserOut['data_limit'] - $DataUserOut['used_traffic'];
-    $RemainingVolume = $DataUserOut['data_limit'] ? formatBytes($output) : "نامحدود";
+    $RemainingVolume = $DataUserOut['data_limit'] ? formatBytes($output) : $textbotlang['users']['unlimited'];
     #---------------[ used_traffic ]--------------#
     $usedTrafficGb = $DataUserOut['used_traffic'] ? formatBytes($DataUserOut['used_traffic']) : $textbotlang['users']['stateus']['Notconsumed'];
     #--------------[ day ]---------------#
@@ -617,7 +617,7 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
         ];
     }
     $productextend['inline_keyboard'][] = [
-        ['text' => "🏠 بازگشت به اطلاعات سرویس", 'callback_data' => "product_" . $username]
+        ['text' => $textbotlang['users']['backorder'], 'callback_data' => "product_" . $username]
     ];
 
     $json_list_product_lists = json_encode($productextend);
@@ -892,7 +892,7 @@ if (strlen($setting['Channel_Report']) > 0) {
     $LastTraffic = $DataUserOut['data_limit'] ? formatBytes($DataUserOut['data_limit']) : $textbotlang['users']['stateus']['Unlimited'];
     #---------------[ RemainingVolume ]--------------#
     $output = $DataUserOut['data_limit'] - $DataUserOut['used_traffic'];
-    $RemainingVolume = $DataUserOut['data_limit'] ? formatBytes($output) : "نامحدود";
+    $RemainingVolume = $DataUserOut['data_limit'] ? formatBytes($output) : $textbotlang['users']['unlimited'];
     #---------------[ used_traffic ]--------------#
     $usedTrafficGb = $DataUserOut['used_traffic'] ? formatBytes($DataUserOut['used_traffic']) : $textbotlang['users']['stateus']['Notconsumed'];
     #--------------[ day ]---------------#
@@ -1433,7 +1433,7 @@ if ($text == $datatextbot['text_sell']) {
 $text_config
 $link_config
     
-🧑‍🦯 شما میتوانید شیوه اتصال را با فشردن دکمه زیر و انتخاب سیستم عامل خود دریافت کنید";
+📚 راهنمای اتصال به سرویس را از طریق کلیک کردن دکمه زیر مطالعه بفرمایید";
     if ($marzban_list_get['sublink'] == "onsublink") {
         $urlimage = "$from_id$randomString.png";
         $writer = new PngWriter();
