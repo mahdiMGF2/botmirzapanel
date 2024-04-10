@@ -1,5 +1,4 @@
 <?php
-include('config.php');
 require_once 'functions.php';
 #-----------------------------#
 function token_panel($url_panel,$username_panel,$password_panel){
