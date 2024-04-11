@@ -248,7 +248,7 @@ echo -e "$text_to_save" >> /var/www/html/mirzabotconfig/config.php
         curl -s -X POST "https://api.telegram.org/bot${YOUR_BOT_TOKEN}/sendMessage" -d chat_id="${YOUR_CHAT_ID}" -d text="$MESSAGE"
 
         sleep 1
-
+        sudo systemctl start apache2
         url="https://${YOUR_DOMAIN}/mirzabotconfig/install/table.php"
         curl $url
 
@@ -256,6 +256,7 @@ echo -e "$text_to_save" >> /var/www/html/mirzabotconfig/config.php
 
         echo " "
 
+        echo -e "\e[100mDomain Bot: https://${YOUR_DOMAIN}\033[0m"
         echo -e "\e[100mDatabase addres: https://${YOUR_DOMAIN}/phpmyadmin\033[0m"
         echo -e "\e[33mDatabase name: \e[36m${dbname}\033[0m"
         echo -e "\e[33mDatabase username: \e[36m${dbuser}\033[0m"
