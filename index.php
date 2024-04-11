@@ -1,6 +1,6 @@
 <?php
 ini_set('error_log', 'error_log');
-
+$version = "4.8.4";
 date_default_timezone_set('Asia/Tehran');
 require_once 'config.php';
 require_once 'botapi.php';
@@ -42,7 +42,6 @@ if ($from_id != "0") {
     $stmt->bindParam(':username', $username, PDO::PARAM_STR);
     $stmt->execute();
 }
-$version = file_get_contents('install/version');
 $user = select("user", "*", "id", $from_id, "select");
 if ($user == false) {
     $user = array();
