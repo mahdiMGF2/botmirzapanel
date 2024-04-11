@@ -249,7 +249,7 @@ echo -e "$text_to_save" >> /var/www/html/mirzabotconfig/config.php
 
         sleep 1
         sudo systemctl start apache2
-        url="https://${YOUR_DOMAIN}/mirzabotconfig/install/table.php"
+        url="https://${YOUR_DOMAIN}/mirzabotconfig/table.php"
         curl $url
 
         clear
