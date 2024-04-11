@@ -60,6 +60,7 @@ sudo systemctl start mysql.service
 sudo systemctl enable apache2
 sudo systemctl start apache2
 wait
+sudo apt-get install ufw -y
 ufw allow 'Apache'
 sudo systemctl restart apache2
 sudo apt-get install -y git
