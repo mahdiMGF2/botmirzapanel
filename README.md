@@ -20,16 +20,18 @@
 ## Table of Contents
 - [Overview](#overview)
 - [Features](#features)
-- [Prerequisites](#prerequisites)
-- [Installation Guide](#installation-guide)
-- [FAQ](#faq)
+- [How do I install the bot?](#install-bot)
 - [Financial Support](#financial-support)
 
 # Overview
 
-Bot Mirza Panel is a bot for selling VPN services specifically for the Marzban. It is not currently compatible with other panels. This bot offers features such as purchasing VPNs, automatic configuration building, viewing purchased services, and test accounts.
+Mirza bot is a bot for selling VPN services for Marzban and 3x-ui panels.
+
+Mirza robot has two versions, free and subscription. This bot offers features such as VPN purchase, automatic configuration creation, viewing of purchased services, and trial accounts. In the following, you can see some features of the free and subscription version
 
 ### Features
+
+***Features Free version***
 
 - Purchase VPN and auto-build configuration
 - View purchased services
@@ -51,43 +53,56 @@ Bot Mirza Panel is a bot for selling VPN services specifically for the Marzban. 
 - Text customization from the bot
 - Product and panel management
 - Ability to define a username generation method
-- Ability to specify configuration building based on the selected protocol (admin-side)
+- Ability to specify configuration building based on the selected  - protocol (admin-side)
 - Gateway management from the bot
 
-# Prerequisites
-- Hosting (preferably cPanel)
-- Domain with SSL
-- PHP version 7.4 or higher
-- cURL extension
+***Features Subscription version***
+- Admin access level in three levels (management, sales, support)
+- View all users in the bot
+- Advanced discount code
+- Ability to represent
+- Remove the service and get a refund
+- Manage internal bands for each panel separately
+- Manage panel status
+- Separation of panels in the test account
+- Buy the desired time
+- Send configuration after successful payment (direct payment)
+- Renewal and purchase of additional volume for users who do not have service from the robot
+- Setting the minimum and maximum amount of inventory increase
+- Ability to respond to support messages by the user
+- Advanced Subset Management
+- Possibility of bulk purchase
+- Different ways to create a username
+- Ability to quickly search and find the service
+- Advanced cron job settings
+- Advanced bot statistics
+- Restrictions on creating configurations for each panel
+- Web panel
+- The possibility of changing the location
+- Transfer of service by user to another user
+-  Rial exchange portals
 
-# Installation Guide
+Link to the purchase guide for the subscription version : 
+https://t.me/mirzaperimium/4
 
-1. Download the latest public version from the link below:
-   [Download](https://github.com/mahdigholipour3/botmirzapanel/releases).
+# install bot
 
-2. After downloading the source, upload it to the "public_html" folder of your hosting file manager. Once uploaded, extract the source from the compressed file.
+prerequisites
 
-3. Execute the "install" folder in your browser.
+ubutnu server 22
 
-   For example, if your hosting domain is "botdomain.com" and the source files are inside the "bot" folder, you should enter the following URL in your browser:
-   `https://botdomain.com/bot/install`
+Domain
 
-4. After accessing the installation page, click the "Install" button and proceed to the installation page. Complete the requested information on this page and click the "Install Bot" button to install the bot.
+ Run the following command on the server : 
 
-5. After clicking the "Install Bot" button, you will be taken to the final installation page. The bot will be installed, and a message will be sent to the bot for the admin ID you defined. If the installation is not successful, an error message will be displayed.
-
-6. The installation file will be deleted for security reasons after the installation is complete.
-
-# FAQ
-
-To view frequently asked questions, click on the link below:
-[Frequently Asked Questions](https://t.me/mirzapanelgroup/1230).
-
+ ```
+ curl -o install.sh -L https://raw.githubusercontent.com/mahdiMGF2/botmirzapanel/main/install.sh && bash install.sh
+```
+ 
 # Financial Support
 
 If Mirza Panel has been helpful to you and you would like to support its development, you can contribute financially using one of the following crypto networks:
 
-- TRX Network (TRC20): `TJxoQEyCEs36Cf8R9MjapFsT6vpm9aRArS`
-- TON Network: `EQA0KjWeODV8CDloEp_d3fBJ71xHMVv77ydQWjVr-fAtZSqw`
+- TRX Network (TRC20): `TNvwhpNtXxKMFFeVzGR8GNZ6gL4aECituU`
 
 Thank you for your support!
