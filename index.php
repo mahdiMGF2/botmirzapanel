@@ -1270,7 +1270,9 @@ if ($text == $datatextbot['text_sell']) {
     sendmessage($from_id, $textbotlang['users']['selectusername'], $backuser, 'html');
     step('endstepuser', $from_id);
 } elseif ($user['step'] == "endstepuser" || preg_match('/prodcutservice_(.*)/', $datain, $dataget)) {
+    if($user['step'] != "endstepuser"){
     $prodcut = $dataget[1];
+    }
     $panellist = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
     if ($panellist['MethodUsername'] == "نام کاربری دلخواه") {
         if (!preg_match('~(?!_)^[a-z][a-z\d_]{2,32}(?<!_)$~i', $text)) {
