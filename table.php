@@ -1,6 +1,6 @@
 <?php
 $randomString = bin2hex(random_bytes(3));
-require_once '../config.php';
+require_once 'config.php';
 global $connect;
 //-----------------------------------------------------------------
 try {
