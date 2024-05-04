@@ -85,30 +85,35 @@ function adduser($username,$expire,$data_limit,$location)
 if(isset($marzban_list_get['vless']) && $marzban_list_get['vless'] == "onvless"){
     $nameprotocol['vless'] = array();
 }
-
 if(isset($marzban_list_get['vmess']) && $marzban_list_get['vmess'] == "onvmess"){
     $nameprotocol['vmess'] = array();
 }
-
 if(isset($marzban_list_get['trojan']) && $marzban_list_get['trojan'] == "ontrojan"){
     $nameprotocol['trojan'] = array();
 }
-
 if(isset($marzban_list_get['shadowsocks']) && $marzban_list_get['shadowsocks'] == "onshadowsocks"){
     $nameprotocol['shadowsocks'] = array();
 }
-
 if(isset($nameprotocol['vless']) && $marzban_list_get['flow'] == "flowon"){
     $nameprotocol['vless']['flow'] = 'xtls-rprx-vision';
 }
     $header_value = 'Bearer ';
     $data = array(
         "proxies" => $nameprotocol,
-        "expire" => $expire,
         "data_limit" => $data_limit,
         "username" => $username
     );
-
+    if($expire == "0"){
+        $data['expire'] = 0;
+    }else {
+        if($marzban_list_get['onholdstatus'] == "ononhold"){
+            $data["expire"] = 0;
+            $data["status"] = "on_hold";
+            $data["on_hold_expire_duration"] = $expire - time();
+        }else{
+        $data['expire'] = $expire;
+        }
+    }
     $payload = json_encode($data);
 
     $ch = curl_init();

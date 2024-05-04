@@ -339,7 +339,8 @@ if ($user['step'] == "getusernameinfo") {
         'active' => $textbotlang['users']['stateus']['active'],
         'limited' => $textbotlang['users']['stateus']['limited'],
         'disabled' => $textbotlang['users']['stateus']['disabled'],
-        'expired' => $textbotlang['users']['stateus']['expired']
+        'expired' => $textbotlang['users']['stateus']['expired'],
+        'on_hold' => $textbotlang['users']['stateus']['onhold']
     ][$status];
     #--------------[ expire ]---------------#
     $expirationDate = $DataUserOut['expire'] ? jdate('Y/m/d', $DataUserOut['expire']) : $textbotlang['users']['stateus']['Unlimited'];
@@ -497,7 +498,8 @@ if (preg_match('/product_(\w+)/', $datain, $dataget)) {
         'active' => $textbotlang['users']['stateus']['active'],
         'limited' => $textbotlang['users']['stateus']['limited'],
         'disabled' => $textbotlang['users']['stateus']['disabled'],
-        'expired' => $textbotlang['users']['stateus']['expired']
+        'expired' => $textbotlang['users']['stateus']['expired'],
+        'on_hold' => $textbotlang['users']['stateus']['onhold']
     ][$status];
     #--------------[ expire ]---------------#
     $expirationDate = $DataUserOut['expire'] ? jdate('Y/m/d', $DataUserOut['expire']) : $textbotlang['users']['stateus']['Unlimited'];
@@ -884,6 +886,7 @@ if (strlen($setting['Channel_Report']) > 0) {
         'limited' => $textbotlang['users']['stateus']['limited'],
         'disabled' => $textbotlang['users']['stateus']['disabled'],
         'expired' => $textbotlang['users']['stateus']['expired'],
+        'on_hold' => $textbotlang['users']['stateus']['onhold']
     ][$status];
     #--------------[ expire ]---------------#
     $expirationDate = $DataUserOut['expire'] ? jdate('Y/m/d', $DataUserOut['expire']) : $textbotlang['users']['stateus']['Unlimited'];
@@ -1357,9 +1360,14 @@ if ($text == $datatextbot['text_sell']) {
     $stmt->bindParam(9, $info_product['Service_time']);
     $stmt->bindParam(10, $Status);
     $stmt->execute();
+    if($info_product['Service_time'] == "0"){
+     $data = "0";   
+    }else{
     $date = strtotime("+" . $info_product['Service_time'] . "days");
+    $data = strtotime(date("Y-m-d H:i:s", $date));
+    }
     $datac = array(
-        'expire' => strtotime(date("Y-m-d H:i:s", $date)),
+        'expire' => $data,
         'data_limit' => $info_product['Volume_constraint'] * pow(1024, 3),
     );
     $dataoutput = $ManagePanel->createUser($marzban_list_get['name_panel'], $username_ac, $datac);
@@ -4208,5 +4216,43 @@ if ($text == "🌟 مبلغ هدیه استارت") {
     if (strlen($setting['Channel_Report']) > 0) {
         sendmessage($setting['Channel_Report'], $text_report, null, 'HTML');
     }
+}
+if ($text == "⏳ قابلیت اولین اتصال") {
+    $panel = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
+    if ($panel['onholdstatus'] == null) {
+        update("marzban_panel", "onholdstatus", "offonhold", "name_panel", $user['Processing_value']);
+    }
+    $panel = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
+    $onhold_Status = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $panel['onholdstatus'], 'callback_data' => $panel['onholdstatus']],
+            ],
+        ]
+    ]);
+    sendmessage($from_id, $textbotlang['Admin']['Status']['onhold'], $onhold_Status, 'HTML');
+}
+if ($datain == "ononhold") {
+    update("marzban_panel", "onholdstatus", "offonhold", "name_panel", $user['Processing_value']);
+    $panel = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
+    $onhold_Status = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $panel['onholdstatus'], 'callback_data' => $panel['onholdstatus']],
+            ],
+        ]
+    ]);
+    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['offstatus'], $onhold_Status);
+} elseif ($datain == "offonhold") {
+    update("marzban_panel", "onholdstatus", "ononhold", "name_panel", $user['Processing_value']);
+    $panel = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
+    $onhold_Status = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $panel['onholdstatus'], 'callback_data' => $panel['onholdstatus']],
+            ],
+        ]
+    ]);
+    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['onstatus'], $onhold_Status);
 }
 $connect->close();

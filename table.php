@@ -321,6 +321,7 @@ try {
         sublink varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
         configManual varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
         password_panel varchar(200) NULL )
+        onholdstatus varchar(200) NULL )
         ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin");
         if (!$result) {
             echo "table marzban_panel".mysqli_error($connect);
@@ -332,6 +333,12 @@ try {
             $connect->query("ALTER TABLE marzban_panel ADD shadowsocks VARCHAR(100)");
             $connect->query("UPDATE marzban_panel SET shadowsocks = 'offshadowsocks'");
             echo "The shadowsocks field was added ✅";
+        }
+        $Check_filde = $connect->query("SHOW COLUMNS FROM marzban_panel LIKE 'onholdstatus'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE marzban_panel ADD onholdstatus VARCHAR(100)");
+            $connect->query("UPDATE marzban_panel SET onholdstatus = 'offonhold'");
+            echo "The onholdstatus field was added ✅";
         }
         $Check_filde = $connect->query("SHOW COLUMNS FROM marzban_panel LIKE 'sublink'");
         if (mysqli_num_rows($Check_filde) != 1) {
