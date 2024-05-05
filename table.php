@@ -320,7 +320,7 @@ try {
         MethodUsername varchar(900)  NULL,
         sublink varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
         configManual varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
-        password_panel varchar(200) NULL )
+        password_panel varchar(200) NULL,
         onholdstatus varchar(200) NULL )
         ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin");
         if (!$result) {
