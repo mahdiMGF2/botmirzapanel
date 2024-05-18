@@ -3,13 +3,10 @@ $rootPath = filter_input(INPUT_SERVER, 'DOCUMENT_ROOT');
 $PHP_SELF = filter_input(INPUT_SERVER, 'PHP_SELF');
 $Pathfile = dirname(dirname($PHP_SELF, 2));
 $Pathfiles = $rootPath.$Pathfile;
-$Pathfile = $Pathfiles.'/config.php';
-$jdf = $Pathfiles.'/jdf.php';
-$botapi = $Pathfiles.'/botapi.php';
-$botapi = $Pathfiles.'/functions.php';
-require_once $Pathfile;
-require_once $jdf;
-require_once $botapi;
+require_once $Pathfiles.'/config.php';
+require_once $Pathfiles.'/jdf.php';
+require_once $Pathfiles.'/botapi.php';
+require_once $Pathfiles.'/functions.php';
 $invoice_id = htmlspecialchars($_POST['invoice_id'], ENT_QUOTES, 'UTF-8');
 $PaySetting = select("PaySetting", "ValuePay", "NamePay", "merchant_id_aqayepardakht","select")['ValuePay'];
 $Payment_report = select("Payment_report", "price", "id_order", $invoice_id,"select")['price'];
@@ -36,19 +33,18 @@ $result = curl_exec($ch);
 curl_close($ch);
 $result = json_decode($result);
 if ($result->code == "1") {
+    $setting = select("setting", "*");
     $payment_status = "پرداخت موفق";
     $price = $Payment_report;
     $dec_payment_status = "از انجام تراکنش متشکریم!";
     $Payment_report = select("Payment_report", "price", "id_order", $invoice_id,"select");
+    $Balance_id = select("user", "*", "id", $Payment_report['id_user'], "select");
     if($Payment_report['payment_Status'] != "paid"){
-    $Balance_id = select("user", "*", "id", $Payment_report['id_user'],"select");
-    $Balance_confrim = intval($Balance_id['Balance']) + $price;
-    update("user", "Balance", $Balance_confrim, "id",$Payment_report['id_user']);
-    update("Payment_report", "payment_Status", "paid", "id",$Payment_report['id_order']);
-    sendmessage($Payment_report['id_user'],"💎 کاربر گرامی مبلغ $price تومان به کیف پول شما واریز گردید با تشکر از پرداخت شما.
-    
-    🛒 کد پیگیری شما: {$Payment_report['id_order']}",null,'HTML');
-    $setting = select("setting", "*");
+    DirectPayment($Payment_report['id_order']);
+    update("user","Processing_value","0", "id",$Balance_id['id']);
+    update("user","Processing_value_one","0", "id",$Balance_id['id']);
+    update("user","Processing_value_tow","0", "id",$Balance_id['id']);
+    update("Payment_report","payment_Status","paid","id_order",$Payment_report['id_order']);
 $text_report = "💵 پرداخت جدید
         
 آیدی عددی کاربر : $from_id

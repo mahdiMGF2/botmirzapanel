@@ -83,7 +83,6 @@ $keyboardpaymentManage = json_encode([
     'keyboard' => [
         [['text' => "💳 تنظبمات درگاه آفلاین"]],
         [['text' => "💵 تنظیمات nowpayment"]],
-        [['text' => "💎 درگاه ارزی ریالی"],['text' => "🟡  درگاه آل سات"]],
         [['text' => "🔵 درگاه آقای پرداخت"],['text' => "🔴 درگاه پرفکت مانی"]],
         [['text' => "🏠 بازگشت به منوی مدیریت"]]
     ],
@@ -340,35 +339,34 @@ if ($users == false) {
         'step' => '',
     );
 }
-$list_marzban_panel_users = [
-        'inline_keyboard' => [],
-    ];
-if ($users['step'] == "getusernameinfo") {
-    foreach ($namepanel as $button) {
-    $list_marzban_panel_users['inline_keyboard'][] = [
-        ['text' => $button[0] , 'callback_data' => "locationnotuser_{$button[0]}"]
-    ];
-}
-}
-else{
-        foreach ($namepanel as $button) {
-    $list_marzban_panel_users['inline_keyboard'][] = [
-        ['text' => $button[0] , 'callback_data' => "location_{$button[0]}"]
-    ];
-}
-}
+$stmt = $pdo->prepare("SELECT * FROM marzban_panel");
+$stmt->execute();
+$list_marzban_panel_users = ['inline_keyboard' => []];
+    while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        if ($users['step'] == "getusernameinfo") {
+            $list_marzban_panel_users['inline_keyboard'][] = [
+                ['text' => $result['name_panel'], 'callback_data' => "locationnotuser_{$result['id']}"]
+            ];
+        }
+        else{
+            $list_marzban_panel_users['inline_keyboard'][] = [['text' => $result['name_panel'], 'callback_data' => "location_{$result['id']}"]
+            ];
+        }
+    }
 $list_marzban_panel_users['inline_keyboard'][] = [
     ['text' => "🏠 بازگشت به منوی اصلی", 'callback_data' => "backuser"],
 ];
 $list_marzban_panel_user = json_encode($list_marzban_panel_users);
+
   $list_marzban_panel_usertest = [
         'inline_keyboard' => [],
     ];
-    foreach ($namepanel as $buttons) {
-    $list_marzban_panel_usertest['inline_keyboard'][] = [
-        ['text' => $buttons[0] , 'callback_data' => "locationtests_".$buttons[0]]
-    ];
-}
+$stmt = $pdo->prepare("SELECT * FROM marzban_panel");
+$stmt->execute();
+while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $list_marzban_panel_usertest['inline_keyboard'][] = [['text' => $result['name_panel'], 'callback_data' => "locationtests_{$result['id']}"]
+            ];
+    }
 $list_marzban_panel_usertest['inline_keyboard'][] = [
     ['text' => "🏠 بازگشت به منوی اصلی", 'callback_data' => "backuser"],
 ];

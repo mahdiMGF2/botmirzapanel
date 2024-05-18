@@ -487,14 +487,20 @@ try {
         price varchar(400) NULL,
         dec_not_confirmed varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL,
         Payment_Method varchar(400) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL,
-        payment_Status varchar(2000) NULL)
+        payment_Status varchar(2000) NULL,
+        invoice varchar(300) NULL)
         ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin");
         if (!$result) {
             echo "table Payment_report".mysqli_error($connect);
         }
     }
     else{
-      $Check_filde = $connect->query("SHOW COLUMNS FROM Payment_report LIKE 'Payment_Method'");
+      $Check_filde = $connect->query("SHOW COLUMNS FROM Payment_report LIKE 'invoice'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE Payment_report ADD invoice VARCHAR(300)");
+            echo "The invoice field was added ✅";
+        }   
+        $Check_filde = $connect->query("SHOW COLUMNS FROM Payment_report LIKE 'Payment_Method'");
         if (mysqli_num_rows($Check_filde) != 1) {
             $connect->query("ALTER TABLE Payment_report ADD Payment_Method VARCHAR(1000)");
             echo "The Payment_Method field was added ✅";

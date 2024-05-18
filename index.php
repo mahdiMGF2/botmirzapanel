@@ -323,8 +323,9 @@ if ($user['step'] == "getusernameinfo") {
     sendmessage($from_id, $textbotlang['users']['Service']['Location'], $list_marzban_panel_user, 'html');
     step('getdata', $from_id);
 } elseif (preg_match('/locationnotuser_(.*)/', $datain, $dataget)) {
-    $location = $dataget[1];
-    $marzban_list_get = select("marzban_panel", "name_panel", "name_panel", $location, "select");
+    $locationid = $dataget[1];
+    $marzban_list_get = select("marzban_panel", "name_panel", "id", $locationid, "select");
+    $location = $marzban_list_get['name_panel'];
     $DataUserOut = $ManagePanel->DataUser($marzban_list_get['name_panel'], $user['Processing_value']);
     if ($DataUserOut['status'] == "Unsuccessful") {
         if ($DataUserOut['msg'] == "User not found") {
@@ -632,6 +633,9 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
     $stmt->execute();
     $product = $stmt->fetch(PDO::FETCH_ASSOC);
     update("invoice", "name_product", $product['name_product'], "username", $user['Processing_value']);
+    update("invoice", "Service_time", $product['Service_time'], "username", $user['Processing_value']);
+    update("invoice", "Volume", $product['Volume_constraint'], "username", $user['Processing_value']);
+    update("invoice", "price_product", $product['price_product'], "username", $user['Processing_value']);
     update("user", "Processing_value_one", $codeproduct, "id", $from_id);
     $keyboardextend = json_encode([
         'inline_keyboard' => [
@@ -731,7 +735,7 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
 👤 نام کاربری مشتری در پنل  : $usernamepanel
 موجودی کاربر : $balanceformatsell تومان
 لوکیشن سرویس کاربر : {$nameloc['Service_location']}";
-    if (strlen($setting['Channel_Report']) > 0) {
+    if (isset($setting['Channel_Report']) &&strlen($setting['Channel_Report']) > 0) {
         sendmessage($setting['Channel_Report'], $text_report, null, 'HTML');
     }
 } elseif (preg_match('/changelink_(\w+)/', $datain, $dataget)) {
@@ -838,7 +842,7 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
 🪪 آیدی عددی : $from_id
 🛍 حجم خریداری شده  : $volumes
 💰 مبلغ پرداختی : $volume تومان";
-if (strlen($setting['Channel_Report']) > 0) {
+if (isset($setting['Channel_Report']) &&strlen($setting['Channel_Report']) > 0) {
         sendmessage($setting['Channel_Report'], $text_report, null, 'HTML');
     }
 } elseif (preg_match('/removeserviceuserco-(\w+)/', $datain, $dataget)) {
@@ -968,7 +972,9 @@ if ($user['step'] == "createusertest" || preg_match('/locationtests_(.*)/', $dat
         }
     } else {
         deletemessage($from_id, $message_id);
-        $name_panel = $dataget[1];
+        $id_panel = $dataget[1];
+        $marzban_list_get = select("marzban_panel", "*", "id", $id_panel, "select");
+        $name_panel = $marzban_list_get['name_panel'];
     }
     $randomString = bin2hex(random_bytes(2));
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $name_panel, "select");
@@ -1098,7 +1104,7 @@ if ($user['step'] == "createusertest" || preg_match('/locationtests_(.*)/', $dat
 اطلاعات کاربر 👇👇
 ⚜️ نام کاربری کاربر: @{$user['username']}
 آیدی عددی کاربر : <code>$from_id</code>";
-    if (strlen($setting['Channel_Report']) > 0) {
+    if (isset($setting['Channel_Report']) &&strlen($setting['Channel_Report']) > 0) {
         sendmessage($setting['Channel_Report'], $text_report, $usertestReport, 'HTML');
     }
 }
@@ -1238,8 +1244,9 @@ if ($text == $datatextbot['text_sell']) {
         sendmessage($from_id, $textbotlang['users']['Service']['Location'], $list_marzban_panel_user, 'HTML');
     }
 } elseif (preg_match('/^location_(.*)/', $datain, $dataget)) {
-    $location = $dataget[1];
-    $panellist = select("marzban_panel", "*", "name_panel", $location, "select");
+    $locationid = $dataget[1];
+    $panellist = select("marzban_panel", "*", "id", $locationid, "select");
+    $location = $panellist['name_panel'];
     $nullproduct = select("product", "*", null, null, "count");
     if ($nullproduct == 0) {
         sendmessage($from_id, $textbotlang['Admin']['Product']['nullpProduct'], null, 'HTML');
@@ -1320,6 +1327,10 @@ if ($text == $datatextbot['text_sell']) {
     $stmt->bindValue(':loc1', $user['Processing_value']);
     $stmt->execute();
     $info_product = $stmt->fetch(PDO::FETCH_ASSOC);
+    $marzban_list_get = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
+    $username_ac = $user['Processing_value_tow'];
+    $date = jdate('Y/m/d');
+    $randomString = bin2hex(random_bytes(2));
     if (empty ($info_product['price_product']) || empty ($info_product['price_product']))
         return;
     if ($datain == "confirmandgetserviceDiscount") {
@@ -1329,15 +1340,18 @@ if ($text == $datatextbot['text_sell']) {
     }
     if ($priceproduct > $user['Balance']) {
         $Balance_prim = $priceproduct - $user['Balance'];
-        update("user", "Processing_value", $Balance_prim, "id", $from_id);
+        update("user","Processing_value",$Balance_prim, "id",$from_id);
         sendmessage($from_id, $textbotlang['users']['sell']['None-credit'], $step_payment, 'HTML');
         step('get_step_payment', $from_id);
+        $stmt = $connect->prepare("INSERT IGNORE INTO invoice(id_user, id_invoice, username,time_sell, Service_location, name_product, price_product, Volume, Service_time,Status) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?,?)");
+        $Status =  "unpaid";
+        $stmt->bind_param("ssssssssss", $from_id, $randomString, $username_ac, $date, $marzban_list_get['name_panel'], $info_product['name_product'], $info_product['price_product'], $info_product['Volume_constraint'], $info_product['Service_time'], $Status);
+       $stmt->execute();
+       $stmt->close();
+        update("user","Processing_value_one",$username_ac, "id",$from_id);
+        update("user","Processing_value_tow","getconfigafterpay", "id",$from_id);
         return;
     }
-    $username_ac = $user['Processing_value_tow'];
-    $date = jdate('Y/m/d');
-    $randomString = bin2hex(random_bytes(2));
-    $marzban_list_get = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
     $DataUserOut = $ManagePanel->DataUser($marzban_list_get['name_panel'], $username_ac);
     $random_number = random_int(1000000, 9999999);
     if (isset ($DataUserOut['username']) || in_array($username_ac, $usernameinvoice)) {
@@ -1391,7 +1405,7 @@ if ($text == $datatextbot['text_sell']) {
         $value = intval($SellDiscountlimit['usedDiscount']) + 1;
         update("DiscountSell", "usedDiscount", $value, "codeDiscount", $partsdic[0]);
         $text_report = "⭕️ یک کاربر با نام کاربری @$username  و آیدی عددی $from_id از کد تخفیف {$partsdic[0]} استفاده کرد.";
-        if (strlen($setting['Channel_Report']) > 0) {
+        if (isset($setting['Channel_Report']) &&strlen($setting['Channel_Report']) > 0) {
             sendmessage($setting['Channel_Report'], $text_report, null, 'HTML');
         }
     }
@@ -1483,7 +1497,7 @@ $link_config
     
         اطلاعات کاربر 👇👇
         ⚜️ نام کاربری کاربر: @$username";
-    if (strlen($setting['Channel_Report']) > 0) {
+    if (isset($setting['Channel_Report']) &&strlen($setting['Channel_Report']) > 0) {
         sendmessage($setting['Channel_Report'], $text_report, null, 'HTML');
     }
     step('home', $from_id);
@@ -1589,43 +1603,6 @@ if ($text == $datatextbot['text_Add_Balance']) {
         sendmessage($from_id, $textcart, $backuser, 'HTML');
         step('cart_to_cart_user', $from_id);
     }
-    if ($datain == "zarinpal") {
-        if ($user['Processing_value'] < 5000) {
-            sendmessage($from_id, $textbotlang['users']['Balance']['zarinpal'], null, 'HTML');
-            return;
-        }
-        sendmessage($from_id, $textbotlang['users']['Balance']['linkpayments'], $keyboard, 'HTML');
-        $dateacc = date('Y/m/d h:i:s');
-        $randomString = bin2hex(random_bytes(5));
-        $sql = "INSERT INTO Payment_report (id_user, id_order, time, price, payment_Status, Payment_Method) VALUES (?, ?, ?, ?, ?, ?)";
-        $payment_Status = "Unpaid";
-        $Payment_Method = "zarinpal";
-        $stmt = $pdo->prepare($sql);
-        $stmt->bindParam(1, $from_id);
-        $stmt->bindParam(2, $randomString);
-        $stmt->bindParam(3, $dateacc);
-        $stmt->bindParam(4, $user['Processing_value'], PDO::PARAM_STR);
-        $stmt->bindParam(5, $payment_Status);
-        $stmt->bindParam(6, $Payment_Method);
-
-        $stmt->execute();
-        $paymentkeyboard = json_encode([
-            'inline_keyboard' => [
-                [
-                    ['text' => $textbotlang['users']['Balance']['payments'], 'url' => "https://" . "$domainhosts" . "/payment/zarinpal/zarinpal.php?price={$user['Processing_value']}&order_id=$randomString"],
-                ]
-            ]
-        ]);
-        $user['Processing_value'] = number_format($user['Processing_value'], 0);
-        $textnowpayments = "
-✅ فاکتور پرداخت ایجاد شد.
-        
-🔢 شماره فاکتور : $randomString
-💰 مبلغ فاکتور : {$user['Processing_value']} تومان
-    
-    جهت پرداخت از دکمه زیر استفاده کنید👇🏻";
-        sendmessage($from_id, $textnowpayments, $paymentkeyboard, 'HTML');
-    }
     if ($datain == "aqayepardakht") {
         if ($user['Processing_value'] < 5000) {
             sendmessage($from_id, $textbotlang['users']['Balance']['zarinpal'], null, 'HTML');
@@ -1636,14 +1613,20 @@ if ($text == $datatextbot['text_Add_Balance']) {
         $randomString = bin2hex(random_bytes(5));
         $payment_Status = "Unpaid";
         $Payment_Method = "aqayepardakht";
-        $stmt = $pdo->prepare("INSERT INTO Payment_report (id_user, id_order, time, price, payment_Status, Payment_Method) VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->bindParam(1, $from_id);
-        $stmt->bindParam(2, $randomString);
-        $stmt->bindParam(3, $dateacc);
-        $stmt->bindParam(4, $user['Processing_value'], PDO::PARAM_STR);
-        $stmt->bindParam(5, $payment_Status);
-        $stmt->bindParam(6, $Payment_Method);
-        $stmt->execute();
+        if($user['Processing_value_tow'] == "getconfigafterpay"){
+    $invoice = "{$user['Processing_value_tow']}|{$user['Processing_value_one']}";
+    }else{
+     $invoice = "0|0";
+    }
+    $stmt = $pdo->prepare("INSERT INTO Payment_report (id_user, id_order, time, price, payment_Status, Payment_Method,invoice) VALUES (?, ?, ?, ?, ?, ?,?)");
+    $stmt->bindParam(1, $from_id);
+    $stmt->bindParam(2, $randomString);
+    $stmt->bindParam(3, $dateacc);
+    $stmt->bindParam(4, $user['Processing_value'], PDO::PARAM_STR);
+    $stmt->bindParam(5, $payment_Status);
+    $stmt->bindParam(6, $Payment_Method);
+    $stmt->bindParam(7, $invoice);
+    $stmt->execute();
         $paymentkeyboard = json_encode([
             'inline_keyboard' => [
                 [
@@ -1675,14 +1658,20 @@ if ($text == $datatextbot['text_Add_Balance']) {
         $randomString = bin2hex(random_bytes(5));
         $payment_Status = "Unpaid";
         $Payment_Method = "Nowpayments";
-        $stmt = $pdo->prepare("INSERT INTO Payment_report (id_user, id_order, time, price, payment_Status, Payment_Method) VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->bindParam(1, $from_id);
-        $stmt->bindParam(2, $randomString);
-        $stmt->bindParam(3, $dateacc);
-        $stmt->bindParam(4, $user['Processing_value'], PDO::PARAM_STR);
-        $stmt->bindParam(5, $payment_Status);
-        $stmt->bindParam(6, $Payment_Method);
-        $stmt->execute();
+        if($user['Processing_value_tow'] == "getconfigafterpay"){
+    $invoice = "{$user['Processing_value_tow']}|{$user['Processing_value_one']}";
+    }else{
+     $invoice = "0|0";
+    }
+    $stmt = $pdo->prepare("INSERT INTO Payment_report (id_user, id_order, time, price, payment_Status, Payment_Method,invoice) VALUES (?, ?, ?, ?, ?, ?,?)");
+    $stmt->bindParam(1, $from_id);
+    $stmt->bindParam(2, $randomString);
+    $stmt->bindParam(3, $dateacc);
+    $stmt->bindParam(4, $user['Processing_value'], PDO::PARAM_STR);
+    $stmt->bindParam(5, $payment_Status);
+    $stmt->bindParam(6, $Payment_Method);
+    $stmt->bindParam(7, $invoice);
+    $stmt->execute();
         $paymentkeyboard = json_encode([
             'inline_keyboard' => [
                 [
@@ -1722,14 +1711,20 @@ if ($text == $datatextbot['text_Add_Balance']) {
         $randomString = bin2hex(random_bytes(5));
         $payment_Status = "Unpaid";
         $Payment_Method = "Currency Rial gateway";
-        $stmt = $pdo->prepare("INSERT INTO Payment_report (id_user, id_order, time, price, payment_Status, Payment_Method) VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->bindParam(1, $from_id);
-        $stmt->bindParam(2, $randomString);
-        $stmt->bindParam(3, $dateacc);
-        $stmt->bindParam(4, $user['Processing_value'], PDO::PARAM_STR);
-        $stmt->bindParam(5, $payment_Status);
-        $stmt->bindParam(6, $Payment_Method);
-        $stmt->execute();
+        if($user['Processing_value_tow'] == "getconfigafterpay"){
+    $invoice = "{$user['Processing_value_tow']}|{$user['Processing_value_one']}";
+    }else{
+     $invoice = "0|0";
+    }
+    $stmt = $pdo->prepare("INSERT INTO Payment_report (id_user, id_order, time, price, payment_Status, Payment_Method,invoice) VALUES (?, ?, ?, ?, ?, ?,?)");
+    $stmt->bindParam(1, $from_id);
+    $stmt->bindParam(2, $randomString);
+    $stmt->bindParam(3, $dateacc);
+    $stmt->bindParam(4, $user['Processing_value'], PDO::PARAM_STR);
+    $stmt->bindParam(5, $payment_Status);
+    $stmt->bindParam(6, $Payment_Method);
+    $stmt->bindParam(7, $invoice);
+    $stmt->execute();
         $order_description = "weswap_" . $randomString . "_" . $trxprice;
         $pay = nowPayments('payment', $usdprice, $randomString, $order_description);
         if (!isset ($pay->pay_address)) {
@@ -1835,25 +1830,30 @@ if ($user['step'] == "getvcodeuser") {
     $endPos = strpos($Voucher, $endTag, $startPos);
     $voucherAmount = substr($Voucher, $startPos, $endPos - $startPos);
     $USD = $voucherAmount * json_decode(file_get_contents('https://api.tetherland.com/currencies'), true)['data']['currencies']['USDT']['price'];
-    $Balance_confrim = intval($user['Balance']) + intval($USD);
-    update("user", "Balance", $Balance_confrim, "id", $from_id);
     $USD = number_format($USD, 0);
-    sendmessage($from_id, "💎 با تشکر از پرداخت شما 
-    
-پرداخت شما با  موفقیت تایید گردید و مبلغ $USD به موجودی شما اضافه گردید.
-⚙️ کد پیگیری پرداخت شما :$randomString  ", $keyboard, 'HTML');
-    $dateacc = date('Y/m/d h:i:s');
+    update("Payment_report","payment_Status","paid","id_order",$Payment_report['id_order']);
     $randomString = bin2hex(random_bytes(5));
+    $dateacc = date('Y/m/d h:i:s');
     $payment_Status = "paid";
     $Payment_Method = "perfectmoney";
-    $stmt = $pdo->prepare("INSERT INTO Payment_report (id_user, id_order, time, price, payment_Status, Payment_Method) VALUES (?, ?, ?, ?, ?, ?)");
+    if($user['Processing_value_tow'] == "getconfigafterpay"){
+    $invoice = "{$user['Processing_value_tow']}|{$user['Processing_value_one']}";
+    }else{
+     $invoice = "0|0";
+    }
+    $stmt = $pdo->prepare("INSERT INTO Payment_report (id_user, id_order, time, price, payment_Status, Payment_Method,invoice) VALUES (?, ?, ?, ?, ?, ?,?)");
     $stmt->bindParam(1, $from_id);
     $stmt->bindParam(2, $randomString);
     $stmt->bindParam(3, $dateacc);
     $stmt->bindParam(4, $USD);
     $stmt->bindParam(5, $payment_Status);
     $stmt->bindParam(6, $Payment_Method);
+    $stmt->bindParam(7, $invoice);
     $stmt->execute();
+    DirectPayment($randomString);
+    update("user","Processing_value","0", "id",$Balance_id['id']);
+    update("user","Processing_value_one","0", "id",$Balance_id['id']);
+    update("user","Processing_value_tow","0", "id",$Balance_id['id']);
 }
 if (preg_match('/Confirmpay_user_(\w+)_(\w+)/', $datain, $dataget)) {
     $id_payment = $dataget[1];
@@ -1889,7 +1889,7 @@ if (preg_match('/Confirmpay_user_(\w+)_(\w+)/', $datain, $dataget)) {
 آیدی عددی کاربر : $from_id
 مبلغ تراکنش : {$Payment_report['price']} 
 روش پرداخت :  درگاه ارزی ریالی";
-        if (strlen($setting['Channel_Report']) > 0) {
+        if (isset($setting['Channel_Report']) &&strlen($setting['Channel_Report']) > 0) {
             sendmessage($setting['Channel_Report'], $text_report, null, 'HTML');
         }
     } elseif ($StatusPayment['payment_status'] == "expired") {
@@ -1942,13 +1942,19 @@ if (preg_match('/Confirmpay_user_(\w+)_(\w+)/', $datain, $dataget)) {
     $randomString = bin2hex(random_bytes(5));
     $payment_Status = "Unpaid";
     $Payment_Method = "cart to cart";
-    $stmt = $pdo->prepare("INSERT INTO Payment_report (id_user, id_order, time, price, payment_Status, Payment_Method) VALUES (?, ?, ?, ?, ?, ?)");
+    if($user['Processing_value_tow'] == "getconfigafterpay"){
+    $invoice = "{$user['Processing_value_tow']}|{$user['Processing_value_one']}";
+    }else{
+     $invoice = "0|0";
+    }
+    $stmt = $pdo->prepare("INSERT INTO Payment_report (id_user, id_order, time, price, payment_Status, Payment_Method,invoice) VALUES (?, ?, ?, ?, ?, ?,?)");
     $stmt->bindParam(1, $from_id);
     $stmt->bindParam(2, $randomString);
     $stmt->bindParam(3, $dateacc);
     $stmt->bindParam(4, $user['Processing_value'], PDO::PARAM_STR);
     $stmt->bindParam(5, $payment_Status);
     $stmt->bindParam(6, $Payment_Method);
+    $stmt->bindParam(7, $invoice);
     $stmt->execute();
     sendmessage($from_id, $textbotlang['users']['Balance']['Send-receipt'], $keyboard, 'HTML');
     $Confirm_pay = json_encode([
@@ -2945,25 +2951,18 @@ if (preg_match('/Confirm_pay_(\w+)/', $datain, $dataget)) {
         );
         return;
     }
-    $Balance_confrim = intval($Balance_id['Balance']) + intval($Payment_report['price']);
-    update("user", "Balance", $Balance_confrim, "id", $Payment_report['id_user']);
-    update("Payment_report", "payment_Status", "paid", "id_order", $Payment_report['id_order']);
-    $Payment_report['price'] = number_format($Payment_report['price']);
-    $textconfrom = "
-                💵 پرداخت با موفقیت تایید گردید.
-                  به موجودی کاربر مبلغ {$Payment_report['price']} اضافه گردید.
-                ";
-    sendmessage($from_id, $textconfrom, null, 'HTML');
-    sendmessage($Payment_report['id_user'], "💎 کاربر گرامی مبلغ {$Payment_report['price']} تومان به کیف پول شما واریز گردید با تشکر از پرداخت شما.
-            
-            🛒 کد پیگیری شما: {$Payment_report['id_order']}", null, 'HTML');
+    DirectPayment($order_id);
+    update("user","Processing_value","0", "id",$Balance_id['id']);
+    update("user","Processing_value_one","0", "id",$Balance_id['id']);
+    update("user","Processing_value_tow","0", "id",$Balance_id['id']);
+    update("Payment_report","payment_Status","paid","id_order",$order_id);
     $text_report = "📣 یک ادمین رسید پرداخت کارت به کارت را تایید کرد.
     
     اطلاعات :
     👤آیدی عددی  ادمین تایید کننده : $from_id
     💰 مبلغ پرداخت : {$Payment_report['price']}
     ";
-    if (strlen($setting['Channel_Report']) > 0) {
+    if (isset($setting['Channel_Report']) &&strlen($setting['Channel_Report']) > 0) {
         sendmessage($setting['Channel_Report'], $text_report, null, 'HTML');
     }
 }
@@ -3477,7 +3476,15 @@ if ($text == "💡 روش ساخت نام کاربری") {
     }
     update("setting", "namecustome", $text);
     step('home', $from_id);
-    sendmessage($from_id, $textbotlang['Admin']['managepanel']['savedname'], $optionMarzban, 'HTML');
+    $listpanel = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
+    update("user", "Processing_value", $text, "id", $from_id);
+    if ($listpanel['type'] == "marzban") {
+        sendmessage($from_id, $textbotlang['Admin']['managepanel']['savedname'], $optionMarzban, 'HTML');
+    } elseif ($listpanel['type'] == "x-ui_single") {
+        sendmessage($from_id, $textbotlang['Admin']['managepanel']['savedname'], $optionX_ui_single, 'HTML');
+    }else{
+        sendmessage($from_id, $textbotlang['Admin']['managepanel']['savedname'], $optionMarzban, 'HTML');
+    }
 }
 #----------------[  MANAGE PAYMENT   ]------------------#
 
@@ -4213,7 +4220,7 @@ if ($text == "🌟 مبلغ هدیه استارت") {
             💰 مبلغ بازگشتی : $pricecancel تومان
             👤 نام کاربری : $username
             آیدی عددی درخواست کننده کنسل کردن : {$nameloc['id_user']}";
-    if (strlen($setting['Channel_Report']) > 0) {
+    if (isset($setting['Channel_Report']) &&strlen($setting['Channel_Report']) > 0) {
         sendmessage($setting['Channel_Report'], $text_report, null, 'HTML');
     }
 }
