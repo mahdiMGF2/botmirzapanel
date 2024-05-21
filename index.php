@@ -2190,7 +2190,9 @@ if ($text == "📯 تنظیمات کانال") {
 if ($text == "📊 آمار ربات") {
     $date = jdate('Y/m/d');
     $timeacc = jdate('H:i:s', time());
-    $dayListSell = select("invoice", "*", 'time_sell', $date, "count");
+    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE time_sell = '$date' AND status = 'active'");
+    $stmt->execute();
+    $dayListSell = $stmt->rowCount();
     $count_usertest = select("TestAccount", "*", null, null, "count");
     $stmt = $pdo->prepare("SELECT SUM(Balance) FROM user");
     $stmt->execute();
@@ -2201,7 +2203,9 @@ if ($text == "📊 آمار ربات") {
     if($value == null )$value = 0;
     $suminvoiceday = number_format($value);
     $statistics = select("user", "id", null, null, "count");
-    $invoice = select("invoice", "*", null, null, "count");
+    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE  status = 'active'");
+    $stmt->execute();
+    $invoice = $stmt->rowCount();
     $ping = sys_getloadavg();
     $ping = floatval($ping[0]);
     $keyboardstatistics = json_encode([
