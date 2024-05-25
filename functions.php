@@ -243,7 +243,7 @@ function DirectPayment($order_id){
         if ($marzban_list_get['sublink'] == "onsublink") {
             $output_config_link = $dataoutput['subscription_url'];
         }
-        if ($marzban_list_get['config'] == "onconfig") {
+        if ($marzban_list_get['configManual'] == "onconfig") {
             foreach ($dataoutput['configs'] as $configs) {
                 $config .= "\n\n" . $configs;
                 $configqr .= $configs;
@@ -262,7 +262,7 @@ function DirectPayment($order_id){
 <code>{$config}{$output_config_link}</code>
     
 📚 راهنمای اتصال به سرویس را از طریق کلیک کردن دکمه زیر مطالعه بفرمایید";
-        if ($marzban_list_get['config'] == "onconfig") {
+        if ($marzban_list_get['configManual'] == "onconfig") {
             if (count($dataoutput['configs']) == 1) {
         $urlimage = "{$get_invoice['id_user']}$randomString.png";
         $writer = new PngWriter();
@@ -352,7 +352,6 @@ function DirectPayment($order_id){
 موقعیت سرویس کاربر :{$get_invoice['Service_location']}
 موجودی کاربر : $balanceformatsell  تومان
 کد پیگیری: $randomString
-نوع کاربر : {$Balance_id['agent']}
         
             اطلاعات کاربر 👇👇
             ⚜️ نام کاربری کاربر: @{$Balance_id['username']}";

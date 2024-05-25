@@ -1,6 +1,6 @@
 <?php
 ini_set('error_log', 'error_log');
-$version = "4.8.5";
+$version = "4.8.5.1";
 date_default_timezone_set('Asia/Tehran');
 require_once 'config.php';
 require_once 'botapi.php';
@@ -226,16 +226,18 @@ if ($setting['Bot_Status'] == "❌ ربات خاموش است" && !in_array($fro
 }
 #-----------/start------------#
 if ($text == "/start") {
-    $file_path = 'install/data.php';
-    if (file_exists($file_path)) {
-        unlink($file_path);
-    }
+    update("user","Processing_value","0", "id",$from_id);
+    update("user","Processing_value_one","0", "id",$from_id);
+    update("user","Processing_value_tow","0", "id",$from_id);
     sendmessage($from_id, $datatextbot['text_start'], $keyboard, 'html');
     step('home', $from_id);
     return;
 }
 #-----------back------------#
 if ($text == "🏠 بازگشت به منوی اصلی" || $datain == "backuser") {
+    update("user","Processing_value","0", "id",$from_id);
+    update("user","Processing_value_one","0", "id",$from_id);
+    update("user","Processing_value_tow","0", "id",$from_id);
     if ($datain == "backuser")
         deletemessage($from_id, $message_id);
     sendmessage($from_id, $textbotlang['users']['back'], $keyboard, 'html');
@@ -478,6 +480,10 @@ if (preg_match('/product_(\w+)/', $datain, $dataget)) {
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'], "select");
     $DataUserOut = $ManagePanel->DataUser($nameloc['Service_location'], $username);
     if (isset ($DataUserOut['msg']) && $DataUserOut['msg'] == "User not found") {
+        sendmessage($from_id, $textbotlang['users']['stateus']['usernotfound'], $keyboard, 'html');
+        return;
+    }
+    if($DataUserOut['status'] == "Unsuccessful"){
         sendmessage($from_id, $textbotlang['users']['stateus']['error'], $keyboard, 'html');
         return;
     }

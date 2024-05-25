@@ -59,6 +59,7 @@ $textbotlang['users']['stateus']['LastTraffic'] = "حجم کل سرویس :";
 $textbotlang['users']['stateus']['RemainingVolume'] = "حجم باقی مانده سرویس :";
 $textbotlang['users']['stateus']['info'] = "📊 اطلاعات سرویس:";
 $textbotlang['users']['stateus']['error'] = "❌خطایی رخ داده است";
+$textbotlang['users']['stateus']['usernotfound'] = " ❌ کاربر در سرور وجود ندارد";
 $textbotlang['users']['stateus']['getlinksub'] = "🔗  دریافت لینک اشتراک";
 $textbotlang['users']['stateus']['linksub'] = "🔗 لینک اشتراک";
 $textbotlang['users']['stateus']['backlist'] = "🏠 بازگشت به لیست سرویس ها";
