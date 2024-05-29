@@ -325,7 +325,7 @@ function DirectPayment($order_id){
         }
         $affiliatescommission = select("affiliates", "*", null, null,"select");
         if ($affiliatescommission['status_commission'] == "oncommission" &&($Balance_id['affiliates'] !== null || $Balance_id['affiliates'] != 0)) {
-            $result = ($get_invoice['price_product'] * $setting['affiliatespercentage']) / 100;
+            $result = ($get_invoice['price_product'] * $affiliatescommission['affiliatespercentage']) / 100;
             $user_Balance = select("user", "*", "id", $Balance_id['affiliates'],"select");
             $Balance_prim = $user_Balance['Balance'] + $result;
             update("user","Balance",$Balance_prim, "id",$Balance_id['affiliates']);

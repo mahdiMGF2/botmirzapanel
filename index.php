@@ -1420,6 +1420,7 @@ if ($text == $datatextbot['text_sell']) {
         $affiliatescommission = select("affiliates", "*", null, null, "select");
         $result = ($priceproduct * $affiliatescommission['affiliatespercentage']) / 100;
         $user_Balance = select("user", "*", "id", $user['affiliates'], "select");
+        if($user_Balance){
         $Balance_prim = $user_Balance['Balance'] + $result;
         update("user", "Balance", $Balance_prim, "id", $user['affiliates']);
         $result = number_format($result);
@@ -1427,6 +1428,7 @@ if ($text == $datatextbot['text_sell']) {
     
 مبلغ $result تومان به حساب شما از طرف  زیر مجموعه تان به کیف پول شما واریز گردید";
         sendmessage($user['affiliates'], $textadd, null, 'HTML');
+        }
     }
     $link_config = "";
     $text_config = "";
