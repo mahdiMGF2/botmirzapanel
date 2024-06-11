@@ -1,6 +1,6 @@
 <?php
 ini_set('error_log', 'error_log');
-$version = "4.8.5.1";
+$version = "4.8.5.2";
 date_default_timezone_set('Asia/Tehran');
 require_once 'config.php';
 require_once 'botapi.php';
@@ -99,6 +99,14 @@ foreach ($datatxtbot as $item) {
     if (isset ($datatextbot[$item['id_text']])) {
         $datatextbot[$item['id_text']] = $item['text'];
     }
+}
+
+$existingCronCommands = shell_exec('crontab -l');
+$phpFilePath = "https://$domainhosts/cron/sendmessage.php";
+$cronCommand = "*/1 * * * * curl $phpFilePath";
+if (strpos($existingCronCommands, $cronCommand) === false) {
+    $command = "(crontab -l ; echo '$cronCommand') | crontab -";
+    shell_exec($command);
 }
 #---------channel--------------#
 $tch = '';
@@ -2362,36 +2370,34 @@ if ($text == "📨 ارسال پیام") {
     sendmessage($from_id, $textbotlang['users']['selectoption'], $sendmessageuser, 'HTML');
 } elseif ($text == "✉️ ارسال همگانی") {
     sendmessage($from_id, $textbotlang['Admin']['ManageUser']['GetText'], $backadmin, 'HTML');
-    step('gettextforsendall', $from_id);
+    step('getconfirmsendall', $from_id);
+}elseif($user['step'] == "getconfirmsendall"){
+    savedata("clear","text",$text);
+    savedata("save","id_admin",$from_id);
+    sendmessage($from_id,"در صورت تایید متن زیر را ارسال نمایید
+    تایید", $backadmin, 'HTML');
+    step("gettextforsendall",$from_id);
 } elseif ($user['step'] == "gettextforsendall") {
-    if (!$text) {
-        sendmessage($from_id, $textbotlang['Admin']['mesage']['nottextmessage'], $backadmin, 'HTML');
-        return;
-    }
-    sendmessage($from_id, "درحال ارسال پیام", $keyboardadmin, 'HTML');
-    step('home', $from_id);
-    $filename = 'user.txt';
-    $stmt = $pdo->prepare("SELECT id FROM user");
-    $stmt->execute();
-    if ($result) {
-        $ids = array();
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $ids[] = $row['id'];
+    $userdata  = json_decode($user['Processing_value'],true);
+    if($text == "تایید"){
+        step('home', $from_id);
+        $result = select("user","id","User_Status","Active","fetchAll");
+        $Respuseronse = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => "لغو ارسال", 'callback_data' => 'cancel_sendmessage'],
+            ],
+        ]
+    ]);
+        file_put_contents('cron/users.json',json_encode($result));
+        file_put_contents('cron/info',$user['Processing_value']);
+            sendmessage($from_id, "📌 پیام شما  در صف ارسال قرار گرفت پس از ارسال پیام تایید برای شما ارسال می شود ( ارسال پیام ممکن است  حداکثر 8 ساعت زمان ببرد بدلیل محدودیت های تلگرام )", $Respuseronse, 'HTML');
         }
-        $idsText = implode("\n", $ids);
-        file_put_contents($filename, $idsText);
-    }
-    $file = fopen($filename, 'r');
-    if ($file) {
-        while (($line = fgets($file)) !== false) {
-            $line = trim($line);
-            sendmessage($line, $text, null, 'HTML');
-            usleep(1000000);
-        }
-        sendmessage($from_id, "✅ پیام به تمامی کاربران ارسال شد", $keyboardadmin, 'HTML');
-        fclose($file);
-    }
-    unlink($filename);
+}elseif($datain == "cancel_sendmessage"){
+    unlink('cron/users.json');
+    unlink('cron/info');
+    deletemessage($from_id, $message_id);
+    sendmessage($from_id, "📌 ارسال پیام لغو گردید.", null, 'HTML');
 } elseif ($text == "📤 فوروارد همگانی") {
     sendmessage($from_id, $textbotlang['Admin']['ManageUser']['ForwardGetext'], $backadmin, 'HTML');
     step('gettextforwardMessage', $from_id);

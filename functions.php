@@ -327,6 +327,7 @@ function DirectPayment($order_id){
         if ($affiliatescommission['status_commission'] == "oncommission" &&($Balance_id['affiliates'] !== null || $Balance_id['affiliates'] != 0)) {
             $result = ($get_invoice['price_product'] * $affiliatescommission['affiliatespercentage']) / 100;
             $user_Balance = select("user", "*", "id", $Balance_id['affiliates'],"select");
+            if(isset($user_Balance)){
             $Balance_prim = $user_Balance['Balance'] + $result;
             update("user","Balance",$Balance_prim, "id",$Balance_id['affiliates']);
             $result = number_format($result);
@@ -334,6 +335,7 @@ function DirectPayment($order_id){
         
         مبلغ $result تومان به حساب شما از طرف  زیر مجموعه تان به کیف پول شما واریز گردید";
             sendmessage($Balance_id['affiliates'], $textadd, null, 'HTML');
+            }
         }
         $Balance_prims = $Balance_id['Balance'] - $get_invoice['price_product'];
         if($Balance_prims <= 0) $Balance_prims = 0;
@@ -392,4 +394,18 @@ function DirectPayment($order_id){
                 
 🛒 کد پیگیری شما: {$Payment_report['id_order']}", null, 'HTML');
 }
+}
+function savedata($type,$namefiled,$valuefiled){
+    global $from_id;
+    if($type == "clear"){
+        $datauser = [];
+        $datauser[$namefiled] = $valuefiled;
+        $data = json_encode($datauser);
+        update("user","Processing_value",$data,"id",$from_id);
+    }elseif($type == "save"){
+        $userdata = select("user","*","id",$from_id,"select");
+        $dataperevieos = json_decode($userdata['Processing_value'],true);
+        $dataperevieos[$namefiled] = $valuefiled;
+        update("user","Processing_value",json_encode($dataperevieos),"id",$from_id);
+    }
 }
