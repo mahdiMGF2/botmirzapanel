@@ -178,7 +178,7 @@ wait
         fi
 
         echo -e "\n\e[32mPlease enter the database password!\033[0m"
-        printf "[+] Default user name is \e[91m${randomdbpass}\e[0m ( let it blank to use this user name ): "
+        printf "[+] Default password is \e[91m${randomdbpass}\e[0m ( let it blank to use this password ): "
         read dbpass
         if [ "$dbpass" = "" ]; then
         dbpass=$randomdbpass
@@ -266,7 +266,7 @@ echo -e "$text_to_save" >> /var/www/html/mirzabotconfig/config.php
         echo " "
 
         echo -e "\e[102mDomain Bot: https://${YOUR_DOMAIN}\033[0m"
-        echo -e "\e[104mDatabase addres: https://${YOUR_DOMAIN}/phpmyadmin\033[0m"
+        echo -e "\e[104mDatabase address: https://${YOUR_DOMAIN}/phpmyadmin\033[0m"
         echo -e "\e[33mDatabase name: \e[36m${dbname}\033[0m"
         echo -e "\e[33mDatabase username: \e[36m${dbuser}\033[0m"
         echo -e "\e[33mDatabase password: \e[36m${dbpass}\033[0m"
