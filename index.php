@@ -1,6 +1,6 @@
 <?php
 ini_set('error_log', 'error_log');
-$version = "4.8.5.2";
+$version = "4.8.6";
 date_default_timezone_set('Asia/Tehran');
 require_once 'config.php';
 require_once 'botapi.php';
@@ -34,7 +34,26 @@ foreach ($telegram_ip_ranges as $telegram_ip_range)
 if (!$ok)
     die ("دسترسی غیرمجاز");
 #-------------Variable----------#
+$users_ids = select("user", "id",null,null,"FETCH_COLUMN");
 $setting = select("setting", "*");
+if(!in_array($from_id,$users_ids)){
+    $Response = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => "ارسال پیام به کاربر", 'callback_data' => 'Response_' . $from_id],
+            ]
+        ]
+    ]);
+    $newuser = "
+    🎉یک کاربر جدید ربات را استارت کرد
+نام : $first_name
+نام کاربری : @$username
+آیدی عددی : <a href = \"tg://user?id=$from_id\">$from_id</a>";
+    foreach ($admin_ids as $admin) {
+        sendmessage($admin, $newuser, $Response, 'html');
+    }
+}
+
 if ($from_id != "0") {
     $stmt = $pdo->prepare("INSERT IGNORE INTO user (id, step, limit_usertest, User_Status, number, Balance, pagenumber, username, message_count, last_message_time, affiliatescount, affiliates) VALUES (:from_id, 'none', :limit_usertest_all, 'Active', 'none', '0', '1', :username, '0', '0', '0', '0')");
     $stmt->bindParam(':from_id', $from_id);
