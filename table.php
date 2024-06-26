@@ -309,6 +309,9 @@ try {
         name_panel varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL,
         url_panel varchar(2000) NULL,
         username_panel varchar(200) NULL,
+        password_panel varchar(200) NULL,
+        status varchar(100) NULL,
+        statusTest varchar(100) NULL,
         vmess varchar(200) NULL,
         vless varchar(200) NULL,
         trojan varchar(200) NULL,
@@ -320,7 +323,6 @@ try {
         MethodUsername varchar(900)  NULL,
         sublink varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
         configManual varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
-        password_panel varchar(200) NULL,
         onholdstatus varchar(200) NULL )
         ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin");
         if (!$result) {
@@ -333,6 +335,18 @@ try {
             $connect->query("ALTER TABLE marzban_panel ADD shadowsocks VARCHAR(100)");
             $connect->query("UPDATE marzban_panel SET shadowsocks = 'offshadowsocks'");
             echo "The shadowsocks field was added ✅";
+        }
+         $Check_filde = $connect->query("SHOW COLUMNS FROM marzban_panel LIKE 'statusTest'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE marzban_panel ADD statusTest VARCHAR(100)");
+            $connect->query("UPDATE marzban_panel SET statusTest = 'ontestshowpanel'");
+            echo "The statusTest field was added ✅";
+        }
+        $Check_filde = $connect->query("SHOW COLUMNS FROM marzban_panel LIKE 'status'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE marzban_panel ADD status VARCHAR(100)");
+            $connect->query("UPDATE marzban_panel SET status = 'activepanel'");
+            echo "The status field was added ✅";
         }
         $Check_filde = $connect->query("SHOW COLUMNS FROM marzban_panel LIKE 'onholdstatus'");
         if (mysqli_num_rows($Check_filde) != 1) {
