@@ -2353,8 +2353,10 @@ if ($text == "🖥  اضافه کردن پنل") {
     $sublink = "onsublink";
     $config = "offconfig";
     $valusername = "آیدی عددی + حروف و عدد رندوم";
-    $stmt = $pdo->prepare("INSERT INTO marzban_panel (name_panel, vless, vmess, trojan, shadowsocks,inboundid,sublink,configManual,MethodUsername) VALUES (?, ?, ?, ?, ?,?,?,?,?)");
-    $stmt->execute([$text, $vless, $vmess, $trojan, $shadowsocks, $inboundid, $sublink, $config,$valusername]);
+    $valueteststatus = "ontestshowpanel";
+    $stauts = "activepanel";
+    $stmt = $pdo->prepare("INSERT INTO marzban_panel (name_panel, vless, vmess, trojan, shadowsocks,inboundid,sublink,configManual,MethodUsername,statusTest,status) VALUES (?, ?, ?, ?, ?,?,?,?,?,?,?)");
+    $stmt->execute([$text, $vless, $vmess, $trojan, $shadowsocks, $inboundid, $sublink, $config,$valusername,$valueteststatus,$stauts]);
     sendmessage($from_id, $textbotlang['Admin']['managepanel']['addpanelurl'], $backadmin, 'HTML');
     step('add_link_panel', $from_id);
     update("user", "Processing_value", $text, "id", $from_id);
