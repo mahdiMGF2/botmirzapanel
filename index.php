@@ -1210,7 +1210,7 @@ if ($text == $datatextbot['text_account']) {
     sendmessage($from_id, $text_account, $keyboardPanel, 'HTML');
 }
 if ($text == $datatextbot['text_sell']) {
-    $locationproduct = select("marzban_panel", "*", null, null, "count");
+    $locationproduct = select("marzban_panel", "*", "status", "activepanel", "count");
     if ($locationproduct == 0) {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['nullpanel'], null, 'HTML');
         return;
@@ -2724,6 +2724,77 @@ if ($datain == "flowon") {
     ]);
     Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['flowStatuson'], $flow_Status);
 }
+//_________________________________________________
+if ($text == "👁‍🗨 وضعیت نمایش پنل") {
+    $panel = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
+    $view_Status = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $panel['status'], 'callback_data' => $panel['status']],
+            ],
+        ]
+    ]);
+    sendmessage($from_id,"📌 در این بخش می توانید مشخص نمایید  که پنل در بخش خرید برای کاربر در دسترس باشد یا خیر", $view_Status, 'HTML');
+}
+if ($datain == "activepanel") {
+    update("marzban_panel", "status", "disablepanel", "name_panel", $user['Processing_value']);
+    $panel = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
+    $view_Status = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $panel['status'], 'callback_data' => $panel['status']],
+            ],
+        ]
+    ]);
+    Editmessagetext($from_id, $message_id, "خاموش گردید.", $view_Status);
+} elseif ($datain == "disablepanel") {
+    update("marzban_panel", "status", "activepanel", "name_panel", $user['Processing_value']);
+    $panel = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
+    $view_Status = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $panel['status'], 'callback_data' => $panel['status']],
+            ],
+        ]
+    ]);
+    Editmessagetext($from_id, $message_id, "روشن گردید.", $view_Status);
+}
+//_________________________________________________
+if ($text == "🎁 وضعیت اکانت تست") {
+    $panel = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
+    $view_Status = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $panel['statusTest'], 'callback_data' => $panel['statusTest']],
+            ],
+        ]
+    ]);
+    sendmessage($from_id,"📌 در این بخش می توانید مشخص نمایید  که پنل در بخش اکانت تس برای کاربر در دسترس باشد یا خیر در صورت روشن کردن این قابلیت باید وضعیت نمایش پنل را خماوش کنید", $view_Status, 'HTML');
+}
+if ($datain == "ontestshowpanel") {
+    update("marzban_panel", "statusTest", "offtestshowpanel", "name_panel", $user['Processing_value']);
+    $panel = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
+    $view_Status = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $panel['statusTest'], 'callback_data' => $panel['statusTest']],
+            ],
+        ]
+    ]);
+    Editmessagetext($from_id, $message_id, "خاموش گردید.", $view_Status);
+} elseif ($datain == "offtestshowpanel") {
+    update("marzban_panel", "statusTest", "ontestshowpanel", "name_panel", $user['Processing_value']);
+    $panel = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
+    $view_Status = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $panel['statusTest'], 'callback_data' => $panel['statusTest']],
+            ],
+        ]
+    ]);
+    Editmessagetext($from_id, $message_id, "روشن گردید.", $view_Status);
+}
+
 #-----------------[ not user change status ]-----------------#
 $not_user = json_encode([
     'inline_keyboard' => [

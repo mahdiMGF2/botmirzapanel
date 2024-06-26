@@ -339,7 +339,7 @@ if ($users == false) {
         'step' => '',
     );
 }
-$stmt = $pdo->prepare("SELECT * FROM marzban_panel");
+$stmt = $pdo->prepare("SELECT * FROM marzban_panel WHERE status = 'activepanel'");
 $stmt->execute();
 $list_marzban_panel_users = ['inline_keyboard' => []];
     while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -361,7 +361,7 @@ $list_marzban_panel_user = json_encode($list_marzban_panel_users);
   $list_marzban_panel_usertest = [
         'inline_keyboard' => [],
     ];
-$stmt = $pdo->prepare("SELECT * FROM marzban_panel");
+$stmt = $pdo->prepare("SELECT * FROM marzban_panel WHERE statusTest = 'ontestshowpanel'");
 $stmt->execute();
 while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $list_marzban_panel_usertest['inline_keyboard'][] = [['text' => $result['name_panel'], 'callback_data' => "locationtests_{$result['id']}"]
@@ -528,7 +528,8 @@ $MethodUsername = json_encode([
 ]);
 $optionMarzban = json_encode([
     'keyboard' => [
-        [['text' => "🔌 وضعیت اتصال پنل "]],
+        [['text' => "🔌 وضعیت اتصال پنل "],['text' => "👁‍🗨 وضعیت نمایش پنل"]],
+        [['text' => "🎁 وضعیت اکانت تست"]],
         [['text' => "✍️ نام پنل"],['text' => "❌ حذف پنل"]],
         [['text'=>"🔗 ویرایش آدرس پنل"],['text' => "👤 ویرایش نام کاربری"]],
         [['text' => "🔐 ویرایش رمز عبور"],['text' => "⚙️ تنظیمات پروتکل"]],
@@ -541,7 +542,8 @@ $optionMarzban = json_encode([
 ]);
 $optionX_ui_single = json_encode([
     'keyboard' => [
-        [['text' => "🔌 وضعیت اتصال پنل "]],
+        [['text' => "🔌 وضعیت اتصال پنل "],['text' => "👁‍🗨 وضعیت نمایش پنل"]],
+        [['text' => "🎁 وضعیت اکانت تست"]],
         [['text' => "✍️ نام پنل"],['text' => "❌ حذف پنل"]],
         [['text' => "💡 روش ساخت نام کاربری"]],
         [['text' => "🔐 ویرایش رمز عبور"],['text' => "👤 ویرایش نام کاربری"]],
