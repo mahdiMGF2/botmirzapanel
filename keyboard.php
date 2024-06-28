@@ -41,16 +41,19 @@ if ($table_exists) {
         }
     }
 }
+$affiliatesvalue = select("affiliates", "*", null, null, "select")['affiliatesstatus'];
 $keyboard = [
     'keyboard' => [
         [['text' => $datatextbot['text_sell']],['text' => $datatextbot['text_usertest']]],
         [['text' => $datatextbot['text_Purchased_services']],['text' => $datatextbot['text_Tariff_list']]],
         [['text' => $datatextbot['text_account']],['text' => $datatextbot['text_Add_Balance']]],
-        [['text' => "👥 زیر مجموعه گیری"]],
-        [['text' => $datatextbot['text_support']], ['text' => $datatextbot['text_help']]],
     ],
     'resize_keyboard' => true
 ];
+if ($affiliatesvalue == "onaffiliates") {
+    $keyboard['keyboard'][] = [['text' => "👥 زیر مجموعه گیری"]];
+}
+$keyboard['keyboard'][] = [['text' => $datatextbot['text_support']], ['text' => $datatextbot['text_help']]];
 if(in_array($from_id,$admin_ids)){
 $keyboard['keyboard'][] = [
         ['text' => "ادمین"],
