@@ -201,6 +201,10 @@ function DirectPayment($order_id){
         $stmt->execute();
         $info_product = $stmt->fetch(PDO::FETCH_ASSOC);
         $username_ac = $get_invoice['username'];
+        if (isset ($DataUserOut['username'])) {
+        $random_number = random_int(1000000, 9999999);
+        $username_ac = $username_ac . $random_number;
+    }
         $randomString = bin2hex(random_bytes(2));
         $marzban_list_get = select("marzban_panel", "*", "name_panel", $get_invoice['Service_location'],"select");
         $date = strtotime("+" . $get_invoice['Service_time'] . "days");
