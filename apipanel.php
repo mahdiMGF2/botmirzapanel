@@ -2,6 +2,19 @@
 require_once 'functions.php';
 #-----------------------------#
 function token_panel($url_panel,$username_panel,$password_panel){
+    $panel = select("marzban_panel","*","url_panel",$url_panel,"select");
+    if($panel['datelogin'] != null){
+        $date = json_decode($panel['datelogin'],true);
+        if(isset($date['time'])){
+        $timecurrent = time();
+        $start_date = new DateTime($date['time']);
+        $since_start = $start_date->diff(new DateTime(date('Y/m/d H:i:s',$timecurrent)));
+        var_dump($since_start->i);
+        if($since_start->i <= 10){
+            return $date;
+        }
+        }
+    }
     $url_get_token = $url_panel.'/api/admin/token';
     $data_token = array(
         'username' => $username_panel,
@@ -10,7 +23,7 @@ function token_panel($url_panel,$username_panel,$password_panel){
     $options = array(
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST => true,
-        CURLOPT_TIMEOUT_MS => 3000,
+        CURLOPT_TIMEOUT_MS => 6000,
         CURLOPT_POSTFIELDS => http_build_query($data_token),
         CURLOPT_HTTPHEADER => array(
             'Content-Type: application/x-www-form-urlencoded',
@@ -28,6 +41,14 @@ function token_panel($url_panel,$username_panel,$password_panel){
     curl_close($curl_token);
 
     $body = json_decode( $token, true);
+    if(isset($body['access_token'])){
+        $time = date('Y/m/d h:i:s');
+        $data = json_encode(array(
+            'time' => $time,
+            'access_token' => $body['access_token']
+            ));
+        update("marzban_panel","datelogin",$data,'name_panel',$panel['name_panel']);
+    }
     return $body;
 }
 #-----------------------------#

@@ -138,6 +138,7 @@ $keyboard_usertest =  json_encode([
 ]);
 $setting_panel =  json_encode([
     'keyboard' => [
+        [['text' => "🕚 تنظیمات کرون جاب"]],
         [['text' => "📡 وضعیت ربات"], ['text' => "♨️ بخش قوانین"]],
         [['text' => "📣 تنظیم کانال گزارش"], ['text' => "📯 تنظیمات کانال"]],
         [['text' => "👤 دکمه نام کاربری"]],
@@ -295,14 +296,14 @@ $stmt = $pdo->prepare("SHOW TABLES LIKE 'marzban_panel'");
         'keyboard' => [],
         'resize_keyboard' => true,
     ];
-    $list_marzban_panel['keyboard'][] = [
-        ['text' => "🏠 بازگشت به منوی مدیریت"],
-    ];
     foreach ($namepanel as $button) {
         $list_marzban_panel['keyboard'][] = [
             ['text' => $button[0]]
         ];
     }
+    $list_marzban_panel['keyboard'][] = [
+        ['text' => "🏠 بازگشت به منوی مدیریت"],
+    ];
     $json_list_marzban_panel = json_encode($list_marzban_panel);
 }
 $sql = "SHOW TABLES LIKE 'help'";
@@ -586,6 +587,13 @@ $affiliates =  json_encode([
 $typepanel =  json_encode([
     'keyboard' => [
         [['text' => "marzban"],['text' => "x-ui_single"]],
+        [['text' => "🏠 بازگشت به منوی مدیریت"]]
+    ],
+    'resize_keyboard' => true
+]);
+$keyboardcronjob =  json_encode([
+    'keyboard' => [
+        [['text' => 'فعال شدن کرون تست'],['text' => 'غیر فعال شدن کرون تست']],
         [['text' => "🏠 بازگشت به منوی مدیریت"]]
     ],
     'resize_keyboard' => true

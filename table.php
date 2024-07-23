@@ -323,13 +323,19 @@ try {
         MethodUsername varchar(900)  NULL,
         sublink varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
         configManual varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
-        onholdstatus varchar(200) NULL )
+        onholdstatus varchar(200) NULL,
+        datelogin TEXT NULL)
         ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin");
         if (!$result) {
             echo "table marzban_panel".mysqli_error($connect);
         }
         }
         else{
+        $Check_filde = $connect->query("SHOW COLUMNS FROM marzban_panel LIKE 'datelogin'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE marzban_panel ADD datelogin TEXT");
+            echo "The datelogin field was added ✅";
+        }
         $Check_filde = $connect->query("SHOW COLUMNS FROM marzban_panel LIKE 'shadowsocks'");
         if (mysqli_num_rows($Check_filde) != 1) {
             $connect->query("ALTER TABLE marzban_panel ADD shadowsocks VARCHAR(100)");
@@ -554,29 +560,6 @@ try {
         id_user varchar(200) NULL)");
         if (!$result) {
             echo "table Giftcodeconsumed".mysqli_error($connect);
-        }
-    }
-} catch (Exception $e) {
-    file_put_contents("$randomString.txt",$e->getMessage());
-}
-//-----------------------------------------------------------------
-try {
-
-    $result = $connect->query("SHOW TABLES LIKE 'TestAccount'");
-    $table_exists = ($result->num_rows > 0);
-
-    if (!$table_exists) {
-        $result =  $connect->query("CREATE TABLE  TestAccount (
-        id_invoice varchar(200) PRIMARY KEY,
-        id_user varchar(200) NULL,
-        username varchar(200) NULL,
-        Service_location varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin
- NULL,
-        time_sell varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin
- NULL)
-        ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin");
-        if (!$result) {
-            echo "table TestAccount".mysqli_error($connect);
         }
     }
 } catch (Exception $e) {

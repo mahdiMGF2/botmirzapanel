@@ -1,6 +1,6 @@
 <?php
 ini_set('error_log', 'error_log');
-$version = "4.8.6";
+$version = "4.8.7";
 date_default_timezone_set('Asia/Tehran');
 require_once 'config.php';
 require_once 'botapi.php';
@@ -157,8 +157,7 @@ if (strpos($text, "/start ") !== false) {
         return;
     }
     $affiliatesid = str_replace("/start ", "", $text);
-    if (!ctype_digit($affiliatesid))
-        return;
+    if (ctype_digit($affiliatesid)){
     if (!in_array($affiliatesid, $users_ids)) {
         sendmessage($from_id,$textbotlang['users']['affiliates']['affiliatesyou'], null, 'html');
         return;
@@ -181,6 +180,7 @@ if (strpos($text, "/start ") !== false) {
     $addcountaffiliates = intval($useraffiliates['affiliatescount']) + 1;
     update("user", "affiliates", $affiliatesid, "id", $from_id);
     update("user", "affiliatescount", $addcountaffiliates, "id", $affiliatesid);
+    }
 }
 $timebot = time();
 $TimeLastMessage = $timebot - intval($user['last_message_time']);
@@ -1022,7 +1022,7 @@ if ($user['step'] == "createusertest" || preg_match('/locationtests_(.*)/', $dat
     }
     $username_ac = generateUsername($from_id, $marzban_list_get['MethodUsername'], $user['username'], $randomString, $text);
     $DataUserOut = $ManagePanel->DataUser($marzban_list_get['name_panel'], $username_ac);
-    if (isset ($DataUserOut['username'])) {
+    if (isset ($DataUserOut['username']) || in_array($username_ac, $usernameinvoice)) {
         $random_number = random_int(1000000, 9999999);
         $username_ac = $username_ac . $random_number;
     }
@@ -1048,12 +1048,21 @@ if ($user['step'] == "createusertest" || preg_match('/locationtests_(.*)/', $dat
     }
     $date = jdate('Y/m/d');
     $randomString = bin2hex(random_bytes(2));
-    $stmt = $pdo->prepare("INSERT IGNORE INTO TestAccount (id_user, id_invoice, username,Service_location,time_sell) VALUES (:id_user,:id_invoice,:username,:Service_location,:time_sell)");
-    $stmt->bindParam(':id_user', $from_id);
-    $stmt->bindParam(':id_invoice', $randomString);
-    $stmt->bindParam(':username', $username_ac, PDO::PARAM_STR);
-    $stmt->bindParam(':Service_location', $name_panel, PDO::PARAM_STR);
-    $stmt->bindParam(':time_sell', $date);
+    $sql = "INSERT IGNORE INTO invoice (id_user, id_invoice, username, time_sell, Service_location, name_product, price_product, Volume, Service_time, Status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $Status = "active";
+    $usertest = "usertest";
+    $price = "0";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(1, $from_id);
+    $stmt->bindParam(2, $randomString);
+    $stmt->bindParam(3, $username_ac, PDO::PARAM_STR);
+    $stmt->bindParam(4, $date);
+    $stmt->bindParam(5, $name_panel, PDO::PARAM_STR);
+    $stmt->bindParam(6, $usertest, PDO::PARAM_STR);
+    $stmt->bindParam(7, $price);
+    $stmt->bindParam(8, $setting['val_usertest']);
+    $stmt->bindParam(9, $setting['time_usertest']);
+    $stmt->bindParam(10, $Status);
     $stmt->execute();
     $text_config = "";
     $output_config_link = "";
@@ -1069,27 +1078,26 @@ if ($user['step'] == "createusertest" || preg_match('/locationtests_(.*)/', $dat
         }
         $text_config = $config;
     }
-    $usertestinfo = json_encode([
+$Shoppinginfo = json_encode([
         'inline_keyboard' => [
-            [
-                ['text' => $setting['time_usertest'] . " ساعت", 'callback_data' => "Service_time"],
-                ['text' => $textbotlang['users']['time-Service'], 'callback_data' => "Service_time"],
-            ],
-            [
-                ['text' => $setting['val_usertest'] . " مگابایت", 'callback_data' => "Volume_constraint"],
-                ['text' => $textbotlang['users']['Volume-Service'], 'callback_data' => "Volume_constraint"],
-            ],
             [
                 ['text' => $textbotlang['users']['help']['btninlinebuy'], 'callback_data' => "helpbtn"],
             ]
         ]
     ]);
-    $textcreatuser = "🔑 اشتراک شما با موفقیت ساخته شد.
-        
-👤 نام کاربری شما :<code>$username_ac</code>
-        
-        <code>$output_config_link</code>
-        <code>$text_config</code>";
+$textcreatuser = "✅ سرویس با موفقیت ایجاد شد
+    
+👤 نام کاربری سرویس : <code>$username_ac</code>
+🌿 نام سرویس: تست
+‏🇺🇳 لوکیشن: {$marzban_list_get['name_panel']}
+⏳ مدت زمان: {$setting['time_usertest']}  ساعت
+🗜 حجم سرویس:  {$setting['val_usertest']} مگابایت
+    
+لینک اتصال:
+<code>$output_config_link</code>
+<code>$text_config</code>
+    
+📚 راهنمای اتصال به سرویس را از طریق کلیک کردن دکمه زیر مطالعه بفرمایید";
     if ($marzban_list_get['sublink'] == "onsublink") {
         $urlimage = "$from_id$randomString.png";
         $writer = new PngWriter();
@@ -1104,7 +1112,7 @@ if ($user['step'] == "createusertest" || preg_match('/locationtests_(.*)/', $dat
         telegram('sendphoto', [
             'chat_id' => $from_id,
             'photo' => new CURLFile($urlimage),
-            'reply_markup' => $usertestinfo,
+            'reply_markup' => $Shoppinginfo,
             'caption' => $textcreatuser,
             'parse_mode' => "HTML",
         ]);
@@ -1228,7 +1236,7 @@ if ($text == $datatextbot['text_account']) {
                 ";
     sendmessage($from_id, $text_account, $keyboardPanel, 'HTML');
 }
-if ($text == $datatextbot['text_sell']) {
+if ($text == $datatextbot['text_sell'] || $datain == "buy") {
     $locationproduct = select("marzban_panel", "*", "status", "activepanel", "count");
     if ($locationproduct == 0) {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['nullpanel'], null, 'HTML');
@@ -2225,20 +2233,20 @@ if ($text == "📯 تنظیمات کانال") {
 if ($text == "📊 آمار ربات") {
     $date = jdate('Y/m/d');
     $timeacc = jdate('H:i:s', time());
-    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE time_sell = '$date' AND status = 'active'");
+    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE time_sell = '$date' AND status = 'active' AND name_product != 'usertest'");
     $stmt->execute();
     $dayListSell = $stmt->rowCount();
-    $count_usertest = select("TestAccount", "*", null, null, "count");
+    $count_usertest = select("invoice", "*", "name_product", "usertest", "count");
     $stmt = $pdo->prepare("SELECT SUM(Balance) FROM user");
     $stmt->execute();
     $Balanceall = $stmt->fetch(PDO::FETCH_ASSOC);
-    $stmt = $pdo->prepare("SELECT SUM(price_product) FROM invoice WHERE time_sell = '$date' AND status = 'active'");
+    $stmt = $pdo->prepare("SELECT SUM(price_product) FROM invoice WHERE time_sell = '$date' AND status = 'active' AND name_product != 'usertest'");
     $stmt->execute();
     $value = $stmt->fetchColumn();
     if($value == null )$value = 0;
     $suminvoiceday = number_format($value);
     $statistics = select("user", "id", null, null, "count");
-    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE  status = 'active'");
+    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE  status = 'active' AND name_product != 'usertest'");
     $stmt->execute();
     $invoice = $stmt->rowCount();
     $ping = sys_getloadavg();
@@ -3780,7 +3788,6 @@ if ($text == "✏️ مدیریت پنل") {
     update("marzban_panel", "name_panel", $text, "name_panel", $user['Processing_value']);
     update("invoice", "Service_location", $text, "Service_location", $user['Processing_value']);
     update("product", "Location", $text, "Location", $user['Processing_value']);
-    update("TestAccount", "Service_location", $text, "Service_location", $user['Processing_value']);
     update("user", "Processing_value", $text, "id", $from_id);
     step('home', $from_id);
 } elseif ($text == "🔗 ویرایش آدرس پنل") {
@@ -4076,6 +4083,10 @@ if ($text == "🎁 ساخت کد تخفیف") {
     sendmessage($from_id, $textbotlang['Admin']['Discountsell']['GetCode'], $backadmin, 'HTML');
     step('get_codesell', $from_id);
 } elseif ($user['step'] == "get_codesell") {
+    if (in_array($text, $SellDiscount)) {
+        sendmessage($from_id, "❌ این کد تخفیف وجود دارد لطفا از کد تخفیف دیگری استفاده کنید", $backadmin, 'HTML');
+        return;
+    }
     if (!preg_match('/^[A-Za-z]+$/', $text)) {
         sendmessage($from_id, $textbotlang['Admin']['Discount']['ErrorCode'], null, 'HTML');
         return;
@@ -4371,5 +4382,27 @@ if ($datain == "ononhold") {
         ]
     ]);
     Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['onstatus'], $onhold_Status);
+}
+if ($text == "🕚 تنظیمات کرون جاب") {
+    sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboardcronjob, 'HTML');
+}
+if($text == "فعال شدن کرون تست"){
+    sendmessage($from_id, "✅ کرون جاب فعال گردید این کرون هر 15 دقیقه اجرا می شود", null, 'HTML');
+    $phpFilePath = "https://$domainhosts/cron/configtest.php";
+    $cronCommand = "*/15 * * * * curl $phpFilePath";
+    $existingCronCommands = shell_exec('crontab -l');
+if (strpos($existingCronCommands, $cronCommand) === false) {
+    $command = "(crontab -l ; echo '$cronCommand') | crontab -";
+    shell_exec($command);
+}
+}
+if($text == "غیر فعال شدن کرون تست"){
+    sendmessage($from_id, "کرون جاب غیرفعال گردید", null, 'HTML');
+    $currentCronJobs = shell_exec("crontab -l");
+    $jobToRemove = "*/15 * * * * curl https://$domainhosts/cron/configtest.php";
+    $newCronJobs = preg_replace('/'.preg_quote($jobToRemove, '/').'/', '', $currentCronJobs);
+    file_put_contents('/tmp/crontab.txt', $newCronJobs);
+    shell_exec('crontab /tmp/crontab.txt');
+    unlink('/tmp/crontab.txt');
 }
 $connect->close();
