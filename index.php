@@ -1344,6 +1344,11 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy") {
     $randomString = bin2hex(random_bytes(2));
     $panellist = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
     $username_ac = generateUsername($from_id, $panellist['MethodUsername'], $username, $randomString, $text);
+    $DataUserOut = $ManagePanel->DataUser($panellist['name_panel'], $username_ac);
+    $random_number = random_int(1000000, 9999999);
+    if (isset ($DataUserOut['username']) || in_array($username_ac, $usernameinvoice)) {
+        $username_ac = $random_number . $username_ac;
+    }
     update("user", "Processing_value_tow", $username_ac, "id", $from_id);
     if ($info_product['Volume_constraint'] == 0)
         $info_product['Volume_constraint'] = $textbotlang['users']['stateus']['Unlimited'];
@@ -1392,11 +1397,6 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy") {
         update("user","Processing_value_one",$username_ac, "id",$from_id);
         update("user","Processing_value_tow","getconfigafterpay", "id",$from_id);
         return;
-    }
-    $DataUserOut = $ManagePanel->DataUser($marzban_list_get['name_panel'], $username_ac);
-    $random_number = random_int(1000000, 9999999);
-    if (isset ($DataUserOut['username']) || in_array($username_ac, $usernameinvoice)) {
-        $username_ac = $random_number . $username_ac;
     }
     if (in_array($randomString, $id_invoice)) {
         $randomString = $random_number . $randomString;
