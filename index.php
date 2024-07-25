@@ -4087,7 +4087,7 @@ if ($text == "🎁 ساخت کد تخفیف") {
         sendmessage($from_id, "❌ این کد تخفیف وجود دارد لطفا از کد تخفیف دیگری استفاده کنید", $backadmin, 'HTML');
         return;
     }
-    if (!preg_match('/^[A-Za-z]+$/', $text)) {
+    if (!preg_match('/^[A-Za-z\d]+$/', $text)) {
         sendmessage($from_id, $textbotlang['Admin']['Discount']['ErrorCode'], null, 'HTML');
         return;
     }
