@@ -18,10 +18,30 @@ fi
 
 echo -e "\e[32mInstalling mirza script ... \033[0m\n"
 
+
+# Function to add the Ondřej Surý PPA for PHP
+add_php_ppa() {
+    sudo add-apt-repository -y ppa:ondrej/php
+}
+
+# Function to add the Ondřej Surý PPA for PHP with locale override
+add_php_ppa_with_locale() {
+    sudo LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php
+}
+
+# Try adding the PPA with the system's default locale settings
+if ! add_php_ppa; then
+    echo "Failed to add PPA with default locale, retrying with locale override..."
+    # If it fails, add the PPA with a locale override
+    if ! add_php_ppa_with_locale; then
+        echo "Failed to add PPA even with locale override. Exiting..."
+        exit 1
+    fi
+fi
+
 sudo apt update && apt upgrade -y
 echo -e "\e[92mThe server was successfully updated ...\033[0m\n"
-sudo apt install php8.2 php8.2-fpm php8.2-mysql
-
+DEBIAN_FRONTEND=noninteractive sudo apt install -y php8.2 php8.2-fpm php8.2-mysql
 
 
 PKG=(
@@ -36,15 +56,14 @@ PKG=(
     php-curl 
 )
 
-for i in "${PKG[@]}"
-do
+
+for i in "${PKG[@]}"; do
     dpkg -s $i &> /dev/null
     if [ $? -eq 0 ]; then
         echo "$i is already installed"
     else
-        apt install $i -y
-        if [ $? -ne 0 ]; then
-            echo "Error installing $i"
+        if ! DEBIAN_FRONTEND=noninteractive sudo apt install -y $i; then
+            echo "Error installing $i. Exiting..."
             exit 1
         fi
     fi
