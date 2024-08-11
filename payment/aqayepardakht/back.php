@@ -10,14 +10,14 @@ require_once $Pathfiles.'/functions.php';
 require_once $Pathfiles.'/panels.php';
 $invoice_id = htmlspecialchars($_POST['invoice_id'], ENT_QUOTES, 'UTF-8');
 $PaySetting = select("PaySetting", "ValuePay", "NamePay", "merchant_id_aqayepardakht","select")['ValuePay'];
-$Payment_report = select("Payment_report", "price", "id_order", $invoice_id,"select")['price'];
+$price = select("Payment_report", "price", "id_order", $invoice_id,"select")['price'];
 $ManagePanel = new ManagePanel();
 
 // verify Transaction
 
 $data = [
 'pin'    => $PaySetting,
-'amount'    => $Payment_report,
+'amount'    => $price,
 'transid' => $_POST['transid'],
 ];
 $data = json_encode($data);
@@ -37,7 +37,6 @@ $result = json_decode($result);
 if ($result->code == "1") {
     $setting = select("setting", "*");
     $payment_status = "پرداخت موفق";
-    $price = $Payment_report;
     $dec_payment_status = "از انجام تراکنش متشکریم!";
     $Payment_report = select("Payment_report", "price", "id_order", $invoice_id,"select");
     $Balance_id = select("user", "*", "id", $Payment_report['id_user'], "select");
@@ -84,6 +83,7 @@ $text_report = "💵 پرداخت جدید
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            direction: rtl;
         }
 
         .confirmation-box {
@@ -119,7 +119,7 @@ $text_report = "💵 پرداخت جدید
     <div class="confirmation-box">
         <h1><?php echo $payment_status ?></h1>
         <p>شماره تراکنش:<span><?php echo $invoice_id ?></span></p>
-        <p>مبلغ پرداختی:  <span><?php echo  $Payment_report; ?></span>تومان</p>
+        <p>مبلغ پرداختی:  <span><?php echo  $price; ?></span>تومان</p>
         <p>تاریخ: <span>  <?php echo jdate('Y/m/d')  ?>  </span></p>
         <p><?php echo $dec_payment_status ?></p>
         <a class = "btn" href = "https://t.me/<?php echo $usernamebot ?>">بازگشت به ربات</a>
