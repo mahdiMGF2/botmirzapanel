@@ -1,6 +1,6 @@
 <?php
 ini_set('error_log', 'error_log');
-$version = "4.8.7";
+$version = "4.8.8";
 date_default_timezone_set('Asia/Tehran');
 require_once 'config.php';
 require_once 'botapi.php';
@@ -292,7 +292,7 @@ if ($user['step'] == 'get_number') {
 
 #-----------Purchased services------------#
 if ($text == $datatextbot['text_Purchased_services'] || $datain == "backorder") {
-    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user AND status = 'active'");
+    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user AND (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn')");
     $stmt->bindParam(':id_user', $from_id);
     $stmt->execute();
     $invoices = $stmt->rowCount();
@@ -304,7 +304,7 @@ if ($text == $datatextbot['text_Purchased_services'] || $datain == "backorder") 
     $page = 1;
     $items_per_page = 5;
     $start_index = ($page - 1) * $items_per_page;
-    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user AND status = 'active' ORDER BY username ASC LIMIT $start_index, $items_per_page");
+    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user AND (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn') ORDER BY username ASC LIMIT $start_index, $items_per_page");
     $stmt->bindParam(':id_user', $from_id);
     $stmt->execute();
     $keyboardlists = [
@@ -435,7 +435,7 @@ if ($datain == 'next_page') {
         $next_page = $page + 1;
     }
     $start_index = ($next_page - 1) * $items_per_page;
-    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user AND status = 'active' ORDER BY username ASC LIMIT $start_index, $items_per_page");
+    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user AND (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn') ORDER BY username ASC LIMIT $start_index, $items_per_page");
     $stmt->bindParam(':id_user', $from_id);
     $stmt->execute();
     $keyboardlists = [
@@ -472,7 +472,7 @@ if ($datain == 'next_page') {
         $next_page = $page - 1;
     }
     $start_index = ($next_page - 1) * $items_per_page;
-    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user AND status = 'active' ORDER BY username ASC LIMIT $start_index, $items_per_page");
+    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user AND (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn') ORDER BY username ASC LIMIT $start_index, $items_per_page");
     $stmt->bindParam(':id_user', $from_id);
     $stmt->execute();
     $keyboardlists = [
@@ -1020,7 +1020,7 @@ if ($user['step'] == "createusertest" || preg_match('/locationtests_(.*)/', $dat
             return;
         }
     }
-    $username_ac = generateUsername($from_id, $marzban_list_get['MethodUsername'], $user['username'], $randomString, $text);
+    $username_ac = strtolower(generateUsername($from_id, $marzban_list_get['MethodUsername'], $user['username'], $randomString, $text));
     $DataUserOut = $ManagePanel->DataUser($marzban_list_get['name_panel'], $username_ac);
     if (isset ($DataUserOut['username']) || in_array($username_ac, $usernameinvoice)) {
         $random_number = random_int(1000000, 9999999);
@@ -1343,7 +1343,7 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy") {
     $info_product = $stmt->fetch(PDO::FETCH_ASSOC);
     $randomString = bin2hex(random_bytes(2));
     $panellist = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
-    $username_ac = generateUsername($from_id, $panellist['MethodUsername'], $username, $randomString, $text);
+    $username_ac = strtolower(generateUsername($from_id, $panellist['MethodUsername'], $username, $randomString, $text));
     $DataUserOut = $ManagePanel->DataUser($panellist['name_panel'], $username_ac);
     $random_number = random_int(1000000, 9999999);
     if (isset ($DataUserOut['username']) || in_array($username_ac, $usernameinvoice)) {
@@ -2233,20 +2233,20 @@ if ($text == "📯 تنظیمات کانال") {
 if ($text == "📊 آمار ربات") {
     $date = jdate('Y/m/d');
     $timeacc = jdate('H:i:s', time());
-    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE time_sell = '$date' AND status = 'active' AND name_product != 'usertest'");
+    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE time_sell = '$date' AND (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn') AND name_product != 'usertest'");
     $stmt->execute();
     $dayListSell = $stmt->rowCount();
     $count_usertest = select("invoice", "*", "name_product", "usertest", "count");
     $stmt = $pdo->prepare("SELECT SUM(Balance) FROM user");
     $stmt->execute();
     $Balanceall = $stmt->fetch(PDO::FETCH_ASSOC);
-    $stmt = $pdo->prepare("SELECT SUM(price_product) FROM invoice WHERE time_sell = '$date' AND status = 'active' AND name_product != 'usertest'");
+    $stmt = $pdo->prepare("SELECT SUM(price_product) FROM invoice WHERE time_sell = '$date' AND (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn') AND name_product != 'usertest'");
     $stmt->execute();
     $value = $stmt->fetchColumn();
     if($value == null )$value = 0;
     $suminvoiceday = number_format($value);
     $statistics = select("user", "id", null, null, "count");
-    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE  status = 'active' AND name_product != 'usertest'");
+    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE  (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn') AND name_product != 'usertest'");
     $stmt->execute();
     $invoice = $stmt->rowCount();
     $ping = sys_getloadavg();
@@ -4400,6 +4400,44 @@ if($text == "غیر فعال شدن کرون تست"){
     sendmessage($from_id, "کرون جاب غیرفعال گردید", null, 'HTML');
     $currentCronJobs = shell_exec("crontab -l");
     $jobToRemove = "*/15 * * * * curl https://$domainhosts/cron/configtest.php";
+    $newCronJobs = preg_replace('/'.preg_quote($jobToRemove, '/').'/', '', $currentCronJobs);
+    file_put_contents('/tmp/crontab.txt', $newCronJobs);
+    shell_exec('crontab /tmp/crontab.txt');
+    unlink('/tmp/crontab.txt');
+}
+if($text == "فعال شدن کرون حجم"){
+    sendmessage($from_id, "✅ کرون جاب فعال گردید این کرون هر 1 دقیقه اجرا می شود", null, 'HTML');
+    $phpFilePath = "https://$domainhosts/cron/cronvolume.php";
+    $cronCommand = "*/1 * * * * curl $phpFilePath";
+    $existingCronCommands = shell_exec('crontab -l');
+if (strpos($existingCronCommands, $cronCommand) === false) {
+    $command = "(crontab -l ; echo '$cronCommand') | crontab -";
+    shell_exec($command);
+}
+}
+if($text == "غیر فعال شدن کرون حجم"){
+    sendmessage($from_id, "کرون جاب غیرفعال گردید", null, 'HTML');
+    $currentCronJobs = shell_exec("crontab -l");
+    $jobToRemove = "*/1 * * * * curl https://$domainhosts/cron/cronvolume.php";
+    $newCronJobs = preg_replace('/'.preg_quote($jobToRemove, '/').'/', '', $currentCronJobs);
+    file_put_contents('/tmp/crontab.txt', $newCronJobs);
+    shell_exec('crontab /tmp/crontab.txt');
+    unlink('/tmp/crontab.txt');
+}
+if($text == "فعال شدن کرون زمان"){
+    sendmessage($from_id, "✅ کرون جاب فعال گردید این کرون هر 1 دقیقه اجرا می شود", null, 'HTML');
+    $phpFilePath = "https://$domainhosts/cron/cronday.php";
+    $cronCommand = "*/1 * * * * curl $phpFilePath";
+    $existingCronCommands = shell_exec('crontab -l');
+if (strpos($existingCronCommands, $cronCommand) === false) {
+    $command = "(crontab -l ; echo '$cronCommand') | crontab -";
+    shell_exec($command);
+}
+}
+if($text == "غیر فعال شدن کرون زمان"){
+    sendmessage($from_id, "کرون جاب غیرفعال گردید", null, 'HTML');
+    $currentCronJobs = shell_exec("crontab -l");
+    $jobToRemove = "*/1 * * * * curl https://$domainhosts/cron/cronday.php";
     $newCronJobs = preg_replace('/'.preg_quote($jobToRemove, '/').'/', '', $currentCronJobs);
     file_put_contents('/tmp/crontab.txt', $newCronJobs);
     shell_exec('crontab /tmp/crontab.txt');

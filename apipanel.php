@@ -9,7 +9,6 @@ function token_panel($url_panel,$username_panel,$password_panel){
         $timecurrent = time();
         $start_date = new DateTime($date['time']);
         $since_start = $start_date->diff(new DateTime(date('Y/m/d H:i:s',$timecurrent)));
-        var_dump($since_start->i);
         if($since_start->i <= 10){
             return $date;
         }
