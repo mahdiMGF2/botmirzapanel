@@ -38,7 +38,7 @@ if ($result->code == "1") {
     $setting = select("setting", "*");
     $payment_status = "پرداخت موفق";
     $dec_payment_status = "از انجام تراکنش متشکریم!";
-    $Payment_report = select("Payment_report", "price", "id_order", $invoice_id,"select");
+    $Payment_report = select("Payment_report", "*", "id_order", $invoice_id,"select");
     $Balance_id = select("user", "*", "id", $Payment_report['id_user'], "select");
     if($Payment_report['payment_Status'] != "paid"){
     DirectPayment($Payment_report['id_order']);

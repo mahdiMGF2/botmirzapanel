@@ -7,9 +7,8 @@ function token_panel($url_panel,$username_panel,$password_panel){
         $date = json_decode($panel['datelogin'],true);
         if(isset($date['time'])){
         $timecurrent = time();
-        $start_date = new DateTime($date['time']);
-        $since_start = $start_date->diff(new DateTime(date('Y/m/d H:i:s',$timecurrent)));
-        if($since_start->i <= 10){
+        $start_date = time() - strtotime($date['time']);
+        if($start_date <= 600){
             return $date;
         }
         }
@@ -41,7 +40,7 @@ function token_panel($url_panel,$username_panel,$password_panel){
 
     $body = json_decode( $token, true);
     if(isset($body['access_token'])){
-        $time = date('Y/m/d h:i:s');
+        $time = date('Y/m/d H:i:s');
         $data = json_encode(array(
             'time' => $time,
             'access_token' => $body['access_token']
@@ -50,6 +49,7 @@ function token_panel($url_panel,$username_panel,$password_panel){
     }
     return $body;
 }
+
 #-----------------------------#
 
 function getuser($usernameac,$location)
