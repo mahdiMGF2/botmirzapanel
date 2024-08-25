@@ -3268,6 +3268,10 @@ if ($text == "⬆️️️ افزایش موجودی کاربر") {
         sendmessage($from_id, $textbotlang['Admin']['Balance']['Invalidprice'], $backadmin, 'HTML');
         return;
     }
+    if(intval($text) > 100000000){
+        sendmessage($from_id, "حداکثر ۱۰۰ میلیون تومان می باشد", $backadmin, 'HTML');
+        return;
+    }
     sendmessage($from_id, $textbotlang['Admin']['Balance']['AddBalanceUser'], $User_Services, 'HTML');
     $Balance_user = select("user", "*", "id", $user['Processing_value'], "select");
     $Balance_add_user = $Balance_user['Balance'] + $text;
@@ -3292,6 +3296,10 @@ if ($text == "⬇️ کم کردن موجودی") {
 } elseif ($user['step'] == "get_price_Negative") {
     if (!ctype_digit($text)) {
         sendmessage($from_id, $textbotlang['Admin']['Balance']['Invalidprice'], $backadmin, 'HTML');
+        return;
+    }
+    if(intval($text) > 100000000){
+        sendmessage($from_id, "حداکثر ۱۰۰ میلیون تومان می باشد", $backadmin, 'HTML');
         return;
     }
     sendmessage($from_id, $textbotlang['Admin']['Balance']['NegativeBalanceUser'], $User_Services, 'HTML');
