@@ -8,6 +8,7 @@ require_once $Pathfiles.'/jdf.php';
 require_once $Pathfiles.'/botapi.php';
 require_once $Pathfiles.'/functions.php';
 require_once $Pathfiles.'/panels.php';
+require_once $Pathfiles.'/text.php';
 $invoice_id = htmlspecialchars($_POST['invoice_id'], ENT_QUOTES, 'UTF-8');
 $PaySetting = select("PaySetting", "ValuePay", "NamePay", "merchant_id_aqayepardakht","select")['ValuePay'];
 $price = select("Payment_report", "price", "id_order", $invoice_id,"select")['price'];
