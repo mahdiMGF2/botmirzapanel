@@ -503,10 +503,6 @@ $textbotlang['Admin']['Usertest']['TimeUpdated'] = "✅ زمان سرویس تس
 $textbotlang['Admin']['Usertest']['VolumeUpdated'] = "✅ حجم سرویس تست بروزرسانی شد";
 
 
-$textbotlang['Admin']['Balance']['AddBalance'] = "⚜️ آیدی عددی کاربر را ارسال کنید 
-توضیحات: برای افزایش موجودی کاربر ابتدا آیدی عددی کاربر را ارسال نمایید";
-$textbotlang['Admin']['Balance']['NegativeBalance'] = "⚜️ آیدی عددی کاربر را ارسال کنید 
-توضیحات: برای کم کردن موجودی کاربر ابتدا آیدی عددی کاربر را ارسال نمایید";
 $textbotlang['Admin']['Balance']['PriceBalance'] = "آیدی عددی دریافت شد مبلغی که میخواهید به کاربر اضافه کنید را ارسال کنید مبلغ به تومان باشد";
 $textbotlang['Admin']['Balance']['PriceBalancek'] = "آیدی عددی دریافت شد مبلغی که میخواهید از کاربرکم کنید را ارسال کنید مبلغ به تومان باشد";
 $textbotlang['Admin']['Balance']['Invalidprice'] = "مبلغ نامعتبر است";
