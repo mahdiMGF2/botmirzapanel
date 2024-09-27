@@ -4373,6 +4373,25 @@ if($text == "غیر فعال شدن کرون زمان"){
     shell_exec('crontab /tmp/crontab.txt');
     unlink('/tmp/crontab.txt');
 }
+if($text == "فعال شدن کرون حذف"){
+    sendmessage($from_id, "✅ کرون جاب فعال گردید این کرون هر 1 دقیقه اجرا می شود", null, 'HTML');
+    $phpFilePath = "https://$domainhosts/cron/removeexpire.php";
+    $cronCommand = "*/1 * * * * curl $phpFilePath";
+    $existingCronCommands = shell_exec('crontab -l');
+if (strpos($existingCronCommands, $cronCommand) === false) {
+    $command = "(crontab -l ; echo '$cronCommand') | crontab -";
+    shell_exec($command);
+}
+}
+if($text == "غیر فعال شدن کرون حذف"){
+    sendmessage($from_id, "کرون جاب غیرفعال گردید", null, 'HTML');
+    $currentCronJobs = shell_exec("crontab -l");
+    $jobToRemove = "*/1 * * * * curl https://$domainhosts/cron/removeexpire.php";
+    $newCronJobs = preg_replace('/'.preg_quote($jobToRemove, '/').'/', '', $currentCronJobs);
+    file_put_contents('/tmp/crontab.txt', $newCronJobs);
+    shell_exec('crontab /tmp/crontab.txt');
+    unlink('/tmp/crontab.txt');
+}
 if ($text == "👁‍🗨 جستجو کاربر") {
     sendmessage($from_id, "📌 آیدی عددی کاربر را ارسال نمایید", $backadmin, 'HTML');
     step('show_infos', $from_id);
@@ -4429,5 +4448,17 @@ if ($text == "👁‍🗨 جستجو کاربر") {
     sendmessage($from_id, $textinfouser, $keyboardmanage, 'HTML');
     sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboardadmin, 'HTML');
     step('home', $from_id);
+}
+if($text == "زمان حذف اکانت"){
+    sendmessage($from_id, "زمان خود را برای حذف اکانت های اکسپایر شده ارسال کنید", $backadmin, 'HTML');
+    step("gettimeremove",$from_id);
+}elseif($user['step'] == "gettimeremove"){
+    if (!ctype_digit($text)) {
+        sendmessage($from_id, "زمان ناعمتبر است", $backadmin, 'HTML');
+        return;
+    }
+    sendmessage($from_id, "زمان با موفقیت تنظیم شد", $keyboardcronjob, 'HTML');
+    step("home",$from_id);
+    update("setting","removedayc",$text,null,null);
 }
 $connect->close();
