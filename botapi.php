@@ -18,6 +18,7 @@ function sendmessage($chat_id,$text,$keyboard,$parse_mode){
     telegram('sendmessage',[
         'chat_id' => $chat_id,
         'text' => $text,
+        'disable_web_page_preview' => true,
         'reply_markup' => $keyboard,
         'parse_mode' => $parse_mode,
         

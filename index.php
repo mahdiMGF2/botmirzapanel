@@ -309,7 +309,7 @@ if ($user['step'] == 'get_number') {
 }
 
 #-----------Purchased services------------#
-if ($text == $datatextbot['text_Purchased_services'] || $datain == "backorder") {
+if ($text == $datatextbot['text_Purchased_services'] || $datain == "backorder" || $text == "/services") {
     $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user AND (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn')");
     $stmt->bindParam(':id_user', $from_id);
     $stmt->execute();
@@ -1173,7 +1173,7 @@ $textcreatuser = "✅ سرویس با موفقیت ایجاد شد
     }
 }
 #-----------help------------#
-if ($text == $datatextbot['text_help'] || $datain == "helpbtn") {
+if ($text == $datatextbot['text_help'] || $datain == "helpbtn" || $text == "/help") {
     if ($setting['help_Status'] == "❌ آموزش غیرفعال است") {
         sendmessage($from_id, $textbotlang['users']['help']['disablehelp'], null, 'HTML');
         return;
@@ -1193,7 +1193,7 @@ if ($text == $datatextbot['text_help'] || $datain == "helpbtn") {
 }
 
 #-----------support------------#
-if ($text == $datatextbot['text_support']) {
+if ($text == $datatextbot['text_support'] || $text == "/support") {
     sendmessage($from_id, $textbotlang['users']['support']['btnsupport'], $supportoption, 'HTML');
 } elseif ($datain == "support") {
     sendmessage($from_id, $textbotlang['users']['support']['sendmessageuser'], $backuser, 'HTML');
@@ -1259,7 +1259,7 @@ if ($text == $datatextbot['text_account']) {
                 ";
     sendmessage($from_id, $text_account, $keyboardPanel, 'HTML');
 }
-if ($text == $datatextbot['text_sell'] || $datain == "buy") {
+if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
     $locationproduct = select("marzban_panel", "*", "status", "activepanel", "count");
     if ($locationproduct == 0) {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['nullpanel'], null, 'HTML');
@@ -1544,6 +1544,29 @@ $link_config
         ]);
         sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboard, 'HTML');
         unlink($urlimage);
+    }elseif ($marzban_list_get['config'] == "onconfig") {
+        if (count($dataoutput['configs']) == 1) {
+        $urlimage = "$from_id$randomString.png";
+        $writer = new PngWriter();
+        $qrCode = QrCode::create($configqr)
+        ->setEncoding(new Encoding('UTF-8'))
+        ->setErrorCorrectionLevel(ErrorCorrectionLevel::Low)
+        ->setSize(400)
+        ->setMargin(0)
+        ->setRoundBlockSizeMode(RoundBlockSizeMode::Margin);
+        $result = $writer->write($qrCode,null, null);
+        $result->saveToFile($urlimage);
+            telegram('sendphoto', [
+                'chat_id' => $from_id,
+                'photo' => new CURLFile($urlimage),
+                'reply_markup' => $Shoppinginfo,
+                'caption' => $textcreatuser,
+                'parse_mode' => "HTML",
+            ]);
+            unlink($urlimage);
+        } else {
+            sendmessage($from_id, $textcreatuser, $Shoppinginfo, 'HTML');
+        }
     } else {
         sendmessage($from_id, $textcreatuser, $Shoppinginfo, 'HTML');
         sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboard, 'HTML');
@@ -1635,7 +1658,7 @@ $link_config
 
 
 #-------------------[ text_Add_Balance ]---------------------#
-if ($text == $datatextbot['text_Add_Balance']) {
+if ($text == $datatextbot['text_Add_Balance'] || $text == "/wallet") {
     if ($setting['get_number'] == "✅ تایید شماره موبایل روشن است" && $user['step'] != "get_number" && $user['number'] == "none") {
         sendmessage($from_id, $textbotlang['users']['number']['Confirming'], $request_contact, 'HTML');
         step('get_number', $from_id);
