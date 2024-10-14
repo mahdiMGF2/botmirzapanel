@@ -74,52 +74,52 @@ try {
             $connect->query("UPDATE user SET Processing_value = 'none'");
             echo "The Processing_Value field was added ✅";
         }
-            $Check_filde = $connect->query("SHOW COLUMNS FROM user LIKE 'Processing_value_tow'");
-            if (mysqli_num_rows($Check_filde) != 1) {
-                $connect->query("ALTER TABLE user ADD Processing_value_tow VARCHAR(1000)");
-                $connect->query("UPDATE user SET Processing_value_tow = 'none'");
-                echo "The Processing_value_tow field was added ✅";
-            }
-            $Check_filde = $connect->query("SHOW COLUMNS FROM user LIKE 'Processing_value_one'");
-            if (mysqli_num_rows($Check_filde) != 1) {
-                $connect->query("ALTER TABLE user ADD Processing_value_one VARCHAR(1000)");
-                $connect->query("UPDATE user SET Processing_value_one = 'none'");
-                echo "The Processing_value_one field was added ✅";
-            }
-            $Check_filde = $connect->query("SHOW COLUMNS FROM user LIKE 'Balance'");
-            if (mysqli_num_rows($Check_filde) != 1) {
-                $connect->query("ALTER TABLE user ADD Balance int(255)");
-                $connect->query("UPDATE user SET Balance = '0'");
-                echo "The Balance field was added ✅";
-            }
-            $Check_filde = $connect->query("SHOW COLUMNS FROM user LIKE 'number'");
-            if (mysqli_num_rows($Check_filde) != 1) {
-                $connect->query("ALTER TABLE user ADD number VARCHAR(1000)");
-                $connect->query("UPDATE user SET number = 'none'");
-                echo "The number field was added ✅";
-            }
-            $Check_filde = $connect->query("SHOW COLUMNS FROM user LIKE 'roll_Status'");
-            if (mysqli_num_rows($Check_filde) != 1) {
-                $connect->query("ALTER TABLE user ADD roll_Status bool");
-                $connect->query("UPDATE user SET roll_Status = false");
-                echo "The roll_Status field was added ✅";
-            }
-            $Check_filde = $connect->query("SHOW COLUMNS FROM user LIKE 'description_blocking'");
-            if (mysqli_num_rows($Check_filde) != 1) {
-                $connect->query("ALTER TABLE user ADD description_blocking VARCHAR(5000)");
-                echo "The description_blocking field was added ✅";
-            }
-            $Check_filde = $connect->query("SHOW COLUMNS FROM user LIKE 'User_Status'");
-            if (mysqli_num_rows($Check_filde) != 1) {
-                $connect->query("ALTER TABLE user ADD User_Status VARCHAR(500)");
-                echo "The User_Status field was added ✅";
-            }
-            $Check_filde = $connect->query("SHOW COLUMNS FROM user LIKE 'pagenumber'");
-            if (mysqli_num_rows($Check_filde) != 1) {
-                $connect->query("ALTER TABLE user ADD pagenumber int(10)");
-                echo "The page_number field was added ✅";
-            }
+        $Check_filde = $connect->query("SHOW COLUMNS FROM user LIKE 'Processing_value_tow'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE user ADD Processing_value_tow VARCHAR(1000)");
+            $connect->query("UPDATE user SET Processing_value_tow = 'none'");
+            echo "The Processing_value_tow field was added ✅";
         }
+        $Check_filde = $connect->query("SHOW COLUMNS FROM user LIKE 'Processing_value_one'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE user ADD Processing_value_one VARCHAR(1000)");
+            $connect->query("UPDATE user SET Processing_value_one = 'none'");
+            echo "The Processing_value_one field was added ✅";
+        }
+        $Check_filde = $connect->query("SHOW COLUMNS FROM user LIKE 'Balance'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE user ADD Balance int(255)");
+            $connect->query("UPDATE user SET Balance = '0'");
+            echo "The Balance field was added ✅";
+        }
+        $Check_filde = $connect->query("SHOW COLUMNS FROM user LIKE 'number'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE user ADD number VARCHAR(1000)");
+            $connect->query("UPDATE user SET number = 'none'");
+            echo "The number field was added ✅";
+        }
+        $Check_filde = $connect->query("SHOW COLUMNS FROM user LIKE 'roll_Status'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE user ADD roll_Status bool");
+            $connect->query("UPDATE user SET roll_Status = false");
+            echo "The roll_Status field was added ✅";
+        }
+        $Check_filde = $connect->query("SHOW COLUMNS FROM user LIKE 'description_blocking'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE user ADD description_blocking VARCHAR(5000)");
+            echo "The description_blocking field was added ✅";
+        }
+        $Check_filde = $connect->query("SHOW COLUMNS FROM user LIKE 'User_Status'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE user ADD User_Status VARCHAR(500)");
+            echo "The User_Status field was added ✅";
+        }
+        $Check_filde = $connect->query("SHOW COLUMNS FROM user LIKE 'pagenumber'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE user ADD pagenumber int(10)");
+            echo "The page_number field was added ✅";
+        }
+    }
 } catch (Exception $e) {
     file_put_contents("$randomString.txt",$e->getMessage());
 }
@@ -175,7 +175,7 @@ try {
         $sublink = "✅ لینک اشتراک فعال است.";
         $configManual = "❌ ارسال کانفیگ دستی خاموش است";
         $configManual = "❌ ارسال کانفیگ دستی خاموش است";
-$connect->query("INSERT INTO setting (Bot_Status,roll_Status,get_number,limit_usertest_all,time_usertest,val_usertest,help_Status,iran_number,NotUser,namecustome,removedayc) VALUES ('$active_bot_text','$active_roll_text','$active_phone_text','1','1','100','$active_help','$active_phone_iran_text','offnotuser','0','1')");
+        $connect->query("INSERT INTO setting (Bot_Status,roll_Status,get_number,limit_usertest_all,time_usertest,val_usertest,help_Status,iran_number,NotUser,namecustome,removedayc) VALUES ('$active_bot_text','$active_roll_text','$active_phone_text','1','1','100','$active_help','$active_phone_iran_text','offnotuser','0','1')");
     } else {
         $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'namecustome'");
         if (mysqli_num_rows($Check_filde) != 1) {
@@ -203,7 +203,7 @@ $connect->query("INSERT INTO setting (Bot_Status,roll_Status,get_number,limit_us
             $connect->query("ALTER TABLE setting ADD iran_number VARCHAR(200)");
             echo "The iran_number field was added ✅";
         }
-         $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'get_number'");
+        $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'get_number'");
         if (mysqli_num_rows($Check_filde) != 1) {
             $connect->query("ALTER TABLE setting ADD get_number VARCHAR(200)");
             echo "The get_number field was added ✅";
@@ -230,7 +230,7 @@ $connect->query("INSERT INTO setting (Bot_Status,roll_Status,get_number,limit_us
         }
         $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'Channel_Report'");
         if (mysqli_num_rows($Check_filde) != 1) {
-              $connect->query("ALTER TABLE setting ADD Channel_Report VARCHAR(200)");
+            $connect->query("ALTER TABLE setting ADD Channel_Report VARCHAR(200)");
             echo "The Channel_Report field was added ✅";
         }
         $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'Bot_Status'");
@@ -249,15 +249,15 @@ $connect->query("INSERT INTO setting (Bot_Status,roll_Status,get_number,limit_us
         $active_phone_iran_text = "❌ بررسی شماره ایرانی غیرفعال است";
         $configManual = "❌ ارسال کانفیگ دستی خاموش است";
         if(!isset($settingsql['iran_number'])){
-        $stmt = $connect->prepare("UPDATE setting SET iran_number = ?");
-        $stmt->bind_param("s", $active_phone_iran_text);
-        $stmt->execute();
+            $stmt = $connect->prepare("UPDATE setting SET iran_number = ?");
+            $stmt->bind_param("s", $active_phone_iran_text);
+            $stmt->execute();
         }
         if(!isset($settingsql['NotUser'])){
-        $stmt = $connect->prepare("UPDATE setting SET NotUser = ?");
-        $text = "offnotuser";
-        $stmt->bind_param("s", $text);
-        $stmt->execute();
+            $stmt = $connect->prepare("UPDATE setting SET NotUser = ?");
+            $text = "offnotuser";
+            $stmt->bind_param("s", $text);
+            $stmt->execute();
         }
     }
 } catch (Exception $e) {
@@ -300,7 +300,7 @@ link varchar(200) NOT NULL )");
         if (!$result) {
             echo "table channels".mysqli_error($connect);
         }
-        }
+    }
 } catch (Exception $e) {
     file_put_contents("$randomString.txt",$e->getMessage());
 }
@@ -331,17 +331,23 @@ try {
         sublink varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
         configManual varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
         onholdstatus varchar(200) NULL,
-        datelogin TEXT NULL)
+        datelogin TEXT NULL,
+        proxies TEXT NULL)
         ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin");
         if (!$result) {
             echo "table marzban_panel".mysqli_error($connect);
         }
-        }
-        else{
+    }
+    else{
         $Check_filde = $connect->query("SHOW COLUMNS FROM marzban_panel LIKE 'datelogin'");
         if (mysqli_num_rows($Check_filde) != 1) {
             $connect->query("ALTER TABLE marzban_panel ADD datelogin TEXT");
             echo "The datelogin field was added ✅";
+        }
+        $Check_filde = $connect->query("SHOW COLUMNS FROM marzban_panel LIKE 'proxies'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE marzban_panel ADD proxies TEXT");
+            echo "The proxies field was added ✅";
         }
         $Check_filde = $connect->query("SHOW COLUMNS FROM marzban_panel LIKE 'shadowsocks'");
         if (mysqli_num_rows($Check_filde) != 1) {
@@ -349,7 +355,7 @@ try {
             $connect->query("UPDATE marzban_panel SET shadowsocks = 'offshadowsocks'");
             echo "The shadowsocks field was added ✅";
         }
-         $Check_filde = $connect->query("SHOW COLUMNS FROM marzban_panel LIKE 'statusTest'");
+        $Check_filde = $connect->query("SHOW COLUMNS FROM marzban_panel LIKE 'statusTest'");
         if (mysqli_num_rows($Check_filde) != 1) {
             $connect->query("ALTER TABLE marzban_panel ADD statusTest VARCHAR(100)");
             $connect->query("UPDATE marzban_panel SET statusTest = 'ontestshowpanel'");
@@ -426,7 +432,7 @@ try {
             $connect->query("UPDATE marzban_panel SET trojan = 'ontrojan'");
             echo "The trojan field was added ✅";
         }
-        }
+    }
 } catch (Exception $e) {
     file_put_contents("$randomString.txt",$e->getMessage());
 }
@@ -453,12 +459,12 @@ try {
     else{
         $Check_filde = $connect->query("SHOW COLUMNS FROM product LIKE 'Location'");
         if (mysqli_num_rows($Check_filde) != 1) {
-           $result = $connect->query("ALTER TABLE product ADD Location VARCHAR(1000)");
-        } 
+            $result = $connect->query("ALTER TABLE product ADD Location VARCHAR(1000)");
+        }
         $Check_filde = $connect->query("SHOW COLUMNS FROM product LIKE 'code_product'");
         if (mysqli_num_rows($Check_filde) != 1) {
-           $result = $connect->query("ALTER TABLE product ADD code_product VARCHAR(200)");
-        } 
+            $result = $connect->query("ALTER TABLE product ADD code_product VARCHAR(200)");
+        }
     }
 } catch (Exception $e) {
     file_put_contents("$randomString.txt",$e->getMessage());
@@ -487,14 +493,14 @@ try {
         }
     }
     else{
-     $Check_filde = $connect->query("SHOW COLUMNS FROM invoice LIKE 'time_sell'");
+        $Check_filde = $connect->query("SHOW COLUMNS FROM invoice LIKE 'time_sell'");
         if (mysqli_num_rows($Check_filde) != 1) {
-           $result = $connect->query("ALTER TABLE invoice ADD time_sell VARCHAR(2000)");
-        }    
+            $result = $connect->query("ALTER TABLE invoice ADD time_sell VARCHAR(2000)");
+        }
         $Check_filde = $connect->query("SHOW COLUMNS FROM invoice LIKE 'Status'");
         if (mysqli_num_rows($Check_filde) != 1) {
-           $result = $connect->query("ALTER TABLE invoice ADD Status VARCHAR(2000)");
-        }    
+            $result = $connect->query("ALTER TABLE invoice ADD Status VARCHAR(2000)");
+        }
     }
 } catch (Exception $e) {
     file_put_contents("$randomString.txt",$e->getMessage());
@@ -522,16 +528,16 @@ try {
         }
     }
     else{
-      $Check_filde = $connect->query("SHOW COLUMNS FROM Payment_report LIKE 'invoice'");
+        $Check_filde = $connect->query("SHOW COLUMNS FROM Payment_report LIKE 'invoice'");
         if (mysqli_num_rows($Check_filde) != 1) {
             $connect->query("ALTER TABLE Payment_report ADD invoice VARCHAR(300)");
             echo "The invoice field was added ✅";
-        }   
+        }
         $Check_filde = $connect->query("SHOW COLUMNS FROM Payment_report LIKE 'Payment_Method'");
         if (mysqli_num_rows($Check_filde) != 1) {
             $connect->query("ALTER TABLE Payment_report ADD Payment_Method VARCHAR(1000)");
             echo "The Payment_Method field was added ✅";
-        }   
+        }
     }
 } catch (Exception $e) {
     file_put_contents("$randomString.txt",$e->getMessage());
@@ -736,11 +742,11 @@ try {
             echo "table DiscountSell".mysqli_error($connect);
         }
     }else{
-      $Check_filde = $connect->query("SHOW COLUMNS FROM DiscountSell LIKE 'usefirst'");
+        $Check_filde = $connect->query("SHOW COLUMNS FROM DiscountSell LIKE 'usefirst'");
         if (mysqli_num_rows($Check_filde) != 1) {
             $connect->query("ALTER TABLE DiscountSell ADD usefirst VARCHAR(500)");
             echo "The DiscountSell field was added ✅";
-        }   
+        }
     }
 } catch (Exception $e) {
     file_put_contents("$randomString.txt",$e->getMessage());
