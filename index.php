@@ -1516,7 +1516,7 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
     }
     if ($marzban_list_get['configManual'] == "onconfig") {
         foreach ($dataoutput['configs'] as $configs) {
-            $config .= "\n\n" . $configs;
+            $config .= "\n" . $configs;
             $configqr .= $configs;
         }
         $text_config = "<code>$config</code>";
@@ -2299,65 +2299,43 @@ if ($text == "📯 تنظیمات کانال") {
 }
 #-------------------------#
 if ($text == "📊 آمار ربات") {
-    $date = jdate('Y/m/d');
-    $timeacc = jdate('H:i:s', time());
-    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE time_sell = '$date' AND (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn') AND name_product != 'usertest'");
+    $current_date_time = time();
+    $datefirst = $current_date_time - 86400;
+    $desired_date_time_start = $current_date_time - 3600;
+    $month_date_time_start = $current_date_time - 2592000;
+    $dateacc = jdate('Y/m/d');
+    $sql = "SELECT * FROM invoice WHERE  (Status = 'active' OR Status = 'end_of_time'  OR Status = 'end_of_volume' OR status = 'sendedwarn') AND name_product != 'usertest'";
+    $stmt = $pdo->prepare($sql);
     $stmt->execute();
     $dayListSell = $stmt->rowCount();
-    $count_usertest = select("invoice", "*", "name_product", "usertest", "count");
-    $stmt = $pdo->prepare("SELECT SUM(Balance) FROM user");
+    $Balanceall =  select("user","SUM(Balance)",null,null,"select");
+    $statistics = select("user","*",null,null,"count");
+    $sumpanel = select("marzban_panel","*",null,null,"count");
+    $sql = "SELECT COUNT(*)  FROM invoice WHERE (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn') AND name_product != 'usertest'";
+    $stmt = $pdo->prepare($sql);
     $stmt->execute();
-    $Balanceall = $stmt->fetch(PDO::FETCH_ASSOC);
-    $stmt = $pdo->prepare("SELECT SUM(price_product) FROM invoice WHERE time_sell = '$date' AND (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn') AND name_product != 'usertest'");
+    $invoice =$stmt->rowCount();
+    $sql = "SELECT SUM(price_product)  FROM invoice WHERE (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn') AND name_product != 'usertest'";
+    $stmt = $pdo->prepare($sql);
     $stmt->execute();
-    $value = $stmt->fetchColumn();
-    if($value == null )$value = 0;
-    $suminvoiceday = number_format($value);
-    $statistics = select("user", "id", null, null, "count");
-    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE  (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn') AND name_product != 'usertest'");
-    $stmt->execute();
-    $invoice = $stmt->rowCount();
+    $invoicesum =$stmt->fetch(PDO::FETCH_ASSOC)['SUM(price_product)'];
+    $count_usertest = select("invoice","*","name_product","usertest","count");
     $ping = sys_getloadavg();
-    $ping = floatval($ping[0]);
-    $keyboardstatistics = json_encode([
-        'inline_keyboard' => [
-            [
-                ['text' => $statistics, 'callback_data' => 'countusers'],
-                ['text' => $textbotlang['Admin']['sumuser'], 'callback_data' => 'countusers'],
-            ],
-            [
-                ['text' => $count_usertest, 'callback_data' => 'count_usertest_var'],
-                ['text' => $textbotlang['Admin']['sumusertest'], 'callback_data' => 'count_usertest_var'],
-            ],
-            [
-                ['text' => phpversion(), 'callback_data' => 'phpversion'],
-                ['text' => $textbotlang['Admin']['phpversion'], 'callback_data' => 'phpversion'],
-            ],
-            [
-                ['text' => number_format($ping, 2), 'callback_data' => 'ping'],
-                ['text' => $textbotlang['Admin']['pingbot'], 'callback_data' => 'ping'],
-            ],
-            [
-                ['text' => $invoice, 'callback_data' => 'sellservices'],
-                ['text' => $textbotlang['Admin']['sellservices'], 'callback_data' => 'sellservices'],
-            ],
-            [
-                ['text' => $dayListSell, 'callback_data' => 'dayListSell'],
-                ['text' => $textbotlang['Admin']['dayListSell'], 'callback_data' => 'dayListSell'],
-            ],
-            [
-                ['text' => $Balanceall['SUM(Balance)'], 'callback_data' => 'Balanceall'],
-                ['text' => $textbotlang['Admin']['Balanceall'], 'callback_data' => 'Balanceall'],
-            ],
-            [
-                ['text' => $suminvoiceday." تومان", 'callback_data' => 'sumpro'],
-                ['text' => $textbotlang['Admin']['sumporoduct'], 'callback_data' => 'sumpro'],
-            ],
-        ]
-    ]);
-    sendmessage($from_id, $textbotlang['Admin']['Status']['btn'] . "
-    📆 $date → ⏰ $timeacc", $keyboardstatistics, 'HTML');
+    $ping = number_format(floatval($ping[0]),2);
+    $timeacc = jdate('H:i:s', time());
+    $statisticsall = "
+📊 آمار کلی ربات  
+
+📌 تعداد کاربران : $statistics نفر
+📌 موجودی کل کاربران : {$Balanceall['SUM(Balance)']}
+📌 پینگ ربات  : $ping
+📌 تعداد اکانت های تست گرفته شده : $count_usertest نفر
+📌 تعداد فروش کل : $invoice عدد
+📌 جمع فروش کل : $invoicesum تومان
+📌 تعداد پنل ها : $sumpanel عدد";
+    sendmessage($from_id, $statisticsall, null, 'HTML');
 }
+
 if ($text == "🔌 وضعیت اتصال پنل") {
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
     if ($marzban_list_get['type'] == "marzban") {
@@ -3498,11 +3476,7 @@ if ($text == "🛍 مشاهده سفارشات کاربر") {
     }
     $OrderUsers = select("invoice", "*", "id_user", $text, "fetchAll");
     foreach ($OrderUsers as $OrderUser) {
-        if (isset ($OrderUser['time_sell'])) {
-            $datatime = $OrderUser['time_sell'];
-        } else {
-            $datatime = $textbotlang['Admin']['ManageUser']['dataorder'];
-        }
+        $timeacc = jdate('H:i:s', $OrderUser['time_sell']);
         $text_order = "
 🛒 شماره سفارش  :  <code>{$OrderUser['id_invoice']}</code>
 🙍‍♂️ شناسه کاربر : <code>{$OrderUser['id_user']}</code>
