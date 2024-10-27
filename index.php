@@ -3544,7 +3544,7 @@ if ($text == "🛍 مشاهده سفارشات کاربر") {
     }
     $OrderUsers = select("invoice", "*", "id_user", $text, "fetchAll");
     foreach ($OrderUsers as $OrderUser) {
-        $timeacc = jdate('H:i:s', $OrderUser['time_sell']);
+        $timeacc = jdate('Y/m/d H:i:s', $OrderUser['time_sell']);
         $text_order = "
 🛒 شماره سفارش  :  <code>{$OrderUser['id_invoice']}</code>
 وضعیت سفارش : <code>{$OrderUser['Status']}</code>
@@ -3555,7 +3555,7 @@ if ($text == "🛍 مشاهده سفارشات کاربر") {
 💰 قیمت پرداختی سرویس : {$OrderUser['price_product']} تومان
 ⚜️ حجم سرویس خریداری شده : {$OrderUser['Volume']}
 ⏳ زمان سرویس خریداری شده : {$OrderUser['Service_time']} روزه
-📆 تاریخ خرید : $datatime
+📆 تاریخ خرید : $timeacc
                 ";
         sendmessage($from_id, $text_order, null, 'HTML');
     }
