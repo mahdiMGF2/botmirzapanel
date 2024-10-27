@@ -174,9 +174,9 @@ class ManagePanel{
                 }else{
                     $UsernameData['enable'] = "disabled";
                 }
-                $domain = explode(":", $Get_Data_Panel['linksubx']);
                 $subId = $UsernameData2['subId'];
                 $status_user = get_onlinecli($Get_Data_Panel['name_panel'],$username);
+                $linksub = "{$Get_Data_Panel['linksubx']}/{$subId}";
                 $Output = array(
                     'status' => $UsernameData['enable'],
                     'username' => $UsernameData['email'],
@@ -184,8 +184,8 @@ class ManagePanel{
                     'expire' => $UsernameData['expiryTime']/1000,
                     'online_at' => $status_user,
                     'used_traffic' => $UsernameData['up']+$UsernameData['down'],
-                    'links' => [outputlunk($domain[0].":".$domain[1].":2096/sub/{$UsernameData2['subId']}?name={$UsernameData2['subId']}")],
-                    'subscription_url' => $domain[0].":".$domain[1].":2096/sub/{$UsernameData2['subId']}?name={$UsernameData2['subId']}",
+                    'links' => [outputlunk($linksub)],
+                    'subscription_url' => $linksub,
                 );
             }
         }
@@ -243,6 +243,7 @@ class ManagePanel{
         elseif($Get_Data_Panel['type'] == "x-ui_single"){
             $clients = get_clinets($username,$name_panel);
             $subId = bin2hex(random_bytes(8));
+            $linksub = "{$Get_Data_Panel['linksubx']}/{$subId}";
             $config = array(
                 'id' => intval($Get_Data_Panel['inboundid']),
                 'settings' => json_encode(array(
@@ -266,11 +267,10 @@ class ManagePanel{
                     'msg' => 'Unsuccessful'
                 );
             }else{
-                $domain = explode(":", $Get_Data_Panel['linksubx']);
                 $Output = array(
                     'status' => 'successful',
-                    'configs' => outputlunk($domain[0].":".$domain[1].":2096/sub/{$subId}?name=$subId"),
-                    'subscription_url' => $domain[0].":".$domain[1].":2096/sub/{$subId}?name=$subId",
+                    'configs' => outputlunk($linksub),
+                    'subscription_url' => $linksub,
                 );
             }
         }
