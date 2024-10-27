@@ -70,8 +70,7 @@ class ManagePanel{
             }else{
                 $Output['status'] = 'successful';
                 $Output['username'] = $usernameC;
-                $domain = explode(":", $Get_Data_Panel['linksubx']);
-                $Output['subscription_url'] = $domain[0].":".$domain[1].":2096/sub/{$subId}?name=$subId";
+                $Output['subscription_url'] = "{$Get_Data_Panel['linksubx']}/{$subId}";
                 $Output['configs'] = [outputlunk($Output['subscription_url'])];
             }
         }
