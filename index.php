@@ -1,6 +1,6 @@
 <?php
 ini_set('error_log', 'error_log');
-$version = "4.10";
+$version = "4.10.1";
 date_default_timezone_set('Asia/Tehran');
 require_once 'config.php';
 require_once 'botapi.php';
@@ -336,6 +336,12 @@ if ($text == $datatextbot['text_Purchased_services'] || $datain == "backorder" |
             ],
         ];
     }
+    $usernotlist = [
+        [
+            'text' => "🔍 نام کاربری من در لیست نیست",
+            'callback_data' => 'usernotlist'
+        ]
+    ];
     $pagination_buttons = [
         [
             'text' => $textbotlang['users']['page']['next'],
@@ -346,6 +352,9 @@ if ($text == $datatextbot['text_Purchased_services'] || $datain == "backorder" |
             'callback_data' => 'previous_page'
         ]
     ];
+    if ($setting['NotUser'] == "onnotuser") {
+        $keyboardlists['inline_keyboard'][] = $usernotlist;
+    }
     $keyboardlists['inline_keyboard'][] = $pagination_buttons;
     $keyboard_json = json_encode($keyboardlists);
     if ($datain == "backorder") {
@@ -353,11 +362,8 @@ if ($text == $datatextbot['text_Purchased_services'] || $datain == "backorder" |
     } else {
         sendmessage($from_id, $textbotlang['users']['sell']['service_sell'], $keyboard_json, 'html');
     }
-    if ($setting['NotUser'] == "onnotuser") {
-        sendmessage($from_id, $textbotlang['users']['stateus']['notUsername'], $NotProductUser, 'html');
-    }
 }
-if ($text == "⭕️ نام کاربری من در لیست نیست ⭕️") {
+if ($datain == "usernotlist") {
     sendmessage($from_id, $textbotlang['users']['stateus']['SendUsername'], $backuser, 'html');
     step('getusernameinfo', $from_id);
 }
@@ -477,6 +483,15 @@ if ($datain == 'next_page') {
             'callback_data' => 'previous_page'
         ]
     ];
+    $usernotlist = [
+        [
+            'text' => "🔍 نام کاربری من در لیست نیست",
+            'callback_data' => 'usernotlist'
+        ]
+    ];
+    if ($setting['NotUser'] == "onnotuser") {
+        $keyboardlists['inline_keyboard'][] = $usernotlist;
+    }
     $keyboardlists['inline_keyboard'][] = $pagination_buttons;
     $keyboard_json = json_encode($keyboardlists);
     update("user", "pagenumber", $next_page, "id", $from_id);
@@ -514,6 +529,15 @@ if ($datain == 'next_page') {
             'callback_data' => 'previous_page'
         ]
     ];
+    $usernotlist = [
+        [
+            'text' => "🔍 نام کاربری من در لیست نیست",
+            'callback_data' => 'usernotlist'
+        ]
+    ];
+    if ($setting['NotUser'] == "onnotuser") {
+        $keyboardlists['inline_keyboard'][] = $usernotlist;
+    }
     $keyboardlists['inline_keyboard'][] = $pagination_buttons;
     $keyboard_json = json_encode($keyboardlists);
     update("user", "pagenumber", $next_page, "id", $from_id);
@@ -567,26 +591,53 @@ if (preg_match('/product_(\w+)/', $datain, $dataget)) {
     $timeDiff = $DataUserOut['expire'] - time();
     $day = $DataUserOut['expire'] ? floor($timeDiff / 86400) + 1 . $textbotlang['users']['stateus']['day'] : $textbotlang['users']['stateus']['Unlimited'];
     #-----------------------------#
-    $keyboardsetting = json_encode([
-        'inline_keyboard' => [
-            [
-                ['text' => $textbotlang['users']['stateus']['linksub'], 'callback_data' => 'subscriptionurl_' . $username],
-                ['text' => $textbotlang['users']['stateus']['config'], 'callback_data' => 'config_' . $username],
-            ],
-            [
-                ['text' => $textbotlang['users']['extend']['title'], 'callback_data' => 'extend_' . $username],
-                ['text' => $textbotlang['users']['changelink']['btntitle'], 'callback_data' => 'changelink_' . $username],
-            ],
-            [
-                ['text' => $textbotlang['users']['removeconfig']['btnremoveuser'], 'callback_data' => 'removeserviceuserco-' . $username],
-                ['text' => $textbotlang['users']['Extra_volume']['sellextra'], 'callback_data' => 'Extra_volume_' . $username],
-            ],
-            [
-                ['text' => $textbotlang['users']['stateus']['backlist'], 'callback_data' => 'backorder'],
+    if(!in_array($status,['active',"on_hold"])){
+        $keyboardsetting = json_encode([
+            'inline_keyboard' => [
+                [
+                    ['text' => $textbotlang['users']['extend']['title'], 'callback_data' => 'extend_' . $username],
+                ],
+                [
+                    ['text' => "🗑 حذف سرویس", 'callback_data' => 'removebyuser-' . $username],
+                    ['text' => $textbotlang['users']['Extra_volume']['sellextra'], 'callback_data' => 'Extra_volume_' . $username],
+                ],
+                [
+                    ['text' => $textbotlang['users']['stateus']['backlist'], 'callback_data' => 'backorder'],
+                ]
             ]
-        ]
-    ]);
-    $textinfo = "وضعیت سرویس : $status_var
+        ]);
+        $textinfo = "وضعیت سرویس : $status_var
+نام کاربری سرویس : {$DataUserOut['username']}
+لوکیشن :{$nameloc['Service_location']}
+کد سرویس:{$nameloc['id_invoice']}
+    
+📥 حجم مصرفی : $usedTrafficGb
+♾ حجم سرویس : $LastTraffic
+
+📅 فعال تا تاریخ : $expirationDate ($day)
+";
+
+    }else{
+        $keyboardsetting = json_encode([
+            'inline_keyboard' => [
+                [
+                    ['text' => $textbotlang['users']['stateus']['linksub'], 'callback_data' => 'subscriptionurl_' . $username],
+                    ['text' => $textbotlang['users']['stateus']['config'], 'callback_data' => 'config_' . $username],
+                ],
+                [
+                    ['text' => $textbotlang['users']['extend']['title'], 'callback_data' => 'extend_' . $username],
+                    ['text' => $textbotlang['users']['changelink']['btntitle'], 'callback_data' => 'changelink_' . $username],
+                ],
+                [
+                    ['text' => $textbotlang['users']['removeconfig']['btnremoveuser'], 'callback_data' => 'removeserviceuserco-' . $username],
+                    ['text' => $textbotlang['users']['Extra_volume']['sellextra'], 'callback_data' => 'Extra_volume_' . $username],
+                ],
+                [
+                    ['text' => $textbotlang['users']['stateus']['backlist'], 'callback_data' => 'backorder'],
+                ]
+            ]
+        ]);
+        $textinfo = "وضعیت سرویس : $status_var
 نام کاربری سرویس : {$DataUserOut['username']}
 لوکیشن :{$nameloc['Service_location']}
 کد سرویس:{$nameloc['id_invoice']}
@@ -599,6 +650,7 @@ if (preg_match('/product_(\w+)/', $datain, $dataget)) {
 📅 فعال تا تاریخ : $expirationDate ($day)
     
 🚫 برای تغییر لینک و قطع دسترسی دیگران کافیست روی گزینه ' بروزرسانی اشتراک ' کلیک کنید.";
+    }
     Editmessagetext($from_id, $message_id, $textinfo, $keyboardsetting);
 }
 if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
@@ -920,8 +972,8 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
     }
 } elseif (preg_match('/removeserviceuserco-(\w+)/', $datain, $dataget)) {
     $username = $dataget[1];
-    $nameloc = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM invoice WHERE username = '$username'"));
-    $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$nameloc['Service_location']}'"));
+    $nameloc = select("invoice","*","username",$username,"select");
+    $marzban_list_get = select("marzban_panel","*","name_panel",$nameloc['Service_location'],"select");
     $DataUserOut = $ManagePanel->DataUser($marzban_list_get['name_panel'], $username);
     if (isset ($DataUserOut['status']) && in_array($DataUserOut['status'], ["expired", "limited", "disabled"])) {
         sendmessage($from_id, $textbotlang['users']['stateus']['notusername'], null, 'html');
@@ -940,6 +992,23 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
         ]
     ]);
     Editmessagetext($from_id, $message_id, $textbotlang['users']['stateus']['descriptions_removeservice'], $confirmremove);
+}elseif (preg_match('/removebyuser-(\w+)/', $datain, $dataget)) {
+    $username = $dataget[1];
+    $nameloc = select("invoice","*","username",$username,"select");
+    $marzban_list_get = select("marzban_panel","*","name_panel",$nameloc['Service_location'],"select");
+    $ManagePanel->RemoveUser($nameloc['Service_location'],$nameloc['username']);
+    update('invoice','status','removebyuser','id_invoice',$nameloc['id_invoice']);
+    $tetremove = "ادمین عزیز یک کاربر سرویس خود را پس از پایان حجم یا زمان حدف کرده است
+نام کاربری کانفیک : {$nameloc['username']}";
+    if (strlen($setting['Channel_Report']) > 0) {
+        telegram('sendmessage',[
+            'chat_id' => $setting['Channel_Report'],
+            'text' => $tetremove,
+            'parse_mode' => "HTML"
+        ]);
+    }
+    deletemessage($from_id, $message_id);
+    sendmessage($from_id, "📌 سرویس با موفقیت حذف شد", null, 'html');
 } elseif (preg_match('/confirmremoveservices-(\w+)/', $datain, $dataget)) {
     $checkcancelservice = mysqli_query($connect, "SELECT * FROM cancel_service WHERE id_user = '$from_id' AND status = 'waiting'");
     if (mysqli_num_rows($checkcancelservice) != 0) {
@@ -1832,7 +1901,7 @@ if ($text == $datatextbot['text_Add_Balance'] || $text == "/wallet") {
         $stmt->bindParam(6, $Payment_Method);
         $stmt->bindParam(7, $invoice);
         $stmt->execute();
-        $order_description = "weswap_" . $randomString . "_" . $trxprice;
+        $order_description = "SwapinoBot_" . $randomString . "_" . $trxprice;
         $pay = nowPayments('payment', $usdprice, $randomString, $order_description);
         if (!isset ($pay->pay_address)) {
             $text_error = $pay->message;
@@ -1849,12 +1918,13 @@ if ($text == $datatextbot['text_Add_Balance'] || $text == "/wallet") {
             }
             return;
         }
+        $trxprice = str_replace('.', "_", strval($pay->pay_amount));
         $pay_address = $pay->pay_address;
         $payment_id = $pay->payment_id;
         $paymentkeyboard = json_encode([
             'inline_keyboard' => [
                 [
-                    ['text' => $textbotlang['users']['Balance']['payments'], 'url' => "https://changeto.technology/quick/?amount=$trxprice&currency=TRX&address=$pay_address"]
+                    ['text' => $textbotlang['users']['Balance']['payments'], 'url' => "https://t.me/SwapinoBot?start=trx-$pay_address-$trxprice-Tron"]
                 ],
                 [
                     ['text' => $textbotlang['users']['Balance']['Confirmpaying'], 'callback_data' => "Confirmpay_user_{$payment_id}_{$randomString}"]
@@ -2260,6 +2330,10 @@ if ($text == "❌ حذف ادمین") {
     sendmessage($from_id, $textbotlang['Admin']['manageadmin']['getid'], $backadmin, 'HTML');
     step('deleteadmin', $from_id);
 } elseif ($user['step'] == "deleteadmin") {
+    if(intval($text) == $adminnumber){
+        sendmessage($from_id,"❌امکان حذف ادمین اصلی وجود ندارد برای تغییر ادمین اصلی باید از فایل config.php  ابتدا ایدی عددی ادمین اصلی  را تغییر سپس از این بخش حذف نمایید", null, 'HTML');
+        return;
+    }
     if (!is_numeric($text) || !in_array($text, $admin_ids))
         return;
     sendmessage($from_id, $textbotlang['Admin']['manageadmin']['removedadmin'], $keyboardadmin, 'HTML');
@@ -2268,19 +2342,13 @@ if ($text == "❌ حذف ادمین") {
     $stmt->execute();
     step('home', $from_id);
 }
-if ($text == "➕ محدودیت ساخت اکانت تست برای کاربر") {
-    sendmessage($from_id, $textbotlang['Admin']['manageusertest']['getidlimit'], $backadmin, 'HTML');
-    step('add_limit_usertest_foruser', $from_id);
-} elseif ($user['step'] == "add_limit_usertest_foruser") {
-    if (!in_array($text, $users_ids)) {
-        sendmessage($from_id, $textbotlang['Admin']['not-user'], $backadmin, 'HTML');
-        return;
-    }
+elseif (preg_match('/limitusertest_(.*)/', $datain, $dataget)) {
+    $id_user = $dataget[1];
     sendmessage($from_id, $textbotlang['Admin']['getlimitusertest']['getid'], $backadmin, 'HTML');
-    update("user", "Processing_value", $text, "id", $from_id);
+    update("user", "Processing_value", $id_user, "id", $from_id);
     step('get_number_limit', $from_id);
 } elseif ($user['step'] == "get_number_limit") {
-    sendmessage($from_id, $textbotlang['Admin']['getlimitusertest']['setlimit'], $keyboard_usertest, 'HTML');
+    sendmessage($from_id, $textbotlang['Admin']['getlimitusertest']['setlimit'], $keyboardadmin, 'HTML');
     $id_user_set = $text;
     step('home', $from_id);
     update("user", "limit_usertest", $text, "id", $user['Processing_value']);
@@ -3479,6 +3547,7 @@ if ($text == "🛍 مشاهده سفارشات کاربر") {
         $timeacc = jdate('H:i:s', $OrderUser['time_sell']);
         $text_order = "
 🛒 شماره سفارش  :  <code>{$OrderUser['id_invoice']}</code>
+وضعیت سفارش : <code>{$OrderUser['Status']}</code>
 🙍‍♂️ شناسه کاربر : <code>{$OrderUser['id_user']}</code>
 👤 نام کاربری اشتراک :  <code>{$OrderUser['username']}</code> 
 📍 لوکیشن سرویس :  {$OrderUser['Service_location']}
@@ -4469,6 +4538,7 @@ if ($text == "👁‍🗨 جستجو کاربر") {
             [['text' => $textbotlang['Admin']['ManageUser']['addbalanceuser'], 'callback_data' => "addbalanceuser_" . $text], ['text' => $textbotlang['Admin']['ManageUser']['lowbalanceuser'], 'callback_data' => "lowbalanceuser_" . $text],],
             [['text' => $textbotlang['Admin']['ManageUser']['banuserlist'], 'callback_data' => "banuserlist_" . $text], ['text' => $textbotlang['Admin']['ManageUser']['unbanuserlist'], 'callback_data' => "unbanuserr_" . $text]],
             [['text' => $textbotlang['Admin']['ManageUser']['confirmnumber'], 'callback_data' => "confirmnumber_" . $text]],
+            [['text' => "➕ محدودیت ساخت اکانت تست", 'callback_data' => "limitusertest_" . $text]],
         ]
     ];
     $keyboardmanage = json_encode($keyboardmanage);
