@@ -266,7 +266,7 @@ function DirectPayment($order_id){
             if (count($dataoutput['configs']) == 1) {
                 $urlimage = "{$get_invoice['id_user']}$randomString.png";
                 $writer = new PngWriter();
-                $qrCode = QrCode::create($output_config_link)
+                $qrCode = QrCode::create($configqr)
                     ->setEncoding(new Encoding('UTF-8'))
                     ->setErrorCorrectionLevel(ErrorCorrectionLevel::Low)
                     ->setSize(400)
