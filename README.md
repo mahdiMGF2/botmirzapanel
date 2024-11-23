@@ -22,6 +22,7 @@
 - [Features](#features)
 - [How do I install the bot?](#install-bot)
 - [How do I Update the bot?](#update-bot)
+- [How do I remove the bot?](#remove-bot)
 - [Financial Support](#financial-support)
 
 # Overview
@@ -100,13 +101,25 @@ Domain
  curl -o install.sh -L https://raw.githubusercontent.com/mahdiMGF2/botmirzapanel/main/install.sh && bash install.sh
 ```
 
+Select option 1.
+
 # update bot
 
  Run the following command on the server : 
 
  ```
- curl -o update.sh -L https://raw.githubusercontent.com/mahdiMGF2/botmirzapanel/main/update.sh && bash update.sh
+ curl -o install.sh -L https://raw.githubusercontent.com/mahdiMGF2/botmirzapanel/main/install.sh && bash install.sh
 ```
+Select option 2.
+
+# remove bot
+
+ Run the following command on the server : 
+
+ ```
+ curl -o install.sh -L https://raw.githubusercontent.com/mahdiMGF2/botmirzapanel/main/install.sh && bash install.sh
+```
+Select option 3.
 
 # Financial Support
 
