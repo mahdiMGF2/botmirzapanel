@@ -1,6 +1,5 @@
 <?php
 require_once 'config.php';
-require_once 'alireza.php';
 ini_set('error_log', 'error_log');
 
 function loginalireza($url,$username,$password){
