@@ -151,7 +151,8 @@ function adduserm($location,$data_limit,$username_ac,$timestamp)
             $date = new DateTime();
             $date->setTimestamp($timestamp - time());
             $formattedDate = $date->format('Y-m-d\TH:i:s');
-            $data["on_hold_expire_duration"] = $formattedDate;
+            $data["activation_deadline"] = $formattedDate;
+            $data["usage_duration"] = $timestamp - time();
         }
     }
     $payload = json_encode($data);

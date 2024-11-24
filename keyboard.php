@@ -588,7 +588,7 @@ $affiliates =  json_encode([
 $typepanel =  json_encode([
     'keyboard' => [
         [['text' => "marzban"],['text' => "x-ui_single"]],
-        [['text' => "marzneshin"]],
+        [['text' => "marzneshin"],['text' => "alireza"]],
         [['text' => "🏠 بازگشت به منوی مدیریت"]]
     ],
     'resize_keyboard' => true

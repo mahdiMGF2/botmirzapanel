@@ -831,6 +831,25 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
             ),
         );
         $ManagePanel->Modifyuser($user['Processing_value'], $nameloc['Service_location'], $config);
+    }elseif ($marzban_list_get['type'] == "alireza") {
+        $date = strtotime("+" . $product['Service_time'] . "day");
+        $newDate = strtotime(date("Y-m-d H:i:s", $date)) * 1000;
+        $data_limit = intval($product['Volume_constraint']) * pow(1024, 3);
+        $config = array(
+            'id' => intval($marzban_list_get['inboundid']),
+            'settings' => json_encode(
+                array(
+                    'clients' => array(
+                        array(
+                            "totalGB" => $data_limit,
+                            "expiryTime" => $newDate,
+                            "enable" => true,
+                        )
+                    ),
+                )
+            ),
+        );
+        $ManagePanel->Modifyuser($user['Processing_value'], $nameloc['Service_location'], $config);
     }
     $keyboardextendfnished = json_encode([
         'inline_keyboard' => [
@@ -938,6 +957,19 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
             "data_limit" => $data_limit
         );
     } elseif ($marzban_list_get['type'] == "x-ui_single") {
+        $datam = array(
+            'id' => intval($marzban_list_get['inboundid']),
+            'settings' => json_encode(
+                array(
+                    'clients' => array(
+                        array(
+                            "totalGB" => $data_limit,
+                        )
+                    ),
+                )
+            ),
+        );
+    } elseif ($marzban_list_get['type'] == "alireza") {
         $datam = array(
             'id' => intval($marzban_list_get['inboundid']),
             'settings' => json_encode(
@@ -2464,6 +2496,17 @@ if ($text == "🔌 وضعیت اتصال پنل") {
             $text_marzban = $textbotlang['Admin']['managepanel']['errorstateuspanel'];
             sendmessage($from_id, $text_marzban, null, 'HTML');
         }
+    }elseif ($marzban_list_get['type'] == "alireza") {
+        $x_ui_check_connect = loginalireza($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
+        if ($x_ui_check_connect['success']) {
+            sendmessage($from_id, $textbotlang['Admin']['managepanel']['connectx-ui'], null, 'HTML');
+        } elseif ($x_ui_check_connect['msg'] == "Invalid username or password.") {
+            $text_marzban = "❌ نام کاربری یا رمز عبور پنل اشتباه است";
+            sendmessage($from_id, $text_marzban, null, 'HTML');
+        } else {
+            $text_marzban = $textbotlang['Admin']['managepanel']['errorstateuspanel'];
+            sendmessage($from_id, $text_marzban, null, 'HTML');
+        }
     }
     step('home', $from_id);
 }
@@ -3639,6 +3682,8 @@ if ($text == "💡 روش ساخت نام کاربری") {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['savedname'], $optionMarzneshin, 'HTML');
     }elseif ($listpanel['type'] == "x-ui_single") {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['savedname'], $optionX_ui_single, 'HTML');
+    }elseif ($listpanel['type'] == "alireza") {
+        sendmessage($from_id, $textbotlang['Admin']['managepanel']['savedname'], $optionX_ui_single, 'HTML');
     }else{
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['savedname'], $optionMarzban, 'HTML');
     }
@@ -3812,6 +3857,8 @@ if ($text == "✏️ مدیریت پنل") {
         sendmessage($from_id, $textbotlang['users']['selectoption'], $optionMarzneshin, 'HTML');
     } elseif ($listpanel['type'] == "x-ui_single") {
         sendmessage($from_id, $textbotlang['users']['selectoption'], $optionX_ui_single, 'HTML');
+    } elseif ($listpanel['type'] == "alireza") {
+        sendmessage($from_id, $textbotlang['users']['selectoption'], $optionX_ui_single, 'HTML');
     }else{
         sendmessage($from_id, $textbotlang['users']['selectoption'], $optionMarzban, 'HTML');
     }
@@ -3826,6 +3873,8 @@ if ($text == "✏️ مدیریت پنل") {
     }elseif ($typepanel['type'] == "marzneshin") {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedNmaePanel'], $optionMarzneshin, 'HTML');
     } elseif ($typepanel['type'] == "x-ui_single") {
+        sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedNmaePanel'], $optionX_ui_single, 'HTML');
+    } elseif ($typepanel['type'] == "alireza") {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedNmaePanel'], $optionX_ui_single, 'HTML');
     }
     update("marzban_panel", "name_panel", $text, "name_panel", $user['Processing_value']);
@@ -3846,6 +3895,8 @@ if ($text == "✏️ مدیریت پنل") {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedurlPanel'], $optionMarzban, 'HTML');
     } elseif ($typepanel['type'] == "x-ui_single") {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedurlPanel'], $optionX_ui_single, 'HTML');
+    } elseif ($typepanel['type'] == "alireza") {
+        sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedurlPanel'], $optionX_ui_single, 'HTML');
     }elseif ($typepanel['type'] == "marzneshin") {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedurlPanel'], $optionMarzneshin, 'HTML');
     }
@@ -3860,6 +3911,8 @@ if ($text == "✏️ مدیریت پنل") {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedusernamePanel'], $optionMarzban, 'HTML');
     } elseif ($typepanel['type'] == "x-ui_single") {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedusernamePanel'], $optionX_ui_single, 'HTML');
+    }elseif ($typepanel['type'] == "alireza") {
+        sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedusernamePanel'], $optionX_ui_single, 'HTML');
     }elseif ($typepanel['type'] == "marzneshin") {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedusernamePanel'], $optionMarzneshin, 'HTML');
     }
@@ -3873,6 +3926,8 @@ if ($text == "✏️ مدیریت پنل") {
     if ($typepanel['type'] == "marzban") {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedpasswordPanel'], $optionMarzban, 'HTML');
     } elseif ($typepanel['type'] == "x-ui_single") {
+        sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedpasswordPanel'], $optionX_ui_single, 'HTML');
+    } elseif ($typepanel['type'] == "alireza") {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedpasswordPanel'], $optionX_ui_single, 'HTML');
     }elseif ($typepanel['type'] == "marzneshin") {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedpasswordPanel'], $optionMarzneshin, 'HTML');

@@ -4,6 +4,7 @@ require_once 'config.php';
 require_once 'apipanel.php';
 require_once 'x-ui_single.php';
 require_once 'marzneshin.php';
+require_once 'alireza_single.php';
 class ManagePanel{
     public $name_panel;
     public $connect;
@@ -74,6 +75,21 @@ class ManagePanel{
                 $Output['configs'] = [outputlunk($Output['subscription_url'])];
             }
         }
+        elseif($Get_Data_Panel['type'] == "alireza"){
+            $subId = bin2hex(random_bytes(8));
+            $Expireac = $expire*1000;
+            $data_Output = addClientalireza_singel($Get_Data_Panel['name_panel'],$usernameC,$Expireac,$data_limit,generateUUID(),"",$subId);
+            if(!$data_Output['success']){
+                $Output['status'] = 'Unsuccessful';
+                $Output['msg'] = $data_Output['msg'];
+            }else{
+                $Output['status'] = 'successful';
+                $Output['username'] = $usernameC;
+                $Output['subscription_url'] = "{$Get_Data_Panel['linksubx']}/{$subId}/?name=$usernameC";
+                $Output['configs'] = [outputlunk($Output['subscription_url'])];
+            }
+        }
+
         else{
             $Output['status'] = 'Unsuccessful';
             $Output['msg'] = 'Panel Not Found';
@@ -189,6 +205,36 @@ class ManagePanel{
                 );
             }
         }
+        elseif($Get_Data_Panel['type'] == "alireza"){
+            $UsernameData = get_Clientalireza($username,$Get_Data_Panel['name_panel']);
+            $UsernameData2 = get_clinetsalireza($username,$Get_Data_Panel['name_panel']);
+            if(!$UsernameData['id']){
+                $Output = array(
+                    'status' => 'Unsuccessful',
+                    'msg' => $UsernameData['msg']
+                );
+            }else{
+                if($UsernameData['enable']){
+                    $UsernameData['enable'] = "active";
+                }else{
+                    $UsernameData['enable'] = "disabled";
+                }
+                $subId = $UsernameData2['subId'];
+                $status_user = get_onlinecli($Get_Data_Panel['name_panel'],$username);
+                $linksub = "{$Get_Data_Panel['linksubx']}/{$subId}/?name=$username";
+                $Output = array(
+                    'status' => $UsernameData['enable'],
+                    'username' => $UsernameData['email'],
+                    'data_limit' => $UsernameData['total'],
+                    'expire' => $UsernameData['expiryTime']/1000,
+                    'online_at' => $status_user,
+                    'used_traffic' => $UsernameData['up']+$UsernameData['down'],
+                    'links' => [outputlunk($linksub)],
+                    'subscription_url' => $linksub,
+                );
+            }
+        }
+
         else{
             $Output = array(
                 'status' => 'Unsuccessful',
@@ -239,7 +285,6 @@ class ManagePanel{
                 );
             }
         }
-
         elseif($Get_Data_Panel['type'] == "x-ui_single"){
             $clients = get_clinets($username,$name_panel);
             $subId = bin2hex(random_bytes(8));
@@ -274,6 +319,41 @@ class ManagePanel{
                 );
             }
         }
+        elseif($Get_Data_Panel['type'] == "alireza"){
+            $clients = get_clinetsalireza($username,$name_panel);
+            $subId = bin2hex(random_bytes(8));
+            $linksub = "{$Get_Data_Panel['linksubx']}/{$subId}/?name=$username";
+            $config = array(
+                'id' => intval($Get_Data_Panel['inboundid']),
+                'settings' => json_encode(array(
+                        'clients' => array(
+                            array(
+                                "id" => generateUUID(),
+                                "flow" => $clients['flow'],
+                                "email" => $clients['email'],
+                                "totalGB" => $clients['totalGB'],
+                                "expiryTime" => $clients['expiryTime'],
+                                "enable" => true,
+                                "subId" => $subId,
+                            )),
+                    )
+                )
+            );
+            $updateinbound = updateClientalireza($Get_Data_Panel['name_panel'],$username,$config);
+            if(!$clients){
+                $Output = array(
+                    'status' => 'Unsuccessful',
+                    'msg' => 'Unsuccessful'
+                );
+            }else{
+                $Output = array(
+                    'status' => 'successful',
+                    'configs' => outputlunk($linksub),
+                    'subscription_url' => $linksub,
+                );
+            }
+        }
+
 
         else{
             $Output = array(
@@ -349,6 +429,9 @@ class ManagePanel{
         elseif($Get_Data_Panel['type'] == "x-ui_single"){
             ResetUserDataUsagex_uisin($username, $name_panel);
         }
+        elseif($Get_Data_Panel['type'] == "alireza"){
+            ResetUserDataUsagealirezasin($username, $name_panel);
+        }
     }
     function Modifyuser($username,$name_panel,$config = array()){
         $Output = array();
@@ -386,6 +469,29 @@ class ManagePanel{
             );
             $configs['settings'] = json_encode(array_replace_recursive(json_decode($configs['settings'], true),json_decode($config['settings'], true)));
             $updateinbound = updateClient($Get_Data_Panel['name_panel'], $username,$configs);
+        }
+        elseif($Get_Data_Panel['type'] == "alireza"){
+            $clients = get_clinetsalireza($username, $name_panel);
+            $configs = array(
+                'id' => intval($Get_Data_Panel['inboundid']),
+                'settings' => json_encode(array(
+                        'clients' => array(
+                            array(
+                                "id" => $clients['id'],
+                                "flow" => $clients['flow'],
+                                "email" => $clients['email'],
+                                "totalGB" => $clients['totalGB'],
+                                "expiryTime" => $clients['expiryTime'],
+                                "enable" => true,
+                                "subId" => $clients['subId'],
+                            )),
+                        'decryption' => 'none',
+                        'fallbacks' => array(),
+                    )
+                ),
+            );
+            $configs['settings'] = json_encode(array_replace_recursive(json_decode($configs['settings'], true),json_decode($config['settings'], true)));
+            $updateinbound = updateClientalireza($Get_Data_Panel['name_panel'], $username,$configs);
         }
 
     }
