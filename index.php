@@ -2411,8 +2411,8 @@ if ($text == "📊 آمار ربات") {
     $Balanceall =  select("user","SUM(Balance)",null,null,"select");
     $statistics = select("user","*",null,null,"count");
     $sumpanel = select("marzban_panel","*",null,null,"count");
-    $sql = "SELECT COUNT(*)  FROM invoice WHERE (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn') AND name_product != 'usertest'";
-    $stmt = $pdo->prepare($sql);
+    $sqlinvoice = "SELECT *  FROM invoice WHERE (Status = 'active' OR Status = 'end_of_time'  OR Status = 'end_of_volume' OR Status = 'sendedwarn') AND name_product != 'usertest'";
+    $stmt = $pdo->prepare($sqlinvoice);
     $stmt->execute();
     $invoice =$stmt->rowCount();
     $sql = "SELECT SUM(price_product)  FROM invoice WHERE (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn') AND name_product != 'usertest'";
