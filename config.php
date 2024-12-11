@@ -2,33 +2,37 @@
 /*
 channel => @mirzapanel
 */
-//-----------------------------database-------------------------------
-$dbname = "databasename"; //  نام دیتابیس
-$usernamedb = "username"; // نام کاربری دیتابیس
-$passworddb = "password"; // رمز عبور دیتابیس
-$connect = mysqli_connect("localhost", $usernamedb, $passworddb, $dbname);
+
+//----------------------------- Configuration -------------------------------
+define('DB_NAME', 'databasename'); // نام دیتابیس
+define('DB_USER', 'username');    // نام کاربری دیتابیس
+define('DB_PASS', 'password');    // رمز عبور دیتابیس
+define('DB_HOST', 'localhost');   // هاست دیتابیس
+
+define('BOT_API_KEY', 'TOKEN');          // توکن ربات
+define('ADMIN_ID', '5522424631');        // آیدی عددی ادمین
+define('BOT_DOMAIN', 'domain.com/bot'); // دامنه و مسیر سورس
+define('BOT_USERNAME', 'marzbaninfobot'); // نام کاربری ربات (بدون @)
+
+//----------------------------- MySQLi Connection ---------------------------
+$connect = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+
 if ($connect->connect_error) {
-    die("The connection to the database failed:" . $connect->connect_error);
+    die("Database connection failed: " . $connect->connect_error);
 }
-mysqli_set_charset($connect, "utf8mb4");
-//-----------------------------info-------------------------------
 
-$APIKEY = "**TOKEN**"; // توکن ربات خود را وارد کنید
-$adminnumber = "5522424631";// آیدی عددی ادمین
-$domainhosts = "domain.com/bot";// دامنه  هاست و مسیر سورس
-$usernamebot = "marzbaninfobot"; //نام کاربری ربات  بدون @
+$connect->set_charset("utf8mb4");
 
-
-
-
+//----------------------------- PDO Connection -------------------------------
+$dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
 $options = [
     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
     PDO::ATTR_EMULATE_PREPARES   => false,
 ];
-$dsn = "mysql:host=localhost;dbname=$dbname;charset=utf8mb4";
+
 try {
-     $pdo = new PDO($dsn, $usernamedb, $passworddb, $options);
-} catch (\PDOException $e) {
-     throw new \PDOException($e->getMessage(), (int)$e->getCode());
+    $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
+} catch (PDOException $e) {
+    die("PDO connection failed: " . $e->getMessage());
 }
