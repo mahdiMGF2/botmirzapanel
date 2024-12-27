@@ -22,14 +22,20 @@ function show_menu() {
     echo -e "\033[1;36m1)\033[0m Install Mirza Bot"
     echo -e "\033[1;36m2)\033[0m Update Mirza Bot"
     echo -e "\033[1;36m3)\033[0m Remove Mirza Bot"
-    echo -e "\033[1;36m4)\033[0m Exit"
+    echo -e "\033[1;36m4)\033[0m Export Database"
+    echo -e "\033[1;36m5)\033[0m Import Database"
+    echo -e "\033[1;36m6)\033[0m Configure Automated Backup"
+    echo -e "\033[1;36m7)\033[0m Exit"
     echo ""
-    read -p "Select an option [1-4]: " option
+    read -p "Select an option [1-7]: " option
     case $option in
         1) install_bot ;;
         2) update_bot ;;
         3) remove_bot ;;
-        4)
+        4) export_database ;;
+        5) import_database ;;
+        6) auto_backup ;;
+        7)
             echo -e "\033[32mExiting...\033[0m"
             exit 0
             ;;
@@ -672,6 +678,164 @@ function remove_bot() {
     sudo ufw reload
 
     echo -e "\e[92mMirza Bot, MySQL, and their dependencies have been completely removed.\033[0m" | tee -a "$LOG_FILE"
+}
+# Export Database Function
+function export_database() {
+    echo -e "\033[33mChecking database configuration...\033[0m"
+
+    # Path to database credentials
+    CONFIG_FILE="/root/confmirza/dbrootmirza.txt"
+
+    if [ ! -f "$CONFIG_FILE" ]; then
+        echo -e "\033[31m[ERROR]\033[0m Database configuration file not found at $CONFIG_FILE."
+        return 1
+    fi
+
+    # Extract credentials
+    DB_USER=$(grep '\$user' "$CONFIG_FILE" | cut -d"'" -f2)
+    DB_PASS=$(grep '\$pass' "$CONFIG_FILE" | cut -d"'" -f2)
+    DB_NAME="mirzabot"  # Assuming the database name is fixed
+
+    echo -e "\033[33mVerifying database existence...\033[0m"
+
+    if ! mysql -u "$DB_USER" -p"$DB_PASS" -e "USE $DB_NAME;" 2>/dev/null; then
+        echo -e "\033[31m[ERROR]\033[0m Database $DB_NAME does not exist or credentials are incorrect."
+        return 1
+    fi
+
+    # Create a backup
+    BACKUP_FILE="/root/${DB_NAME}_backup.sql"
+    echo -e "\033[33mCreating backup at $BACKUP_FILE...\033[0m"
+
+    if ! mysqldump -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" > "$BACKUP_FILE"; then
+        echo -e "\033[31m[ERROR]\033[0m Failed to create database backup."
+        return 1
+    fi
+
+    echo -e "\033[32mBackup successfully created at $BACKUP_FILE.\033[0m"
+}
+
+# Import Database Function
+function import_database() {
+    echo -e "\033[33mChecking database configuration...\033[0m"
+
+    # Path to database credentials
+    CONFIG_FILE="/root/confmirza/dbrootmirza.txt"
+
+    if [ ! -f "$CONFIG_FILE" ]; then
+        echo -e "\033[31m[ERROR]\033[0m Database configuration file not found at $CONFIG_FILE."
+        return 1
+    fi
+
+    # Extract credentials
+    DB_USER=$(grep '\$user' "$CONFIG_FILE" | cut -d"'" -f2)
+    DB_PASS=$(grep '\$pass' "$CONFIG_FILE" | cut -d"'" -f2)
+    DB_NAME="mirzabot"  # Assuming the database name is fixed
+
+    echo -e "\033[33mVerifying database existence...\033[0m"
+
+    if ! mysql -u "$DB_USER" -p"$DB_PASS" -e "USE $DB_NAME;" 2>/dev/null; then
+        echo -e "\033[31m[ERROR]\033[0m Database $DB_NAME does not exist or credentials are incorrect."
+        return 1
+    fi
+
+    # Prompt for backup file location
+    read -p "Enter the path to the backup file [default: /root/${DB_NAME}_backup.sql]: " BACKUP_FILE
+    BACKUP_FILE=${BACKUP_FILE:-/root/${DB_NAME}_backup.sql}
+
+    if [ ! -f "$BACKUP_FILE" ]; then
+        echo -e "\033[31m[ERROR]\033[0m Backup file not found at $BACKUP_FILE."
+        return 1
+    fi
+
+    echo -e "\033[33mImporting backup from $BACKUP_FILE...\033[0m"
+
+    if ! mysql -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" < "$BACKUP_FILE"; then
+        echo -e "\033[31m[ERROR]\033[0m Failed to import database from backup file."
+        return 1
+    fi
+
+    echo -e "\033[32mDatabase successfully imported from $BACKUP_FILE.\033[0m"
+}
+
+# Function for automated backup
+function auto_backup() {
+    echo -e "\033[33mChecking database configuration...\033[0m"
+
+    CONFIG_FILE="/root/confmirza/dbrootmirza.txt"
+
+    if [ ! -f "$CONFIG_FILE" ]; then
+        echo -e "\033[31m[ERROR]\033[0m Database configuration file not found at $CONFIG_FILE."
+        return 1
+    fi
+
+    # Extract database credentials
+    DB_USER=$(grep '\$user' "$CONFIG_FILE" | cut -d"'" -f2)
+    DB_PASS=$(grep '\$pass' "$CONFIG_FILE" | cut -d"'" -f2)
+    DB_NAME="mirzabot"
+
+    echo -e "\033[33mVerifying database existence...\033[0m"
+
+    if ! mysql -u "$DB_USER" -p"$DB_PASS" -e "USE $DB_NAME;" 2>/dev/null; then
+        echo -e "\033[31m[ERROR]\033[0m Database $DB_NAME does not exist or credentials are incorrect."
+        return 1
+    fi
+
+    # Prompt user for backup frequency
+    echo -e "\033[36mChoose backup frequency:\033[0m"
+    echo -e "\033[36m1) Every minute\033[0m"
+    echo -e "\033[36m2) Every hour\033[0m"
+    echo -e "\033[36m3) Every day\033[0m"
+    read -p "Enter your choice (1-3): " frequency
+
+    case $frequency in
+        1) cron_time="* * * * *" ;;
+        2) cron_time="0 * * * *" ;;
+        3) cron_time="0 0 * * *" ;;
+        *)
+            echo -e "\033[31mInvalid option. Exiting...\033[0m"
+            return 1
+            ;;
+    esac
+
+    # Prompt user for Telegram bot token and chat ID
+    read -p "Enter your Telegram bot token: " TELEGRAM_TOKEN
+    if [ -z "$TELEGRAM_TOKEN" ]; then
+        echo -e "\033[31m[ERROR]\033[0m Telegram bot token cannot be empty."
+        return 1
+    fi
+
+    read -p "Enter your Telegram chat ID: " TELEGRAM_CHAT_ID
+    if [ -z "$TELEGRAM_CHAT_ID" ]; then
+        echo -e "\033[31m[ERROR]\033[0m Telegram chat ID cannot be empty."
+        return 1
+    fi
+
+    # Create backup script
+    BACKUP_SCRIPT="/root/auto_backup.sh"
+    cat <<EOF > "$BACKUP_SCRIPT"
+#!/bin/bash
+BACKUP_FILE="/root/\${DB_NAME}_\$(date +\"%Y%m%d_%H%M%S\").sql"
+if mysqldump -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" > "\$BACKUP_FILE"; then
+    FILE_SIZE=\$(stat -c%s "\$BACKUP_FILE")
+    if [ \$FILE_SIZE -gt 52428800 ]; then
+        echo -e "\033[31m[WARNING]\033[0m Backup file exceeds 50 MB and cannot be sent to Telegram."
+    else
+        curl -F document=@"\$BACKUP_FILE" "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendDocument" -F chat_id="$TELEGRAM_CHAT_ID"
+        # delete 
+        rm "\$BACKUP_FILE"
+        echo -e "\033[32mBackup sent and file removed.\033[0m"
+    fi
+else
+    echo -e "\033[31m[ERROR]\033[0m Failed to create database backup."
+fi
+EOF
+
+    chmod +x "$BACKUP_SCRIPT"
+
+    # Add cron job
+    (crontab -l 2>/dev/null; echo "$cron_time bash $BACKUP_SCRIPT") | crontab -
+    echo -e "\033[32mAutomated backup configured successfully.\033[0m"
 }
 
 # Execute Menu
