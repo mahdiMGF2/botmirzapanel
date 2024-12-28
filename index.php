@@ -1,6 +1,6 @@
 <?php
 ini_set('error_log', 'error_log');
-$version = "4.10.3";
+$version = "4.10.4";
 date_default_timezone_set('Asia/Tehran');
 require_once 'config.php';
 require_once 'botapi.php';
@@ -2411,13 +2411,19 @@ if ($text == "📊 آمار ربات") {
     $Balanceall =  select("user","SUM(Balance)",null,null,"select");
     $statistics = select("user","*",null,null,"count");
     $sumpanel = select("marzban_panel","*",null,null,"count");
-    $sql = "SELECT COUNT(*)  FROM invoice WHERE (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn') AND name_product != 'usertest'";
-    $stmt = $pdo->prepare($sql);
+    $sqlinvoice = "SELECT *  FROM invoice WHERE (Status = 'active' OR Status = 'end_of_time'  OR Status = 'end_of_volume' OR Status = 'sendedwarn') AND name_product != 'usertest'";
+    $stmt = $pdo->prepare($sqlinvoice);
     $stmt->execute();
     $invoice =$stmt->rowCount();
     $sql = "SELECT SUM(price_product)  FROM invoice WHERE (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn') AND name_product != 'usertest'";
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
+    $datefirstday = time() - 86400;
+    $sql = "SELECT SUM(price_product) FROM invoice WHERE time_sell > :time_sell AND (Status = 'active' OR Status = 'end_of_time'  OR Status = 'end_of_volume' OR status = 'sendedwarn') AND name_product != 'usertest'";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':time_sell', $datefirstday);
+    $stmt->execute();
+    $dayListSell = $stmt->rowCount();
     $invoicesum =$stmt->fetch(PDO::FETCH_ASSOC)['SUM(price_product)'];
     $count_usertest = select("invoice","*","name_product","usertest","count");
     $ping = sys_getloadavg();
@@ -2432,6 +2438,7 @@ if ($text == "📊 آمار ربات") {
 📌 تعداد اکانت های تست گرفته شده : $count_usertest نفر
 📌 تعداد فروش کل : $invoice عدد
 📌 جمع فروش کل : $invoicesum تومان
+📌 تعداد فروش یک روز گذشته : $dayListSell عدد
 📌 تعداد پنل ها : $sumpanel عدد";
     sendmessage($from_id, $statisticsall, null, 'HTML');
 }
@@ -4644,5 +4651,47 @@ if ($text == "⚙️ تنظیمات سرویس") {
     update("marzban_panel","proxies",json_encode($userdata['service_ids']),"name_panel",$user['Processing_value']);
     step("home",$from_id);
     sendmessage($from_id,"✅ اطلاعات با موفقیت تنظیم گردید", $optionMarzneshin, 'HTML');
+}
+elseif($text == "✏️ ویرایش آموزش"){
+    sendmessage($from_id,"📌 یک آموزش را انتخاب کنید.", $json_list_help, 'HTML');
+    step("getnameforedite",$from_id);
+}elseif($user['step'] == "getnameforedite"){
+    sendmessage($from_id, $textbotlang['users']['selectoption'], $helpedit, 'HTML');
+    update("user","Processing_value",$text, "id",$from_id);
+    step("home",$from_id);
+
+}
+elseif($text == "ویرایش نام") {
+    sendmessage($from_id, "نام جدید را ارسال کنید", $backadmin, 'HTML');
+    step('changenamehelp', $from_id);
+}elseif($user['step'] == "changenamehelp") {
+    if(strlen($text) >= 150){
+        sendmessage($from_id, "❌ نام آموزش باید کمتر از 150 کاراکتر باشد", null, 'HTML');
+        return;
+    }
+    update("help","name_os",$text,"name_os",$user['Processing_value']);
+    sendmessage($from_id, "✅ نام آموزش بروزرسانی شد", $json_list_helpkey, 'HTML');
+    step('home', $from_id);
+}elseif($text == "ویرایش توضیحات") {
+    sendmessage($from_id, "توضیحات جدید را ارسال کنید", $backadmin, 'HTML');
+    step('changedeshelp', $from_id);
+}elseif($user['step'] == "changedeshelp") {
+    update("help","Description_os",$text,"name_os",$user['Processing_value']);
+    sendmessage($from_id, "✅ توضیحات  آموزش بروزرسانی شد", $helpedit, 'HTML');
+    step('home', $from_id);
+}
+elseif($text == "ویرایش رسانه") {
+    sendmessage($from_id, "تصویر یا فیلم جدید را ارسال کنید", $backadmin, 'HTML');
+    step('changemedia', $from_id);
+}elseif($user['step'] == "changemedia") {
+    if ($photo) {
+        if(isset($photoid))update("help","Media_os",$photoid, "name_os",$user['Processing_value']);
+        update("help","type_Media_os","photo", "name_os",$user['Processing_value']);
+    }elseif($video) {
+        if(isset($videoid))update("help","Media_os",$videoid, "name_os",$user['Processing_value']);
+        update("help","type_Media_os","video", "name_os",$user['Processing_value']);
+    }
+    sendmessage($from_id, "✅ توضیحات  آموزش بروزرسانی شد", $helpedit, 'HTML');
+    step('home', $from_id);
 }
 $connect->close();

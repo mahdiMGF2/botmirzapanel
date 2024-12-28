@@ -24,20 +24,12 @@ function show_menu() {
     echo -e "\033[1;36m3)\033[0m Remove Mirza Bot"
     echo -e "\033[1;36m4)\033[0m Export Database"
     echo -e "\033[1;36m5)\033[0m Import Database"
-    echo -e "\033[1;36m6)\033[0m Configure Automated Backup"
-    echo -e "\033[1;36m7)\033[0m Renew SSL Certificates"
-    echo -e "\033[1;36m8)\033[0m Exit"
-    echo ""
-    read -p "Select an option [1-8]: " option
     case $option in
         1) install_bot ;;
         2) update_bot ;;
         3) remove_bot ;;
         4) export_database ;;
         5) import_database ;;
-        6) auto_backup ;;
-        7) renew_ssl ;;
-        8)
             echo -e "\033[32mExiting...\033[0m"
             exit 0
             ;;
@@ -680,6 +672,84 @@ function remove_bot() {
     sudo ufw reload
 
     echo -e "\e[92mMirza Bot, MySQL, and their dependencies have been completely removed.\033[0m" | tee -a "$LOG_FILE"
+}
+# Export Database Function
+function export_database() {
+    echo -e "\033[33mChecking database configuration...\033[0m"
+
+    # Path to database credentials
+    CONFIG_FILE="/root/confmirza/dbrootmirza.txt"
+
+    if [ ! -f "$CONFIG_FILE" ]; then
+        echo -e "\033[31m[ERROR]\033[0m Database configuration file not found at $CONFIG_FILE."
+        return 1
+    fi
+
+    # Extract credentials
+    DB_USER=$(grep '\$user' "$CONFIG_FILE" | cut -d"'" -f2)
+    DB_PASS=$(grep '\$pass' "$CONFIG_FILE" | cut -d"'" -f2)
+    DB_NAME="mirzabot"  # Assuming the database name is fixed
+
+    echo -e "\033[33mVerifying database existence...\033[0m"
+
+    if ! mysql -u "$DB_USER" -p"$DB_PASS" -e "USE $DB_NAME;" 2>/dev/null; then
+        echo -e "\033[31m[ERROR]\033[0m Database $DB_NAME does not exist or credentials are incorrect."
+        return 1
+    fi
+
+    # Create a backup
+    BACKUP_FILE="/root/${DB_NAME}_backup.sql"
+    echo -e "\033[33mCreating backup at $BACKUP_FILE...\033[0m"
+
+    if ! mysqldump -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" > "$BACKUP_FILE"; then
+        echo -e "\033[31m[ERROR]\033[0m Failed to create database backup."
+        return 1
+    fi
+
+    echo -e "\033[32mBackup successfully created at $BACKUP_FILE.\033[0m"
+}
+
+# Import Database Function
+function import_database() {
+    echo -e "\033[33mChecking database configuration...\033[0m"
+
+    # Path to database credentials
+    CONFIG_FILE="/root/confmirza/dbrootmirza.txt"
+
+    if [ ! -f "$CONFIG_FILE" ]; then
+        echo -e "\033[31m[ERROR]\033[0m Database configuration file not found at $CONFIG_FILE."
+        return 1
+    fi
+
+    # Extract credentials
+    DB_USER=$(grep '\$user' "$CONFIG_FILE" | cut -d"'" -f2)
+    DB_PASS=$(grep '\$pass' "$CONFIG_FILE" | cut -d"'" -f2)
+    DB_NAME="mirzabot"  # Assuming the database name is fixed
+
+    echo -e "\033[33mVerifying database existence...\033[0m"
+
+    if ! mysql -u "$DB_USER" -p"$DB_PASS" -e "USE $DB_NAME;" 2>/dev/null; then
+        echo -e "\033[31m[ERROR]\033[0m Database $DB_NAME does not exist or credentials are incorrect."
+        return 1
+    fi
+
+    # Prompt for backup file location
+    read -p "Enter the path to the backup file [default: /root/${DB_NAME}_backup.sql]: " BACKUP_FILE
+    BACKUP_FILE=${BACKUP_FILE:-/root/${DB_NAME}_backup.sql}
+
+    if [ ! -f "$BACKUP_FILE" ]; then
+        echo -e "\033[31m[ERROR]\033[0m Backup file not found at $BACKUP_FILE."
+        return 1
+    fi
+
+    echo -e "\033[33mImporting backup from $BACKUP_FILE...\033[0m"
+
+    if ! mysql -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" < "$BACKUP_FILE"; then
+        echo -e "\033[31m[ERROR]\033[0m Failed to import database from backup file."
+        return 1
+    fi
+
+    echo -e "\033[32mDatabase successfully imported from $BACKUP_FILE.\033[0m"
 }
 
 # Function to extract database credentials from config.php
