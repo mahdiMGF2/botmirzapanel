@@ -24,16 +24,12 @@ function show_menu() {
     echo -e "\033[1;36m3)\033[0m Remove Mirza Bot"
     echo -e "\033[1;36m4)\033[0m Export Database"
     echo -e "\033[1;36m5)\033[0m Import Database"
-    echo -e "\033[1;36m6)\033[0m Exit"
-    echo ""
-    read -p "Select an option [1-6]: " option
     case $option in
         1) install_bot ;;
         2) update_bot ;;
         3) remove_bot ;;
         4) export_database ;;
         5) import_database ;;
-        6)
             echo -e "\033[32mExiting...\033[0m"
             exit 0
             ;;
@@ -754,6 +750,170 @@ function import_database() {
     fi
 
     echo -e "\033[32mDatabase successfully imported from $BACKUP_FILE.\033[0m"
+}
+
+# Function to extract database credentials from config.php
+function extract_db_credentials() {
+    CONFIG_PATH="/var/www/html/mirzabotconfig/config.php"
+
+    if [ ! -f "$CONFIG_PATH" ]; then
+        echo -e "\033[31m[ERROR]\033[0m File config.php not found at $CONFIG_PATH."
+        return 1
+    fi
+
+    # Extracting credentials with more precision
+    DB_USER=$(grep '^\$usernamedb' "$CONFIG_PATH" | awk -F"'" '{print $2}')
+    DB_PASS=$(grep '^\$passworddb' "$CONFIG_PATH" | awk -F"'" '{print $2}')
+    DB_NAME=$(grep '^\$dbname' "$CONFIG_PATH" | awk -F"'" '{print $2}')
+
+    if [ -z "$DB_USER" ] || [ -z "$DB_PASS" ] || [ -z "$DB_NAME" ]; then
+        echo -e "\033[31m[ERROR]\033[0m Could not extract database credentials from config.php."
+        return 1
+    fi
+
+    # Add these lines to debug extracted variables
+    echo "DB_USER: $DB_USER"
+    echo "DB_PASS: $DB_PASS"
+    echo "DB_NAME: $DB_NAME"
+
+    export DB_USER DB_PASS DB_NAME
+    return 0
+}
+
+
+# Export Database Function
+function export_database() {
+    echo -e "\033[33mChecking database configuration...\033[0m"
+
+    if ! extract_db_credentials; then
+        return 1
+    fi
+
+    echo -e "\033[33mVerifying database existence...\033[0m"
+
+    if ! mysql -u "$DB_USER" -p"$DB_PASS" -e "USE $DB_NAME;" 2>/dev/null; then
+        echo -e "\033[31m[ERROR]\033[0m Database $DB_NAME does not exist or credentials are incorrect."
+        return 1
+    fi
+
+    BACKUP_FILE="/root/${DB_NAME}_backup.sql"
+    echo -e "\033[33mCreating backup at $BACKUP_FILE...\033[0m"
+
+    if ! mysqldump -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" > "$BACKUP_FILE"; then
+        echo -e "\033[31m[ERROR]\033[0m Failed to create database backup."
+        return 1
+    fi
+
+    echo -e "\033[32mBackup successfully created at $BACKUP_FILE.\033[0m"
+}
+
+# Import Database Function
+function import_database() {
+    echo -e "\033[33mChecking database configuration...\033[0m"
+
+    if ! extract_db_credentials; then
+        return 1
+    fi
+
+    echo -e "\033[33mVerifying database existence...\033[0m"
+
+    if ! mysql -u "$DB_USER" -p"$DB_PASS" -e "USE $DB_NAME;" 2>/dev/null; then
+        echo -e "\033[31m[ERROR]\033[0m Database $DB_NAME does not exist or credentials are incorrect."
+        return 1
+    fi
+
+    read -p "Enter the path to the backup file [default: /root/${DB_NAME}_backup.sql]: " BACKUP_FILE
+    BACKUP_FILE=${BACKUP_FILE:-/root/${DB_NAME}_backup.sql}
+
+    if [ ! -f "$BACKUP_FILE" ]; then
+        echo -e "\033[31m[ERROR]\033[0m Backup file not found at $BACKUP_FILE."
+        return 1
+    fi
+
+    echo -e "\033[33mImporting backup from $BACKUP_FILE...\033[0m"
+
+    if ! mysql -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" < "$BACKUP_FILE"; then
+        echo -e "\033[31m[ERROR]\033[0m Failed to import database from backup file."
+        return 1
+    fi
+
+    echo -e "\033[32mDatabase successfully imported from $BACKUP_FILE.\033[0m"
+}
+
+# Function for automated backup
+function auto_backup() {
+    echo -e "\033[33mChecking database configuration...\033[0m"
+
+    if ! extract_db_credentials; then
+        return 1
+    fi
+
+    echo -e "\033[33mVerifying database existence...\033[0m"
+
+    if ! mysql -u "$DB_USER" -p"$DB_PASS" -e "USE $DB_NAME;" 2>/dev/null; then
+        echo -e "\033[31m[ERROR]\033[0m Database $DB_NAME does not exist or credentials are incorrect."
+        return 1
+    fi
+
+    TELEGRAM_TOKEN=$(grep '\$APIKEY' "$CONFIG_PATH" | cut -d"'" -f2)
+    TELEGRAM_CHAT_ID=$(grep '\$adminnumber' "$CONFIG_PATH" | cut -d"'" -f2)
+
+    if [ -z "$TELEGRAM_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+        echo -e "\033[31m[ERROR]\033[0m Telegram token or chat ID not found in config.php."
+        return 1
+    fi
+
+    echo -e "\033[36mChoose backup frequency:\033[0m"
+    echo -e "\033[36m1) Every minute\033[0m"
+    echo -e "\033[36m2) Every hour\033[0m"
+    echo -e "\033[36m3) Every day\033[0m"
+    read -p "Enter your choice (1-3): " frequency
+
+    case $frequency in
+        1) cron_time="* * * * *" ;;
+        2) cron_time="0 * * * *" ;;
+        3) cron_time="0 0 * * *" ;;
+        *)
+            echo -e "\033[31mInvalid option. Exiting...\033[0m"
+            return 1
+            ;;
+    esac
+
+    BACKUP_SCRIPT="/root/auto_backup.sh"
+    cat <<EOF > "$BACKUP_SCRIPT"
+#!/bin/bash
+BACKUP_FILE="/root/\${DB_NAME}_\$(date +\"%Y%m%d_%H%M%S\").sql"
+if mysqldump -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" > "\$BACKUP_FILE"; then
+    curl -F document=@"\$BACKUP_FILE" "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendDocument" -F chat_id="$TELEGRAM_CHAT_ID"
+    rm "\$BACKUP_FILE"
+else
+    echo -e "\033[31m[ERROR]\033[0m Failed to create database backup."
+fi
+EOF
+
+    chmod +x "$BACKUP_SCRIPT"
+    (crontab -l 2>/dev/null; echo "$cron_time bash $BACKUP_SCRIPT") | crontab -
+    echo -e "\033[32mAutomated backup configured successfully.\033[0m"
+}
+
+# Function to renew SSL certificates
+function renew_ssl() {
+    echo -e "\033[33mStarting SSL renewal process...\033[0m"
+
+    if ! command -v certbot &>/dev/null; then
+        echo -e "\033[31m[ERROR]\033[0m Certbot is not installed. Please install Certbot to proceed."
+        return 1
+    fi
+
+    if sudo certbot renew; then
+        echo -e "\033[32mSSL certificates successfully renewed.\033[0m"
+        sudo systemctl reload apache2 || {
+            echo -e "\033[31m[WARNING]\033[0m Failed to reload Apache. Please check manually."
+        }
+    else
+        echo -e "\033[31m[ERROR]\033[0m SSL renewal failed. Please check Certbot logs for more details."
+        return 1
+    fi
 }
 
 # Execute Menu
