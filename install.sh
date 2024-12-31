@@ -311,10 +311,10 @@ echo " "
 echo -e "\e[32m SSL \033[0m\n"
 
 read -p "Enter the domain: " domainname
-if [ "$domainname" = "" ]; then
-    echo -e "\e[91mError: Domain name cannot be empty.\033[0m"
-    exit 1
-else
+while [[ ! "$domainname" =~ ^[a-zA-Z0-9.-]+$ ]]; do
+    echo -e "\e[91mInvalid domain format. Please try again.\033[0m"
+    read -p "Enter the domain: " domainname
+done
     DOMAIN_NAME="$domainname"
     PATHS=$(cat /root/confmirza/dbrootmirza.txt | grep '$path' | cut -d"'" -f2)
     sudo ufw allow 80 || {
@@ -369,6 +369,36 @@ else
         echo -e "\e[91mError: Failed to start Apache2.\033[0m"
         exit 1
     }
+            clear
+
+        printf "\e[33m[+] \e[36mBot Token: \033[0m"
+        read YOUR_BOT_TOKEN
+        while [[ ! "$YOUR_BOT_TOKEN" =~ ^[0-9]{8,10}:[a-zA-Z0-9_-]{35}$ ]]; do
+            echo -e "\e[91mInvalid bot token format. Please try again.\033[0m"
+            printf "\e[33m[+] \e[36mBot Token: \033[0m"
+            read YOUR_BOT_TOKEN
+        done
+
+        printf "\e[33m[+] \e[36mChat id: \033[0m"
+        read YOUR_CHAT_ID
+        while [[ ! "$YOUR_CHAT_ID" =~ ^-?[0-9]+$ ]]; do
+            echo -e "\e[91mInvalid chat ID format. Please try again.\033[0m"
+            printf "\e[33m[+] \e[36mChat id: \033[0m"
+            read YOUR_CHAT_ID
+        done
+
+        YOUR_DOMAIN="$DOMAIN_NAME"
+
+    while true; do
+        printf "\e[33m[+] \e[36musernamebot: \033[0m"
+        read YOUR_BOTNAME
+        if [ "$YOUR_BOTNAME" != "" ]; then
+            break
+        else
+            echo -e "\e[91mError: Bot username cannot be empty. Please enter a valid username.\033[0m"
+        fi
+    done
+
     ROOT_PASSWORD=$(cat /root/confmirza/dbrootmirza.txt | grep '$pass' | cut -d"'" -f2)
     ROOT_USER="root"
     echo "SELECT 1" | mysql -u$ROOT_USER -p$ROOT_PASSWORD 2>/dev/null || {
@@ -412,18 +442,7 @@ else
 
             clear
 
-            printf "\n\e[33m[+] \e[36mBot Token: \033[0m"
-            read YOUR_BOT_TOKEN
-            printf "\e[33m[+] \e[36mChat id: \033[0m"
-            read YOUR_CHAT_ID
-            printf "\e[33m[+] \e[36mDomain: \033[0m"
-            read YOUR_DOMAIN
-            printf "\e[33m[+] \e[36musernamebot: \033[0m"
-            read YOUR_BOTNAME
-            echo " "
-            if [ "$YOUR_BOT_TOKEN" = "" ] || [ "$YOUR_DOMAIN" = "" ] || [ "$YOUR_CHAT_ID" = "" ] || [ "$YOUR_BOTNAME" = "" ]; then
-               exit
-            fi
+
 
             ASAS="$"
 
@@ -520,7 +539,7 @@ echo -e "$text_to_save" >> /var/www/html/mirzabotconfig/config.php
 
     fi
 
-fi
+
 }
 # Update Function
 function update_bot() {
@@ -752,13 +771,16 @@ function import_database() {
         return 1
     fi
 
-    read -p "Enter the path to the backup file [default: /root/${DB_NAME}_backup.sql]: " BACKUP_FILE
-    BACKUP_FILE=${BACKUP_FILE:-/root/${DB_NAME}_backup.sql}
+    while true; do
+        read -p "Enter the path to the backup file [default: /root/${DB_NAME}_backup.sql]: " BACKUP_FILE
+        BACKUP_FILE=${BACKUP_FILE:-/root/${DB_NAME}_backup.sql}
 
-    if [ ! -f "$BACKUP_FILE" ]; then
-        echo -e "\033[31m[ERROR]\033[0m Backup file not found at $BACKUP_FILE."
-        return 1
-    fi
+        if [[ -f "$BACKUP_FILE" && "$BACKUP_FILE" =~ \.sql$ ]]; then
+            break
+        else
+            echo -e "\033[31m[ERROR]\033[0m Invalid file path or format. Please provide a valid .sql file."
+        fi
+    done
 
     echo -e "\033[33mImporting backup from $BACKUP_FILE...\033[0m"
 
@@ -793,21 +815,22 @@ function auto_backup() {
         return 1
     fi
 
-    echo -e "\033[36mChoose backup frequency:\033[0m"
-    echo -e "\033[36m1) Every minute\033[0m"
-    echo -e "\033[36m2) Every hour\033[0m"
-    echo -e "\033[36m3) Every day\033[0m"
-    read -p "Enter your choice (1-3): " frequency
+    while true; do
+        echo -e "\033[36mChoose backup frequency:\033[0m"
+        echo -e "\033[36m1) Every minute\033[0m"
+        echo -e "\033[36m2) Every hour\033[0m"
+        echo -e "\033[36m3) Every day\033[0m"
+        read -p "Enter your choice (1-3): " frequency
 
-    case $frequency in
-        1) cron_time="* * * * *" ;;
-        2) cron_time="0 * * * *" ;;
-        3) cron_time="0 0 * * *" ;;
-        *)
-            echo -e "\033[31mInvalid option. Exiting...\033[0m"
-            return 1
-            ;;
-    esac
+        case $frequency in
+            1) cron_time="* * * * *" ; break ;;
+            2) cron_time="0 * * * *" ; break ;;
+            3) cron_time="0 0 * * *" ; break ;;
+            *)
+                echo -e "\033[31mInvalid option. Please try again.\033[0m"
+                ;;
+        esac
+    done
 
     BACKUP_SCRIPT="/root/auto_backup.sh"
     cat <<EOF > "$BACKUP_SCRIPT"
