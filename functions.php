@@ -244,9 +244,12 @@ function DirectPayment($order_id){
             $output_config_link = $dataoutput['subscription_url'];
         }
         if ($marzban_list_get['configManual'] == "onconfig") {
-            foreach ($dataoutput['configs'] as $configs) {
-                $config .= "\n\n" . $configs;
+            if(isset($dataoutput['configs']) and count($dataoutput['configs']) !=0){
+                $config .= "\n" . $configs;
                 $configqr .= $configs;
+            }else{
+                $config = "";
+                $configqr = "";
             }
         }
         $Shoppinginfo = json_encode($Shoppinginfo);
@@ -408,4 +411,29 @@ function savedata($type,$namefiled,$valuefiled){
         $dataperevieos[$namefiled] = $valuefiled;
         update("user","Processing_value",json_encode($dataperevieos),"id",$from_id);
     }
+}
+function sanitizeUserName($userName) {
+    $forbiddenCharacters = [
+        "'", "\"", "<", ">", "--", "#", ";", "\\", "%", "(", ")"
+    ];
+
+    foreach ($forbiddenCharacters as $char) {
+        $userName = str_replace($char, "", $userName);
+    }
+
+    return $userName;
+}
+function checktelegramip(){
+    $telegram_ip_ranges = [
+        ['lower' => '149.154.160.0', 'upper' => '149.154.175.255'],
+        ['lower' => '91.108.4.0',    'upper' => '91.108.7.255']
+    ];
+    $ip_dec = (float) sprintf("%u", ip2long($_SERVER['REMOTE_ADDR']));
+    $ok = false;
+    foreach ($telegram_ip_ranges as $telegram_ip_range) if (!$ok) {
+        $lower_dec = (float) sprintf("%u", ip2long($telegram_ip_range['lower']));
+        $upper_dec = (float) sprintf("%u", ip2long($telegram_ip_range['upper']));
+        if ($ip_dec >= $lower_dec and $ip_dec <= $upper_dec) $ok = true;
+    }
+    return $ok;
 }

@@ -1,22 +1,22 @@
 <?php
 require_once 'functions.php';
 #-----------------------------#
-function token_panel($url_panel,$username_panel,$password_panel){
-    $panel = select("marzban_panel","*","url_panel",$url_panel,"select");
+function token_panel($code_panel){
+    $panel = select("marzban_panel","*","id",$code_panel,"select");
     if($panel['datelogin'] != null){
         $date = json_decode($panel['datelogin'],true);
         if(isset($date['time'])){
-        $timecurrent = time();
-        $start_date = time() - strtotime($date['time']);
-        if($start_date <= 600){
-            return $date;
-        }
+            $timecurrent = time();
+            $start_date = time() - strtotime($date['time']);
+            if($start_date <= 600){
+                return $date;
+            }
         }
     }
-    $url_get_token = $url_panel.'/api/admin/token';
+    $url_get_token = $panel['url_panel'].'/api/admin/token';
     $data_token = array(
-        'username' => $username_panel,
-        'password' => $password_panel
+        'username' => $panel['username_panel'],
+        'password' => $panel['password_panel']
     );
     $options = array(
         CURLOPT_RETURNTRANSFER => true,
@@ -44,7 +44,7 @@ function token_panel($url_panel,$username_panel,$password_panel){
         $data = json_encode(array(
             'time' => $time,
             'access_token' => $body['access_token']
-            ));
+        ));
         update("marzban_panel","datelogin",$data,'name_panel',$panel['name_panel']);
     }
     return $body;
@@ -55,7 +55,7 @@ function token_panel($url_panel,$username_panel,$password_panel){
 function getuser($usernameac,$location)
 {
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $location,"select");
-    $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
+    $Check_token = token_panel($marzban_list_get['id']);
     $url =  $marzban_list_get['url_panel'].'/api/user/' . $usernameac;
     $header_value = 'Bearer ';
 
@@ -77,7 +77,7 @@ function getuser($usernameac,$location)
 function ResetUserDataUsage($usernameac,$location)
 {
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $location,"select");
-    $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
+    $Check_token = token_panel($marzban_list_get['id']);
     $url =  $marzban_list_get['url_panel'].'/api/user/' . $usernameac.'/reset';
     $header_value = 'Bearer ';
 
@@ -99,30 +99,17 @@ function ResetUserDataUsage($usernameac,$location)
 function adduser($username,$expire,$data_limit,$location)
 {
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $location,"select");
-    $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
+    $Check_token = token_panel($marzban_list_get['id']);
     $url = $marzban_list_get['url_panel']."/api/user";
-    $nameprotocol = array();
-if(isset($marzban_list_get['vless']) && $marzban_list_get['vless'] == "onvless"){
-    $nameprotocol['vless'] = array();
-}
-if(isset($marzban_list_get['vmess']) && $marzban_list_get['vmess'] == "onvmess"){
-    $nameprotocol['vmess'] = array();
-}
-if(isset($marzban_list_get['trojan']) && $marzban_list_get['trojan'] == "ontrojan"){
-    $nameprotocol['trojan'] = array();
-}
-if(isset($marzban_list_get['shadowsocks']) && $marzban_list_get['shadowsocks'] == "onshadowsocks"){
-    $nameprotocol['shadowsocks'] = array();
-}
-if(isset($nameprotocol['vless']) && $marzban_list_get['flow'] == "flowon"){
-    $nameprotocol['vless']['flow'] = 'xtls-rprx-vision';
-}
     $header_value = 'Bearer ';
     $data = array(
-        "proxies" => $nameprotocol,
+        "proxies" => json_decode($marzban_list_get['proxies'],true),
         "data_limit" => $data_limit,
         "username" => $username
     );
+    if($marzban_list_get['inbounds'] != null and $marzban_list_get['inbounds'] != "null"){
+        $data['inbounds'] = json_decode($marzban_list_get['inbounds'],true);
+    }
     if($expire == "0"){
         $data['expire'] = 0;
     }else {
@@ -131,7 +118,7 @@ if(isset($nameprotocol['vless']) && $marzban_list_get['flow'] == "flowon"){
             $data["status"] = "on_hold";
             $data["on_hold_expire_duration"] = $expire - time();
         }else{
-        $data['expire'] = $expire;
+            $data['expire'] = $expire;
         }
     }
     $payload = json_encode($data);
@@ -155,7 +142,7 @@ if(isset($nameprotocol['vless']) && $marzban_list_get['flow'] == "flowon"){
 //----------------------------------
 function Get_System_Stats($location){
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $location,"select");
-    $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
+    $Check_token = token_panel($marzban_list_get['id']);
     $url =  $marzban_list_get['url_panel'].'/api/system';
     $header_value = 'Bearer ';
 
@@ -177,7 +164,7 @@ function Get_System_Stats($location){
 function removeuser($location,$username)
 {
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $location,"select");
-    $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
+    $Check_token = token_panel($marzban_list_get['id']);
     $url =  $marzban_list_get['url_panel'].'/api/user/'.$username;
     $header_value = 'Bearer ';
 
@@ -200,23 +187,23 @@ function removeuser($location,$username)
 function Modifyuser($location,$username,array $data)
 {
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $location,"select");
-    $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
+    $Check_token = token_panel($marzban_list_get['id']);
     $url =  $marzban_list_get['url_panel'].'/api/user/'.$username;
     $payload = json_encode($data);
-$ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, $url);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
-curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-$headers = array();
-$headers[] = 'Accept: application/json';
-$headers[] = 'Authorization: Bearer '.$Check_token['access_token'];
-$headers[] = 'Content-Type: application/json';
-curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+    $headers = array();
+    $headers[] = 'Accept: application/json';
+    $headers[] = 'Authorization: Bearer '.$Check_token['access_token'];
+    $headers[] = 'Content-Type: application/json';
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
-$result = curl_exec($ch);
-curl_close($ch);
-     $data_useer = json_decode($result, true);
+    $result = curl_exec($ch);
+    curl_close($ch);
+    $data_useer = json_decode($result, true);
     return $data_useer;
 }
 
@@ -225,7 +212,7 @@ function revoke_sub($username,$location)
 {
     global $connect;
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $location,"select");
-    $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
+    $Check_token = token_panel($marzban_list_get['id']);
     $usernameac = $username;
     $url =  $marzban_list_get['url_panel'].'/api/user/' . $usernameac.'/revoke_sub';
     $header_value = 'Bearer ';

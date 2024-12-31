@@ -319,19 +319,15 @@ try {
         password_panel varchar(200) NULL,
         status varchar(100) NULL,
         statusTest varchar(100) NULL,
-        vmess varchar(200) NULL,
-        vless varchar(200) NULL,
-        trojan varchar(200) NULL,
-        shadowsocks varchar(200) NULL,
         type varchar(200) NULL,
         linksubx varchar(500) NULL,
         inboundid varchar(200) NULL,
-        flow varchar(200)  NULL,
         MethodUsername varchar(900)  NULL,
         sublink varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
         configManual varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
         onholdstatus varchar(200) NULL,
         datelogin TEXT NULL,
+        inbounds TEXT NULL,
         proxies TEXT NULL)
         ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin");
         if (!$result) {
@@ -343,6 +339,11 @@ try {
         if (mysqli_num_rows($Check_filde) != 1) {
             $connect->query("ALTER TABLE marzban_panel ADD datelogin TEXT");
             echo "The datelogin field was added ✅";
+        }
+        $Check_filde = $connect->query("SHOW COLUMNS FROM marzban_panel LIKE 'inbounds'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE marzban_panel ADD inbounds TEXT");
+            echo "The inbounds field was added ✅";
         }
         $Check_filde = $connect->query("SHOW COLUMNS FROM marzban_panel LIKE 'proxies'");
         if (mysqli_num_rows($Check_filde) != 1) {

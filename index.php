@@ -1,6 +1,6 @@
 <?php
 ini_set('error_log', 'error_log');
-$version = "4.10.4";
+$version = "4.11.0";
 date_default_timezone_set('Asia/Tehran');
 require_once 'config.php';
 require_once 'botapi.php';
@@ -16,23 +16,10 @@ use Endroid\QrCode\ErrorCorrectionLevel;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\RoundBlockSizeMode;
 use Endroid\QrCode\Writer\PngWriter;
-
+$first_name = sanitizeUserName($first_name);
+if(!in_array($Chat_type,["private","supergroup"]))return;
 #-----------telegram_ip_ranges------------#
-$telegram_ip_ranges = [
-    ['lower' => '149.154.160.0', 'upper' => '149.154.175.255'],
-    ['lower' => '91.108.4.0', 'upper' => '91.108.7.255']
-];
-$ip_dec = (float) sprintf("%u", ip2long($_SERVER['REMOTE_ADDR']));
-$ok = false;
-foreach ($telegram_ip_ranges as $telegram_ip_range)
-    if (!$ok) {
-        $lower_dec = (float) sprintf("%u", ip2long($telegram_ip_range['lower']));
-        $upper_dec = (float) sprintf("%u", ip2long($telegram_ip_range['upper']));
-        if ($ip_dec >= $lower_dec and $ip_dec <= $upper_dec)
-            $ok = true;
-    }
-if (!$ok)
-    die ("دسترسی غیرمجاز");
+if (!checktelegramip()) die("دسترسی غیرمجاز");
 #-------------Variable----------#
 $users_ids = select("user", "id",null,null,"FETCH_COLUMN");
 $setting = select("setting", "*");
@@ -54,7 +41,7 @@ if(!in_array($from_id,$users_ids) && intval($from_id) != 0){
     }
 }
 
-if ($from_id != "0") {
+if (intval($from_id) != 0) {
     $stmt = $pdo->prepare("INSERT IGNORE INTO user (id, step, limit_usertest, User_Status, number, Balance, pagenumber, username, message_count, last_message_time, affiliatescount, affiliates) VALUES (:from_id, 'none', :limit_usertest_all, 'Active', 'none', '0', '1', :username, '0', '0', '0', '0')");
     $stmt->bindParam(':from_id', $from_id);
     $stmt->bindParam(':limit_usertest_all', $setting['limit_usertest_all']);
@@ -139,9 +126,9 @@ if ($user['username'] == "none" || $user['username'] == null) {
 #-----------User_Status------------#
 if ($user['User_Status'] == "block") {
     $textblock = "
-                   🚫 شما از طرف مدیریت بلاک شده اید.
+🚫 شما از طرف مدیریت بلاک شده اید.
                     
-                ✍️ دلیل مسدودی: {$user['description_blocking']}
+✍️ دلیل مسدودی: {$user['description_blocking']}
                     ";
     sendmessage($from_id, $textblock, null, 'html');
     return;
@@ -338,7 +325,7 @@ if ($text == $datatextbot['text_Purchased_services'] || $datain == "backorder" |
     }
     $usernotlist = [
         [
-            'text' => "🔍 نام کاربری من در لیست نیست",
+            'text' => $textbotlang['Admin']['Status']['notusenameinbot'],
             'callback_data' => 'usernotlist'
         ]
     ];
@@ -485,7 +472,7 @@ if ($datain == 'next_page') {
     ];
     $usernotlist = [
         [
-            'text' => "🔍 نام کاربری من در لیست نیست",
+            'text' => $textbotlang['Admin']['Status']['notusenameinbot'],
             'callback_data' => 'usernotlist'
         ]
     ];
@@ -531,7 +518,7 @@ if ($datain == 'next_page') {
     ];
     $usernotlist = [
         [
-            'text' => "🔍 نام کاربری من در لیست نیست",
+            'text' => $textbotlang['Admin']['Status']['notusenameinbot'],
             'callback_data' => 'usernotlist'
         ]
     ];
@@ -1617,8 +1604,13 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
     }
     if ($marzban_list_get['configManual'] == "onconfig") {
         foreach ($dataoutput['configs'] as $configs) {
-            $config .= "\n" . $configs;
-            $configqr .= $configs;
+            if(isset($dataoutput['configs']) and count($dataoutput['configs']) !=0){
+                $config .= "\n" . $configs;
+                $configqr .= $configs;
+            }else{
+                $config = "";
+                $configqr = "";
+            }
         }
         $text_config = "<code>$config</code>";
     }
@@ -2403,6 +2395,7 @@ if ($text == "📊 آمار ربات") {
     $datefirst = $current_date_time - 86400;
     $desired_date_time_start = $current_date_time - 3600;
     $month_date_time_start = $current_date_time - 2592000;
+    $datefirstday = time() - 86400;
     $dateacc = jdate('Y/m/d');
     $sql = "SELECT * FROM invoice WHERE  (Status = 'active' OR Status = 'end_of_time'  OR Status = 'end_of_volume' OR status = 'sendedwarn') AND name_product != 'usertest'";
     $stmt = $pdo->prepare($sql);
@@ -2418,13 +2411,12 @@ if ($text == "📊 آمار ربات") {
     $sql = "SELECT SUM(price_product)  FROM invoice WHERE (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn') AND name_product != 'usertest'";
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
-    $datefirstday = time() - 86400;
+    $invoicesum =$stmt->fetch(PDO::FETCH_ASSOC)['SUM(price_product)'];
     $sql = "SELECT SUM(price_product) FROM invoice WHERE time_sell > :time_sell AND (Status = 'active' OR Status = 'end_of_time'  OR Status = 'end_of_volume' OR status = 'sendedwarn') AND name_product != 'usertest'";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':time_sell', $datefirstday);
     $stmt->execute();
     $dayListSell = $stmt->rowCount();
-    $invoicesum =$stmt->fetch(PDO::FETCH_ASSOC)['SUM(price_product)'];
     $count_usertest = select("invoice","*","name_product","usertest","count");
     $ping = sys_getloadavg();
     $ping = number_format(floatval($ping[0]),2);
@@ -2446,7 +2438,7 @@ if ($text == "📊 آمار ربات") {
 if ($text == "🔌 وضعیت اتصال پنل") {
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
     if ($marzban_list_get['type'] == "marzban") {
-        $Check_token = token_panel($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
+        $Check_token = token_panel($marzban_list_get['id']);
         if (isset ($Check_token['access_token'])) {
             $System_Stats = Get_System_Stats($user['Processing_value']);
             $active_users = $System_Stats['users_active'];
@@ -2536,18 +2528,14 @@ if ($text == "🖥  اضافه کردن پنل") {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['Repeatpanel'], $backadmin, 'HTML');
         return;
     }
-    $vless = "onvless";
-    $vmess = "offvmess";
-    $trojan = "offtrojan";
-    $shadowsocks = "offshadowsocks";
     $inboundid = "0";
     $sublink = "onsublink";
     $config = "offconfig";
     $valusername = "آیدی عددی + حروف و عدد رندوم";
     $valueteststatus = "ontestshowpanel";
     $stauts = "activepanel";
-    $stmt = $pdo->prepare("INSERT INTO marzban_panel (name_panel, vless, vmess, trojan, shadowsocks,inboundid,sublink,configManual,MethodUsername,statusTest,status) VALUES (?, ?, ?, ?, ?,?,?,?,?,?,?)");
-    $stmt->execute([$text, $vless, $vmess, $trojan, $shadowsocks, $inboundid, $sublink, $config,$valusername,$valueteststatus,$stauts]);
+    $stmt = $pdo->prepare("INSERT INTO marzban_panel (name_panel,inboundid,sublink,configManual,MethodUsername,statusTest,status) VALUES (?, ?, ?, ?, ?,?,?)");
+    $stmt->execute([$text, $inboundid, $sublink, $config,$valusername,$valueteststatus,$stauts]);
     sendmessage($from_id, $textbotlang['Admin']['managepanel']['addpanelurl'], $backadmin, 'HTML');
     step('add_link_panel', $from_id);
     update("user", "Processing_value", $text, "id", $from_id);
@@ -2899,46 +2887,6 @@ if ($text == "📡 وضعیت ربات") {
 } elseif ($datain == "❌ ربات خاموش است") {
     update("setting", "Bot_Status", "✅  ربات روشن است");
     Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['BotStatuson'], null);
-}
-
-//_________________________________________________
-if ($text == "🍀 قابلیت flow") {
-    $panel = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
-    if ($panel['flow'] == null) {
-        update("marzban_panel", "flow", "offflow", "name_panel", $user['Processing_value']);
-    }
-    $panel = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
-    $flow_Status = json_encode([
-        'inline_keyboard' => [
-            [
-                ['text' => $panel['flow'], 'callback_data' => $panel['flow']],
-            ],
-        ]
-    ]);
-    sendmessage($from_id, $textbotlang['Admin']['Status']['flow'], $flow_Status, 'HTML');
-}
-if ($datain == "flowon") {
-    update("marzban_panel", "flow", "offflow", "name_panel", $user['Processing_value']);
-    $panel = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
-    $flow_Status = json_encode([
-        'inline_keyboard' => [
-            [
-                ['text' => $panel['flow'], 'callback_data' => $panel['flow']],
-            ],
-        ]
-    ]);
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['flowStatusOff'], $flow_Status);
-} elseif ($datain == "offflow") {
-    update("marzban_panel", "flow", "flowon", "name_panel", $user['Processing_value']);
-    $panel = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
-    $flow_Status = json_encode([
-        'inline_keyboard' => [
-            [
-                ['text' => $panel['flow'], 'callback_data' => $panel['flow']],
-            ],
-        ]
-    ]);
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['flowStatuson'], $flow_Status);
 }
 //_________________________________________________
 if ($text == "👁‍🗨 وضعیت نمایش پنل") {
@@ -3959,141 +3907,7 @@ if ($text == "✏️ مدیریت پنل") {
     sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedurlPanel'], $optionX_ui_single, 'HTML');
     update("marzban_panel", "linksubx", $text, "name_panel", $user['Processing_value']);
     step('home', $from_id);
-} elseif ($text == "⚙️ تنظیمات پروتکل") {
-    sendmessage($from_id, $textbotlang['Admin']['managepanel']['settingprotocol'], $keyboardprotocol, 'HTML');
-} elseif ($text == "vless") {
-    $marzbanprotocol = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
-    $vless = json_encode([
-        'inline_keyboard' => [
-            [
-                ['text' => $marzbanprotocol['vless'], 'callback_data' => $marzbanprotocol['vless']],
-            ],
-        ]
-    ]);
-
-    sendmessage($from_id, $textbotlang['Admin']['managepanel']['staatusprotocol'], $vless, 'HTML');
-} elseif ($datain == "onvless") {
-    update("marzban_panel", "vless", "offvless", "name_panel", $user['Processing_value']);
-    $marzbanprotocol = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
-    $vless = json_encode([
-        'inline_keyboard' => [
-            [
-                ['text' => $marzbanprotocol['vless'], 'callback_data' => $marzbanprotocol['vless']],
-            ],
-        ]
-    ]);
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['managepanel']['onprotocol'], $vless);
-} elseif ($datain == "offvless") {
-    update("marzban_panel", "vless", "onvless", "name_panel", $user['Processing_value']);
-    $marzbanprotocol = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
-    $vless = json_encode([
-        'inline_keyboard' => [
-            [
-                ['text' => $marzbanprotocol['vless'], 'callback_data' => $marzbanprotocol['vless']],
-            ],
-        ]
-    ]);
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['managepanel']['offprotocol'], $vless);
-} elseif ($text == "vmess") {
-    $marzbanprotocol = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
-    $vmess = json_encode([
-        'inline_keyboard' => [
-            [
-                ['text' => $marzbanprotocol['vmess'], 'callback_data' => $marzbanprotocol['vmess']],
-            ],
-        ]
-    ]);
-
-    sendmessage($from_id, $textbotlang['Admin']['managepanel']['staatusprotocol'], $vmess, 'HTML');
-} elseif ($datain == "onvmess") {
-    update("marzban_panel", "vmess", "offvmess", "name_panel", $user['Processing_value']);
-    $marzbanprotocol = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
-    $vmess = json_encode([
-        'inline_keyboard' => [
-            [
-                ['text' => $marzbanprotocol['vmess'], 'callback_data' => $marzbanprotocol['vmess']],
-            ],
-        ]
-    ]);
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['managepanel']['onprotocol'], $vmess);
-} elseif ($datain == "offvmess") {
-    update("marzban_panel", "vmess", "onvmess", "name_panel", $user['Processing_value']);
-    $marzbanprotocol = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
-    $vmess = json_encode([
-        'inline_keyboard' => [
-            [
-                ['text' => $marzbanprotocol['vmess'], 'callback_data' => $marzbanprotocol['vmess']],
-            ],
-        ]
-    ]);
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['managepanel']['offprotocol'], $vmess);
-} elseif ($text == "trojan") {
-    $marzbanprotocol = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
-    $trojan = json_encode([
-        'inline_keyboard' => [
-            [
-                ['text' => $marzbanprotocol['trojan'], 'callback_data' => $marzbanprotocol['trojan']],
-            ],
-        ]
-    ]);
-
-    sendmessage($from_id, $textbotlang['Admin']['managepanel']['staatusprotocol'], $trojan, 'HTML');
-} elseif ($datain == "ontrojan") {
-    update("marzban_panel", "trojan", "offtrojan", "name_panel", $user['Processing_value']);
-    $marzbanprotocol = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
-    $trojan = json_encode([
-        'inline_keyboard' => [
-            [
-                ['text' => $marzbanprotocol['trojan'], 'callback_data' => $marzbanprotocol['trojan']],
-            ],
-        ]
-    ]);
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['managepanel']['onprotocol'], $trojan);
-} elseif ($datain == "offtrojan") {
-    update("marzban_panel", "trojan", "ontrojan", "name_panel", $user['Processing_value']);
-    $marzbanprotocol = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
-    $trojan = json_encode([
-        'inline_keyboard' => [
-            [
-                ['text' => $marzbanprotocol['trojan'], 'callback_data' => $marzbanprotocol['trojan']],
-            ],
-        ]
-    ]);
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['managepanel']['offprotocol'], $trojan);
-} elseif ($text == "shadowsocks") {
-    $marzbanprotocol = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
-    $shadowsocks = json_encode([
-        'inline_keyboard' => [
-            [
-                ['text' => $marzbanprotocol['shadowsocks'], 'callback_data' => $marzbanprotocol['shadowsocks']],
-            ],
-        ]
-    ]);
-
-    sendmessage($from_id, $textbotlang['Admin']['managepanel']['staatusprotocol'], $shadowsocks, 'HTML');
-} elseif ($datain == "onshadowsocks") {
-    update("marzban_panel", "shadowsocks", "offshadowsocks", "name_panel", $user['Processing_value']);
-    $marzbanprotocol = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
-    $shadowsocks = json_encode([
-        'inline_keyboard' => [
-            [
-                ['text' => $marzbanprotocol['shadowsocks'], 'callback_data' => $marzbanprotocol['shadowsocks']],
-            ],
-        ]
-    ]);
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['managepanel']['onprotocol'], $shadowsocks);
-} elseif ($datain == "offshadowsocks") {
-    update("marzban_panel", "shadowsocks", "onshadowsocks", "name_panel", $user['Processing_value']);
-    $marzbanprotocol = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
-    $shadowsocks = json_encode([
-        'inline_keyboard' => [
-            [
-                ['text' => $marzbanprotocol['shadowsocks'], 'callback_data' => $marzbanprotocol['shadowsocks']],
-            ],
-        ]
-    ]);
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['managepanel']['offprotocol'], $shadowsocks);
-} elseif ($user['step'] == "GetpaawordNew") {
+}elseif ($user['step'] == "GetpaawordNew") {
     sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedpasswordPanel'], $optionMarzban, 'HTML');
     update("marzban_panel", "password_panel", $text, "name_panel", $user['Processing_value']);
     step('home', $from_id);
@@ -4693,5 +4507,41 @@ elseif($text == "ویرایش رسانه") {
     }
     sendmessage($from_id, "✅ توضیحات  آموزش بروزرسانی شد", $helpedit, 'HTML');
     step('home', $from_id);
+}elseif($text == "⚙️ تنظیم پروتکل و اینباند"){
+    $textsetprotocol = "📌 برای تنظیم اینباند  و پروتکل باید یک کانفیگ در پنل خود ساخته و  پروتکل و اینباند هایی که میخواهید فعال باشند. را داخل پنل فعال کرده و نام کاربری کانفیگ را ارسال نمایید
+    
+⚠️ در صورتی که ادمین غیرسودو هستید بجای ارسال نام کاربری  یک لینک ساب ارسال نمایید";
+    sendmessage($from_id, $textsetprotocol, $backadmin, 'HTML');
+    step("setinboundandprotocol",$from_id);
+}elseif($user['step'] == "setinboundandprotocol"){
+    if (filter_var($text, FILTER_VALIDATE_URL)) {
+        $data = json_decode(outputlunk("$text/info"),true);
+        if(!isset($data['proxies'])){
+            sendmessage($from_id, "❌ لینک ساب نامعتبر است", null, 'html');
+            return;
+        }
+        $DataUserOut = $data;
+    }else{
+        $DataUserOut = getuser($text,$user['Processing_value']);
+    }
+    if ((isset($DataUserOut['msg']) && $DataUserOut['msg'] == "User not found") or !isset($DataUserOut['proxies'])) {
+        sendmessage($from_id, $textbotlang['users']['stateus']['UserNotFound'], null, 'html');
+        return;
+    }
+    foreach ($DataUserOut['proxies'] as $key => &$value){
+        if($key == "shadowsocks"){
+            unset($DataUserOut['proxies'][$key]['password']);
+        }
+        elseif($key == "trojan"){
+            unset($DataUserOut['proxies'][$key]['password']);
+        }
+        else{
+            unset($DataUserOut['proxies'][$key]['id']);
+        }
+    }
+    update("marzban_panel","inbounds",json_encode($DataUserOut['inbounds']),"name_panel",$user['Processing_value']);
+    update("marzban_panel","proxies",json_encode($DataUserOut['proxies']),"name_panel",$user['Processing_value']);
+    sendmessage($from_id, "✅ اینباند و پروتکل های شما با موفقیت تنظیم گردیدند.", $optionMarzban, 'HTML');
+    step("home",$from_id);
 }
 $connect->close();

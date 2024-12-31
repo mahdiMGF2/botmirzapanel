@@ -306,10 +306,6 @@ $textbotlang['Admin']['managepanel']['getusernamenew'] = " نام کاربری �
 $textbotlang['Admin']['managepanel']['ChangedusernamePanel'] = "✅ نام کاربری پنل با موفقیت تغییر کرد.";
 $textbotlang['Admin']['managepanel']['getpasswordnew'] = "رمز عبور جدید پنل را ارسال کنید";
 $textbotlang['Admin']['managepanel']['ChangedpasswordPanel'] = "✅ رمز عبور پنل با موفقیت تغییر کرد.";
-$textbotlang['Admin']['managepanel']['settingprotocol'] = "برای فعالسازی یا غیرفعالسازی پروتکل  یکی از گزینه های زیر را انتخاب کنید";
-$textbotlang['Admin']['managepanel']['staatusprotocol'] = "وضعیت پروتکل را انتخاب کنید";
-$textbotlang['Admin']['managepanel']['onprotocol'] = "پروتکل با موفقیت خاموش شد";
-$textbotlang['Admin']['managepanel']['offprotocol'] = "پروتکل با موفقیت روشن شد";
 
 
 
@@ -386,12 +382,9 @@ $textbotlang['Admin']['Help']['RemoveHelp'] = "✅ آموزش حذف گردید.
 
 $textbotlang['Admin']['Status']['btn'] ="📈 آمار ربات شما";
 $textbotlang['Admin']['Status']['BotTitle'] = "وضعیت ربات";
-$textbotlang['Admin']['Status']['flow'] = "وضعیت فعال بودن قابلیت flow";
 $textbotlang['Admin']['Status']['onhold'] = "وضعیت قابلیت اولین اتصال سرویس";
 $textbotlang['Admin']['Status']['onstatus'] = "روشن شد";
 $textbotlang['Admin']['Status']['offstatus'] = "خاموش شد";
-$textbotlang['Admin']['Status']['flowStatusOff'] = "flow غیرفعال شد";
-$textbotlang['Admin']['Status']['flowStatuson'] = "flow روشن شد";
 $textbotlang['Admin']['Status']['BotStatusOff'] = "❌ ربات خاموش گردید ";
 $textbotlang['Admin']['Status']['BotStatuson'] = "🤖 ربات روشن گردید";
 $textbotlang['Admin']['Status']['UsernameTitle'] = "وضعیت دکمه نام کاربری
@@ -446,6 +439,7 @@ $textbotlang['Admin']['Status']['commissionStatuson'] = "قابلیت پورسا
 $textbotlang['Admin']['Status']['Discountaffiliates'] = "وضعیت فعال بودن قابلیت هدیه";
 $textbotlang['Admin']['Status']['DiscountaffiliatesStatusOff'] = "قابلیت هدیه غیرفعال شد";
 $textbotlang['Admin']['Status']['DiscountaffiliatesStatuson'] = "قابلیت هدیه فعال شد";
+$textbotlang['Admin']['Status']['notusenameinbot'] = "🔍 نام کاربری من در لیست نیست";
 
 
 $textbotlang['Admin']['phone']['notactive'] = "🛑شماره موبایل تایید نشده است🛑";

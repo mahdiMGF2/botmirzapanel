@@ -21,8 +21,8 @@ function sendmessage($chat_id,$text,$keyboard,$parse_mode){
         'disable_web_page_preview' => true,
         'reply_markup' => $keyboard,
         'parse_mode' => $parse_mode,
-        
-        ]);
+
+    ]);
 }
 
 function forwardMessage($chat_id,$message_id,$chat_id_user){
@@ -55,16 +55,16 @@ function Editmessagetext($chat_id, $message_id, $text, $keyboard){
         'reply_markup' => $keyboard
     ]);
 }
- function deletemessage($chat_id, $message_id){
-  telegram('deletemessage', [
-'chat_id' => $chat_id, 
-'message_id' => $message_id,
-]);
- }
+function deletemessage($chat_id, $message_id){
+    telegram('deletemessage', [
+        'chat_id' => $chat_id,
+        'message_id' => $message_id,
+    ]);
+}
 #-----------------------------#
 $update = json_decode(file_get_contents("php://input"), true);
 $from_id = $update['message']['from']['id'] ?? $update['callback_query']['from']['id'] ?? 0;
-$Chat_type = $update["message"]["chat"]["type"] ?? '';
+$Chat_type = $update["message"]["chat"]["type"] ?? $update['callback_query']['message']['chat']['type'] ?? '';
 $text = $update["message"]["text"] ?? '';
 $text_callback = $update["callback_query"]["message"]["text"] ?? '';
 $message_id = $update["message"]["message_id"] ?? $update["callback_query"]["message"]["message_id"] ?? 0;
