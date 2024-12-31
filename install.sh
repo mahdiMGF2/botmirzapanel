@@ -24,12 +24,20 @@ function show_menu() {
     echo -e "\033[1;36m3)\033[0m Remove Mirza Bot"
     echo -e "\033[1;36m4)\033[0m Export Database"
     echo -e "\033[1;36m5)\033[0m Import Database"
+    echo -e "\033[1;36m6)\033[0m Configure Automated Backup"
+    echo -e "\033[1;36m7)\033[0m Renew SSL Certificates"
+    echo -e "\033[1;36m8)\033[0m Exit"
+    echo ""
+    read -p "Select an option [1-8]: " option
     case $option in
         1) install_bot ;;
         2) update_bot ;;
         3) remove_bot ;;
         4) export_database ;;
         5) import_database ;;
+        6) auto_backup ;;
+        7) renew_ssl ;;
+        8)
             echo -e "\033[32mExiting...\033[0m"
             exit 0
             ;;
@@ -303,10 +311,10 @@ echo " "
 echo -e "\e[32m SSL \033[0m\n"
 
 read -p "Enter the domain: " domainname
-if [ "$domainname" = "" ]; then
-    echo -e "\e[91mError: Domain name cannot be empty.\033[0m"
-    exit 1
-else
+while [[ ! "$domainname" =~ ^[a-zA-Z0-9.-]+$ ]]; do
+    echo -e "\e[91mInvalid domain format. Please try again.\033[0m"
+    read -p "Enter the domain: " domainname
+done
     DOMAIN_NAME="$domainname"
     PATHS=$(cat /root/confmirza/dbrootmirza.txt | grep '$path' | cut -d"'" -f2)
     sudo ufw allow 80 || {
@@ -361,6 +369,36 @@ else
         echo -e "\e[91mError: Failed to start Apache2.\033[0m"
         exit 1
     }
+            clear
+
+        printf "\e[33m[+] \e[36mBot Token: \033[0m"
+        read YOUR_BOT_TOKEN
+        while [[ ! "$YOUR_BOT_TOKEN" =~ ^[0-9]{8,10}:[a-zA-Z0-9_-]{35}$ ]]; do
+            echo -e "\e[91mInvalid bot token format. Please try again.\033[0m"
+            printf "\e[33m[+] \e[36mBot Token: \033[0m"
+            read YOUR_BOT_TOKEN
+        done
+
+        printf "\e[33m[+] \e[36mChat id: \033[0m"
+        read YOUR_CHAT_ID
+        while [[ ! "$YOUR_CHAT_ID" =~ ^-?[0-9]+$ ]]; do
+            echo -e "\e[91mInvalid chat ID format. Please try again.\033[0m"
+            printf "\e[33m[+] \e[36mChat id: \033[0m"
+            read YOUR_CHAT_ID
+        done
+
+        YOUR_DOMAIN="$DOMAIN_NAME"
+
+    while true; do
+        printf "\e[33m[+] \e[36musernamebot: \033[0m"
+        read YOUR_BOTNAME
+        if [ "$YOUR_BOTNAME" != "" ]; then
+            break
+        else
+            echo -e "\e[91mError: Bot username cannot be empty. Please enter a valid username.\033[0m"
+        fi
+    done
+
     ROOT_PASSWORD=$(cat /root/confmirza/dbrootmirza.txt | grep '$pass' | cut -d"'" -f2)
     ROOT_USER="root"
     echo "SELECT 1" | mysql -u$ROOT_USER -p$ROOT_PASSWORD 2>/dev/null || {
@@ -404,18 +442,7 @@ else
 
             clear
 
-            printf "\n\e[33m[+] \e[36mBot Token: \033[0m"
-            read YOUR_BOT_TOKEN
-            printf "\e[33m[+] \e[36mChat id: \033[0m"
-            read YOUR_CHAT_ID
-            printf "\e[33m[+] \e[36mDomain: \033[0m"
-            read YOUR_DOMAIN
-            printf "\e[33m[+] \e[36musernamebot: \033[0m"
-            read YOUR_BOTNAME
-            echo " "
-            if [ "$YOUR_BOT_TOKEN" = "" ] || [ "$YOUR_DOMAIN" = "" ] || [ "$YOUR_CHAT_ID" = "" ] || [ "$YOUR_BOTNAME" = "" ]; then
-               exit
-            fi
+
 
             ASAS="$"
 
@@ -512,7 +539,7 @@ echo -e "$text_to_save" >> /var/www/html/mirzabotconfig/config.php
 
     fi
 
-fi
+
 }
 # Update Function
 function update_bot() {
@@ -673,84 +700,6 @@ function remove_bot() {
 
     echo -e "\e[92mMirza Bot, MySQL, and their dependencies have been completely removed.\033[0m" | tee -a "$LOG_FILE"
 }
-# Export Database Function
-function export_database() {
-    echo -e "\033[33mChecking database configuration...\033[0m"
-
-    # Path to database credentials
-    CONFIG_FILE="/root/confmirza/dbrootmirza.txt"
-
-    if [ ! -f "$CONFIG_FILE" ]; then
-        echo -e "\033[31m[ERROR]\033[0m Database configuration file not found at $CONFIG_FILE."
-        return 1
-    fi
-
-    # Extract credentials
-    DB_USER=$(grep '\$user' "$CONFIG_FILE" | cut -d"'" -f2)
-    DB_PASS=$(grep '\$pass' "$CONFIG_FILE" | cut -d"'" -f2)
-    DB_NAME="mirzabot"  # Assuming the database name is fixed
-
-    echo -e "\033[33mVerifying database existence...\033[0m"
-
-    if ! mysql -u "$DB_USER" -p"$DB_PASS" -e "USE $DB_NAME;" 2>/dev/null; then
-        echo -e "\033[31m[ERROR]\033[0m Database $DB_NAME does not exist or credentials are incorrect."
-        return 1
-    fi
-
-    # Create a backup
-    BACKUP_FILE="/root/${DB_NAME}_backup.sql"
-    echo -e "\033[33mCreating backup at $BACKUP_FILE...\033[0m"
-
-    if ! mysqldump -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" > "$BACKUP_FILE"; then
-        echo -e "\033[31m[ERROR]\033[0m Failed to create database backup."
-        return 1
-    fi
-
-    echo -e "\033[32mBackup successfully created at $BACKUP_FILE.\033[0m"
-}
-
-# Import Database Function
-function import_database() {
-    echo -e "\033[33mChecking database configuration...\033[0m"
-
-    # Path to database credentials
-    CONFIG_FILE="/root/confmirza/dbrootmirza.txt"
-
-    if [ ! -f "$CONFIG_FILE" ]; then
-        echo -e "\033[31m[ERROR]\033[0m Database configuration file not found at $CONFIG_FILE."
-        return 1
-    fi
-
-    # Extract credentials
-    DB_USER=$(grep '\$user' "$CONFIG_FILE" | cut -d"'" -f2)
-    DB_PASS=$(grep '\$pass' "$CONFIG_FILE" | cut -d"'" -f2)
-    DB_NAME="mirzabot"  # Assuming the database name is fixed
-
-    echo -e "\033[33mVerifying database existence...\033[0m"
-
-    if ! mysql -u "$DB_USER" -p"$DB_PASS" -e "USE $DB_NAME;" 2>/dev/null; then
-        echo -e "\033[31m[ERROR]\033[0m Database $DB_NAME does not exist or credentials are incorrect."
-        return 1
-    fi
-
-    # Prompt for backup file location
-    read -p "Enter the path to the backup file [default: /root/${DB_NAME}_backup.sql]: " BACKUP_FILE
-    BACKUP_FILE=${BACKUP_FILE:-/root/${DB_NAME}_backup.sql}
-
-    if [ ! -f "$BACKUP_FILE" ]; then
-        echo -e "\033[31m[ERROR]\033[0m Backup file not found at $BACKUP_FILE."
-        return 1
-    fi
-
-    echo -e "\033[33mImporting backup from $BACKUP_FILE...\033[0m"
-
-    if ! mysql -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" < "$BACKUP_FILE"; then
-        echo -e "\033[31m[ERROR]\033[0m Failed to import database from backup file."
-        return 1
-    fi
-
-    echo -e "\033[32mDatabase successfully imported from $BACKUP_FILE.\033[0m"
-}
 
 # Function to extract database credentials from config.php
 function extract_db_credentials() {
@@ -822,13 +771,16 @@ function import_database() {
         return 1
     fi
 
-    read -p "Enter the path to the backup file [default: /root/${DB_NAME}_backup.sql]: " BACKUP_FILE
-    BACKUP_FILE=${BACKUP_FILE:-/root/${DB_NAME}_backup.sql}
+    while true; do
+        read -p "Enter the path to the backup file [default: /root/${DB_NAME}_backup.sql]: " BACKUP_FILE
+        BACKUP_FILE=${BACKUP_FILE:-/root/${DB_NAME}_backup.sql}
 
-    if [ ! -f "$BACKUP_FILE" ]; then
-        echo -e "\033[31m[ERROR]\033[0m Backup file not found at $BACKUP_FILE."
-        return 1
-    fi
+        if [[ -f "$BACKUP_FILE" && "$BACKUP_FILE" =~ \.sql$ ]]; then
+            break
+        else
+            echo -e "\033[31m[ERROR]\033[0m Invalid file path or format. Please provide a valid .sql file."
+        fi
+    done
 
     echo -e "\033[33mImporting backup from $BACKUP_FILE...\033[0m"
 
@@ -863,21 +815,22 @@ function auto_backup() {
         return 1
     fi
 
-    echo -e "\033[36mChoose backup frequency:\033[0m"
-    echo -e "\033[36m1) Every minute\033[0m"
-    echo -e "\033[36m2) Every hour\033[0m"
-    echo -e "\033[36m3) Every day\033[0m"
-    read -p "Enter your choice (1-3): " frequency
+    while true; do
+        echo -e "\033[36mChoose backup frequency:\033[0m"
+        echo -e "\033[36m1) Every minute\033[0m"
+        echo -e "\033[36m2) Every hour\033[0m"
+        echo -e "\033[36m3) Every day\033[0m"
+        read -p "Enter your choice (1-3): " frequency
 
-    case $frequency in
-        1) cron_time="* * * * *" ;;
-        2) cron_time="0 * * * *" ;;
-        3) cron_time="0 0 * * *" ;;
-        *)
-            echo -e "\033[31mInvalid option. Exiting...\033[0m"
-            return 1
-            ;;
-    esac
+        case $frequency in
+            1) cron_time="* * * * *" ; break ;;
+            2) cron_time="0 * * * *" ; break ;;
+            3) cron_time="0 0 * * *" ; break ;;
+            *)
+                echo -e "\033[31mInvalid option. Please try again.\033[0m"
+                ;;
+        esac
+    done
 
     BACKUP_SCRIPT="/root/auto_backup.sh"
     cat <<EOF > "$BACKUP_SCRIPT"
