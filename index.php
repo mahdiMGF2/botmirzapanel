@@ -1603,14 +1603,14 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
         $link_config = "<code>$output_config_link</code>";
     }
     if ($marzban_list_get['configManual'] == "onconfig") {
-        foreach ($dataoutput['configs'] as $configs) {
-            if(isset($dataoutput['configs']) and count($dataoutput['configs']) !=0){
+        if(isset($dataoutput['configs']) and count($dataoutput['configs']) !=0){
+            foreach ($dataoutput['configs'] as $configs) {
                 $config .= "\n" . $configs;
                 $configqr .= $configs;
-            }else{
-                $config = "";
-                $configqr = "";
             }
+        }else{
+            $config .= "";
+            $configqr .= "";
         }
         $text_config = "<code>$config</code>";
     }

@@ -245,11 +245,13 @@ function DirectPayment($order_id){
         }
         if ($marzban_list_get['configManual'] == "onconfig") {
             if(isset($dataoutput['configs']) and count($dataoutput['configs']) !=0){
-                $config .= "\n" . $configs;
-                $configqr .= $configs;
+                foreach ($dataoutput['configs'] as $configs) {
+                    $config .= "\n" . $configs;
+                    $configqr .= $configs;
+                }
             }else{
-                $config = "";
-                $configqr = "";
+                $config .= "";
+                $configqr .= "";
             }
         }
         $Shoppinginfo = json_encode($Shoppinginfo);

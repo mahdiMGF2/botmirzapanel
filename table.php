@@ -393,12 +393,6 @@ try {
             $connect->query("UPDATE marzban_panel SET MethodUsername = '$MethodUsername'");
             echo "The MethodUsername field was added ✅";
         }
-        $Check_filde = $connect->query("SHOW COLUMNS FROM marzban_panel LIKE 'flow'");
-        if (mysqli_num_rows($Check_filde) != 1) {
-            $connect->query("ALTER TABLE marzban_panel ADD flow VARCHAR(200)");
-            $connect->query("UPDATE marzban_panel SET flow = 'offflow'");
-            echo "The flow field was added ✅";
-        }
         $Check_filde = $connect->query("SHOW COLUMNS FROM marzban_panel LIKE 'inboundid'");
         if (mysqli_num_rows($Check_filde) != 1) {
             $connect->query("ALTER TABLE marzban_panel ADD inboundid VARCHAR(200)");
@@ -414,24 +408,6 @@ try {
             $connect->query("ALTER TABLE marzban_panel ADD type VARCHAR(200)");
             $connect->query("UPDATE marzban_panel SET type = 'marzban'");
             echo "The type field was added ✅";
-        }
-        $Check_filde = $connect->query("SHOW COLUMNS FROM marzban_panel LIKE 'vless'");
-        if (mysqli_num_rows($Check_filde) != 1) {
-            $connect->query("ALTER TABLE marzban_panel ADD vless VARCHAR(100)");
-            $connect->query("UPDATE marzban_panel SET vless = 'onvless'");
-            echo "The vless field was added ✅";
-        }
-        $Check_filde = $connect->query("SHOW COLUMNS FROM marzban_panel LIKE 'vmess'");
-        if (mysqli_num_rows($Check_filde) != 1) {
-            $connect->query("ALTER TABLE marzban_panel ADD vmess VARCHAR(100)");
-            $connect->query("UPDATE marzban_panel SET vmess = 'onvmess'");
-            echo "The vmess field was added ✅";
-        }
-        $Check_filde = $connect->query("SHOW COLUMNS FROM marzban_panel LIKE 'trojan'");
-        if (mysqli_num_rows($Check_filde) != 1) {
-            $connect->query("ALTER TABLE marzban_panel ADD trojan VARCHAR(100)");
-            $connect->query("UPDATE marzban_panel SET trojan = 'ontrojan'");
-            echo "The trojan field was added ✅";
         }
     }
 } catch (Exception $e) {
