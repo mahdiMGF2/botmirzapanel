@@ -84,6 +84,11 @@ function install_bot() {
     }
     echo -e "\e[92mThe server was successfully updated ...\033[0m\n"
 
+    sudo apt install -y git unzip curl || {
+        echo -e "\e[91mError: Failed to install required packages.\033[0m"
+        exit 1
+    }
+
     DEBIAN_FRONTEND=noninteractive sudo apt install -y php8.2 php8.2-fpm php8.2-mysql || {
         echo -e "\e[91mError: Failed to install PHP 8.2 and related packages.\033[0m"
         exit 1
@@ -228,20 +233,65 @@ function install_bot() {
         }
     fi
     
-    git clone https://github.com/mahdiMGF2/botmirzapanel.git /var/www/html/mirzabotconfig || {
-        echo -e "\e[91mError: Failed to clone Git repository.\033[0m"
+    # Default repository URL
+    REPO_URL="https://github.com/mahdiMGF2/botmirzapanel.git"
+
+    # Check for version flag
+    if [[ "$1" == -v* ]]; then
+        VERSION=$(echo "$1" | sed 's/-v//')
+        REPO_URL="https://github.com/mahdiMGF2/botmirzapanel/archive/refs/tags/$VERSION.zip"
+    elif [[ "$1" == "-v" && -n "$2" ]]; then
+        VERSION="$2"
+        REPO_URL="https://github.com/mahdiMGF2/botmirzapanel/archive/refs/tags/$VERSION.zip"
+    fi
+
+    # Validate the REPO_URL
+    if ! curl --output /dev/null --silent --head --fail "$REPO_URL"; then
+        echo -e "\e[91mError: The specified version or URL is invalid.\033[0m"
+        exit 1
+    fi
+
+    # Clone or download the repository
+    if [[ $REPO_URL == *.zip ]]; then
+        TEMP_DIR="/tmp/mirzabot"
+        mkdir -p "$TEMP_DIR"
+        curl -L -o "$TEMP_DIR/bot.zip" "$REPO_URL" || {
+            echo -e "\e[91mError: Failed to download the specified version.\033[0m"
+            exit 1
+        }
+        if ! unzip "$TEMP_DIR/bot.zip" -d "$TEMP_DIR"; then
+            echo -e "\e[91mError: Failed to unzip the repository. Please check the version or URL.\033[0m"
+            rm -rf "$TEMP_DIR"
+            exit 1
+        fi
+        # Find the extracted directory (assuming only one subdirectory exists)
+        EXTRACTED_DIR=$(find "$TEMP_DIR" -mindepth 1 -maxdepth 1 -type d)
+        if [ -z "$EXTRACTED_DIR" ]; then
+            echo -e "\e[91mError: Extracted directory not found.\033[0m"
+            exit 1
+        fi
+        mv "$EXTRACTED_DIR" "$BOT_DIR" || {
+            echo -e "\e[91mError: Failed to move files to $BOT_DIR.\033[0m"
+            exit 1
+        }
+        rm -rf "$TEMP_DIR"
+    else
+        git clone "$REPO_URL" "$BOT_DIR" || {
+            echo -e "\e[91mError: Failed to clone the repository.\033[0m"
+            exit 1
+        }
+    fi
+
+    sudo chown -R www-data:www-data "$BOT_DIR" || {
+        echo -e "\e[91mError: Failed to set ownership for $BOT_DIR.\033[0m"
         exit 1
     }
-    sudo chown -R www-data:www-data /var/www/html/mirzabotconfig/ || {
-        echo -e "\e[91mError: Failed to set ownership for /var/www/html/mirzabotconfig.\033[0m"
-        exit 1
-    }
-    sudo chmod -R 755 /var/www/html/mirzabotconfig/ || {
-        echo -e "\e[91mError: Failed to set permissions for /var/www/html/mirzabotconfig.\033[0m"
+    sudo chmod -R 755 "$BOT_DIR" || {
+        echo -e "\e[91mError: Failed to set permissions for $BOT_DIR.\033[0m"
         exit 1
     }
 
-    echo -e "\n\033[33mmirza config and script have been installed successfully\033[0m"
+    echo -e "\n\033[33mMirza config and script have been installed successfully.\033[0m"
 
 wait
 if [ ! -d "/root/confmirza" ]; then
@@ -1591,6 +1641,10 @@ EOF
     echo -e "\033[32mAutomated backup configured successfully for $SELECTED_BOT.\033[0m"
 }
 
-# Execute Menu
+# Main Execution
 show_logo
-show_menu
+if [[ "$1" == -v* || ( "$1" == "-v" && -n "$2" ) ]]; then
+    install_bot "$1" "$2"
+else
+    show_menu
+fi
