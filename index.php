@@ -4525,7 +4525,7 @@ elseif($text == "ویرایش رسانه") {
         $DataUserOut = getuser($text,$user['Processing_value']);
     }
     if ((isset($DataUserOut['msg']) && $DataUserOut['msg'] == "User not found") or !isset($DataUserOut['proxies'])) {
-        sendmessage($from_id, $textbotlang['users']['stateus']['UserNotFound'], null, 'html');
+        sendmessage($from_id,$textbotlang['users']['stateus']['usernotfound'], null, 'html');
         return;
     }
     foreach ($DataUserOut['proxies'] as $key => &$value){
