@@ -103,7 +103,7 @@ function adduser($username,$expire,$data_limit,$location)
     $url = $marzban_list_get['url_panel']."/api/user";
     $header_value = 'Bearer ';
     $data = array(
-        "proxies" => json_decode($marzban_list_get['proxies'],true),
+        "proxies" => json_decode($marzban_list_get['proxies']),
         "data_limit" => $data_limit,
         "username" => $username
     );

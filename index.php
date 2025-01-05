@@ -4538,6 +4538,9 @@ elseif($text == "ویرایش رسانه") {
         else{
             unset($DataUserOut['proxies'][$key]['id']);
         }
+        if(count($DataUserOut['proxies'][$key]) == 0){
+            $DataUserOut['proxies'][$key] = new stdClass();
+        }
     }
     update("marzban_panel","inbounds",json_encode($DataUserOut['inbounds']),"name_panel",$user['Processing_value']);
     update("marzban_panel","proxies",json_encode($DataUserOut['proxies']),"name_panel",$user['Processing_value']);
