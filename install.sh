@@ -552,7 +552,7 @@ echo -e "$text_to_save" >> /var/www/html/mirzabotconfig/config.php
                 echo -e "\e[91mError: Failed to set webhook for bot.\033[0m"
                 exit 1
             }
-            MESSAGE="✅ The bot is installed! for start bot send comment /start"
+            MESSAGE="✅ The bot is installed! for start the bot send /start command."
             curl -s -X POST "https://api.telegram.org/bot${YOUR_BOT_TOKEN}/sendMessage" -d chat_id="${YOUR_CHAT_ID}" -d text="$MESSAGE" || {
                 echo -e "\e[91mError: Failed to send message to Telegram.\033[0m"
                 exit 1
