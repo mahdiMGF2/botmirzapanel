@@ -1,11 +1,11 @@
 <?php
 
+session_write_close();
+ignore_user_abort(true);
 if (function_exists('fastcgi_finish_request')) {
     fastcgi_finish_request();
 } elseif (function_exists('litespeed_finish_request')) {
     litespeed_finish_request();
-} else {
-    error_log('Neither fastcgi_finish_request nor litespeed_finish_request is available.');
 }
 
 ini_set('error_log', 'error_log');
