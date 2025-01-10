@@ -4,7 +4,7 @@ date_default_timezone_set('Asia/Tehran');
 require_once '../config.php';
 require_once '../botapi.php';
 require_once '../panels.php';
-require_once '../function.php';
+require_once '../functions.php';
 $ManagePanel = new ManagePanel();
 $textbotlang = json_decode(file_get_contents('../text.json'),true);
 
