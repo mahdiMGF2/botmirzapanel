@@ -516,6 +516,8 @@ done
 
             sleep 1
 
+            secrettoken=$(openssl rand -base64 10 | tr -dc 'a-zA-Z0-9' | cut -c1-8)
+
             echo -e "<?php" >> /var/www/html/mirzabotconfig/config.php
             echo -e "${ASAS}APIKEY = '${YOUR_BOT_TOKEN}';" >> /var/www/html/mirzabotconfig/config.php
             echo -e "${ASAS}usernamedb = '${dbuser}';" >> /var/www/html/mirzabotconfig/config.php
@@ -524,6 +526,7 @@ done
             echo -e "${ASAS}domainhosts = '${YOUR_DOMAIN}/mirzabotconfig';" >> /var/www/html/mirzabotconfig/config.php
             echo -e "${ASAS}adminnumber = '${YOUR_CHAT_ID}';" >> /var/www/html/mirzabotconfig/config.php
             echo -e "${ASAS}usernamebot = '${YOUR_BOTNAME}';" >> /var/www/html/mirzabotconfig/config.php
+            echo -e "${ASAS}secrettoken = '${secrettoken}';" >> /var/www/html/mirzabotconfig/config.php
             echo -e "${ASAS}connect = mysqli_connect('localhost', \$usernamedb, \$passworddb, \$dbname);" >> /var/www/html/mirzabotconfig/config.php
             echo -e "if (${ASAS}connect->connect_error) {" >> /var/www/html/mirzabotconfig/config.php
             echo -e "die(' The connection to the database failed:' . ${ASAS}connect->connect_error);" >> /var/www/html/mirzabotconfig/config.php
@@ -548,11 +551,13 @@ echo -e "$text_to_save" >> /var/www/html/mirzabotconfig/config.php
 
             sleep 1
 
-            curl -F "url=https://${YOUR_DOMAIN}/mirzabotconfig/index.php" "https://api.telegram.org/bot${YOUR_BOT_TOKEN}/setWebhook" || {
+            curl -F "url=https://${YOUR_DOMAIN}/mirzabotconfig/index.php" \
+     -F "secret_token=${secrettoken}" \
+     "https://api.telegram.org/bot${YOUR_BOT_TOKEN}/setWebhook" || {
                 echo -e "\e[91mError: Failed to set webhook for bot.\033[0m"
                 exit 1
             }
-            MESSAGE="✅ The bot is installed! for start bot send comment /start"
+            MESSAGE="✅ The bot is installed! for start the bot send /start command."
             curl -s -X POST "https://api.telegram.org/bot${YOUR_BOT_TOKEN}/sendMessage" -d chat_id="${YOUR_CHAT_ID}" -d text="$MESSAGE" || {
                 echo -e "\e[91mError: Failed to send message to Telegram.\033[0m"
                 exit 1
