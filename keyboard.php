@@ -1,6 +1,7 @@
 <?php
 require_once 'config.php';
 require_once 'functions.php';
+require_once 'text.php';
 $setting = select("setting", "*");
 $admin_ids = select("admin", "id_admin",null,null,"FETCH_COLUMN");
 //-----------------------------[  text panel  ]-------------------------------
@@ -75,7 +76,7 @@ $keyboardadmin = json_encode([
         [['text' => "👤 خدمات کاربر"],['text' => "👁‍🗨 جستجو کاربر"],['text' => "📨 ارسال پیام"]],
         [['text' => "👥 تنظیمات زیر مجموعه گیری"]],
         [['text' => "📚 بخش آموزش "], ['text' => "⚙️ تنظیمات"]],
-        [['text' => "🏠 بازگشت به منوی اصلی"]]
+        [['text' => $textbotlang['users']['backhome']]]
     ],
     'resize_keyboard' => true
 ]);
@@ -227,7 +228,7 @@ $confrimrolls = json_encode([
 $request_contact = json_encode([
     'keyboard' => [
         [['text' => "☎️ ارسال شماره تلفن", 'request_contact' => true]],
-        [['text' => "🏠 بازگشت به منوی اصلی"]]
+        [['text' => $textbotlang['users']['backhome']]]
     ],
     'resize_keyboard' => true
 ]);
@@ -264,7 +265,7 @@ $channelkeyboard = json_encode([
 ]);
 $backuser = json_encode([
     'keyboard' => [
-        [['text' => "🏠 بازگشت به منوی اصلی"]]
+        [['text' => $textbotlang['users']['backhome']]]
     ],
     'resize_keyboard' => true,
     'input_field_placeholder' =>"برای بازگشت روی دکمه زیر کلیک کنید"
@@ -323,7 +324,7 @@ if ($table_exists) {
         ];
     }
     $help_arr['keyboard'][] = [
-        ['text' => "🏠 بازگشت به منوی اصلی"],
+        ['text' => $textbotlang['users']['backhome']],
     ];
     $json_list_help = json_encode($help_arr);
 }
@@ -350,7 +351,7 @@ while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
     }
 }
 $list_marzban_panel_users['inline_keyboard'][] = [
-    ['text' => "🏠 بازگشت به منوی اصلی", 'callback_data' => "backuser"],
+    ['text' => $textbotlang['users']['backhome'], 'callback_data' => "backuser"],
 ];
 $list_marzban_panel_user = json_encode($list_marzban_panel_users);
 
@@ -364,7 +365,7 @@ while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
     ];
 }
 $list_marzban_panel_usertest['inline_keyboard'][] = [
-    ['text' => "🏠 بازگشت به منوی اصلی", 'callback_data' => "backuser"],
+    ['text' => $textbotlang['users']['backhome'], 'callback_data' => "backuser"],
 ];
 $list_marzban_usertest = json_encode($list_marzban_panel_usertest);
 $textbot = json_encode([
@@ -485,7 +486,7 @@ $payment = json_encode([
     'inline_keyboard' => [
         [['text' => "💰 پرداخت و دریافت سرویس", 'callback_data' => "confirmandgetservice"]],
         [['text' => "🎁 ثبت کد تخفیف", 'callback_data' => "aptdc"]],
-        [['text' => "🏠 بازگشت به منوی اصلی" ,  'callback_data' => "backuser"]]
+        [['text' => $textbotlang['users']['backhome'] ,  'callback_data' => "backuser"]]
     ]
 ]);
 $change_product = json_encode([

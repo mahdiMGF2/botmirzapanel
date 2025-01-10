@@ -26,7 +26,7 @@ use Endroid\QrCode\QrCode;
 use Endroid\QrCode\RoundBlockSizeMode;
 use Endroid\QrCode\Writer\PngWriter;
 $first_name = sanitizeUserName($first_name);
-if(!in_array($Chat_type,["private","supergroup"]))return;
+if(!in_array($Chat_type,["private"]))return;
 #-----------telegram_ip_ranges------------#
 if (!checktelegramip()) die("دسترسی غیرمجاز");
 #-------------Variable----------#
@@ -327,7 +327,7 @@ if ($text == $datatextbot['text_Purchased_services'] || $datain == "backorder" |
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $keyboardlists['inline_keyboard'][] = [
             [
-                'text' => "⭕️" . $row['username'] . "⭕️",
+                'text' => "🌟" . $row['username'] . "🌟",
                 'callback_data' => "product_" . $row['username']
             ],
         ];
@@ -464,7 +464,7 @@ if ($datain == 'next_page') {
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $keyboardlists['inline_keyboard'][] = [
             [
-                'text' => "⭕️" . $row['username'] . "⭕️",
+                'text' => "🌟️" . $row['username'] . "🌟️",
                 'callback_data' => "product_" . $row['username']
             ],
         ];
@@ -510,7 +510,7 @@ if ($datain == 'next_page') {
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $keyboardlists['inline_keyboard'][] = [
             [
-                'text' => "⭕️" . $row['username'] . "⭕️",
+                'text' => "🌟️" . $row['username'] . "🌟️",
                 'callback_data' => "product_" . $row['username']
             ],
         ];
@@ -743,7 +743,7 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
                 ['text' => $textbotlang['users']['extend']['confirm'], 'callback_data' => "confirmserivce-" . $codeproduct],
             ],
             [
-                ['text' => "🏠 بازگشت به منوی اصلی", 'callback_data' => "backuser"]
+                ['text' => $textbotlang['users']['backhome'], 'callback_data' => "backuser"]
 
             ]
         ]
@@ -1410,7 +1410,7 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
             }
         }
         $product['inline_keyboard'][] = [
-            ['text' => "🏠 بازگشت به منوی اصلی", 'callback_data' => "backuser"]
+            ['text' => $textbotlang['users']['backhome'], 'callback_data' => "backuser"]
         ];
 
         $json_list_product_list = json_encode($product);
@@ -1447,7 +1447,7 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
         }
     }
     $product['inline_keyboard'][] = [
-        ['text' => "🏠 بازگشت به منوی اصلی", 'callback_data' => "backuser"]
+        ['text' => $textbotlang['users']['backhome'], 'callback_data' => "backuser"]
     ];
 
     $json_list_product_list = json_encode($product);
@@ -1766,7 +1766,7 @@ $link_config
     $paymentDiscount = json_encode([
         'inline_keyboard' => [
             [['text' => "💰 پرداخت و دریافت سرویس", 'callback_data' => "confirmandgetserviceDiscount"]],
-            [['text' => "🏠 بازگشت به منوی اصلی", 'callback_data' => "backuser"]]
+            [['text' => $textbotlang['users']['backhome'], 'callback_data' => "backuser"]]
         ]
     ]);
     $parametrsendvalue = $text . "_" . $info_product['price_product'];
