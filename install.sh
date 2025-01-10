@@ -551,7 +551,9 @@ echo -e "$text_to_save" >> /var/www/html/mirzabotconfig/config.php
 
             sleep 1
 
-            curl -F "url=https://${YOUR_DOMAIN}/mirzabotconfig/index.php&secret_token=${secrettoken}" "https://api.telegram.org/bot${YOUR_BOT_TOKEN}/setWebhook" || {
+            curl -F "url=https://${YOUR_DOMAIN}/mirzabotconfig/index.php" \
+     -F "secret_token=${secrettoken}" \
+     "https://api.telegram.org/bot${YOUR_BOT_TOKEN}/setWebhook" || {
                 echo -e "\e[91mError: Failed to set webhook for bot.\033[0m"
                 exit 1
             }
