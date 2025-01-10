@@ -5,8 +5,8 @@ require_once '../config.php';
 require_once '../botapi.php';
 require_once '../panels.php';
 require_once '../functions.php';
+require_once '../text.php';
 $ManagePanel = new ManagePanel();
-$textbotlang = json_decode(file_get_contents('../text.json'),true);
 
 
 $setting = select("setting", "*");
