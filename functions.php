@@ -428,7 +428,7 @@ function sanitizeUserName($userName) {
 function checktelegramip(){
     global $secrettoken;
 
-    if (empty($secrettoken) {
+    if (empty($secrettoken)) {
 $telegram_ip_ranges = [
         ['lower' => '149.154.160.0', 'upper' => '149.154.175.255'],
         ['lower' => '91.108.4.0',    'upper' => '91.108.7.255']
