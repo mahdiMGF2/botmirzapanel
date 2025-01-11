@@ -51,7 +51,9 @@ if(!in_array($from_id,$users_ids) && intval($from_id) != 0){
 }
 
 if (intval($from_id) != 0) {
-    $stmt = $pdo->prepare("INSERT IGNORE INTO user (id, step, limit_usertest, User_Status, number, Balance, pagenumber, username, message_count, last_message_time, affiliatescount, affiliates) VALUES (:from_id, 'none', :limit_usertest_all, 'Active', 'none', '0', '1', :username, '0', '0', '0', '0')");
+    $verify = 0;
+    $stmt = $pdo->prepare("INSERT IGNORE INTO user (id, step, limit_usertest, User_Status, number, Balance, pagenumber, username, message_count, last_message_time, affiliatescount, affiliates,verify) VALUES (:from_id, 'none', :limit_usertest_all, 'Active', 'none', '0', '1', :username, '0', '0', '0', '0',:verify)");
+    $stmt->bindParam(':verify', $verify);
     $stmt->bindParam(':from_id', $from_id);
     $stmt->bindParam(':limit_usertest_all', $setting['limit_usertest_all']);
     $stmt->bindParam(':username', $username, PDO::PARAM_STR);
@@ -196,6 +198,14 @@ if (floor($TimeLastMessage / 60) >= 1) {
         }
 
     }
+    if($setting['Bot_Status'] == "✅  ربات روشن است" and !in_array($from_id, $admin_ids)) {
+        sendmessage($from_id, "❌ ربات درحال بروزرسانی است ساعتی دیگر مراجعه کنید", null, 'html');
+        return;
+    }elseif($setting['Bot_Status'] == "❌ ربات خاموش است" and !in_array($from_id, $admin_ids))  {
+        sendmessage($from_id, "❌ ربات درحال بروزرسانی است ساعتی دیگر مراجعه کنید", null, 'html');
+        return;
+    }
+
 }#-----------Channel------------#
 if ($datain == "confirmchannel") {
     if (!in_array($tch, ['member', 'creator', 'administrator'])) {
@@ -232,7 +242,7 @@ if (!in_array($tch, ['member', 'creator', 'administrator']) && $channels['Channe
     return;
 }
 #-----------roll------------#
-if ($setting['roll_Status'] == "✅ تایید قانون روشن است" && $user['roll_Status'] == 0 && $text != "✅ قوانین را می پذیرم" && !in_array($from_id, $admin_ids)) {
+if ($setting['roll_Status'] == "1" && $user['roll_Status'] == 0 && $text != "✅ قوانین را می پذیرم" && !in_array($from_id, $admin_ids)) {
     sendmessage($from_id, $datatextbot['text_roll'], $confrimrolls, 'html');
     return;
 }
@@ -243,7 +253,7 @@ if ($text == "✅ قوانین را می پذیرم") {
 }
 
 #-----------Bot_Status------------#
-if ($setting['Bot_Status'] == "❌ ربات خاموش است" && !in_array($from_id, $admin_ids)) {
+if ($setting['Bot_Status'] == "0"  && !in_array($from_id, $admin_ids)) {
     sendmessage($from_id, $datatextbot['text_bot_off'], null, 'html');
     return;
 }
@@ -295,7 +305,7 @@ if ($user['step'] == 'get_number') {
         sendmessage($from_id, $textbotlang['users']['number']['Warning'], $request_contact, 'html');
         return;
     }
-    if ($setting['iran_number'] == "✅ احرازشماره ایرانی روشن است" && !preg_match("/989[0-9]{9}$/", $user_phone)) {
+    if ($setting['iran_number'] == "1" && !preg_match("/989[0-9]{9}$/", $user_phone)) {
         sendmessage($from_id, $textbotlang['users']['number']['erroriran'], $request_contact, 'html');
         return;
     }
@@ -348,7 +358,7 @@ if ($text == $datatextbot['text_Purchased_services'] || $datain == "backorder" |
             'callback_data' => 'previous_page'
         ]
     ];
-    if ($setting['NotUser'] == "onnotuser") {
+    if ($setting['NotUser'] == "1") {
         $keyboardlists['inline_keyboard'][] = $usernotlist;
     }
     $keyboardlists['inline_keyboard'][] = $pagination_buttons;
@@ -485,7 +495,7 @@ if ($datain == 'next_page') {
             'callback_data' => 'usernotlist'
         ]
     ];
-    if ($setting['NotUser'] == "onnotuser") {
+    if ($setting['NotUser'] == "1") {
         $keyboardlists['inline_keyboard'][] = $usernotlist;
     }
     $keyboardlists['inline_keyboard'][] = $pagination_buttons;
@@ -531,7 +541,7 @@ if ($datain == 'next_page') {
             'callback_data' => 'usernotlist'
         ]
     ];
-    if ($setting['NotUser'] == "onnotuser") {
+    if ($setting['NotUser'] == "1") {
         $keyboardlists['inline_keyboard'][] = $usernotlist;
     }
     $keyboardlists['inline_keyboard'][] = $pagination_buttons;
@@ -1117,11 +1127,11 @@ if ($text == $datatextbot['text_usertest']) {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['nullpanel'], null, 'HTML');
         return;
     }
-    if ($setting['get_number'] == "✅ تایید شماره موبایل روشن است" && $user['step'] != "get_number" && $user['number'] == "none") {
+    if ($setting['get_number'] == "1" && $user['step'] != "get_number" && $user['number'] == "none") {
         sendmessage($from_id, $textbotlang['users']['number']['Confirming'], $request_contact, 'HTML');
         step('get_number', $from_id);
     }
-    if ($user['number'] == "none" && $setting['get_number'] == "✅ تایید شماره موبایل روشن است")
+    if ($user['number'] == "none" && $setting['get_number'] == "1")
         return;
     if ($user['limit_usertest'] <= 0) {
         sendmessage($from_id, $textbotlang['users']['usertest']['limitwarning'], $keyboard, 'html');
@@ -1288,7 +1298,7 @@ if ($user['step'] == "createusertest" || preg_match('/locationtests_(.*)/', $dat
 }
 #-----------help------------#
 if ($text == $datatextbot['text_help'] || $datain == "helpbtn" || $text == "/help") {
-    if ($setting['help_Status'] == "❌ آموزش غیرفعال است") {
+    if ($setting['help_Status'] == "0") {
         sendmessage($from_id, $textbotlang['users']['help']['disablehelp'], null, 'HTML');
         return;
     }
@@ -1379,11 +1389,11 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['nullpanel'], null, 'HTML');
         return;
     }
-    if ($setting['get_number'] == "✅ تایید شماره موبایل روشن است" && $user['step'] != "get_number" && $user['number'] == "none") {
+    if ($setting['get_number'] == "1" && $user['step'] != "get_number" && $user['number'] == "none") {
         sendmessage($from_id, $textbotlang['users']['number']['Confirming'], $request_contact, 'HTML');
         step('get_number', $from_id);
     }
-    if ($user['number'] == "none" && $setting['get_number'] == "✅ تایید شماره موبایل روشن است")
+    if ($user['number'] == "none" && $setting['get_number'] == "1")
         return;
     #-----------------------#
     if ($locationproduct == 1) {
@@ -1778,11 +1788,11 @@ $link_config
 
 #-------------------[ text_Add_Balance ]---------------------#
 if ($text == $datatextbot['text_Add_Balance'] || $text == "/wallet") {
-    if ($setting['get_number'] == "✅ تایید شماره موبایل روشن است" && $user['step'] != "get_number" && $user['number'] == "none") {
+    if ($setting['get_number'] == "1" && $user['step'] != "get_number" && $user['number'] == "none") {
         sendmessage($from_id, $textbotlang['users']['number']['Confirming'], $request_contact, 'HTML');
         step('get_number', $from_id);
     }
-    if ($user['number'] == "none" && $setting['get_number'] == "✅ تایید شماره موبایل روشن است")
+    if ($user['number'] == "none" && $setting['get_number'] == "1")
         return;
     sendmessage($from_id, $textbotlang['users']['Balance']['priceinput'], $backuser, 'HTML');
     step('getprice', $from_id);
@@ -2881,23 +2891,6 @@ if (preg_match('/Response_(\w+)/', $datain, $dataget)) {
     step('home', $from_id);
 }
 //_________________________________________________
-$Bot_Status = json_encode([
-    'inline_keyboard' => [
-        [
-            ['text' => $setting['Bot_Status'], 'callback_data' => $setting['Bot_Status']],
-        ],
-    ]
-]);
-if ($text == "📡 وضعیت ربات") {
-    sendmessage($from_id, $textbotlang['Admin']['Status']['BotTitle'], $Bot_Status, 'HTML');
-} elseif ($datain == "✅  ربات روشن است") {
-    update("setting", "Bot_Status", "❌ ربات خاموش است");
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['BotStatusOff'], null);
-} elseif ($datain == "❌ ربات خاموش است") {
-    update("setting", "Bot_Status", "✅  ربات روشن است");
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['BotStatuson'], null);
-}
-//_________________________________________________
 if ($text == "👁‍🗨 وضعیت نمایش پنل") {
     $panel = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
     $view_Status = json_encode([
@@ -2967,25 +2960,6 @@ if ($datain == "ontestshowpanel") {
     ]);
     Editmessagetext($from_id, $message_id, "روشن گردید.", $view_Status);
 }
-
-#-----------------[ not user change status ]-----------------#
-$not_user = json_encode([
-    'inline_keyboard' => [
-        [
-            ['text' => $setting['NotUser'], 'callback_data' => $setting['NotUser']],
-        ],
-    ]
-]);
-if ($text == "👤 دکمه نام کاربری") {
-    sendmessage($from_id, $textbotlang['Admin']['Status']['UsernameTitle'], $not_user, 'HTML');
-}
-if ($datain == "onnotuser") {
-    update("setting", "NotUser", "offnotuser");
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['UsernameStatusOff'], null);
-} elseif ($datain == "offnotuser") {
-    update("setting", "NotUser", "onnotuser");
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['UsernameStatuson'], null);
-}
 //_________________________________________________
 elseif (preg_match('/banuserlist_(\w+)/', $datain, $dataget)) {
     $iduser = $dataget[1];
@@ -3015,9 +2989,7 @@ elseif (preg_match('/banuserlist_(\w+)/', $datain, $dataget)) {
     step('home', $from_id);
 }
 //_________________________________________________
-if ($text == "♨️ بخش قوانین") {
-    sendmessage($from_id, $textbotlang['users']['selectoption'], $rollkey, 'HTML');
-} elseif ($text == "⚖️ متن قانون") {
+elseif ($text == "⚖️ متن قانون") {
     sendmessage($from_id, $textbotlang['Admin']['ManageUser']['ChangeTextGet'] . $datatextbot['text_roll'], $backadmin, 'HTML');
     step('text_roll', $from_id);
 } elseif ($user['step'] == "text_roll") {
@@ -3025,45 +2997,9 @@ if ($text == "♨️ بخش قوانین") {
     update("textbot", "text", $text, "id_text", "text_roll");
     step('home', $from_id);
 }
-$roll_Status = json_encode([
-    'inline_keyboard' => [
-        [
-            ['text' => $setting['roll_Status'], 'callback_data' => $setting['roll_Status']],
-        ],
-    ]
-]);
-if ($text == "💡 روشن / خاموش کردن تایید قوانین") {
-    sendmessage($from_id, $textbotlang['Admin']['Status']['rollTitle'], $roll_Status, 'HTML');
-}
-if ($datain == "✅ تایید قانون روشن است") {
-    update("setting", "roll_Status", "❌ تایید قوانین خاموش است");
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['rollStatusOff'], null);
-} elseif ($datain == "❌ تایید قوانین خاموش است") {
-    update("setting", "roll_Status", "✅ تایید قانون روشن است");
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['rollStatuson'], null);
-}
 //_________________________________________________
 if ($text == "👤 خدمات کاربر") {
     sendmessage($from_id, $textbotlang['users']['selectoption'], $User_Services, 'HTML');
-}
-#-------------------------#
-
-$get_number = json_encode([
-    'inline_keyboard' => [
-        [
-            ['text' => $setting['get_number'], 'callback_data' => $setting['get_number']],
-        ],
-    ]
-]);
-if ($text == "☎️ وضعیت احراز هویت شماره تماس") {
-    sendmessage($from_id, $textbotlang['Admin']['Status']['phoneTitle'], $get_number, 'HTML');
-}
-if ($datain == "✅ تایید شماره موبایل روشن است") {
-    update("setting", "get_number", "❌ احرازهویت شماره تماس غیرفعال است");
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['phoneStatusOff'], null);
-} elseif ($datain == "❌ احرازهویت شماره تماس غیرفعال است") {
-    update("setting", "get_number", "✅ تایید شماره موبایل روشن است");
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['phoneStatuson'], null);
 }
 #-------------------------#
 elseif (preg_match('/confirmnumber_(\w+)/', $datain, $dataget)) {
@@ -3138,10 +3074,6 @@ if ($text == "👨‍🔧 بخش ادمین") {
 #-------------------------#
 if ($text == "⚙️ تنظیمات") {
     sendmessage($from_id, $textbotlang['users']['selectoption'], $setting_panel, 'HTML');
-}
-#-------------------------#
-if ($text == "📱 احراز هویت شماره") {
-    sendmessage($from_id, $textbotlang['users']['selectoption'], $valid_Number, 'HTML');
 }
 #-------------------------#
 if ($text == "🔑 تنظیمات اکانت تست") {
@@ -3393,24 +3325,6 @@ elseif (preg_match('/lowbalanceuser_(\w+)/', $datain, $dataget)) {
     step('home', $from_id);
 }
 #-------------------------#
-$help_Status = json_encode([
-    'inline_keyboard' => [
-        [
-            ['text' => $setting['help_Status'], 'callback_data' => $setting['help_Status']],
-        ],
-    ]
-]);
-if ($text == "💡 وضعیت بخش آموزش") {
-    sendmessage($from_id, $textbotlang['Admin']['Status']['HelpTitle'], $help_Status, 'HTML');
-}
-if ($datain == "✅ آموزش فعال است") {
-    update("setting", "help_Status", "❌ آموزش غیرفعال است");
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['HelpStatusOff'], null);
-} elseif ($datain == "❌ آموزش غیرفعال است") {
-    update("setting", "help_Status", "✅ آموزش فعال است");
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['HelpStatuson'], null);
-}
-#-------------------------#
 if ($text == "🎁 ساخت کد هدیه") {
     sendmessage($from_id, $textbotlang['Admin']['Discount']['GetCode'], $backadmin, 'HTML');
     step('get_code', $from_id);
@@ -3434,24 +3348,6 @@ if ($text == "🎁 ساخت کد هدیه") {
     update("Discount", "price", $text, "code", $user['Processing_value']);
     sendmessage($from_id, $textbotlang['Admin']['Discount']['SaveCode'], $keyboardadmin, 'HTML');
     step('home', $from_id);
-}
-#-------------------------#
-$getNumberIran = json_encode([
-    'inline_keyboard' => [
-        [
-            ['text' => $setting['iran_number'], 'callback_data' => $setting['iran_number']],
-        ],
-    ]
-]);
-if ($text == "تایید شماره ایرانی 🇮🇷") {
-    sendmessage($from_id, $textbotlang['Admin']['Status']['PhoneIranTitle'], $getNumberIran, 'HTML');
-}
-if ($datain == "✅ احرازشماره ایرانی روشن است") {
-    update("setting", "iran_number", "❌ بررسی شماره ایرانی غیرفعال است");
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['PhoneIranStatusOff'], null);
-} elseif ($datain == "❌ بررسی شماره ایرانی غیرفعال است") {
-    update("setting", "iran_number", "✅ احرازشماره ایرانی روشن است");
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['PhoneIranStatuson'], null);
 }
 #-------------------------#
 if ($text == "🔗 ارسال لینک سابسکرایبشن") {
@@ -4555,5 +4451,194 @@ elseif($text == "ویرایش رسانه") {
     update("marzban_panel","proxies",json_encode($DataUserOut['proxies']),"name_panel",$user['Processing_value']);
     sendmessage($from_id, "✅ اینباند و پروتکل های شما با موفقیت تنظیم گردیدند.", $optionMarzban, 'HTML');
     step("home",$from_id);
+}elseif($text == "⚙️ وضعیت قابلیت ها") {
+    if($setting['Bot_Status'] == "✅  ربات روشن است") {
+        update("setting","Bot_Status","1");
+    }elseif($setting['Bot_Status'] == "❌ ربات خاموش است") {
+        update("setting","Bot_Status","0");
+    }
+
+    if($setting['roll_Status'] == "✅ تایید قانون روشن است") {
+        update("setting","roll_Status","1");
+    }elseif($setting['roll_Status'] == "❌ تایید قوانین خاموش است") {
+        update("setting","roll_Status","0");
+    }
+
+    if($setting['NotUser'] == "onnotuser") {
+        update("setting","NotUser","1");
+    }elseif($setting['NotUser'] == "offnotuser") {
+        update("setting","NotUser","0");
+    }
+
+    if($setting['help_Status'] == "✅ آموزش فعال است") {
+        update("setting","help_Status","1");
+    }elseif($setting['help_Status'] == "❌ آموزش غیرفعال است") {
+        update("setting","help_Status","0");
+    }
+
+    if($setting['get_number'] == "✅ تایید شماره موبایل روشن است") {
+        update("setting","get_number","1");
+    }elseif($setting['get_number'] == "❌ احرازهویت شماره تماس غیرفعال است") {
+        update("setting","get_number","0");
+    }
+
+    if($setting['iran_number'] == "✅ احرازشماره ایرانی روشن است") {
+        update("setting","iran_number","1");
+    }elseif($setting['iran_number'] == "❌ بررسی شماره ایرانی غیرفعال است") {
+        update("setting","iran_number","0");
+    }
+    $setting = select("setting", "*");
+    $name_status   = [
+        '1' => $textbotlang['Admin']['Status']['statuson'],
+        '0' => $textbotlang['Admin']['Status']['statusoff']
+    ][$setting['Bot_Status']];
+    $roll_Status   = [
+        '1' => $textbotlang['Admin']['Status']['statuson'],
+        '0' => $textbotlang['Admin']['Status']['statusoff']
+    ][$setting['roll_Status']];
+    $NotUser_Status   = [
+        '1' => $textbotlang['Admin']['Status']['statuson'],
+        '0' => $textbotlang['Admin']['Status']['statusoff']
+    ][$setting['NotUser']];
+    $help_Status   = [
+        '1' => $textbotlang['Admin']['Status']['statuson'],
+        '0' => $textbotlang['Admin']['Status']['statusoff']
+    ][$setting['help_Status']];
+    $get_number_Status   = [
+        '1' => $textbotlang['Admin']['Status']['statuson'],
+        '0' => $textbotlang['Admin']['Status']['statusoff']
+    ][$setting['get_number']];
+    $get_number_iran   = [
+        '1' => $textbotlang['Admin']['Status']['statuson'],
+        '0' => $textbotlang['Admin']['Status']['statusoff']
+    ][$setting['iran_number']];
+    $Bot_Status = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $textbotlang['Admin']['Status']['statussubject'], 'callback_data' => "subjectde"],
+                ['text' => $textbotlang['Admin']['Status']['subject'], 'callback_data' => "subject"],
+            ],
+            [
+                ['text' => $name_status, 'callback_data' => "editstsuts-statusbot-{$setting['Bot_Status']}"],
+                ['text' => $textbotlang['Admin']['Status']['stautsbot'], 'callback_data' => "statusbot"],
+            ],[
+                ['text' => $roll_Status, 'callback_data' => "editstsuts-roll_Status-{$setting['roll_Status']}"],
+                ['text' => "♨️ بخش قوانین", 'callback_data' => "roll_Status"],
+            ],[
+                ['text' => $NotUser_Status, 'callback_data' => "editstsuts-NotUser-{$setting['NotUser']}"],
+                ['text' => "👤 دکمه نام کاربری", 'callback_data' => "NotUser"],
+            ],[
+                ['text' => $help_Status, 'callback_data' => "editstsuts-help_Status-{$setting['help_Status']}"],
+                ['text' => "💡 وضعیت بخش آموزش", 'callback_data' => "help_Status"],
+            ],[
+                ['text' => $get_number_Status, 'callback_data' => "editstsuts-get_number-{$setting['get_number']}"],
+                ['text' => "احراز هویت شماره", 'callback_data' => "get_number"],
+            ],[
+                ['text' => $get_number_iran, 'callback_data' => "editstsuts-iran_number-{$setting['iran_number']}"],
+                ['text' => "تایید شماره ایرانی 🇮🇷", 'callback_data' => "iran_number"],
+            ]
+        ]
+    ]);
+    sendmessage($from_id, $textbotlang['Admin']['Status']['BotTitle'], $Bot_Status, 'HTML');
+}
+elseif(preg_match('/^editstsuts-(.*)-(.*)/', $datain, $dataget)) {
+    $type = $dataget[1];
+    $value = $dataget[2];
+    if($type == "statusbot"){
+        if($value == "1"){
+            $valuenew = "0";
+        }else{
+            $valuenew = "1";
+        }
+        update("setting","Bot_Status",$valuenew);
+    }elseif($type == "roll_Status"){
+        if($value == "1"){
+            $valuenew = "0";
+        }else{
+            $valuenew = "1";
+        }
+        update("setting","roll_Status",$valuenew);
+    }elseif($type == "NotUser"){
+        if($value == "1"){
+            $valuenew = "0";
+        }else{
+            $valuenew = "1";
+        }
+        update("setting","NotUser",$valuenew);
+    }elseif($type == "help_Status"){
+        if($value == "1"){
+            $valuenew = "0";
+        }else{
+            $valuenew = "1";
+        }
+        update("setting","help_Status",$valuenew);
+    }elseif($type == "get_number"){
+        if($value == "1"){
+            $valuenew = "0";
+        }else{
+            $valuenew = "1";
+        }
+        update("setting","get_number",$valuenew);
+    }elseif($type == "iran_number"){
+        if($value == "1"){
+            $valuenew = "0";
+        }else{
+            $valuenew = "1";
+        }
+        update("setting","iran_number",$valuenew);
+    }
+    $setting = select("setting", "*");
+    $name_status   = [
+        '1' => $textbotlang['Admin']['Status']['statuson'],
+        '0' => $textbotlang['Admin']['Status']['statusoff']
+    ][$setting['Bot_Status']];
+    $roll_Status   = [
+        '1' => $textbotlang['Admin']['Status']['statuson'],
+        '0' => $textbotlang['Admin']['Status']['statusoff']
+    ][$setting['roll_Status']];
+    $NotUser_Status   = [
+        '1' => $textbotlang['Admin']['Status']['statuson'],
+        '0' => $textbotlang['Admin']['Status']['statusoff']
+    ][$setting['NotUser']];
+    $help_Status   = [
+        '1' => $textbotlang['Admin']['Status']['statuson'],
+        '0' => $textbotlang['Admin']['Status']['statusoff']
+    ][$setting['help_Status']];
+    $get_number_Status   = [
+        '1' => $textbotlang['Admin']['Status']['statuson'],
+        '0' => $textbotlang['Admin']['Status']['statusoff']
+    ][$setting['get_number']];
+    $get_number_iran   = [
+        '1' => $textbotlang['Admin']['Status']['statuson'],
+        '0' => $textbotlang['Admin']['Status']['statusoff']
+    ][$setting['iran_number']];
+    $Bot_Status = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $textbotlang['Admin']['Status']['statussubject'], 'callback_data' => "subjectde"],
+                ['text' => $textbotlang['Admin']['Status']['subject'], 'callback_data' => "subject"],
+            ],
+            [
+                ['text' => $name_status, 'callback_data' => "editstsuts-statusbot-{$setting['Bot_Status']}"],
+                ['text' => $textbotlang['Admin']['Status']['stautsbot'], 'callback_data' => "statusbot"],
+            ],[
+                ['text' => $roll_Status, 'callback_data' => "editstsuts-roll_Status-{$setting['roll_Status']}"],
+                ['text' => "♨️ بخش قوانین", 'callback_data' => "roll_Status"],
+            ],[
+                ['text' => $NotUser_Status, 'callback_data' => "editstsuts-NotUser-{$setting['NotUser']}"],
+                ['text' => "👤 دکمه نام کاربری", 'callback_data' => "NotUser"],
+            ],[
+                ['text' => $help_Status, 'callback_data' => "editstsuts-help_Status-{$setting['help_Status']}"],
+                ['text' => "💡 وضعیت بخش آموزش", 'callback_data' => "help_Status"],
+            ],[
+                ['text' => $get_number_Status, 'callback_data' => "editstsuts-get_number-{$setting['get_number']}"],
+                ['text' => "احراز هویت شماره", 'callback_data' => "get_number"],
+            ],[
+                ['text' => $get_number_iran, 'callback_data' => "editstsuts-iran_number-{$setting['iran_number']}"],
+                ['text' => "تایید شماره ایرانی 🇮🇷", 'callback_data' => "iran_number"],
+            ]
+        ]
+    ]);
+    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['BotTitle'], $Bot_Status);
 }
 $connect->close();

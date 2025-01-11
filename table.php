@@ -26,6 +26,7 @@ try {
         last_message_time varchar(100) NOT NULL,
         affiliatescount varchar(100) NOT NULL,
         affiliates varchar(100) NOT NULL,
+        verify varchar(50) NOT NULL,
         username varchar(1000) NOT NULL)
         ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin");
         if (!$result) {
@@ -38,6 +39,12 @@ try {
             $connect->query("ALTER TABLE user ADD affiliatescount VARCHAR(100)");
             $connect->query("UPDATE user SET affiliatescount = '0'");
             echo "The affiliatescount field was added ✅";
+        }
+        $Check_filde = $connect->query("SHOW COLUMNS FROM user LIKE 'verify'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE user ADD verify VARCHAR(50)");
+            $connect->query("UPDATE user SET verify = '0'");
+            echo "The verify field was added ✅";
         }
         $Check_filde = $connect->query("SHOW COLUMNS FROM user LIKE 'affiliates'");
         if (mysqli_num_rows($Check_filde) != 1) {
@@ -167,15 +174,15 @@ try {
         if (!$result) {
             echo "table setting".mysqli_error($connect);
         }
-        $active_bot_text = "✅  ربات روشن است";
-        $active_roll_text = "❌ تایید قوانین خاموش است";
-        $active_phone_text = "❌ احرازهویت شماره تماس غیرفعال است";
-        $active_phone_iran_text = "❌ بررسی شماره ایرانی غیرفعال است";
-        $active_help = "❌ آموزش غیرفعال است";
+        $active_bot_text = "1";
+        $active_roll_text = "0";
+        $active_phone_text = "0";
+        $active_phone_iran_text = "0";
+        $active_help = "0";
         $sublink = "✅ لینک اشتراک فعال است.";
         $configManual = "❌ ارسال کانفیگ دستی خاموش است";
         $configManual = "❌ ارسال کانفیگ دستی خاموش است";
-        $connect->query("INSERT INTO setting (Bot_Status,roll_Status,get_number,limit_usertest_all,time_usertest,val_usertest,help_Status,iran_number,NotUser,namecustome,removedayc) VALUES ('$active_bot_text','$active_roll_text','$active_phone_text','1','1','100','$active_help','$active_phone_iran_text','offnotuser','0','1')");
+        $connect->query("INSERT INTO setting (Bot_Status,roll_Status,get_number,limit_usertest_all,time_usertest,val_usertest,help_Status,iran_number,NotUser,namecustome,removedayc) VALUES ('$active_bot_text','$active_roll_text','$active_phone_text','1','1','100','$active_help','$active_phone_iran_text','0','0','1')");
     } else {
         $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'namecustome'");
         if (mysqli_num_rows($Check_filde) != 1) {
@@ -241,12 +248,12 @@ try {
         $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'roll_Status'");
         if (mysqli_num_rows($Check_filde) != 1) {
             $connect->query("ALTER TABLE setting ADD roll_Status VARCHAR(200)");
-            $connect->query("UPDATE setting SET roll_Status = '✅ روشن '");
+            $connect->query("UPDATE setting SET roll_Status = '1'");
             echo "The roll_Status field was added ✅";
         }
         $settingsql = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM setting"));
         $sublink = "✅ لینک اشتراک فعال است.";
-        $active_phone_iran_text = "❌ بررسی شماره ایرانی غیرفعال است";
+        $active_phone_iran_text = "0";
         $configManual = "❌ ارسال کانفیگ دستی خاموش است";
         if(!isset($settingsql['iran_number'])){
             $stmt = $connect->prepare("UPDATE setting SET iran_number = ?");
@@ -349,12 +356,6 @@ try {
         if (mysqli_num_rows($Check_filde) != 1) {
             $connect->query("ALTER TABLE marzban_panel ADD proxies TEXT");
             echo "The proxies field was added ✅";
-        }
-        $Check_filde = $connect->query("SHOW COLUMNS FROM marzban_panel LIKE 'shadowsocks'");
-        if (mysqli_num_rows($Check_filde) != 1) {
-            $connect->query("ALTER TABLE marzban_panel ADD shadowsocks VARCHAR(100)");
-            $connect->query("UPDATE marzban_panel SET shadowsocks = 'offshadowsocks'");
-            echo "The shadowsocks field was added ✅";
         }
         $Check_filde = $connect->query("SHOW COLUMNS FROM marzban_panel LIKE 'statusTest'");
         if (mysqli_num_rows($Check_filde) != 1) {
