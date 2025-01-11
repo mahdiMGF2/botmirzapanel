@@ -49,9 +49,12 @@ if(!in_array($from_id,$users_ids) && intval($from_id) != 0){
         sendmessage($admin, $newuser, $Response, 'html');
     }
 }
-
 if (intval($from_id) != 0) {
-    $verify = 0;
+    if($setting['status_verify'] == "1"){
+        $verify = 1;
+    }else{
+        $verify = 0;
+    }
     $stmt = $pdo->prepare("INSERT IGNORE INTO user (id, step, limit_usertest, User_Status, number, Balance, pagenumber, username, message_count, last_message_time, affiliatescount, affiliates,verify) VALUES (:from_id, 'none', :limit_usertest_all, 'Active', 'none', '0', '1', :username, '0', '0', '0', '0',:verify)");
     $stmt->bindParam(':verify', $verify);
     $stmt->bindParam(':from_id', $from_id);
@@ -72,7 +75,7 @@ if ($user == false) {
         'affiliates' => '',
     );
 }
-
+if($setting['status_verify'] == "1" and $user['verify'] == 0)return;
 $channels = array();
 $helpdata = select("help", "*");
 $datatextbotget = select("textbot", "*", null, null, "fetchAll");
@@ -4320,6 +4323,7 @@ if ($text == "👁‍🗨 جستجو کاربر") {
             [['text' => $textbotlang['Admin']['ManageUser']['banuserlist'], 'callback_data' => "banuserlist_" . $text], ['text' => $textbotlang['Admin']['ManageUser']['unbanuserlist'], 'callback_data' => "unbanuserr_" . $text]],
             [['text' => $textbotlang['Admin']['ManageUser']['confirmnumber'], 'callback_data' => "confirmnumber_" . $text]],
             [['text' => "➕ محدودیت ساخت اکانت تست", 'callback_data' => "limitusertest_" . $text]],
+            [['text' => "احراز هویت ", 'callback_data' => "verify_" . $text],['text' => "حذف احراز هویت ", 'callback_data' => "verifyun_" . $text]],
         ]
     ];
     $keyboardmanage = json_encode($keyboardmanage);
@@ -4340,6 +4344,7 @@ if ($text == "👁‍🗨 جستجو کاربر") {
 ⭕️ جمع کل خرید : $subbuyuser
 ⭕️ تعداد زیرمجموعه کاربر : {$user['affiliatescount']}
 ⭕  معرف کاربر : {$user['affiliates']}
+⭕  وضعیت احراز کاربرر : {$user['verify']}
 ";
     sendmessage($from_id, $textinfouser, $keyboardmanage, 'HTML');
     sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboardadmin, 'HTML');
@@ -4512,6 +4517,10 @@ elseif($text == "ویرایش رسانه") {
         '1' => $textbotlang['Admin']['Status']['statuson'],
         '0' => $textbotlang['Admin']['Status']['statusoff']
     ][$setting['iran_number']];
+    $statusv_verify   = [
+        '1' => $textbotlang['Admin']['Status']['statuson'],
+        '0' => $textbotlang['Admin']['Status']['statusoff']
+    ][$setting['status_verify']];
     $Bot_Status = json_encode([
         'inline_keyboard' => [
             [
@@ -4536,6 +4545,9 @@ elseif($text == "ویرایش رسانه") {
             ],[
                 ['text' => $get_number_iran, 'callback_data' => "editstsuts-iran_number-{$setting['iran_number']}"],
                 ['text' => "تایید شماره ایرانی 🇮🇷", 'callback_data' => "iran_number"],
+            ],[
+                ['text' => $statusv_verify, 'callback_data' => "editstsuts-verify-{$setting['status_verify']}"],
+                ['text' => "👤 احراز هویت", 'callback_data' => "status_verify"],
             ]
         ]
     ]);
@@ -4586,6 +4598,13 @@ elseif(preg_match('/^editstsuts-(.*)-(.*)/', $datain, $dataget)) {
             $valuenew = "1";
         }
         update("setting","iran_number",$valuenew);
+    }elseif($type == "verify"){
+        if($value == "1"){
+            $valuenew = "0";
+        }else{
+            $valuenew = "1";
+        }
+        update("setting","status_verify",$valuenew);
     }
     $setting = select("setting", "*");
     $name_status   = [
@@ -4612,6 +4631,10 @@ elseif(preg_match('/^editstsuts-(.*)-(.*)/', $datain, $dataget)) {
         '1' => $textbotlang['Admin']['Status']['statuson'],
         '0' => $textbotlang['Admin']['Status']['statusoff']
     ][$setting['iran_number']];
+    $statusv_verify   = [
+        '1' => $textbotlang['Admin']['Status']['statuson'],
+        '0' => $textbotlang['Admin']['Status']['statusoff']
+    ][$setting['status_verify']];
     $Bot_Status = json_encode([
         'inline_keyboard' => [
             [
@@ -4636,9 +4659,32 @@ elseif(preg_match('/^editstsuts-(.*)-(.*)/', $datain, $dataget)) {
             ],[
                 ['text' => $get_number_iran, 'callback_data' => "editstsuts-iran_number-{$setting['iran_number']}"],
                 ['text' => "تایید شماره ایرانی 🇮🇷", 'callback_data' => "iran_number"],
+            ],[
+                ['text' => $statusv_verify, 'callback_data' => "editstsuts-verify-{$setting['status_verify']}"],
+                ['text' => "👤 احراز هویت", 'callback_data' => "status_verify"],
             ]
         ]
     ]);
     Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['BotTitle'], $Bot_Status);
+}elseif (preg_match('/verify_(\w+)/', $datain, $dataget)) {
+    $iduser = $dataget[1];
+    $userunverify = select("user", "*", "id", $iduser, "select");
+    if ($userunblock['verify'] == "1") {
+        sendmessage($from_id, "کاربر از قبل احراز شده است", $backadmin, 'HTML');
+        return;
+    }
+    update("user", "verify", "1", "id", $iduser);
+    sendmessage($from_id,"✅ کاربر با موفقیت احراز گردید.", $keyboardadmin, 'HTML');
+    step('home', $from_id);
+}elseif (preg_match('/verifyun_(\w+)/', $datain, $dataget)) {
+    $iduser = $dataget[1];
+    $userunverify = select("user", "*", "id", $iduser, "select");
+    if ($userunblock['verify'] == "0") {
+        sendmessage($from_id, "کاربر از قبل احراز نبوده است", $backadmin, 'HTML');
+        return;
+    }
+    update("user", "verify", "0", "id", $iduser);
+    sendmessage($from_id,"✅ کاربر با موفقیت از احراز خارج گردید.", $keyboardadmin, 'HTML');
+    step('home', $from_id);
 }
 $connect->close();
