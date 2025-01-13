@@ -32,6 +32,8 @@ if (!checktelegramip()) die("دسترسی غیرمجاز");
 #-------------Variable----------#
 $users_ids = select("user", "id",null,null,"FETCH_COLUMN");
 $setting = select("setting", "*");
+$admin_ids = select("admin", "id_admin", null, null, "FETCH_COLUMN");
+
 if(!in_array($from_id,$users_ids) && intval($from_id) != 0){
     $Response = json_encode([
         'inline_keyboard' => [
@@ -81,7 +83,6 @@ $helpdata = select("help", "*");
 $datatextbotget = select("textbot", "*", null, null, "fetchAll");
 $id_invoice = select("invoice", "id_invoice", null, null, "FETCH_COLUMN");
 $channels = select("channels", "*");
-$admin_ids = select("admin", "id_admin", null, null, "FETCH_COLUMN");
 $usernameinvoice = select("invoice", "username", null, null, "FETCH_COLUMN");
 $code_Discount = select("Discount", "code", null, null, "FETCH_COLUMN");
 $users_ids = select("user", "id", null, null, "FETCH_COLUMN");
