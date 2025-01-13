@@ -32,6 +32,7 @@ if (!checktelegramip()) die("دسترسی غیرمجاز");
 #-------------Variable----------#
 $users_ids = select("user", "id",null,null,"FETCH_COLUMN");
 $setting = select("setting", "*");
+$admin_ids = select("admin", "id_admin", null, null, "FETCH_COLUMN");
 if(!in_array($from_id,$users_ids) && intval($from_id) != 0){
     $Response = json_encode([
         'inline_keyboard' => [
@@ -75,13 +76,16 @@ if ($user == false) {
         'affiliates' => '',
     );
 }
+<<<<<<< Updated upstream
 if ($setting['status_verify'] == "1" && ($user['verify'] == 0 && !in_array($from_id, $admin_ids))) return;
+=======
+if(($setting['status_verify'] == "1" && $user['verify'] == 0) && !in_array($from_id,$users_ids))return;
+>>>>>>> Stashed changes
 $channels = array();
 $helpdata = select("help", "*");
 $datatextbotget = select("textbot", "*", null, null, "fetchAll");
 $id_invoice = select("invoice", "id_invoice", null, null, "FETCH_COLUMN");
 $channels = select("channels", "*");
-$admin_ids = select("admin", "id_admin", null, null, "FETCH_COLUMN");
 $usernameinvoice = select("invoice", "username", null, null, "FETCH_COLUMN");
 $code_Discount = select("Discount", "code", null, null, "FETCH_COLUMN");
 $users_ids = select("user", "id", null, null, "FETCH_COLUMN");
@@ -4669,7 +4673,7 @@ elseif(preg_match('/^editstsuts-(.*)-(.*)/', $datain, $dataget)) {
 }elseif (preg_match('/verify_(\w+)/', $datain, $dataget)) {
     $iduser = $dataget[1];
     $userunverify = select("user", "*", "id", $iduser, "select");
-    if ($userunblock['verify'] == "1") {
+    if ($userunverify['verify'] == "1") {
         sendmessage($from_id, "کاربر از قبل احراز شده است", $backadmin, 'HTML');
         return;
     }
@@ -4679,7 +4683,7 @@ elseif(preg_match('/^editstsuts-(.*)-(.*)/', $datain, $dataget)) {
 }elseif (preg_match('/verifyun_(\w+)/', $datain, $dataget)) {
     $iduser = $dataget[1];
     $userunverify = select("user", "*", "id", $iduser, "select");
-    if ($userunblock['verify'] == "0") {
+    if ($userunverify['verify'] == "0") {
         sendmessage($from_id, "کاربر از قبل احراز نبوده است", $backadmin, 'HTML');
         return;
     }
