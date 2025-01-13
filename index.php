@@ -50,7 +50,7 @@ if(!in_array($from_id,$users_ids) && intval($from_id) != 0){
     }
 }
 if (intval($from_id) != 0) {
-    if($setting['status_verify'] == "1"){
+    if($setting['status_verify'] == "1" || in_array($from_id, $admin_ids)){
         $verify = 1;
     }else{
         $verify = 0;
