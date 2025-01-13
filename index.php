@@ -288,7 +288,7 @@ if ($text == "/start") {
     return;
 }
 #-----------back------------#
-if ($text == "🏠 بازگشت به منوی اصلی" || $datain == "backuser") {
+if ($text == $textbotlang['users']['backhome'] || $datain == "backuser") {
     update("user","Processing_value","0", "id",$from_id);
     update("user","Processing_value_one","0", "id",$from_id);
     update("user","Processing_value_tow","0", "id",$from_id);
