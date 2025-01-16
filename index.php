@@ -9,7 +9,7 @@ if (function_exists('fastcgi_finish_request')) {
 }
 
 ini_set('error_log', 'error_log');
-$version = "4.11.2";
+$version = "4.11.2.1";
 date_default_timezone_set('Asia/Tehran');
 require_once 'config.php';
 require_once 'botapi.php';
@@ -1484,6 +1484,11 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
     } else {
         deletemessage($from_id, $message_id);
         $loc = $prodcut;
+    }
+    if($loc == null){
+        sendmessage($from_id, '❌ خطایی رخ داده است مراحل خرید را مجددا انجام دهید', $keyboard, 'html');
+        step("home",$from_id);
+        return;
     }
     update("user", "Processing_value_one", $loc, "id", $from_id);
     $stmt = $pdo->prepare("SELECT * FROM product WHERE code_product = :code_product AND (location = :loc1 OR location = '/all') LIMIT 1");
@@ -4679,7 +4684,7 @@ elseif(preg_match('/^editstsuts-(.*)-(.*)/', $datain, $dataget)) {
 }elseif (preg_match('/verifyun_(\w+)/', $datain, $dataget)) {
     $iduser = $dataget[1];
     $userunverify = select("user", "*", "id", $iduser, "select");
-    if ($userunverify['verify'] == "0") {
+    if ($userunblock['verify'] == "0") {
         sendmessage($from_id, "کاربر از قبل احراز نبوده است", $backadmin, 'HTML');
         return;
     }
