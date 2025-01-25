@@ -19,7 +19,7 @@ function show_logo() {
 
 # Display Menu
 function show_menu() {
-        clear
+    show_logo
     echo -e "\033[1;36m1)\033[0m Install Mirza Bot"
     echo -e "\033[1;36m2)\033[0m Update Mirza Bot"
     echo -e "\033[1;36m3)\033[0m Remove Mirza Bot"
