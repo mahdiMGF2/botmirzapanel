@@ -76,6 +76,7 @@ function get_clinets($username,$namepanel){
     ));
     $output = [];
     $response = json_decode(curl_exec($curl),true)['obj'];
+    if(!isset($response))return [];
     foreach ($response as $client){
         $client= json_decode($client['settings'],true)['clients'];
         foreach($client as $clinets){

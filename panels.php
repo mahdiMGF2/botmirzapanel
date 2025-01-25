@@ -53,8 +53,8 @@ class ManagePanel{
                     $data_Output['subscription_url'] = $Get_Data_Panel['url_panel'] . "/" . ltrim($data_Output['subscription_url'], "/");
                 }
                 $data_Output['links'] = [base64_decode(outputlunk($data_Output['subscription_url']))];
-                $date = new DateTime($data_Output['expire']);
-                $data_Output['expire'] = $date->getTimestamp();
+                $timestamp = strtotime($data_Output['expire']);
+                $data_Output['expire'] = $timestamp;
                 $Output['status'] = 'successful';
                 $Output['username'] = $data_Output['username'];
                 $Output['subscription_url'] = $data_Output['subscription_url'];
