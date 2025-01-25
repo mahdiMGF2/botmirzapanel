@@ -9,7 +9,7 @@ if (function_exists('fastcgi_finish_request')) {
 }
 
 ini_set('error_log', 'error_log');
-$version = "4.11.2.2";
+$version = "4.11.3";
 date_default_timezone_set('Asia/Tehran');
 require_once 'config.php';
 require_once 'botapi.php';
@@ -203,6 +203,9 @@ if (floor($TimeLastMessage / 60) >= 1) {
     }
     if($setting['Bot_Status'] == "✅  ربات روشن است" and !in_array($from_id, $admin_ids)) {
         sendmessage($from_id, "❌ ربات درحال بروزرسانی است ساعتی دیگر مراجعه کنید", null, 'html');
+        foreach ($admin_ids as $admin) {
+            sendmessage($admin, "❌ ادمین عزیز ربات فعال نیست جهت فعالسازی به منوی تنظیمات عمومی > وضعیت قابلیت ها بروید تا رباتتان فعال شود.", null, 'html');
+        }
         return;
     }elseif($setting['Bot_Status'] == "❌ ربات خاموش است" and !in_array($from_id, $admin_ids))  {
         sendmessage($from_id, "❌ ربات درحال بروزرسانی است ساعتی دیگر مراجعه کنید", null, 'html');
@@ -1530,6 +1533,14 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
     $stmt->execute();
     $info_product = $stmt->fetch(PDO::FETCH_ASSOC);
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
+    if($marzban_list_get['linksubx'] == null and in_array($marzban_list_get['type'],["x-ui_single","alireza"])){
+        foreach ($admin_ids as $admin) {
+            sendmessage($admin, "❌ ادمین عزیز پنل زیر فعال نیست جهت فعالسازی پنل باید حتما لینک ساب را از پنل ثنایی فعال و داخل ربات تنظیم کنید سپس در صورتی که میخواهید کانفیگ دهید یا لینک ساب از مدیریت پنل می توانید تنظیم نمایید.
+نام پنل : {$marzban_list_get['name_panel']}", null, 'HTML');
+        }
+        sendmessage($from_id, "❌ پنل درحال حاضر فعال نمی باشد.", $keyboard, 'HTML');
+        return;
+    }
     $username_ac = $user['Processing_value_tow'];
     $date = time();
     $randomString = bin2hex(random_bytes(2));
@@ -2327,12 +2338,16 @@ if (!in_array($from_id, $admin_ids)) {
 }
 if (in_array($text, $textadmin)) {
     $text_admin = "
-        سلام مدیر عزیز به پنل ادمین خوش امدی گلم😍
-    ⭕️ نسخه فعلی ربات شما : $version
-    ❓راهنمایی : 
-    1 - برای اضافه کردن پنل دکمه پنل   را زده و دکمه اضافه کردن پنل را بزنید.
-    2- از دکمه مالی میتوانید وضعیت درگاه و مرچنت ها را تنظیم کنید
-    3-  درگاه ارزی ریالی باید فقط api nowpayments را تنظیم کنید و تمام تنظیمات کیف پول و... داخل سایت nowpayments است";
+سلا 😍
+⭕️ نسخه فعلی ربات شما : $version
+
+channel : @mirzapanel
+group : @mirzapanelgroup
+
+❓راهنمایی : 
+1 - برای اضافه کردن پنل دکمه پنل   را زده و دکمه اضافه کردن پنل را بزنید.
+2- از دکمه مالی میتوانید وضعیت درگاه و مرچنت ها را تنظیم کنید
+3-  درگاه ارزی ریالی باید فقط api nowpayments را تنظیم کنید و تمام تنظیمات کیف پول و... داخل سایت nowpayments است";
     sendmessage($from_id, $text_admin, $keyboardadmin, 'HTML');
 }
 if ($text == "🏠 بازگشت به منوی مدیریت") {
@@ -2574,7 +2589,6 @@ if ($text == "🖥  اضافه کردن پنل") {
     sendmessage($from_id, $textbotlang['Admin']['managepanel']['usernameset'], $backadmin, 'HTML');
     step('add_username_panel', $from_id);
     update("marzban_panel", "url_panel", $text, "name_panel", $user['Processing_value']);
-    update("marzban_panel", "linksubx", $text, "name_panel", $user['Processing_value']);
 } elseif ($user['step'] == "add_username_panel") {
     sendmessage($from_id, $textbotlang['Admin']['managepanel']['getpassword'], $backadmin, 'HTML');
     step('add_password_panel', $from_id);
@@ -2583,7 +2597,6 @@ if ($text == "🖥  اضافه کردن پنل") {
     update("marzban_panel", "password_panel", $text, "name_panel", $user['Processing_value']);
     $textx = "📌 نوع پنل را ارسال نمایید
     
-⚠️ پنل x-ui فقط با پنل ثنایی نوع تک پورت سازگار است.
 ⚠️ در صورت انتخاب پنل ثنایی پس از اضافه کردن پنل به بخش ویرایش پنل > تنظیم شناسه اینباند رفته و شناسه اینباند را ثبت کنید";
     sendmessage($from_id, $textx, $typepanel, 'HTML');
     step('gettyppepanel', $from_id);
@@ -4691,17 +4704,5 @@ elseif(preg_match('/^editstsuts-(.*)-(.*)/', $datain, $dataget)) {
     update("user", "verify", "0", "id", $iduser);
     sendmessage($from_id,"✅ کاربر با موفقیت از احراز خارج گردید.", $keyboardadmin, 'HTML');
     step('home', $from_id);
-}
-if($text == "🆕 آپدیت ربات"){
-    $message_ids = sendmessage($from_id,"⚙️ درحال آپدیت", null, 'HTML');
-    shell_exec("curl -o install.sh -L https://raw.githubusercontent.com/mahdiMGF2/botmirzapanel/main/install.sh && bash install.sh -update");
-    sleep(1);
-    Editmessagetext($from_id, $message_ids['result']['message_id'],"⚙️ درحال آپدیت .", null);
-    sleep(1);
-    Editmessagetext($from_id, $message_ids['result']['message_id'],"⚙️ درحال آپدیت ..", null);
-    sleep(1);
-    Editmessagetext($from_id, $message_ids['result']['message_id'],"⚙️ درحال آپدیت ...", null);
-    sleep(2);
-    Editmessagetext($from_id, $message_ids['result']['message_id'],"✅ ربات با موفقیت آپدیت گردید.", null);
 }
 $connect->close();
