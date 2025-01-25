@@ -17,7 +17,6 @@ $APIKEY = "**TOKEN**"; // توکن ربات خود را وارد کنید
 $adminnumber = "5522424631";// آیدی عددی ادمین
 $domainhosts = "domain.com/bot";// دامنه  هاست و مسیر سورس
 $usernamebot = "marzbaninfobot"; //نام کاربری ربات  بدون @
-$secrettoken = ""; // سکرت توکن
 
 
 
