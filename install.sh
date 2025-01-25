@@ -19,6 +19,7 @@ function show_logo() {
 
 # Display Menu
 function show_menu() {
+        clear
     echo -e "\033[1;36m1)\033[0m Install Mirza Bot"
     echo -e "\033[1;36m2)\033[0m Update Mirza Bot"
     echo -e "\033[1;36m3)\033[0m Remove Mirza Bot"
@@ -26,10 +27,11 @@ function show_menu() {
     echo -e "\033[1;36m5)\033[0m Import Database"
     echo -e "\033[1;36m6)\033[0m Configure Automated Backup"
     echo -e "\033[1;36m7)\033[0m Renew SSL Certificates"
-    echo -e "\033[1;36m8)\033[0m Additional Bot Management"
-    echo -e "\033[1;36m9)\033[0m Exit"
+    echo -e "\033[1;36m8)\033[0m Change Domain"
+    echo -e "\033[1;36m9)\033[0m Additional Bot Management"
+    echo -e "\033[1;36m10)\033[0m Exit"
     echo ""
-    read -p "Select an option [1-9]: " option
+    read -p "Select an option [1-10]: " option
     case $option in
         1) install_bot ;;
         2) update_bot ;;
@@ -38,8 +40,9 @@ function show_menu() {
         5) import_database ;;
         6) auto_backup ;;
         7) renew_ssl ;;
-        8) manage_additional_bots ;;
-        9)
+        8) change_domain ;;
+        9) manage_additional_bots ;;
+        10)
             echo -e "\033[32mExiting...\033[0m"
             exit 0
             ;;
@@ -218,6 +221,11 @@ function install_bot() {
         echo -e "\e[91mError: Failed to install libssh2.\033[0m"
         exit 1
     }
+    sudo apt install jq -y || {
+        echo -e "\e[91mError: Failed to install jq.\033[0m"
+        exit 1
+    }
+
     sudo systemctl restart apache2.service || {
         echo -e "\e[91mError: Failed to restart Apache2 service.\033[0m"
         exit 1
@@ -232,66 +240,45 @@ function install_bot() {
             exit 1
         }
     fi
-    
-    # Default repository URL
-    REPO_URL="https://github.com/mahdiMGF2/botmirzapanel.git"
 
-    # Check for version flag
-    if [[ "$1" == -v* ]]; then
-        VERSION=$(echo "$1" | sed 's/-v//')
-        REPO_URL="https://github.com/mahdiMGF2/botmirzapanel/archive/refs/tags/$VERSION.zip"
-    elif [[ "$1" == "-v" && -n "$2" ]]; then
-        VERSION="$2"
-        REPO_URL="https://github.com/mahdiMGF2/botmirzapanel/archive/refs/tags/$VERSION.zip"
-    fi
-
-    # Validate the REPO_URL
-    if ! curl --output /dev/null --silent --head --fail "$REPO_URL"; then
-        echo -e "\e[91mError: The specified version or URL is invalid.\033[0m"
+    # Create bot directory
+    sudo mkdir -p "$BOT_DIR"
+    if [ ! -d "$BOT_DIR" ]; then
+        echo -e "\e[91mError: Failed to create directory $BOT_DIR.\033[0m"
         exit 1
     fi
 
-    # Clone or download the repository
-    if [[ $REPO_URL == *.zip ]]; then
-        TEMP_DIR="/tmp/mirzabot"
-        mkdir -p "$TEMP_DIR"
-        curl -L -o "$TEMP_DIR/bot.zip" "$REPO_URL" || {
-            echo -e "\e[91mError: Failed to download the specified version.\033[0m"
-            exit 1
-        }
-        if ! unzip "$TEMP_DIR/bot.zip" -d "$TEMP_DIR"; then
-            echo -e "\e[91mError: Failed to unzip the repository. Please check the version or URL.\033[0m"
-            rm -rf "$TEMP_DIR"
-            exit 1
-        fi
-        # Find the extracted directory (assuming only one subdirectory exists)
-        EXTRACTED_DIR=$(find "$TEMP_DIR" -mindepth 1 -maxdepth 1 -type d)
-        if [ -z "$EXTRACTED_DIR" ]; then
-            echo -e "\e[91mError: Extracted directory not found.\033[0m"
-            exit 1
-        fi
-        mv "$EXTRACTED_DIR" "$BOT_DIR" || {
-            echo -e "\e[91mError: Failed to move files to $BOT_DIR.\033[0m"
-            exit 1
-        }
-        rm -rf "$TEMP_DIR"
-    else
-        git clone "$REPO_URL" "$BOT_DIR" || {
-            echo -e "\e[91mError: Failed to clone the repository.\033[0m"
-            exit 1
-        }
-    fi
+    # Default to latest release
+    ZIP_URL=$(curl -s https://api.github.com/repos/mahdiMGF2/botmirzapanel/releases/latest | grep "zipball_url" | cut -d '"' -f 4)
 
-    sudo chown -R www-data:www-data "$BOT_DIR" || {
-        echo -e "\e[91mError: Failed to set ownership for $BOT_DIR.\033[0m"
+# Check for version flag
+if [[ "$1" == "-v" && "$2" == "beta" ]] || [[ "$1" == "-beta" ]] || [[ "$1" == "-" && "$2" == "beta" ]]; then
+    ZIP_URL="https://github.com/mahdiMGF2/botmirzapanel/archive/refs/heads/main.zip"
+elif [[ "$1" == "-v" && -n "$2" ]]; then
+    ZIP_URL="https://github.com/mahdiMGF2/botmirzapanel/archive/refs/tags/$2.zip"
+fi
+
+    # Download and extract the repository
+    TEMP_DIR="/tmp/mirzabot"
+    mkdir -p "$TEMP_DIR"
+    wget -O "$TEMP_DIR/bot.zip" "$ZIP_URL" || {
+        echo -e "\e[91mError: Failed to download the specified version.\033[0m"
         exit 1
     }
-    sudo chmod -R 755 "$BOT_DIR" || {
-        echo -e "\e[91mError: Failed to set permissions for $BOT_DIR.\033[0m"
+
+    unzip "$TEMP_DIR/bot.zip" -d "$TEMP_DIR"
+    EXTRACTED_DIR=$(find "$TEMP_DIR" -mindepth 1 -maxdepth 1 -type d)
+    mv "$EXTRACTED_DIR"/* "$BOT_DIR" || {
+        echo -e "\e[91mError: Failed to move extracted files.\033[0m"
         exit 1
     }
+    rm -rf "$TEMP_DIR"
+
+    sudo chown -R www-data:www-data "$BOT_DIR"
+    sudo chmod -R 755 "$BOT_DIR"
 
     echo -e "\n\033[33mMirza config and script have been installed successfully.\033[0m"
+
 
 wait
 if [ ! -d "/root/confmirza" ]; then
@@ -599,75 +586,79 @@ echo -e "$text_to_save" >> /var/www/html/mirzabotconfig/config.php
 
 }
 # Update Function
+# Updated update_bot function with English comments
 function update_bot() {
     echo "Updating Mirza Bot..."
-
-    # Server Update
+    
+    # Update server packages
     if ! sudo apt update && sudo apt upgrade -y; then
         echo -e "\e[91mError updating the server. Exiting...\033[0m"
         exit 1
     fi
-    echo -e "\e[92mThe server was successfully updated...\033[0m\n"
+    echo -e "\e[92mServer packages updated successfully...\033[0m\n"
 
-    # Install Required Tools
-    if ! sudo apt-get install -y git curl; then
-        echo -e "\e[91mError installing required packages. Exiting...\033[0m"
+    # Fetch latest release from GitHub
+    ZIP_URL=$(curl -s https://api.github.com/repos/mahdiMGF2/botmirzapanel/releases/latest | grep "zipball_url" | cut -d '"' -f4)
+    
+    # Create temporary directory
+    TEMP_DIR="/tmp/mirzabot_update"
+    mkdir -p "$TEMP_DIR"
+    
+    # Download and extract
+    wget -O "$TEMP_DIR/bot.zip" "$ZIP_URL" || {
+        echo -e "\e[91mError: Failed to download update package.\033[0m"
         exit 1
-    fi
-
-    echo -e "\n\e[92mUpdating Bot...\033[0m\n"
-    sleep 2
-
-    # Check the config.php file and transfer it
+    }
+    unzip "$TEMP_DIR/bot.zip" -d "$TEMP_DIR"
+    
+    # Find extracted directory
+    EXTRACTED_DIR=$(find "$TEMP_DIR" -mindepth 1 -maxdepth 1 -type d)
+    
+    # Backup config file
     CONFIG_PATH="/var/www/html/mirzabotconfig/config.php"
-    TEMP_CONFIG_PATH="/root/config.php"
-
+    TEMP_CONFIG="/root/mirza_config_backup.php"
     if [ -f "$CONFIG_PATH" ]; then
-        mv "$CONFIG_PATH" "$TEMP_CONFIG_PATH" || {
-            echo -e "\e[91mFailed to move config.php. Exiting...\033[0m"
+        cp "$CONFIG_PATH" "$TEMP_CONFIG" || {
+            echo -e "\e[91mConfig file backup failed!\033[0m"
             exit 1
         }
-    else
-        echo -e "\e[91mconfig.php not found. Exiting...\033[0m"
-        exit 1
     fi
-
-    # Remove the old version of the bot
-    if ! rm -rf /var/www/html/mirzabotconfig; then
-        echo -e "\e[91mFailed to remove old bot directory. Exiting...\033[0m"
+    
+    # Remove old version
+    sudo rm -rf /var/www/html/mirzabotconfig || {
+        echo -e "\e[91mFailed to remove old bot files!\033[0m"
         exit 1
-    fi
-
-    # Clone the new version of the bot
-    if ! git clone https://github.com/mahdiMGF2/botmirzapanel.git /var/www/html/mirzabotconfig; then
-        echo -e "\e[91mFailed to clone the repository. Exiting...\033[0m"
+    }
+    
+    # Move new files
+    sudo mkdir -p /var/www/html/mirzabotconfig
+    sudo mv "$EXTRACTED_DIR"/* /var/www/html/mirzabotconfig/ || {
+        echo -e "\e[91mFile transfer failed!\033[0m"
         exit 1
+    }
+    
+    # Restore config file
+    if [ -f "$TEMP_CONFIG" ]; then
+        sudo mv "$TEMP_CONFIG" "$CONFIG_PATH" || {
+            echo -e "\e[91mConfig restoration failed!\033[0m"
+            exit 1
+        }
     fi
-
-    # Set Ownership and Permissions
+    
+    # Set permissions
     sudo chown -R www-data:www-data /var/www/html/mirzabotconfig/
     sudo chmod -R 755 /var/www/html/mirzabotconfig/
-
-    # Restore Configuration File 
-    if ! mv "$TEMP_CONFIG_PATH" "$CONFIG_PATH"; then
-        echo -e "\e[91mFailed to restore config.php. Exiting...\033[0m"
-        exit 1
-    fi
-
-    # Execute the table.php script
-    URL=$(grep '$domainhosts' "$CONFIG_PATH" | cut -d"'" -f2)
-    if [ -z "$URL" ]; then
-        echo -e "\e[91mFailed to extract domain URL from config.php. Exiting...\033[0m"
-        exit 1
-    fi
-
-    if ! curl "https://$URL/table.php"; then
-        echo -e "\e[91mFailed to execute table.php. Exiting...\033[0m"
-        exit 1
-    fi
-
-    clear
-    echo -e "\n\e[92mMirza Bot has been successfully updated!\033[0m"
+    
+    # Run setup script
+    URL=$(grep '\$domainhosts' "$CONFIG_PATH" | cut -d"'" -f2)
+    curl -s "https://$URL/table.php" || {
+        echo -e "\e[91mSetup script execution failed!\033[0m"
+    }
+    
+    # Cleanup
+    rm -rf "$TEMP_DIR"
+    
+    echo -e "\n\e[92mMirza Bot updated to latest version successfully!\033[0m"
 }
 
 # Delete Function
@@ -915,15 +906,28 @@ function renew_ssl() {
         return 1
     fi
 
+    # Stop Apache to free port 80
+    echo -e "\033[33mStopping Apache...\033[0m"
+    sudo systemctl stop apache2 || {
+        echo -e "\033[31m[ERROR]\033[0m Failed to stop Apache. Exiting..."
+        return 1
+    }
+
+    # Renew SSL certificates
     if sudo certbot renew; then
         echo -e "\033[32mSSL certificates successfully renewed.\033[0m"
-        sudo systemctl reload apache2 || {
-            echo -e "\033[31m[WARNING]\033[0m Failed to reload Apache. Please check manually."
-        }
     else
         echo -e "\033[31m[ERROR]\033[0m SSL renewal failed. Please check Certbot logs for more details."
+        # Restart Apache even if renewal failed
+        sudo systemctl start apache2
         return 1
     fi
+
+    # Restart Apache
+    echo -e "\033[33mRestarting Apache...\033[0m"
+    sudo systemctl restart apache2 || {
+        echo -e "\033[31m[WARNING]\033[0m Failed to restart Apache. Please check manually."
+    }
 }
 # Function to Manage Additional Bots
 function manage_additional_bots() {
@@ -949,6 +953,59 @@ function manage_additional_bots() {
             manage_additional_bots
             ;;
     esac
+}
+function change_domain() {
+    local new_domain
+    while [[ ! "$new_domain" =~ ^[a-zA-Z0-9.-]+$ ]]; do
+        read -p "Enter new domain: " new_domain
+        [[ ! "$new_domain" =~ ^[a-zA-Z0-9.-]+$ ]] && echo -e "\033[31mInvalid domain format\033[0m"
+    done
+
+
+    echo -e "\033[33mConfiguring SSL for new domain...\033[0m"
+    if ! sudo certbot --apache --redirect --agree-tos --preferred-challenges http -d "$new_domain"; then
+        echo -e "\033[31m[ERROR] SSL configuration failed!\033[0m"
+        echo -e "\033[33mCleaning up...\033[0m"
+        sudo certbot delete --cert-name "$new_domain" 2>/dev/null
+        return 1
+    fi
+
+  
+    CONFIG_FILE="/var/www/html/mirzabotconfig/config.php"
+    if [ -f "$CONFIG_FILE" ]; then
+       
+        sudo cp "$CONFIG_FILE" "$CONFIG_FILE.$(date +%s).bak"
+
+        sudo sed -i "s/\$domainhosts = '.*\/mirzabotconfig';/\$domainhosts = '${new_domain}\/mirzabotconfig';/" "$CONFIG_FILE"
+
+        
+        NEW_SECRET=$(openssl rand -base64 12 | tr -dc 'a-zA-Z0-9')
+        sudo sed -i "s/\$secrettoken = '.*';/\$secrettoken = '${NEW_SECRET%%}';/" "$CONFIG_FILE"
+        
+        
+        BOT_TOKEN=$(awk -F"'" '/\$APIKEY/{print $2}' "$CONFIG_FILE")
+        curl -s -o /dev/null -F "url=https://${new_domain}/mirzabotconfig/index.php" \
+             -F "secret_token=${NEW_SECRET}" \
+             "https://api.telegram.org/bot${BOT_TOKEN}/setWebhook" || {
+            echo -e "\033[33m[WARNING] Webhook update failed\033[0m"
+        }
+    else
+        echo -e "\033[31m[CRITICAL] Config file missing!\033[0m"
+        return 1
+    fi
+
+   
+    if curl -sI "https://${new_domain}" | grep -q "200 OK"; then
+        echo -e "\033[32mDomain successfully migrated to ${new_domain}\033[0m"
+        echo -e "\033[33mOld domain configuration has been automatically cleaned up\033[0m"
+    else
+        echo -e "\033[31m[WARNING] Final verification failed!\033[0m"
+        echo -e "\033[33mPlease check:\033[0m"
+        echo -e "1. DNS settings for ${new_domain}"
+        echo -e "2. Apache virtual host configuration"
+        echo -e "3. Firewall settings"
+        return 1
+    fi
 }
 # Added Function for Installing Additional Bot
 function install_additional_bot() {
@@ -1647,9 +1704,13 @@ EOF
 }
 
 # Main Execution
-show_logo
-if [[ "$1" == -v* || ( "$1" == "-v" && -n "$2" ) ]]; then
-    install_bot "$1" "$2"
+if [[ "$1" == -v* || ("$1" == "-v" && -n "$2") || "$1" == "-beta" || ("$1" == "-" && "$2" == "beta") || "$1" == "-update" ]]; then
+    if [[ "$1" == "-update" ]]; then
+        update_bot
+        exit 0
+    else
+        install_bot "$1" "$2"
+    fi
 else
     show_menu
 fi
