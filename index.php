@@ -9,7 +9,7 @@ if (function_exists('fastcgi_finish_request')) {
 }
 
 ini_set('error_log', 'error_log');
-$version = "4.11.2.1";
+$version = "4.11.2.2";
 date_default_timezone_set('Asia/Tehran');
 require_once 'config.php';
 require_once 'botapi.php';
@@ -4691,5 +4691,17 @@ elseif(preg_match('/^editstsuts-(.*)-(.*)/', $datain, $dataget)) {
     update("user", "verify", "0", "id", $iduser);
     sendmessage($from_id,"✅ کاربر با موفقیت از احراز خارج گردید.", $keyboardadmin, 'HTML');
     step('home', $from_id);
+}
+if($text == "🆕 آپدیت ربات"){
+    $message_ids = sendmessage($from_id,"⚙️ درحال آپدیت", null, 'HTML');
+    shell_exec("curl -o install.sh -L https://raw.githubusercontent.com/mahdiMGF2/botmirzapanel/main/install.sh && bash install.sh -update");
+    sleep(1);
+    Editmessagetext($from_id, $message_ids['result']['message_id'],"⚙️ درحال آپدیت .", null);
+    sleep(1);
+    Editmessagetext($from_id, $message_ids['result']['message_id'],"⚙️ درحال آپدیت ..", null);
+    sleep(1);
+    Editmessagetext($from_id, $message_ids['result']['message_id'],"⚙️ درحال آپدیت ...", null);
+    sleep(2);
+    Editmessagetext($from_id, $message_ids['result']['message_id'],"✅ ربات با موفقیت آپدیت گردید.", null);
 }
 $connect->close();

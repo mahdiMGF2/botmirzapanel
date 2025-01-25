@@ -11,11 +11,11 @@ function telegram($method, $datas = [])
     if (curl_error($ch)) {
         var_dump(curl_error($ch));
     } else {
-        return json_decode($res);
+        return json_decode($res,true);
     }
 }
 function sendmessage($chat_id,$text,$keyboard,$parse_mode){
-    telegram('sendmessage',[
+    return telegram('sendmessage',[
         'chat_id' => $chat_id,
         'text' => $text,
         'disable_web_page_preview' => true,
@@ -26,7 +26,7 @@ function sendmessage($chat_id,$text,$keyboard,$parse_mode){
 }
 
 function forwardMessage($chat_id,$message_id,$chat_id_user){
-    telegram('forwardMessage',[
+    return telegram('forwardMessage',[
         'from_chat_id'=> $chat_id,
         'message_id'=> $message_id,
         'chat_id'=> $chat_id_user,
@@ -48,7 +48,7 @@ function sendvideo($chat_id,$videoid,$caption){
     ]);
 }
 function Editmessagetext($chat_id, $message_id, $text, $keyboard){
-    telegram('editmessagetext', [
+    return telegram('editmessagetext', [
         'chat_id' => $chat_id,
         'message_id' => $message_id,
         'text' => $text,
