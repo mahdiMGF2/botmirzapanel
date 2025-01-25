@@ -9,7 +9,14 @@ A Powerful Bot for Selling VPN Services with Auto Configuration Build.
     <a href="https://github.com/mahdiMGF2/botmirzapanel" target="_blank">
         <img src="https://img.shields.io/github/stars/mahdiMGF2/botmirzapanel?style=social" alt="GitHub Stars"/>
     </a>
+    <a href="https://img.shields.io/github/forks/mahdiMGF2/botmirzapanel?style=flat-square" target="_blank">
+        <img src="https://img.shields.io/github/forks/mahdiMGF2/botmirzapanel?style=flat-square" alt="GitHub Forks"/>
+    </a>
+    <a href="https://github.com/mahdiMGF2/botmirzapanel/issues" target="_blank">
+        <img src="https://img.shields.io/github/issues/mahdiMGF2/botmirzapanel?style=flat-square" alt="GitHub Issues"/>
+    </a>
 </p>
+
 
 ---
 
@@ -174,3 +181,7 @@ If you find **Mirza Panel** helpful and would like to support its development, y
   `TNvwhpNtXxKMFFeVzGR8GNZ6gL4aECituU`
 
 Your support ensures continued updates and improvements for this project. Thank you! 🙌
+
+### Contributors
+
+![Contributors](https://contrib.rocks/image?repo=mahdiMGF2/botmirzapanel)
