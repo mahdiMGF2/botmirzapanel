@@ -148,10 +148,6 @@ function adduserm($location,$data_limit,$username_ac,$timestamp)
         }else{
             $data["expire_date"] = null;
             $data["expire_strategy"] = "start_on_first_use";
-            $date = new DateTime();
-            $date->setTimestamp($timestamp - time());
-            $formattedDate = $date->format('Y-m-d\TH:i:s');
-            $data["activation_deadline"] = $formattedDate;
             $data["usage_duration"] = $timestamp - time();
         }
     }
