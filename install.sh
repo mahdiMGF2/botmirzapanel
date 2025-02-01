@@ -586,10 +586,9 @@ echo -e "$text_to_save" >> /var/www/html/mirzabotconfig/config.php
 
 }
 # Update Function
-# Updated update_bot function with English comments
 function update_bot() {
     echo "Updating Mirza Bot..."
-    
+
     # Update server packages
     if ! sudo apt update && sudo apt upgrade -y; then
         echo -e "\e[91mError updating the server. Exiting...\033[0m"
@@ -598,7 +597,12 @@ function update_bot() {
     echo -e "\e[92mServer packages updated successfully...\033[0m\n"
 
     # Fetch latest release from GitHub
-    ZIP_URL=$(curl -s https://api.github.com/repos/mahdiMGF2/botmirzapanel/releases/latest | grep "zipball_url" | cut -d '"' -f4)
+    # Check for version flag
+    if [[ "$1" == "-beta" ]] || [[ "$1" == "-v" && "$2" == "beta" ]]; then
+        ZIP_URL="https://github.com/mahdiMGF2/botmirzapanel/archive/refs/heads/main.zip"
+    else
+        ZIP_URL=$(curl -s https://api.github.com/repos/mahdiMGF2/botmirzapanel/releases/latest | grep "zipball_url" | cut -d '"' -f4)
+    fi
     
     # Create temporary directory
     TEMP_DIR="/tmp/mirzabot_update"
@@ -640,7 +644,7 @@ function update_bot() {
     # Restore config file
     if [ -f "$TEMP_CONFIG" ]; then
         sudo mv "$TEMP_CONFIG" "$CONFIG_PATH" || {
-            echo -e "\e[91mConfig restoration failed!\033[0m"
+            echo -e "\e[91mConfig file restore failed!\033[0m"
             exit 1
         }
     fi
@@ -660,6 +664,7 @@ function update_bot() {
     
     echo -e "\n\e[92mMirza Bot updated to latest version successfully!\033[0m"
 }
+
 
 # Delete Function
 function remove_bot() {
@@ -1706,7 +1711,7 @@ EOF
 # Main Execution
 if [[ "$1" == -v* || ("$1" == "-v" && -n "$2") || "$1" == "-beta" || ("$1" == "-" && "$2" == "beta") || "$1" == "-update" ]]; then
     if [[ "$1" == "-update" ]]; then
-        update_bot
+        update_bot "$2"
         exit 0
     else
         install_bot "$1" "$2"
