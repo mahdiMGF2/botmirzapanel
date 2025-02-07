@@ -435,7 +435,8 @@ try {
         price_product varchar(2000) NULL,
         Volume_constraint varchar(2000) NULL,
         Location varchar(1000) NULL,
-        Service_time varchar(200) NULL)
+        Service_time varchar(200) NULL,
+        Category varchar(600) NULL)
         ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin");
         if (!$result) {
             echo "table product".mysqli_error($connect);
@@ -445,6 +446,10 @@ try {
         $Check_filde = $connect->query("SHOW COLUMNS FROM product LIKE 'Location'");
         if (mysqli_num_rows($Check_filde) != 1) {
             $result = $connect->query("ALTER TABLE product ADD Location VARCHAR(1000)");
+        }
+        $Check_filde = $connect->query("SHOW COLUMNS FROM product LIKE 'Category'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $result = $connect->query("ALTER TABLE product ADD Category VARCHAR(600)");
         }
         $Check_filde = $connect->query("SHOW COLUMNS FROM product LIKE 'code_product'");
         if (mysqli_num_rows($Check_filde) != 1) {
@@ -775,6 +780,25 @@ try {
         ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin");
         if (!$result) {
             echo "table cancel_service".mysqli_error($connect);
+        }
+    }
+} catch (Exception $e) {
+    file_put_contents('error_log',$e->getMessage());
+}
+$connect->query("ALTER TABLE `user` CHANGE `Processing_value` `Processing_value` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL;");
+
+//----------------------- [ Category ] --------------------- //
+try {
+    $result = $connect->query("SHOW TABLES LIKE 'category'");
+    $table_exists = ($result->num_rows > 0);
+
+    if (!$table_exists) {
+        $result = $connect->query("CREATE TABLE category (
+        id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        remark varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NOT NULL)
+        ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin");
+        if (!$result) {
+            echo "table category".mysqli_error($connect);
         }
     }
 } catch (Exception $e) {

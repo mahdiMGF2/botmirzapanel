@@ -5,11 +5,10 @@ require_once '../botapi.php';
 require_once '../panels.php';
 require_once '../functions.php';
 $ManagePanel = new ManagePanel();
-$stmt = $pdo->prepare("SELECT * FROM invoice WHERE status = 'active' AND name_product = 'usertest'");
+$stmt = $pdo->prepare("SELECT * FROM invoice WHERE status = 'active' AND name_product = 'usertest' LIMIT 10");
 $stmt->execute();
 while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
     $resultt  = trim($result['username']);
-    $result = $result;
     $marzban_list_get = select("marzban_panel","*","name_panel",$result['Service_location'],"select");
     $get_username_Check = $ManagePanel->DataUser($result['Service_location'],$result['username']);
     if (!in_array($get_username_Check['status'],['active','on_hold','Unsuccessful','disabled'])) {

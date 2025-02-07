@@ -179,7 +179,7 @@ if($PaySettingperfectmoney == "onperfectmoney"){
     ];
 }
 $step_payment['inline_keyboard'][] = [
-    ['text' => "❌ بستن لیست" , 'callback_data' => "colselist" ]
+    ['text' => "❌ بستن لیست" , 'callback_data' => "closelist" ]
 ];
 $step_payment = json_encode($step_payment);
 $User_Services = json_encode([
@@ -201,6 +201,7 @@ $keyboardhelpadmin = json_encode([
 $shopkeyboard = json_encode([
     'keyboard' => [
         [['text' => "🛍 اضافه کردن محصول"], ['text' => "❌ حذف محصول"]],
+        [['text' => "🛒 اضافه کردن دسته بندی"], ['text' => "❌ حذف دسته بندی"]],
         [['text' => "✏️ ویرایش محصول"]],
         [['text' => "➕ تنظیم قیمت حجم اضافه"]],
         [['text' => "🎁 ساخت کد هدیه"],['text' => "❌ حذف کد هدیه"]],
@@ -475,7 +476,7 @@ $payment = json_encode([
 $change_product = json_encode([
     'keyboard' => [
         [['text' => "قیمت"], ['text' => "حجم"], ['text' => "زمان"]],
-        [['text' => "نام محصول"]],
+        [['text' => "نام محصول"],['text' => "دسته بندی"]],
         [['text' => "🏠 بازگشت به منوی مدیریت"]]
     ],
     'resize_keyboard' => true
@@ -596,3 +597,32 @@ $helpedit =  json_encode([
     ],
     'resize_keyboard' => true
 ]);
+function KeyboardCategory(){
+    global $pdo;
+    $stmt = $pdo->prepare("SELECT * FROM category");
+    $stmt->execute();
+    $list_category = [
+        'keyboard' => [],
+        'resize_keyboard' => true,
+    ];
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $list_category['keyboard'][] = [['text' =>$row['remark']]];
+    }
+    $list_category['keyboard'][] = [
+        ['text' => "🏠 بازگشت به منوی مدیریت"],
+    ];
+    return json_encode($list_category);
+}
+function KeyboardCategorybuy($callback_data){
+    global $pdo;
+    $stmt = $pdo->prepare("SELECT * FROM category");
+    $stmt->execute();
+    $list_category = ['inline_keyboard' => [],];
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $list_category['inline_keyboard'][] = [['text' =>$row['remark'],'callback_data' => "categorylist_".$row['id']]];
+    }
+    $list_category['inline_keyboard'][] = [
+        ['text' => "🏠 بازگشت به منوی قبل","callback_data" => $callback_data],
+    ];
+    return json_encode($list_category);
+}

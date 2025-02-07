@@ -460,6 +460,7 @@ $textbotlang['Admin']['Product']['AddProductStepOne'] = " ابتدا نام اش
 $textbotlang['Admin']['Product']['GetLimit'] = "حجم اشتراک را ارسال کنید توجه واحد حجم گیگابایت است
 
 اگر میخواهید حجم نامحدود باشد عدد 0 ارسال کنید";
+$textbotlang['Admin']['Product']['Getcategory'] = "دسته بندی محصول را انتخاب کنید";
 $textbotlang['Admin']['Product']['Invalidvolume'] = "حجم نامعتبر است";
 $textbotlang['Admin']['Product']['GettIime'] = "
 زمان اشتراک را وارد نمایید توجه زمان واحد زمان اشتراک روز است
