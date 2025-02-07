@@ -1416,7 +1416,7 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
     $categoryid = $dataget[1];
     $product = [];
     $location = select("marzban_panel", "*", null, null, "select");
-    $stmt = $pdo->prepare("SELECT * FROM product WHERE Location = :location OR Location = '/all' AND category = :category");
+    $stmt = $pdo->prepare("SELECT * FROM product WHERE (Location = :location OR Location = '/all') AND category = :category");
     $stmt->bindParam(':location', $location['name_panel'], PDO::PARAM_STR);
     $stmt->bindParam(':category', $categoryid, PDO::PARAM_STR);
     $stmt->execute();
