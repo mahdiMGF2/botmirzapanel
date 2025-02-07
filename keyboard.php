@@ -613,12 +613,17 @@ function KeyboardCategory(){
     ];
     return json_encode($list_category);
 }
-function KeyboardCategorybuy($callback_data){
+function KeyboardCategorybuy($callback_data,$location){
     global $pdo;
     $stmt = $pdo->prepare("SELECT * FROM category");
     $stmt->execute();
     $list_category = ['inline_keyboard' => [],];
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $stmts = $pdo->prepare("SELECT * FROM product WHERE (Location = :location OR Location = '/all') AND category = :category");
+        $stmts->bindParam(':location', $location, PDO::PARAM_STR);
+        $stmts->bindParam(':category', $row['id'], PDO::PARAM_STR);
+        $stmts->execute();
+        if($stmts->rowCount() == 0)continue;
         $list_category['inline_keyboard'][] = [['text' =>$row['remark'],'callback_data' => "categorylist_".$row['id']]];
     }
     $list_category['inline_keyboard'][] = [
