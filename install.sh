@@ -596,6 +596,13 @@ function update_bot() {
     fi
     echo -e "\e[92mServer packages updated successfully...\033[0m\n"
 
+    # Check if bot is already installed
+    BOT_DIR="/var/www/html/mirzabotconfig"
+    if [ ! -d "$BOT_DIR" ]; then
+        echo -e "\e[91mError: Mirza Bot is not installed. Please install it first.\033[0m"
+        exit 1
+    fi
+
     # Fetch latest release from GitHub
     # Check for version flag
     if [[ "$1" == "-beta" ]] || [[ "$1" == "-v" && "$2" == "beta" ]]; then
@@ -664,7 +671,6 @@ function update_bot() {
     
     echo -e "\n\e[92mMirza Bot updated to latest version successfully!\033[0m"
 }
-
 
 # Delete Function
 function remove_bot() {
