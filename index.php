@@ -1411,12 +1411,16 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
         $panel = select("marzban_panel", "*", "status", "activepanel", "select");
         sendmessage($from_id, "📌 دسته بندی مورد نظر خود را انتخاب نمایید.", KeyboardCategorybuy("backuser",$panel['name_panel']), 'HTML');
     } else {
-        sendmessage($from_id, $textbotlang['users']['Service']['Location'], $list_marzban_panel_user, 'HTML');
+        if($datain == "buy"){
+            Editmessagetext($from_id, $message_id, $textbotlang['users']['Service']['Location'], $list_marzban_panel_user);
+        }else{
+            sendmessage($from_id, $textbotlang['users']['Service']['Location'], $list_marzban_panel_user, 'HTML');
+        }
     }
 }elseif (preg_match('/^categorylist_(.*)/', $datain, $dataget)) {
     $categoryid = $dataget[1];
     $product = [];
-    $location = select("marzban_panel", "*", null, null, "select");
+    $location = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
     $stmt = $pdo->prepare("SELECT * FROM product WHERE (Location = :location OR Location = '/all') AND category = :category");
     $stmt->bindParam(':location', $location['name_panel'], PDO::PARAM_STR);
     $stmt->bindParam(':category', $categoryid, PDO::PARAM_STR);
