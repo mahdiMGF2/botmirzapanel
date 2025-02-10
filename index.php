@@ -9,7 +9,7 @@ if (function_exists('fastcgi_finish_request')) {
 }
 
 ini_set('error_log', 'error_log');
-$version = "4.12.2";
+$version = "4.12.3";
 date_default_timezone_set('Asia/Tehran');
 require_once 'config.php';
 require_once 'botapi.php';
@@ -1403,12 +1403,8 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
         return;
     #-----------------------#
     if ($locationproduct == 1) {
-        $nullproduct = select("product", "*", null, null, "count");
-        if ($nullproduct == 0) {
-            sendmessage($from_id, $textbotlang['Admin']['Product']['nullpProduct'], null, 'HTML');
-            return;
-        }
         $panel = select("marzban_panel", "*", "status", "activepanel", "select");
+        update("user","Processing_value",$panel['name_panel'],"id",$from_id,"select");
         sendmessage($from_id, "📌 دسته بندی مورد نظر خود را انتخاب نمایید.", KeyboardCategorybuy("backuser",$panel['name_panel']), 'HTML');
     } else {
         if($datain == "buy"){
@@ -1420,6 +1416,11 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
 }elseif (preg_match('/^categorylist_(.*)/', $datain, $dataget)) {
     $categoryid = $dataget[1];
     $product = [];
+    $nullproduct = select("product", "*", null, null, "count");
+    if ($nullproduct == 0) {
+        sendmessage($from_id, $textbotlang['Admin']['Product']['nullpProduct'], null, 'HTML');
+        return;
+    }
     $location = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
     $stmt = $pdo->prepare("SELECT * FROM product WHERE (Location = :location OR Location = '/all') AND category = :category");
     $stmt->bindParam(':location', $location['name_panel'], PDO::PARAM_STR);
