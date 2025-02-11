@@ -1422,6 +1422,10 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
         return;
     }
     $location = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
+    if($location == false){
+        sendmessage($from_id, "❌ خطایی رخ داده است مراحل خرید را از اول انجام دهید.", null, 'HTML');
+        return;
+    }
     $stmt = $pdo->prepare("SELECT * FROM product WHERE (Location = :location OR Location = '/all') AND category = :category");
     $stmt->bindParam(':location', $location['name_panel'], PDO::PARAM_STR);
     $stmt->bindParam(':category', $categoryid, PDO::PARAM_STR);
@@ -1877,10 +1881,6 @@ if ($text == $datatextbot['text_Add_Balance'] || $text == "/wallet") {
         $price_rate = tronratee();
         $USD = $price_rate['result']['USD'];
         $usdprice = round($user['Processing_value'] / $USD, 2);
-        if ($usdprice < 1) {
-            sendmessage($from_id, $textbotlang['users']['Balance']['nowpayments'], null, 'HTML');
-            return;
-        }
         sendmessage($from_id, $textbotlang['users']['Balance']['linkpayments'], $keyboard, 'HTML');
         $dateacc = date('Y/m/d H:i:s');
         $randomString = bin2hex(random_bytes(5));
