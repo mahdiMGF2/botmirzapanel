@@ -170,7 +170,8 @@ try {
         Extra_volume varchar(600)  NULL,
         namecustome varchar(100)  NULL,
         status_verify varchar(50)  NULL,
-        removedayc varchar(100)  NULL)
+        removedayc varchar(100)  NULL,
+        statuscategory varchar(100)  NULL)
         ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin");
         if (!$result) {
             echo "table setting".mysqli_error($connect);
@@ -183,13 +184,19 @@ try {
         $sublink = "✅ لینک اشتراک فعال است.";
         $configManual = "❌ ارسال کانفیگ دستی خاموش است";
         $configManual = "❌ ارسال کانفیگ دستی خاموش است";
-        $connect->query("INSERT INTO setting (Bot_Status,roll_Status,get_number,limit_usertest_all,time_usertest,val_usertest,help_Status,iran_number,NotUser,namecustome,removedayc,status_verify) VALUES ('$active_bot_text','$active_roll_text','$active_phone_text','1','1','100','$active_help','$active_phone_iran_text','0','0','1','0')");
+        $connect->query("INSERT INTO setting (Bot_Status,roll_Status,get_number,limit_usertest_all,time_usertest,val_usertest,help_Status,iran_number,NotUser,namecustome,removedayc,status_verify,statuscategory) VALUES ('$active_bot_text','$active_roll_text','$active_phone_text','1','1','100','$active_help','$active_phone_iran_text','0','0','1','0','1')");
     } else {
         $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'status_verify'");
         if (mysqli_num_rows($Check_filde) != 1) {
             $connect->query("ALTER TABLE setting ADD status_verify VARCHAR(50)");
             $connect->query("UPDATE setting SET status_verify = '0'");
             echo "The status_verify field was added ✅";
+        }
+        $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'statuscategory'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $connect->query("ALTER TABLE setting ADD statuscategory VARCHAR(50)");
+            $connect->query("UPDATE setting SET statuscategory = '1'");
+            echo "The statuscategory field was added ✅";
         }
         $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'namecustome'");
         if (mysqli_num_rows($Check_filde) != 1) {

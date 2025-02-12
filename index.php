@@ -9,7 +9,7 @@ if (function_exists('fastcgi_finish_request')) {
 }
 
 ini_set('error_log', 'error_log');
-$version = "4.12.3";
+$version = "4.12.4";
 date_default_timezone_set('Asia/Tehran');
 require_once 'config.php';
 require_once 'botapi.php';
@@ -1405,7 +1405,33 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
     if ($locationproduct == 1) {
         $panel = select("marzban_panel", "*", "status", "activepanel", "select");
         update("user","Processing_value",$panel['name_panel'],"id",$from_id,"select");
-        sendmessage($from_id, "📌 دسته بندی مورد نظر خود را انتخاب نمایید.", KeyboardCategorybuy("backuser",$panel['name_panel']), 'HTML');
+        if($setting['statuscategory'] == "0"){
+            $stmt = $pdo->prepare("SELECT * FROM product WHERE (Location = :location OR Location = '/all') ");
+            $stmt->bindParam(':location', $panel['name_panel'], PDO::PARAM_STR);
+            $stmt->execute();
+            $product = ['inline_keyboard' => []];
+            while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                if ($panel['MethodUsername'] == "نام کاربری دلخواه") {
+                    $product['inline_keyboard'][] = [
+                        ['text' => $result['name_product'], 'callback_data' => "prodcutservices_" . $result['code_product']]
+                    ];
+                } else {
+                    $product['inline_keyboard'][] = [
+                        ['text' => $result['name_product'], 'callback_data' => "prodcutservice_{$result['code_product']}"]
+                    ];
+                }
+            }
+            $product['inline_keyboard'][] = [
+                ['text' => $textbotlang['users']['backhome'], 'callback_data' => "backuser"]
+            ];
+
+            $json_list_product_list = json_encode($product);
+            $textproduct = "🛍 برای خرید اشتراک سرویس مدنظر خود را انتخاب کنید
+لوکیشن سرویس  :{$panel['name_panel']} ";
+            sendmessage($from_id,$textproduct, $json_list_product_list, 'HTML');
+        }else{
+            sendmessage($from_id, "📌 دسته بندی مورد نظر خود را انتخاب نمایید.", KeyboardCategorybuy("backuser",$panel['name_panel']), 'HTML');
+        }
     } else {
         if($datain == "buy"){
             Editmessagetext($from_id, $message_id, $textbotlang['users']['Service']['Location'], $list_marzban_panel_user);
@@ -1461,7 +1487,33 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
         return;
     }
     update("user", "Processing_value", $location, "id", $from_id);
-    Editmessagetext($from_id, $message_id, "📌 دسته بندی مورد نظر خود را انتخاب نمایید.", KeyboardCategorybuy("buy",$panellist['name_panel']));
+    if($setting['statuscategory'] == "0"){
+        $stmt = $pdo->prepare("SELECT * FROM product WHERE (Location = :location OR Location = '/all') ");
+        $stmt->bindParam(':location', $panellist['name_panel'], PDO::PARAM_STR);
+        $stmt->execute();
+        $product = ['inline_keyboard' => []];
+        while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            if ($panel['MethodUsername'] == "نام کاربری دلخواه") {
+                $product['inline_keyboard'][] = [
+                    ['text' => $result['name_product'], 'callback_data' => "prodcutservices_" . $result['code_product']]
+                ];
+            } else {
+                $product['inline_keyboard'][] = [
+                    ['text' => $result['name_product'], 'callback_data' => "prodcutservice_{$result['code_product']}"]
+                ];
+            }
+        }
+        $product['inline_keyboard'][] = [
+            ['text' => $textbotlang['users']['backhome'], 'callback_data' => "buy"]
+        ];
+
+        $json_list_product_list = json_encode($product);
+        $textproduct = "🛍 برای خرید اشتراک سرویس مدنظر خود را انتخاب کنید
+لوکیشن سرویس  :{$panellist['name_panel']} ";
+        sendmessage($from_id,$textproduct, $json_list_product_list, 'HTML');
+    }else{
+        Editmessagetext($from_id, $message_id, "📌 دسته بندی مورد نظر خود را انتخاب نمایید.", KeyboardCategorybuy("buy",$panellist['name_panel']));
+    }
 } elseif (preg_match('/^prodcutservices_(.*)/', $datain, $dataget)) {
     $prodcut = $dataget[1];
     update("user", "Processing_value_one", $prodcut, "id", $from_id);
@@ -4554,6 +4606,10 @@ elseif($text == "ویرایش رسانه") {
         '1' => $textbotlang['Admin']['Status']['statuson'],
         '0' => $textbotlang['Admin']['Status']['statusoff']
     ][$setting['status_verify']];
+    $statusv_category   = [
+        '1' => $textbotlang['Admin']['Status']['statuson'],
+        '0' => $textbotlang['Admin']['Status']['statusoff']
+    ][$setting['statuscategory']];
     $Bot_Status = json_encode([
         'inline_keyboard' => [
             [
@@ -4581,6 +4637,9 @@ elseif($text == "ویرایش رسانه") {
             ],[
                 ['text' => $statusv_verify, 'callback_data' => "editstsuts-verify-{$setting['status_verify']}"],
                 ['text' => "👤 احراز هویت", 'callback_data' => "status_verify"],
+            ],[
+                ['text' => $statusv_category, 'callback_data' => "editstsuts-category-{$setting['statuscategory']}"],
+                ['text' => "🕹 دسته بندی", 'callback_data' => "statuscategory"],
             ]
         ]
     ]);
@@ -4638,6 +4697,13 @@ elseif(preg_match('/^editstsuts-(.*)-(.*)/', $datain, $dataget)) {
             $valuenew = "1";
         }
         update("setting","status_verify",$valuenew);
+    }elseif($type == "category"){
+        if($value == "1"){
+            $valuenew = "0";
+        }else{
+            $valuenew = "1";
+        }
+        update("setting","statuscategory",$valuenew);
     }
     $setting = select("setting", "*");
     $name_status   = [
@@ -4668,6 +4734,10 @@ elseif(preg_match('/^editstsuts-(.*)-(.*)/', $datain, $dataget)) {
         '1' => $textbotlang['Admin']['Status']['statuson'],
         '0' => $textbotlang['Admin']['Status']['statusoff']
     ][$setting['status_verify']];
+    $statusv_category   = [
+        '1' => $textbotlang['Admin']['Status']['statuson'],
+        '0' => $textbotlang['Admin']['Status']['statusoff']
+    ][$setting['statuscategory']];
     $Bot_Status = json_encode([
         'inline_keyboard' => [
             [
@@ -4695,6 +4765,9 @@ elseif(preg_match('/^editstsuts-(.*)-(.*)/', $datain, $dataget)) {
             ],[
                 ['text' => $statusv_verify, 'callback_data' => "editstsuts-verify-{$setting['status_verify']}"],
                 ['text' => "👤 احراز هویت", 'callback_data' => "status_verify"],
+            ],[
+                ['text' => $statusv_category, 'callback_data' => "editstsuts-category-{$setting['statuscategory']}"],
+                ['text' => "🕹 دسته بندی", 'callback_data' => "statuscategory"],
             ]
         ]
     ]);
