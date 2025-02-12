@@ -631,3 +631,30 @@ function KeyboardCategorybuy($callback_data,$location){
     ];
     return json_encode($list_category);
 }
+function KeyboardProduct($location,$backdata,$MethodUsername, $categoryid = null){
+    global $pdo,$textbotlang;
+    $query = "SELECT * FROM product WHERE (Location = :location OR Location = '/all') ";
+    if($categoryid != null){
+        $query.= "AND category = '$categoryid'";
+    }
+    $stmt = $pdo->prepare($query);
+    $stmt->bindParam(':location', $location, PDO::PARAM_STR);
+    $stmt->execute();
+    $product = ['inline_keyboard' => []];
+    while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        if ($MethodUsername == "نام کاربری دلخواه") {
+            $product['inline_keyboard'][] = [
+                ['text' => $result['name_product'], 'callback_data' => "prodcutservices_" . $result['code_product']]
+            ];
+        } else {
+            $product['inline_keyboard'][] = [
+                ['text' => $result['name_product'], 'callback_data' => "prodcutservice_{$result['code_product']}"]
+            ];
+        }
+    }
+    $product['inline_keyboard'][] = [
+        ['text' => $textbotlang['users']['backmenu'], 'callback_data' => $backdata]
+    ];
+
+    return json_encode($product);
+}

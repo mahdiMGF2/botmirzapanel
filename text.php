@@ -193,6 +193,7 @@ $textbotlang['users']['Discount']['firstdiscount']  = "❌ این کد تخفی�
 
 #--------------[ other users ]--------------#
 $textbotlang['users']['backhome'] = "🏠 بازگشت به منوی اصلی";
+$textbotlang['users']['backmenu'] = "🏠 بازگشت به منوی قبل";
 $textbotlang['users']['time-Service'] = "⏳ زمان اشتراک";
 $textbotlang['users']['Volume-Service'] = "🌐 حجم سرویس";
 $textbotlang['users']['selectoption'] = "یک گزینه را انتخاب کنید";

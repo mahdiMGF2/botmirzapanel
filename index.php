@@ -1406,31 +1406,25 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
         $panel = select("marzban_panel", "*", "status", "activepanel", "select");
         update("user","Processing_value",$panel['name_panel'],"id",$from_id,"select");
         if($setting['statuscategory'] == "0"){
-            $stmt = $pdo->prepare("SELECT * FROM product WHERE (Location = :location OR Location = '/all') ");
-            $stmt->bindParam(':location', $panel['name_panel'], PDO::PARAM_STR);
-            $stmt->execute();
-            $product = ['inline_keyboard' => []];
-            while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                if ($panel['MethodUsername'] == "نام کاربری دلخواه") {
-                    $product['inline_keyboard'][] = [
-                        ['text' => $result['name_product'], 'callback_data' => "prodcutservices_" . $result['code_product']]
-                    ];
-                } else {
-                    $product['inline_keyboard'][] = [
-                        ['text' => $result['name_product'], 'callback_data' => "prodcutservice_{$result['code_product']}"]
-                    ];
-                }
+            $nullproduct = select("product", "*", null, null, "count");
+            if ($nullproduct == 0) {
+                sendmessage($from_id, $textbotlang['Admin']['Product']['nullpProduct'], null, 'HTML');
+                return;
             }
-            $product['inline_keyboard'][] = [
-                ['text' => $textbotlang['users']['backhome'], 'callback_data' => "backuser"]
-            ];
-
-            $json_list_product_list = json_encode($product);
             $textproduct = "🛍 برای خرید اشتراک سرویس مدنظر خود را انتخاب کنید
 لوکیشن سرویس  :{$panel['name_panel']} ";
-            sendmessage($from_id,$textproduct, $json_list_product_list, 'HTML');
+            sendmessage($from_id,$textproduct, KeyboardProduct($panel['name_panel'],"backuser",$panel['MethodUsername']), 'HTML');
         }else{
-            sendmessage($from_id, "📌 دسته بندی مورد نظر خود را انتخاب نمایید.", KeyboardCategorybuy("backuser",$panel['name_panel']), 'HTML');
+            $emptycategory = select("category", "*", null, null, "count");
+            if ($emptycategory == 0) {
+                sendmessage($from_id, "❌ دسته بندی برای نمایش یافت نشد.", null, 'HTML');
+                return;
+            }
+            if($datain == "buy"){
+                Editmessagetext($from_id, $message_id, "📌 دسته بندی مورد نظر خود را انتخاب نمایید.", KeyboardCategorybuy("backuser",$panel['name_panel']));
+            }else{
+                sendmessage($from_id, "📌 دسته بندی مورد نظر خود را انتخاب نمایید.", KeyboardCategorybuy("backuser",$panel['name_panel']), 'HTML');
+            }
         }
     } else {
         if($datain == "buy"){
@@ -1452,66 +1446,30 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
         sendmessage($from_id, "❌ خطایی رخ داده است مراحل خرید را از اول انجام دهید.", null, 'HTML');
         return;
     }
-    $stmt = $pdo->prepare("SELECT * FROM product WHERE (Location = :location OR Location = '/all') AND category = :category");
-    $stmt->bindParam(':location', $location['name_panel'], PDO::PARAM_STR);
-    $stmt->bindParam(':category', $categoryid, PDO::PARAM_STR);
-    $stmt->execute();
-    $product = ['inline_keyboard' => []];
-    while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        if ($location['MethodUsername'] == "نام کاربری دلخواه") {
-            $product['inline_keyboard'][] = [
-                ['text' => $result['name_product'], 'callback_data' => "prodcutservices_" . $result['code_product']]
-            ];
-        } else {
-            $product['inline_keyboard'][] = [
-                ['text' => $result['name_product'], 'callback_data' => "prodcutservice_{$result['code_product']}"]
-            ];
-        }
-    }
-    $product['inline_keyboard'][] = [
-        ['text' => $textbotlang['users']['backhome'], 'callback_data' => "buy"]
-    ];
-
-    $json_list_product_list = json_encode($product);
     $textproduct = "🛍 برای خرید اشتراک سرویس مدنظر خود را انتخاب کنید
 لوکیشن سرویس  :{$location['name_panel']} ";
-    Editmessagetext($from_id, $message_id,$textproduct, $json_list_product_list);
+    Editmessagetext($from_id, $message_id,$textproduct, KeyboardProduct($location['name_panel'],"buy",$location['MethodUsername'], $categoryid));
     update("user", "Processing_value", $location['name_panel'], "id", $from_id);
 }elseif (preg_match('/^location_(.*)/', $datain, $dataget)) {
     $locationid = $dataget[1];
     $panellist = select("marzban_panel", "*", "id", $locationid, "select");
     $location = $panellist['name_panel'];
-    $nullproduct = select("product", "*", null, null, "count");
-    if ($nullproduct == 0) {
-        sendmessage($from_id, $textbotlang['Admin']['Product']['nullpProduct'], null, 'HTML');
-        return;
-    }
     update("user", "Processing_value", $location, "id", $from_id);
     if($setting['statuscategory'] == "0"){
-        $stmt = $pdo->prepare("SELECT * FROM product WHERE (Location = :location OR Location = '/all') ");
-        $stmt->bindParam(':location', $panellist['name_panel'], PDO::PARAM_STR);
-        $stmt->execute();
-        $product = ['inline_keyboard' => []];
-        while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            if ($panel['MethodUsername'] == "نام کاربری دلخواه") {
-                $product['inline_keyboard'][] = [
-                    ['text' => $result['name_product'], 'callback_data' => "prodcutservices_" . $result['code_product']]
-                ];
-            } else {
-                $product['inline_keyboard'][] = [
-                    ['text' => $result['name_product'], 'callback_data' => "prodcutservice_{$result['code_product']}"]
-                ];
-            }
+        $nullproduct = select("product", "*", null, null, "count");
+        if ($nullproduct == 0) {
+            sendmessage($from_id, $textbotlang['Admin']['Product']['nullpProduct'], null, 'HTML');
+            return;
         }
-        $product['inline_keyboard'][] = [
-            ['text' => $textbotlang['users']['backhome'], 'callback_data' => "buy"]
-        ];
-
-        $json_list_product_list = json_encode($product);
         $textproduct = "🛍 برای خرید اشتراک سرویس مدنظر خود را انتخاب کنید
 لوکیشن سرویس  :{$panellist['name_panel']} ";
-        sendmessage($from_id,$textproduct, $json_list_product_list, 'HTML');
+        sendmessage($from_id,$textproduct, KeyboardProduct($panellist['name_panel'],"buy",$panellist['MethodUsername']), 'HTML');
     }else{
+        $emptycategory = select("category", "*", null, null, "count");
+        if ($emptycategory == 0) {
+            sendmessage($from_id, "❌ دسته بندی برای نمایش یافت نشد.", null, 'HTML');
+            return;
+        }
         Editmessagetext($from_id, $message_id, "📌 دسته بندی مورد نظر خود را انتخاب نمایید.", KeyboardCategorybuy("buy",$panellist['name_panel']));
     }
 } elseif (preg_match('/^prodcutservices_(.*)/', $datain, $dataget)) {
@@ -4606,7 +4564,7 @@ elseif($text == "ویرایش رسانه") {
         '1' => $textbotlang['Admin']['Status']['statuson'],
         '0' => $textbotlang['Admin']['Status']['statusoff']
     ][$setting['status_verify']];
-    $statusv_category   = [
+    $statusv_category  = [
         '1' => $textbotlang['Admin']['Status']['statuson'],
         '0' => $textbotlang['Admin']['Status']['statusoff']
     ][$setting['statuscategory']];
