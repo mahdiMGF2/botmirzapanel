@@ -92,8 +92,9 @@ function get_clinetsalireza($username,$namepanel){
     unlink('cookie.txt');
     return $output;
 }
-function addClientalireza_singel($namepanel, $usernameac, $Expire,$Total, $Uuid,$Flow,$subid){
-    $marzban_list_get = select("marzban_panel", "*", "name_panel", $namepanel,"select");
+function addClientalireza_singel($namepanel, $usernameac, $Expire,$Total, $Uuid,$subid){
+    $Flow = 'xtls-rprx-vision';
+    $marzban_list_get = select(table: "marzban_panel", "*", "name_panel", $namepanel,"select");
     $Allowedusername = get_Clientalireza($usernameac,$namepanel);
     if (isset($Allowedusername['email'])) {
         $random_number = rand(1000000, 9999999);
