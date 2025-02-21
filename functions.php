@@ -320,6 +320,7 @@ function DirectPayment($order_id){
             $stmt->bindParam(':id_user', $Balance_id['id']);
             $stmt->bindParam(':code', $partsdic[1]);
             $stmt->execute();
+            $pricediscount = $SellDiscountlimit['price'];
             $text_report = "⭕️ یک کاربر با نام کاربری @{$Balance_id['username']}  و آیدی عددی {$Balance_id['id']} از کد تخفیف {$partsdic[1]} استفاده کرد.";
             if (strlen($setting['Channel_Report']) > 0) {
                 telegram('sendmessage',[
@@ -327,10 +328,16 @@ function DirectPayment($order_id){
                     'text' => $text_report,
                 ]);
             }
+        }else{
+            $pricediscount = null;
         }
         $affiliatescommission = select("affiliates", "*", null, null,"select");
         if ($affiliatescommission['status_commission'] == "oncommission" &&($Balance_id['affiliates'] !== null || $Balance_id['affiliates'] != 0)) {
-            $result = ($get_invoice['price_product'] * $affiliatescommission['affiliatespercentage']) / 100;
+            if($pricediscount == null){
+                $result = ($get_invoice['price_product'] * $affiliatescommission['affiliatespercentage']) / 100;
+            }else{
+                $result = ($pricediscount * $affiliatescommission['affiliatespercentage']) / 100;
+            }
             $user_Balance = select("user", "*", "id", $Balance_id['affiliates'],"select");
             if(isset($user_Balance)){
                 $Balance_prim = $user_Balance['Balance'] + $result;
@@ -427,7 +434,7 @@ function sanitizeUserName($userName) {
 }
 function checktelegramip(){
 
-$telegram_ip_ranges = [
+    $telegram_ip_ranges = [
         ['lower' => '149.154.160.0', 'upper' => '149.154.175.255'],
         ['lower' => '91.108.4.0',    'upper' => '91.108.7.255']
     ];
