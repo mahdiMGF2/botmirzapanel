@@ -76,7 +76,7 @@ if ($user == false) {
         'affiliates' => '',
     );
 }
-if(($setting['status_verify'] == "1" && $user['verify'] == 0) && !in_array($from_id,$users_ids))return;
+if(($setting['status_verify'] == "1" && intval($user['verify']) == 0) && !in_array($from_id,$admin_ids))return;
 $channels = array();
 $helpdata = select("help", "*");
 $datatextbotget = select("textbot", "*", null, null, "fetchAll");
