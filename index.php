@@ -78,6 +78,7 @@ if ($user == false) {
 }
 if(($setting['status_verify'] == "1" && intval($user['verify']) == 0) && !in_array($from_id,$admin_ids)){
     sendmessage($from_id, "⚠️ حساب شما احراز نشده است جهت احراز هویت به اکانت پشتیبانی پیام دهید.", null, 'html');
+    return;
 };
 $channels = array();
 $helpdata = select("help", "*");
