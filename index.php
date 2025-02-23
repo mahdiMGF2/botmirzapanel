@@ -51,10 +51,10 @@ if(!in_array($from_id,$users_ids) && intval($from_id) != 0){
     }
 }
 if (intval($from_id) != 0) {
-    if($setting['status_verify'] == "1"){
-        $verify = 1;
-    }else{
+    if(intval($setting['status_verify']) == 1){
         $verify = 0;
+    }else{
+        $verify = 1;
     }
     $stmt = $pdo->prepare("INSERT IGNORE INTO user (id, step, limit_usertest, User_Status, number, Balance, pagenumber, username, message_count, last_message_time, affiliatescount, affiliates,verify) VALUES (:from_id, 'none', :limit_usertest_all, 'Active', 'none', '0', '1', :username, '0', '0', '0', '0',:verify)");
     $stmt->bindParam(':verify', $verify);
@@ -1551,7 +1551,7 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
     if (empty ($info_product['price_product']) || empty ($info_product['price_product']))
         return;
     if ($datain == "confirmandgetserviceDiscount") {
-        $priceproduct = $partsdic[1];
+        $priceproduct = $partsdic[2];
     } else {
         $priceproduct = $info_product['price_product'];
     }
@@ -1802,7 +1802,7 @@ $link_config
             [['text' => $textbotlang['users']['backhome'], 'callback_data' => "backuser"]]
         ]
     ]);
-    $parametrsendvalue = $text . "_" . $info_product['price_product'];
+    $parametrsendvalue = "dis_".$text . "_" . $info_product['price_product'];
     update("user", "Processing_value_four", $parametrsendvalue, "id", $from_id);
     sendmessage($from_id, $textin, $paymentDiscount, 'HTML');
 }

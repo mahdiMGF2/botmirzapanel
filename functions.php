@@ -320,7 +320,8 @@ function DirectPayment($order_id){
             $stmt->bindParam(':id_user', $Balance_id['id']);
             $stmt->bindParam(':code', $partsdic[1]);
             $stmt->execute();
-            $pricediscount = $SellDiscountlimit['price'];
+            $result = ($SellDiscountlimit['price'] / 100) * $get_invoice['price_product'];
+            $pricediscount = $get_invoice['price_product'] - $result;
             $text_report = "⭕️ یک کاربر با نام کاربری @{$Balance_id['username']}  و آیدی عددی {$Balance_id['id']} از کد تخفیف {$partsdic[1]} استفاده کرد.";
             if (strlen($setting['Channel_Report']) > 0) {
                 telegram('sendmessage',[
