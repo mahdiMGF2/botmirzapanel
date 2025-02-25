@@ -9,7 +9,7 @@ if (function_exists('fastcgi_finish_request')) {
 }
 
 ini_set('error_log', 'error_log');
-$version = "4.12.5";
+$version = "4.13";
 date_default_timezone_set('Asia/Tehran');
 require_once 'config.php';
 require_once 'botapi.php';
@@ -866,6 +866,16 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
         );
         $ManagePanel->Modifyuser($user['Processing_value'], $nameloc['Service_location'], $config);
     }
+    elseif($marzban_list_get['type'] == "s_ui"){
+        $date = strtotime("+" . $product['Service_time'] . "day");
+        $newDate = strtotime(date("Y-m-d H:i:s", $date));
+        $data_limit = intval($product['Volume_constraint']) * pow(1024, 3);
+        $config = array(
+            "volume" => $data_limit,
+            "expiry" => $newDate
+        );
+        $ManagePanel->Modifyuser($user['Processing_value'], $nameloc['Service_location'], $config);
+    }
     $keyboardextendfnished = json_encode([
         'inline_keyboard' => [
             [
@@ -896,20 +906,29 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
 } elseif (preg_match('/changelink_(\w+)/', $datain, $dataget)) {
     $username = $dataget[1];
     $nameloc = select("invoice", "*", "username", $username, "select");
-    $keyboardextend = json_encode([
+    $keyboardchange = json_encode([
         'inline_keyboard' => [
             [
                 ['text' => $textbotlang['users']['changelink']['confirm'], 'callback_data' => "confirmchange_" . $username],
+            ],[
+                ['text' => $textbotlang['users']['stateus']['backservice'], 'callback_data' => "product_" . $username],
             ]
         ]
     ]);
-    sendmessage($from_id, $textbotlang['users']['changelink']['warnchange'], $keyboardextend, 'HTML');
+    Editmessagetext($from_id,$message_id,$textbotlang['users']['changelink']['warnchange'], $keyboardchange);
 } elseif (preg_match('/confirmchange_(\w+)/', $datain, $dataget)) {
     $usernameconfig = $dataget[1];
     $nameloc = select("invoice", "*", "username", $usernameconfig, "select");
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'], "select");
     $ManagePanel->Revoke_sub($marzban_list_get['name_panel'], $usernameconfig);
-    Editmessagetext($from_id, $message_id, $textbotlang['users']['changelink']['confirmed'], null);
+    $keyboardchange = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $textbotlang['users']['stateus']['backservice'], 'callback_data' => "product_" . $usernameconfig],
+            ]
+        ]
+    ]);
+    Editmessagetext($from_id, $message_id, $textbotlang['users']['changelink']['confirmed'], $keyboardchange);
 
 } elseif (preg_match('/Extra_volume_(\w+)/', $datain, $dataget)) {
     $username = $dataget[1];
@@ -996,6 +1015,11 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
                     ),
                 )
             ),
+        );
+    }
+    elseif ($marzban_list_get['type'] == "s_ui") {
+        $datam = array(
+            "volume" => $data_limit,
         );
     }
     $ManagePanel->Modifyuser($user['Processing_value'], $marzban_list_get['name_panel'], $datam);
@@ -1466,7 +1490,7 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
         }
         $textproduct = "🛍 برای خرید اشتراک سرویس مدنظر خود را انتخاب کنید
 لوکیشن سرویس  :{$panellist['name_panel']} ";
-        sendmessage($from_id,$textproduct, KeyboardProduct($panellist['name_panel'],"buy",$panellist['MethodUsername']), 'HTML');
+        Editmessagetext($from_id, $message_id,$textproduct, KeyboardProduct($panellist['name_panel'],"buy",$panellist['MethodUsername']));
     }else{
         $emptycategory = select("category", "*", null, null, "count");
         if ($emptycategory == 0) {

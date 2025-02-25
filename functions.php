@@ -449,3 +449,7 @@ function checktelegramip(){
     return $ok;
 
 }
+function generateAuthStr($length = 10) {
+    $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    return substr(str_shuffle(str_repeat($characters, ceil($length / strlen($characters)))), 0, $length);
+}

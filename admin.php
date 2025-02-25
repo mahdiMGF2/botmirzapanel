@@ -188,7 +188,7 @@ if ($text == "🔌 وضعیت اتصال پنل") {
             $text_marzban = $textbotlang['Admin']['managepanel']['errorstateuspanel'] . json_encode($Check_token);
             sendmessage($from_id, $text_marzban, null, 'HTML');
         }
-    }if ($marzban_list_get['type'] == "marzneshin") {
+    }elseif ($marzban_list_get['type'] == "marzneshin") {
         $Check_token = token_panelm($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
         if (isset($Check_token['access_token'])) {
             $System_Stats = Get_System_Statsm($user['Processing_value']);
@@ -244,6 +244,13 @@ if ($text == "📜 مشاهده لیست ادمین ها") {
     sendmessage($from_id, $list_admin_text, $admin_section_panel, 'HTML');
 }
 if ($text == "🖥  اضافه کردن پنل") {
+    $textx = "📌 نوع پنل را ارسال نمایید
+    
+⚠️ در صورت انتخاب پنل ثنایی پس از اضافه کردن پنل به بخش ویرایش پنل > تنظیم شناسه اینباند رفته و شناسه اینباند را ثبت کنید";
+    sendmessage($from_id, $textx, $typepanel, 'HTML');
+    step('gettyppepanel', $from_id);
+}elseif($user['step'] == "gettyppepanel"){
+    savedata("clear","type",$text);
     sendmessage($from_id, $textbotlang['Admin']['managepanel']['addpanelname'], $backadmin, 'HTML');
     step('add_name_panel', $from_id);
 } elseif ($user['step'] == "add_name_panel") {
@@ -252,28 +259,28 @@ if ($text == "🖥  اضافه کردن پنل") {
         return;
     }
     sendmessage($from_id, $textbotlang['Admin']['managepanel']['addpanelurl'], $backadmin, 'HTML');
-    savedata("clear","name",$text);
+    savedata("save","name",$text);
     step('add_link_panel', $from_id);
 } elseif ($user['step'] == "add_link_panel") {
     if (!filter_var($text, FILTER_VALIDATE_URL)) {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['Invalid-domain'], $backadmin, 'HTML');
         return;
     }
+    savedata("save","url_panel",$text);
+    $userdata = json_decode($user['Processing_value'],true);
+    if($userdata['type'] == "s_ui"){
+        sendmessage($from_id, "📌 توکن  را از پنل s-ui منوی ادمین ساخته و ارسال نمایید.", $backadmin, 'HTML');
+        step('add_password_panel', $from_id);
+        savedata("save","username_panel","none");
+        return;
+    }
     sendmessage($from_id, $textbotlang['Admin']['managepanel']['usernameset'], $backadmin, 'HTML');
     step('add_username_panel', $from_id);
-    savedata("save","url_panel",$text);
 } elseif ($user['step'] == "add_username_panel") {
     sendmessage($from_id, $textbotlang['Admin']['managepanel']['getpassword'], $backadmin, 'HTML');
     step('add_password_panel', $from_id);
     savedata("save","username_panel",$text);
-} elseif ($user['step'] == "add_password_panel") {
-    savedata("save","password_panel",$text);
-    $textx = "📌 نوع پنل را ارسال نمایید
-    
-⚠️ در صورت انتخاب پنل ثنایی پس از اضافه کردن پنل به بخش ویرایش پنل > تنظیم شناسه اینباند رفته و شناسه اینباند را ثبت کنید";
-    sendmessage($from_id, $textx, $typepanel, 'HTML');
-    step('gettyppepanel', $from_id);
-} elseif ($user['step'] == "gettyppepanel") {
+}elseif ($user['step'] == "add_password_panel") {
     $userdata = json_decode($user['Processing_value'],true);
     $inboundid = "0";
     $sublink = "onsublink";
@@ -283,10 +290,19 @@ if ($text == "🖥  اضافه کردن پنل") {
     $stauts = "activepanel";
     $on_hold = "offonhold";
     $stmt = $pdo->prepare("INSERT INTO marzban_panel (name_panel,url_panel,username_panel,password_panel,type,inboundid,sublink,configManual,MethodUsername,statusTest,status,onholdstatus) VALUES (?, ?, ?, ?, ?,?,?,?,?,?,?,?)");
-    $stmt->execute([$userdata['name'],$userdata['url_panel'],$userdata['username_panel'],$userdata['password_panel'],$text,$inboundid, $sublink, $config,$valusername,$valueteststatus,$stauts,$on_hold]);
-    update("marzban_panel", "type", $text, "name_panel", $user['Processing_value']);
+    $stmt->execute([$userdata['name'],$userdata['url_panel'],$userdata['username_panel'],$text,$userdata['type'],$inboundid, $sublink, $config,$valusername,$valueteststatus,$stauts,$on_hold]);
     sendmessage($from_id, $textbotlang['Admin']['managepanel']['addedpanel'], $backadmin, 'HTML');
     sendmessage($from_id, "🥳", $keyboardadmin, 'HTML');
+    if($userdata['type'] == "x-ui_single" or $userdata['type'] == "alireza") {
+        sendmessage($from_id,"📌 نکات بعد اضافه کردن پنل :‌
+
+۱ - از مدیریت پنل > تنظیم شناسه اینباند  شناسه اینباندی که میخواهید ساخته شود را تنظیم نمایید
+۲ - از مدیریت پنل > دامنه لینک ساب دامنه لینک ساب را حتما تنظیم نمایید.", null, 'HTML');
+    }elseif($userdata['type'] == "marzban" || $userdata['type'] == "s_ui" || $userdata['type'] == "marzneshin"){
+        sendmessage($from_id,"📌 نکات بعد اضافه کردن پنل :‌
+
+۱ -از مدیریت پنل > تنظیم پروتکل و اینباند یک نام کاربری موجود در پنل را ارسال نمایید.", null, 'HTML');
+    }
     step('home', $from_id);
 }
 if ($text == "📨 ارسال پیام") {
@@ -1442,6 +1458,8 @@ if ($text == "✏️ مدیریت پنل") {
     update("user", "Processing_value", $text, "id", $from_id);
     if ($listpanel['type'] == "marzban") {
         sendmessage($from_id, $textbotlang['users']['selectoption'], $optionMarzban, 'HTML');
+    }elseif($listpanel['type'] == "s_ui"){
+        sendmessage($from_id, $textbotlang['users']['selectoption'], $options_ui, 'HTML');
     }elseif ($listpanel['type'] == "marzneshin") {
         sendmessage($from_id, $textbotlang['users']['selectoption'], $optionMarzneshin, 'HTML');
     } elseif ($listpanel['type'] == "x-ui_single") {
@@ -1465,6 +1483,8 @@ if ($text == "✏️ مدیریت پنل") {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedNmaePanel'], $optionX_ui_single, 'HTML');
     } elseif ($typepanel['type'] == "alireza") {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedNmaePanel'], $optionX_ui_single, 'HTML');
+    }elseif ($typepanel['type'] == "s_ui") {
+        sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedNmaePanel'], $options_ui, 'HTML');
     }
     update("marzban_panel", "name_panel", $text, "name_panel", $user['Processing_value']);
     update("invoice", "Service_location", $text, "Service_location", $user['Processing_value']);
@@ -1488,6 +1508,8 @@ if ($text == "✏️ مدیریت پنل") {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedurlPanel'], $optionX_ui_single, 'HTML');
     }elseif ($typepanel['type'] == "marzneshin") {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedurlPanel'], $optionMarzneshin, 'HTML');
+    }elseif ($typepanel['type'] == "s_ui") {
+        sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedurlPanel'], $options_ui, 'HTML');
     }
     update("marzban_panel", "url_panel", $text, "name_panel", $user['Processing_value']);
     step('home', $from_id);
@@ -1504,6 +1526,8 @@ if ($text == "✏️ مدیریت پنل") {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedusernamePanel'], $optionX_ui_single, 'HTML');
     }elseif ($typepanel['type'] == "marzneshin") {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedusernamePanel'], $optionMarzneshin, 'HTML');
+    }elseif ($typepanel['type'] == "s_ui") {
+        sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedusernamePanel'], $options_ui, 'HTML');
     }
     update("marzban_panel", "username_panel", $text, "name_panel", $user['Processing_value']);
     step('home', $from_id);
@@ -1520,6 +1544,8 @@ if ($text == "✏️ مدیریت پنل") {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedpasswordPanel'], $optionX_ui_single, 'HTML');
     }elseif ($typepanel['type'] == "marzneshin") {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedpasswordPanel'], $optionMarzneshin, 'HTML');
+    }elseif ($typepanel['type'] == "s_ui") {
+        sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedpasswordPanel'], $options_ui, 'HTML');
     }
     update("marzban_panel", "password_panel", $text, "name_panel", $user['Processing_value']);
     step('home', $from_id);
@@ -1538,7 +1564,12 @@ if ($text == "✏️ مدیریت پنل") {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['Invalid-domain'], $backadmin, 'HTML');
         return;
     }
-    sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedurlPanel'], $optionX_ui_single, 'HTML');
+    $panel = select("marzban_panel","*","name_panel",$user['Processing_value'],"select");
+    if($panel['type'] == "x-ui_single"){
+        sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedurlPanel'], $optionX_ui_single, 'HTML');
+    }elseif($panel['type'] == "s_ui"){
+        sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedurlPanel'], $options_ui, 'HTML');
+    }
     update("marzban_panel", "linksubx", $text, "name_panel", $user['Processing_value']);
     step('home', $from_id);
 }elseif ($user['step'] == "GetpaawordNew") {
@@ -2148,36 +2179,42 @@ elseif($text == "ویرایش رسانه") {
     sendmessage($from_id, $textsetprotocol, $backadmin, 'HTML');
     step("setinboundandprotocol",$from_id);
 }elseif($user['step'] == "setinboundandprotocol"){
-    if (filter_var($text, FILTER_VALIDATE_URL)) {
-        $data = json_decode(outputlunk("$text/info"),true);
-        if(!isset($data['proxies'])){
-            sendmessage($from_id, "❌ لینک ساب نامعتبر است", null, 'html');
+    $panel = select("marzban_panel","*","name_panel",$user['Processing_value'],"select");
+    if($panel['type'] == "marzban"){
+        $DataUserOut = getuser($text,$user['Processing_value']);
+        if ((isset($DataUserOut['msg']) && $DataUserOut['msg'] == "User not found") or !isset($DataUserOut['proxies'])) {
+            sendmessage($from_id,$textbotlang['users']['stateus']['usernotfound'], null, 'html');
             return;
         }
-        $DataUserOut = $data;
+        foreach ($DataUserOut['proxies'] as $key => &$value){
+            if($key == "shadowsocks"){
+                unset($DataUserOut['proxies'][$key]['password']);
+            }
+            elseif($key == "trojan"){
+                unset($DataUserOut['proxies'][$key]['password']);
+            }
+            else{
+                unset($DataUserOut['proxies'][$key]['id']);
+            }
+            if(count($DataUserOut['proxies'][$key]) == 0){
+                $DataUserOut['proxies'][$key] = new stdClass();
+            }
+        }
+        update("marzban_panel","inbounds",json_encode($DataUserOut['inbounds']),"name_panel",$user['Processing_value']);
+        update("marzban_panel","proxies",json_encode($DataUserOut['proxies']),"name_panel",$user['Processing_value']);
     }else{
-        $DataUserOut = getuser($text,$user['Processing_value']);
+        $data = GetClientsS_UI($text,$panel['name_panel']);{
+            if(count($data) == 0){
+                sendmessage($from_id, "❌ یوزر در پنل وجود ندارد.", $options_ui, 'HTML');
+                return;
+            }
+            $servies = [];
+            foreach ($data['inbounds'] as $service){
+                $servies[] = $service;
+            }
+        }
+        update("marzban_panel","proxies",json_encode($servies,true),"name_panel",$user['Processing_value']);
     }
-    if ((isset($DataUserOut['msg']) && $DataUserOut['msg'] == "User not found") or !isset($DataUserOut['proxies'])) {
-        sendmessage($from_id,$textbotlang['users']['stateus']['usernotfound'], null, 'html');
-        return;
-    }
-    foreach ($DataUserOut['proxies'] as $key => &$value){
-        if($key == "shadowsocks"){
-            unset($DataUserOut['proxies'][$key]['password']);
-        }
-        elseif($key == "trojan"){
-            unset($DataUserOut['proxies'][$key]['password']);
-        }
-        else{
-            unset($DataUserOut['proxies'][$key]['id']);
-        }
-        if(count($DataUserOut['proxies'][$key]) == 0){
-            $DataUserOut['proxies'][$key] = new stdClass();
-        }
-    }
-    update("marzban_panel","inbounds",json_encode($DataUserOut['inbounds']),"name_panel",$user['Processing_value']);
-    update("marzban_panel","proxies",json_encode($DataUserOut['proxies']),"name_panel",$user['Processing_value']);
     sendmessage($from_id, "✅ اینباند و پروتکل های شما با موفقیت تنظیم گردیدند.", $optionMarzban, 'HTML');
     step("home",$from_id);
 }elseif($text == "⚙️ وضعیت قابلیت ها") {
