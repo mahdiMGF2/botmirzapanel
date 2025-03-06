@@ -52,9 +52,48 @@ function show_menu() {
             ;;
     esac
 }
-   # Install Function
+
+# Check if Marzban is installed
+function check_marzban_installed() {
+    if [ -f "/opt/marzban/docker-compose.yml" ]; then
+        return 0  # Marzban installed
+    else
+        return 1  # Marzban not installed
+    fi
+}
+
+# Detect database type for Marzban
+function detect_database_type() {
+    COMPOSE_FILE="/opt/marzban/docker-compose.yml"
+    if grep -q "mysql:" "$COMPOSE_FILE"; then
+        return 0  # MySQL detected
+    else
+        echo -e "\033[31m[ERROR] Marzban is installed but MySQL database is not present. Installation cannot proceed.\033[0m"
+        exit 1
+    fi
+}
+
+# Find a free port between 3300 and 3330
+function find_free_port() {
+    for port in {3300..3330}; do
+        if ! ss -tuln | grep -q ":$port "; then
+            echo "$port"
+            return 0
+        fi
+    done
+    echo -e "\033[31m[ERROR] No free port found between 3300 and 3330.\033[0m"
+    exit 1
+}
+# Install Function
 function install_bot() {
     echo -e "\e[32mInstalling mirza script ... \033[0m\n"
+
+    # Check if Marzban is installed and redirect to appropriate function
+    if check_marzban_installed; then
+        echo -e "\033[41m[IMPORTANT WARNING]\033[0m \033[1;33mMarzban detected. Proceeding with Marzban-compatible installation.\033[0m"
+        install_bot_with_marzban "$@"  # Pass any arguments (e.g., -v beta)
+        return 0
+    fi
 
     # Function to add the Ondřej Surý PPA for PHP
     add_php_ppa() {
@@ -585,6 +624,442 @@ echo -e "$text_to_save" >> /var/www/html/mirzabotconfig/config.php
 
 
 }
+
+
+function install_bot_with_marzban() {
+    # Display warning and confirmation
+    echo -e "\033[41m[IMPORTANT WARNING]\033[0m \033[1;33mMarzban panel is detected on your server. Please make sure to backup the Marzban database before installing Mirza Bot.\033[0m"
+    read -p "Are you sure you want to install Mirza Bot alongside Marzban? (y/n): " confirm
+    if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
+        echo -e "\e[91mInstallation aborted by user.\033[0m"
+        exit 0
+    fi
+
+    echo -e "\e[32mInstalling Mirza Bot alongside Marzban...\033[0m\n"
+
+    # Check if port 80 is free before proceeding
+    echo -e "\e[32mChecking port 80 availability...\033[0m"
+    if sudo netstat -tuln | grep -q ":80 "; then
+        echo -e "\e[91mError: Port 80 is already in use. Please free port 80 (e.g., stop any service using it like Marzban's HTTP) and run the script again.\033[0m"
+        exit 1
+    else
+        echo -e "\e[92mPort 80 is free. Proceeding with installation...\033[0m"
+    fi
+
+    # Update system and upgrade packages
+    sudo apt update && sudo apt upgrade -y || {
+        echo -e "\e[91mError: Failed to update and upgrade system.\033[0m"
+        exit 1
+    }
+    echo -e "\e[92mSystem updated successfully...\033[0m\n"
+
+    # Add Ondřej Surý PPA for PHP 8.2
+    sudo apt install -y software-properties-common || {
+        echo -e "\e[91mError: Failed to install software-properties-common.\033[0m"
+        exit 1
+    }
+    sudo add-apt-repository -y ppa:ondrej/php || {
+        echo -e "\e[91mError: Failed to add PPA ondrej/php. Trying with locale override...\033[0m"
+        sudo LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php || {
+            echo -e "\e[91mError: Failed to add PPA even with locale override.\033[0m"
+            exit 1
+        }
+    }
+    sudo apt update || {
+        echo -e "\e[91mError: Failed to update package list after adding PPA.\033[0m"
+        exit 1
+    }
+
+    # Install all required packages
+    sudo apt install -y git unzip curl wget jq || {
+        echo -e "\e[91mError: Failed to install basic tools.\033[0m"
+        exit 1
+    }
+
+    # Install Apache if not installed
+    if ! dpkg -s apache2 &>/dev/null; then
+        sudo apt install -y apache2 || {
+            echo -e "\e[91mError: Failed to install Apache2.\033[0m"
+            exit 1
+        }
+    fi
+
+    # Install PHP 8.2 and all necessary modules (including PDO)
+    DEBIAN_FRONTEND=noninteractive sudo apt install -y php8.2 php8.2-fpm php8.2-mysql php8.2-mbstring php8.2-zip php8.2-gd php8.2-curl php8.2-soap php8.2-ssh2 libssh2-1-dev libssh2-1 php8.2-pdo || {
+        echo -e "\e[91mError: Failed to install PHP 8.2 and modules.\033[0m"
+        exit 1
+    }
+
+    # Install additional Apache module
+    sudo apt install -y libapache2-mod-php8.2 || {
+        echo -e "\e[91mError: Failed to install libapache2-mod-php8.2.\033[0m"
+        exit 1
+    }
+
+    # Install UFW if not present
+    if ! dpkg -s ufw &>/dev/null; then
+        sudo apt install -y ufw || {
+            echo -e "\e[91mError: Failed to install UFW.\033[0m"
+            exit 1
+        }
+    fi
+
+    # Check Marzban and use its MySQL (Docker-based)
+    ENV_FILE="/opt/marzban/.env"
+    if [ ! -f "$ENV_FILE" ]; then
+        echo -e "\e[91mError: Marzban .env file not found. Cannot proceed without Marzban configuration.\033[0m"
+        exit 1
+    fi
+
+    # Get MySQL root password from .env
+    MYSQL_ROOT_PASSWORD=$(grep "MYSQL_ROOT_PASSWORD=" "$ENV_FILE" | cut -d'=' -f2 | tr -d '[:space:]' | sed 's/"//g')
+    ROOT_USER="root"
+
+    # Check if MYSQL_ROOT_PASSWORD is empty or invalid
+    if [ -z "$MYSQL_ROOT_PASSWORD" ]; then
+        echo -e "\e[93mWarning: Could not retrieve MySQL root password from Marzban .env file.\033[0m"
+        read -s -p "Please enter the MySQL root password manually: " MYSQL_ROOT_PASSWORD
+        echo
+    fi
+
+    # Dynamically find the MySQL container
+    MYSQL_CONTAINER=$(docker ps -q --filter "name=mysql" --no-trunc)
+    if [ -z "$MYSQL_CONTAINER" ]; then
+        echo -e "\e[91mError: Could not find a running MySQL container. Ensure Marzban is running with Docker.\033[0m"
+        echo -e "\e[93mRunning containers:\033[0m"
+        docker ps
+        exit 1
+    fi
+
+    # Test MySQL connection inside Docker container
+    echo "Testing MySQL connection..."
+    docker exec "$MYSQL_CONTAINER" bash -c "echo 'SELECT 1;' | mysql -u '$ROOT_USER' -p'$MYSQL_ROOT_PASSWORD'" 2>/dev/null || {
+        echo -e "\e[91mError: Failed to connect to MySQL in Marzban Docker container.\033[0m"
+        echo -e "\e[93mPlease ensure the MySQL root password is correct and the container is running.\033[0m"
+        echo -e "\e[93mContainer found: $MYSQL_CONTAINER\033[0m"
+        echo -e "\e[93mPassword used: $MYSQL_ROOT_PASSWORD\033[0m"
+        exit 1
+    }
+    echo -e "\e[92mMySQL connection successful.\033[0m"
+
+    # Ask for database username and password like Marzban
+    clear
+    echo -e "\e[33mConfiguring Mirza Bot database credentials...\033[0m"
+    default_dbuser=$(openssl rand -base64 12 | tr -dc 'a-zA-Z' | head -c8)
+    printf "\e[33m[+] \e[36mDatabase username (default: $default_dbuser): \033[0m"
+    read dbuser
+    if [ -z "$dbuser" ]; then
+        dbuser="$default_dbuser"
+    fi
+
+    default_dbpass=$(openssl rand -base64 12 | tr -dc 'a-zA-Z0-9' | head -c12)
+    printf "\e[33m[+] \e[36mDatabase password (default: $default_dbpass): \033[0m"
+    read -s dbpass
+    echo
+    if [ -z "$dbpass" ]; then
+        dbpass="$default_dbpass"
+    fi
+    dbname="mirzabot"
+
+    # Create database and user inside Docker container
+    docker exec "$MYSQL_CONTAINER" bash -c "mysql -u '$ROOT_USER' -p'$MYSQL_ROOT_PASSWORD' -e \"CREATE DATABASE IF NOT EXISTS $dbname; CREATE USER IF NOT EXISTS '$dbuser'@'%' IDENTIFIED BY '$dbpass'; GRANT ALL PRIVILEGES ON $dbname.* TO '$dbuser'@'%'; FLUSH PRIVILEGES;\"" || {
+        echo -e "\e[91mError: Failed to create database or user in Marzban MySQL container.\033[0m"
+        exit 1
+    }
+    echo -e "\e[92mDatabase '$dbname' created successfully.\033[0m"
+
+    # Bot directory setup
+    BOT_DIR="/var/www/html/mirzabotconfig"
+    if [ -d "$BOT_DIR" ]; then
+        echo -e "\e[93mDirectory $BOT_DIR already exists. Removing...\033[0m"
+        sudo rm -rf "$BOT_DIR" || {
+            echo -e "\e[91mError: Failed to remove existing directory $BOT_DIR.\033[0m"
+            exit 1
+        }
+    fi
+    sudo mkdir -p "$BOT_DIR" || {
+        echo -e "\e[91mError: Failed to create directory $BOT_DIR.\033[0m"
+        exit 1
+    }
+
+    # Download bot files
+    ZIP_URL=$(curl -s https://api.github.com/repos/mahdiMGF2/botmirzapanel/releases/latest | grep "zipball_url" | cut -d '"' -f 4)
+    if [[ "$1" == "-v" && "$2" == "beta" ]] || [[ "$1" == "-beta" ]] || [[ "$1" == "-" && "$2" == "beta" ]]; then
+        ZIP_URL="https://github.com/mahdiMGF2/botmirzapanel/archive/refs/heads/main.zip"
+    elif [[ "$1" == "-v" && -n "$2" ]]; then
+        ZIP_URL="https://github.com/mahdiMGF2/botmirzapanel/archive/refs/tags/$2.zip"
+    fi
+
+    TEMP_DIR="/tmp/mirzabot"
+    mkdir -p "$TEMP_DIR"
+    wget -O "$TEMP_DIR/bot.zip" "$ZIP_URL" || {
+        echo -e "\e[91mError: Failed to download bot files.\033[0m"
+        exit 1
+    }
+    unzip "$TEMP_DIR/bot.zip" -d "$TEMP_DIR" || {
+        echo -e "\e[91mError: Failed to unzip bot files.\033[0m"
+        exit 1
+    }
+    EXTRACTED_DIR=$(find "$TEMP_DIR" -mindepth 1 -maxdepth 1 -type d)
+    mv "$EXTRACTED_DIR"/* "$BOT_DIR" || {
+        echo -e "\e[91mError: Failed to move bot files.\033[0m"
+        exit 1
+    }
+    rm -rf "$TEMP_DIR"
+
+    sudo chown -R www-data:www-data "$BOT_DIR"
+    sudo chmod -R 755 "$BOT_DIR"
+    echo -e "\e[92mBot files installed in $BOT_DIR.\033[0m"
+    sleep 3
+    clear
+
+    # Configure Apache to use port 80 temporarily and 88 for HTTPS
+    echo -e "\e[32mConfiguring Apache ports...\033[0m"
+    sudo bash -c "echo -n > /etc/apache2/ports.conf"  # Clear the file
+    cat <<EOF | sudo tee /etc/apache2/ports.conf
+# If you just change the port or add more ports here, you will likely also
+# have to change the VirtualHost statement in
+# /etc/apache2/sites-enabled/000-default.conf
+
+Listen 80
+Listen 88
+
+# vim: syntax=apache ts=4 sw=4 sts=4 sr noet
+EOF
+    if [ $? -ne 0 ]; then
+        echo -e "\e[91mError: Failed to configure ports.conf.\033[0m"
+        exit 1
+    fi
+
+    # Clear and configure VirtualHost for port 80
+    sudo bash -c "echo -n > /etc/apache2/sites-available/000-default.conf"  # Clear the file
+    cat <<EOF | sudo tee /etc/apache2/sites-available/000-default.conf
+<VirtualHost *:80>
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/html
+    ErrorLog \${APACHE_LOG_DIR}/error.log
+    CustomLog \${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+
+# vim: syntax=apache ts=4 sw=4 sts=4 sr noet
+EOF
+    if [ $? -ne 0 ]; then
+        echo -e "\e[91mError: Failed to configure 000-default.conf.\033[0m"
+        exit 1
+    fi
+
+    # Enable Apache and apply port changes
+    sudo systemctl enable apache2 || {
+        echo -e "\e[91mError: Failed to enable Apache2.\033[0m"
+        exit 1
+    }
+    sudo systemctl restart apache2 || {
+        echo -e "\e[91mError: Failed to restart Apache2.\033[0m"
+        exit 1
+    }
+
+    # SSL setup on port 88
+    echo -e "\e[32mConfiguring SSL on port 88...\033[0m\n"
+    sudo ufw allow 80 || {
+        echo -e "\e[91mError: Failed to configure firewall for port 80.\033[0m"
+        exit 1
+    }
+    sudo ufw allow 88 || {
+        echo -e "\e[91mError: Failed to configure firewall for port 88.\033[0m"
+        exit 1
+    }
+    clear
+    printf "\e[33m[+] \e[36mEnter the domain (e.g., example.com): \033[0m"
+    read domainname
+    while [[ ! "$domainname" =~ ^[a-zA-Z0-9.-]+$ ]]; do
+        echo -e "\e[91mInvalid domain format. Must be like 'example.com'. Please try again.\033[0m"
+        printf "\e[33m[+] \e[36mEnter the domain (e.g., example.com): \033[0m"
+        read domainname
+    done
+    DOMAIN_NAME="$domainname"
+    echo -e "\e[92mDomain set to: $DOMAIN_NAME\033[0m"
+
+    sudo apt install -y letsencrypt python3-certbot-apache || {
+        echo -e "\e[91mError: Failed to install SSL tools.\033[0m"
+        exit 1
+    }
+    sudo systemctl restart apache2 || {
+        echo -e "\e[91mError: Failed to restart Apache2 before Certbot.\033[0m"
+        exit 1
+    }
+    sudo certbot --apache --agree-tos --preferred-challenges http -d "$DOMAIN_NAME" --https-port 88 --no-redirect || {
+        echo -e "\e[91mError: Failed to configure SSL with Certbot on port 88.\033[0m"
+        exit 1
+    }
+
+    # Ensure SSL VirtualHost uses port 88 with correct settings
+    sudo bash -c "echo -n > /etc/apache2/sites-available/000-default-le-ssl.conf"  # Clear any existing file
+    cat <<EOF | sudo tee /etc/apache2/sites-available/000-default-le-ssl.conf
+<IfModule mod_ssl.c>
+<VirtualHost *:88>
+    ServerAdmin webmaster@localhost
+    ServerName $DOMAIN_NAME
+    DocumentRoot /var/www/html
+    ErrorLog \${APACHE_LOG_DIR}/error.log
+    CustomLog \${APACHE_LOG_DIR}/access.log combined
+    SSLEngine on
+    SSLCertificateFile /etc/letsencrypt/live/$DOMAIN_NAME/fullchain.pem
+    SSLCertificateKeyFile /etc/letsencrypt/live/$DOMAIN_NAME/privkey.pem
+    SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1
+    SSLCipherSuite HIGH:!aNULL:!MD5
+</VirtualHost>
+</IfModule>
+EOF
+    if [ $? -ne 0 ]; then
+        echo -e "\e[91mError: Failed to create SSL VirtualHost configuration.\033[0m"
+        exit 1
+    fi
+    sudo a2enmod ssl || {
+        echo -e "\e[91mError: Failed to enable SSL module.\033[0m"
+        exit 1
+    }
+    sudo a2ensite 000-default-le-ssl.conf || {
+        echo -e "\e[91mError: Failed to enable SSL site.\033[0m"
+        exit 1
+    }
+    sudo systemctl restart apache2 || {
+        echo -e "\e[91mError: Failed to restart Apache2 after SSL configuration.\033[0m"
+        exit 1
+    }
+
+    # Disable port 80 after SSL is configured
+    echo -e "\e[32mDisabling port 80 as it's no longer needed...\033[0m"
+    sudo bash -c "echo -n > /etc/apache2/ports.conf"  # Clear the file again
+    cat <<EOF | sudo tee /etc/apache2/ports.conf
+# If you just change the port or add more ports here, you will likely also
+# have to change the VirtualHost statement in
+# /etc/apache2/sites-enabled/000-default.conf
+
+Listen 88
+
+# vim: syntax=apache ts=4 sw=4 sts=4 sr noet
+EOF
+    if [ $? -ne 0 ]; then
+        echo -e "\e[91mError: Failed to reconfigure ports.conf.\033[0m"
+        exit 1
+    fi
+
+    # Remove port 80 VirtualHost from all config files
+    sudo sed -i '/<VirtualHost \*:80>/,/<\/VirtualHost>/d' /etc/apache2/sites-available/* || {
+        echo -e "\e[91mError: Failed to remove VirtualHost for port 80 from all config files.\033[0m"
+        exit 1
+    }
+    sudo ufw delete allow 80 || {
+        echo -e "\e[91mError: Failed to remove port 80 from firewall.\033[0m"
+        exit 1
+    }
+    sudo systemctl restart apache2 || {
+        echo -e "\e[91mError: Failed to restart Apache2 after SSL.\033[0m"
+        exit 1
+    }
+    echo -e "\e[92mSSL configured successfully on port 88. Port 80 disabled.\033[0m"
+    sleep 3
+    clear
+
+    # Bot token, chat ID, and username
+    printf "\e[33m[+] \e[36mBot Token: \033[0m"
+    read YOUR_BOT_TOKEN
+    while [[ ! "$YOUR_BOT_TOKEN" =~ ^[0-9]{8,10}:[a-zA-Z0-9_-]{35}$ ]]; do
+        echo -e "\e[91mInvalid bot token format. Please try again.\033[0m"
+        printf "\e[33m[+] \e[36mBot Token: \033[0m"
+        read YOUR_BOT_TOKEN
+    done
+
+    printf "\e[33m[+] \e[36mChat id: \033[0m"
+    read YOUR_CHAT_ID
+    while [[ ! "$YOUR_CHAT_ID" =~ ^-?[0-9]+$ ]]; do
+        echo -e "\e[91mInvalid chat ID format. Please try again.\033[0m"
+        printf "\e[33m[+] \e[36mChat id: \033[0m"
+        read YOUR_CHAT_ID
+    done
+
+    YOUR_DOMAIN="$DOMAIN_NAME:88"  # Use port 88 for HTTPS
+    printf "\e[33m[+] \e[36mUsernamebot: \033[0m"
+    read YOUR_BOTNAME
+    while [ -z "$YOUR_BOTNAME" ]; do
+        echo -e "\e[91mError: Bot username cannot be empty.\033[0m"
+        printf "\e[33m[+] \e[36mUsernamebot: \033[0m"
+        read YOUR_BOTNAME
+    done
+
+    # Create config file with correct MySQL host and PDO
+    ASAS="$"
+    secrettoken=$(openssl rand -base64 10 | tr -dc 'a-zA-Z0-9' | cut -c1-8)
+    cat <<EOF > "$BOT_DIR/config.php"
+<?php
+${ASAS}APIKEY = '$YOUR_BOT_TOKEN';
+${ASAS}usernamedb = '$dbuser';
+${ASAS}passworddb = '$dbpass';
+${ASAS}dbname = '$dbname';
+${ASAS}domainhosts = '$YOUR_DOMAIN/mirzabotconfig';
+${ASAS}adminnumber = '$YOUR_CHAT_ID';
+${ASAS}usernamebot = '$YOUR_BOTNAME';
+${ASAS}secrettoken = '$secrettoken';
+
+${ASAS}connect = mysqli_connect('127.0.0.1', \$usernamedb, \$passworddb, \$dbname, 3306);
+if (${ASAS}connect->connect_error) {
+    die('Connection failed: ' . ${ASAS}connect->connect_error);
+}
+mysqli_set_charset(${ASAS}connect, 'utf8mb4');
+
+${ASAS}options = [
+    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    PDO::ATTR_EMULATE_PREPARES   => false,
+];
+${ASAS}dsn = "mysql:host=127.0.0.1;port=3306;dbname=\$dbname;charset=utf8mb4";
+try {
+    ${ASAS}pdo = new PDO(\$dsn, \$usernamedb, \$passworddb, \$options);
+} catch (\PDOException \$e) {
+    die('PDO Connection failed: ' . \$e->getMessage());
+}
+?>
+EOF
+
+    # Set webhook with port 88
+    curl -F "url=https://${YOUR_DOMAIN}/mirzabotconfig/index.php" \
+         -F "secret_token=${secrettoken}" \
+         "https://api.telegram.org/bot${YOUR_BOT_TOKEN}/setWebhook" || {
+        echo -e "\e[91mError: Failed to set webhook.\033[0m"
+        exit 1
+    }
+
+    # Send confirmation message
+    MESSAGE="✅ The bot is installed alongside Marzban! Send /start to begin."
+    curl -s -X POST "https://api.telegram.org/bot${YOUR_BOT_TOKEN}/sendMessage" \
+         -d chat_id="${YOUR_CHAT_ID}" -d text="$MESSAGE" || {
+        echo -e "\e[91mError: Failed to send Telegram message.\033[0m"
+        exit 1
+    }
+
+    # Setup database tables with retry mechanism
+    for i in {1..5}; do
+        curl "https://${YOUR_DOMAIN}/mirzabotconfig/table.php" && break || {
+            echo -e "\e[93mAttempt $i: Failed to set up database tables. Retrying in 2 seconds...\033[0m"
+            sleep 2
+        }
+        if [ $i -eq 5 ]; then
+            echo -e "\e[91mError: Failed to set up database tables after 5 attempts.\033[0m"
+            exit 1
+        fi
+    done
+
+    # Final output
+    clear
+    echo -e "\e[32mBot installed successfully alongside Marzban!\033[0m"
+    echo -e "\e[102mDomain Bot: https://${YOUR_DOMAIN}\033[0m"
+    echo -e "\e[104mDatabase address: https://${YOUR_DOMAIN}/phpmyadmin\033[0m"
+    echo -e "\e[33mDatabase name: \e[36m$dbname\033[0m"
+    echo -e "\e[33mDatabase username: \e[36m$dbuser\033[0m"
+    echo -e "\e[33mDatabase password: \e[36m$dbpass\033[0m"
+}
+
+
 # Update Function
 function update_bot() {
     echo "Updating Mirza Bot..."
@@ -942,6 +1417,15 @@ function renew_ssl() {
 }
 # Function to Manage Additional Bots
 function manage_additional_bots() {
+    # Check if Marzban is installed
+    if check_marzban_installed; then
+        echo -e "\033[31m[ERROR]\033[0m Additional bot management is not available when Marzban is installed."
+        echo -e "\033[33mExiting script...\033[0m"
+        sleep 2
+        exit 1
+    fi
+
+    # If Marzban is not installed, proceed with the menu
     echo -e "\033[36m1) Install Additional Bot\033[0m"
     echo -e "\033[36m2) Update Additional Bot\033[0m"
     echo -e "\033[36m3) Remove Additional Bot\033[0m"
