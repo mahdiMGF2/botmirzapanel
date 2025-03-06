@@ -120,8 +120,6 @@ $textbotlang['users']['Balance']['errorprice'] = "❌ خطا
 $textbotlang['users']['Balance']['errorpricelimit'] = "❌ خطا 
         💬 مبلغ باید کمتر 10 میلیون تومان و بیشتر از 20 هزار تومان باشد";
 $textbotlang['users']['Balance']['selectPatment'] = "💵 روش پرداخت خود را انتخاب نمایید";
-$textbotlang['users']['Balance']['nowpayments'] = "❌ خطا 
-    کمترین مبلغ برای  پرداخت در این درگاه 1 دلار می باشد.";
 $textbotlang['users']['Balance']['zarinpal'] = "❌ خطا 
     کمترین مبلغ برای  پرداخت در این درگاه 5000 تومان می باشد.";
 $textbotlang['users']['Balance']['linkpayments'] = "درحال ساخت لینک پرداخت...";
@@ -195,6 +193,7 @@ $textbotlang['users']['Discount']['firstdiscount']  = "❌ این کد تخفی�
 
 #--------------[ other users ]--------------#
 $textbotlang['users']['backhome'] = "🏠 بازگشت به منوی اصلی";
+$textbotlang['users']['backmenu'] = "🏠 بازگشت به منوی قبل";
 $textbotlang['users']['time-Service'] = "⏳ زمان اشتراک";
 $textbotlang['users']['Volume-Service'] = "🌐 حجم سرویس";
 $textbotlang['users']['selectoption'] = "یک گزینه را انتخاب کنید";

@@ -514,6 +514,19 @@ $optionMarzban = json_encode([
     ],
     'resize_keyboard' => true
 ]);
+$options_ui = json_encode([
+    'keyboard' => [
+        [['text' => "👁‍🗨 وضعیت نمایش پنل"]],
+        [['text' => "🎁 وضعیت اکانت تست"],['text' => "⚙️ تنظیم پروتکل و اینباند"]],
+        [['text' => "✍️ نام پنل"],['text' => "❌ حذف پنل"]],
+        [['text'=>"🔗 ویرایش آدرس پنل"],['text' => "👤 ویرایش نام کاربری"]],
+        [['text' => "🔐 ویرایش رمز عبور"],['text' => '🔗 دامنه لینک ساب']],
+        [['text' => "💡 روش ساخت نام کاربری"]],
+        [['text' => "🔗 ارسال لینک سابسکرایبشن"],['text' => "⚙️ارسال کانفیگ"]],
+        [['text' => "🏠 بازگشت به منوی مدیریت"]]
+    ],
+    'resize_keyboard' => true
+]);
 $optionMarzneshin = json_encode([
     'keyboard' => [
         [['text' => "🔌 وضعیت اتصال پنل "],['text' => "👁‍🗨 وضعیت نمایش پنل"]],
@@ -574,6 +587,7 @@ $typepanel =  json_encode([
     'keyboard' => [
         [['text' => "marzban"],['text' => "x-ui_single"]],
         [['text' => "marzneshin"],['text' => "alireza"]],
+        [['text' => "s_ui"]],
         [['text' => "🏠 بازگشت به منوی مدیریت"]]
     ],
     'resize_keyboard' => true
@@ -630,4 +644,31 @@ function KeyboardCategorybuy($callback_data,$location){
         ['text' => "🏠 بازگشت به منوی قبل","callback_data" => $callback_data],
     ];
     return json_encode($list_category);
+}
+function KeyboardProduct($location,$backdata,$MethodUsername, $categoryid = null){
+    global $pdo,$textbotlang;
+    $query = "SELECT * FROM product WHERE (Location = :location OR Location = '/all') ";
+    if($categoryid != null){
+        $query.= "AND category = '$categoryid'";
+    }
+    $stmt = $pdo->prepare($query);
+    $stmt->bindParam(':location', $location, PDO::PARAM_STR);
+    $stmt->execute();
+    $product = ['inline_keyboard' => []];
+    while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        if ($MethodUsername == "نام کاربری دلخواه") {
+            $product['inline_keyboard'][] = [
+                ['text' => $result['name_product'], 'callback_data' => "prodcutservices_" . $result['code_product']]
+            ];
+        } else {
+            $product['inline_keyboard'][] = [
+                ['text' => $result['name_product'], 'callback_data' => "prodcutservice_{$result['code_product']}"]
+            ];
+        }
+    }
+    $product['inline_keyboard'][] = [
+        ['text' => $textbotlang['users']['backmenu'], 'callback_data' => $backdata]
+    ];
+
+    return json_encode($product);
 }

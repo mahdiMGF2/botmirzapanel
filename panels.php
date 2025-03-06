@@ -5,6 +5,7 @@ require_once 'apipanel.php';
 require_once 'x-ui_single.php';
 require_once 'marzneshin.php';
 require_once 'alireza_single.php';
+require_once 's_ui.php';
 class ManagePanel{
     public $name_panel;
     public $connect;
@@ -89,7 +90,19 @@ class ManagePanel{
                 $Output['configs'] = [outputlunk($Output['subscription_url'])];
             }
         }
+        elseif($Get_Data_Panel['type'] == "s_ui"){
+            $data_Output = addClientS_ui($Get_Data_Panel['name_panel'], $usernameC, $expire,$data_limit,json_decode($Get_Data_Panel['proxies']));
+            if(!$data_Output['success']){
+                $Output['status'] = 'Unsuccessful';
+                $Output['msg'] = $data_Output['msg'];
+            }else{
+                $Output['status'] = 'successful';
+                $Output['username'] = $usernameC;
+                $Output['subscription_url'] = $Get_Data_Panel['linksubx']."/$usernameC";
+                $Output['configs'] = [outputlunk($Get_Data_Panel['linksubx']."/$usernameC")];
+            }
 
+        }
         else{
             $Output['status'] = 'Unsuccessful';
             $Output['msg'] = 'Panel Not Found';
@@ -239,7 +252,48 @@ class ManagePanel{
                 );
             }
         }
-
+        elseif($Get_Data_Panel['type'] == "s_ui"){
+            $UsernameData = GetClientsS_UI($username,$Get_Data_Panel['name_panel']);
+            $onlinestatus = get_onlineclients_ui($Get_Data_Panel['name_panel'],$username);
+            if(!isset($UsernameData['id'])){
+                $Output = array(
+                    'status' => 'Unsuccessful',
+                    'msg' => $UsernameData['msg']
+                );}
+            else{
+                $links = [];
+                if(is_array($UsernameData['links'])){
+                    foreach ($UsernameData['links'] as $config){
+                        $links[] = $config['uri'];
+                    }
+                }
+                $data_limit = $UsernameData['volume'];
+                $useage = $UsernameData['up'] + $UsernameData['down'];
+                $RemainingVolume = $data_limit - $useage;
+                $expire = $UsernameData['expiry'];
+                if($UsernameData['enable']){
+                    $UsernameData['enable'] = "active";
+                }elseif($data_limit != 0 and $RemainingVolume < 0){
+                    $UsernameData['enable'] = "limited";
+                }elseif($expire - time() < 0 and $expire != 0 ){
+                    $UsernameData['enable'] = "expired";
+                }else{
+                    $UsernameData['enable'] = "disabled";
+                }
+                $Output = array(
+                    'status' => $UsernameData['enable'],
+                    'username' => $UsernameData['name'],
+                    'data_limit' => $data_limit,
+                    'expire' => $expire,
+                    'online_at' => $onlinestatus,
+                    'used_traffic' => $useage,
+                    'links' => $links,
+                    'subscription_url' => $Get_Data_Panel['linksubx']."/{$UsernameData['name']}",
+                    'sub_updated_at' => null,
+                    'sub_last_user_agent'=> null,
+                );
+            }
+        }
         else{
             $Output = array(
                 'status' => 'Unsuccessful',
@@ -358,7 +412,82 @@ class ManagePanel{
                 );
             }
         }
-
+        elseif($Get_Data_Panel['type'] == "s_ui"){
+            $clients = GetClientsS_UI($username,$name_panel);
+            $password = bin2hex(random_bytes(16));
+            $usernameac  = $username;
+            $configpanel = array(
+                "object" => 'clients',
+                'action' => "edit",
+                "data" => json_encode(array(
+                    "id" => $clients['id'],
+                    "enable" => $clients['enable'],
+                    "name" => $usernameac,
+                    "config" => array (
+                        "mixed" => array(
+                            "username" => $usernameac
+                        ,"password" =>generateAuthStr()
+                        ),"socks" =>array(
+                            "username" =>$usernameac,
+                            "password"=>generateAuthStr()
+                        ),"http"=> array(
+                            "username"=>$usernameac,
+                            "password"=>generateAuthStr()
+                        ),"shadowsocks"=>array(
+                            "name"=> $usernameac,
+                            "password"=>$password
+                        ),"shadowsocks16"=>array(
+                            "name"=>$usernameac,
+                            "password"=>$password
+                        ),"shadowtls"=>array(
+                            "name"=>$usernameac,
+                            "password"=>$password
+                        ),"vmess"=>array(
+                            "name"=>$usernameac,
+                            "uuid"=>generateUUID(),
+                            "alterId"=>0
+                        ),"vless"=>array(
+                            "name"=>$usernameac,
+                            "uuid"=>generateUUID(),
+                            "flow"=>""
+                        ),"trojan"=>array(
+                            "name"=>$usernameac,
+                            "password"=>generateAuthStr()
+                        ),"naive"=>array(
+                            "username"=>$usernameac,
+                            "password"=>generateAuthStr()
+                        ),"hysteria"=>array(
+                            "name"=>$usernameac,
+                            "auth_str"=>generateAuthStr()
+                        ),"tuic"=>array(
+                            "name"=>$usernameac,
+                            "uuid"=>generateUUID(),
+                            "password"=>generateAuthStr()
+                        ),"hysteria2"=>array(
+                            "name"=>$usernameac,
+                            "password"=>generateAuthStr()
+                        )),
+                    "inbounds" => $clients['inbounds'],
+                    "links" => [],
+                    "volume" => $clients['volume'],
+                    "expiry" => $clients['expiry'],
+                    "desc" => $clients['desc']
+                )),
+            );
+            $result = updateClientS_ui($Get_Data_Panel['name_panel'],$configpanel);
+            if(!$result['success']){
+                $Output = array(
+                    'status' => 'Unsuccessful',
+                    'msg' => 'Unsuccessful'
+                );
+            }else{
+                $Output = array(
+                    'status' => 'successful',
+                    'configs' => [outputlunk($Get_Data_Panel['linksubx']."/{$usernameac}")],
+                    'subscription_url' => $Get_Data_Panel['linksubx']."/{$usernameac}",
+                );
+            }
+        }
 
         else{
             $Output = array(
@@ -414,6 +543,20 @@ class ManagePanel{
                 );
             }
         }
+        elseif($Get_Data_Panel['type'] == "s_ui"){
+            $UsernameData = removeClientS_ui($Get_Data_Panel['name_panel'],$username);
+            if(!$UsernameData['success']){
+                $Output = array(
+                    'status' => 'Unsuccessful',
+                    'msg' => $UsernameData['msg']
+                );
+            }else{
+                $Output = array(
+                    'status' => 'successful',
+                    'username' => $username,
+                );
+            }
+        }
         else{
             $Output = array(
                 'status' => 'Unsuccessful',
@@ -436,6 +579,8 @@ class ManagePanel{
         }
         elseif($Get_Data_Panel['type'] == "alireza"){
             ResetUserDataUsagealirezasin($username, $name_panel);
+        }elseif($Get_Data_Panel['type'] == "s_ui"){
+            ResetUserDataUsages_ui($username, $name_panel);
         }
     }
     function Modifyuser($username,$name_panel,$config = array()){
@@ -497,6 +642,29 @@ class ManagePanel{
             );
             $configs['settings'] = json_encode(array_replace_recursive(json_decode($configs['settings'], true),json_decode($config['settings'], true)));
             $updateinbound = updateClientalireza($Get_Data_Panel['name_panel'], $username,$configs);
+        }
+        elseif($Get_Data_Panel['type'] == "s_ui"){
+            $clients = GetClientsS_UI($username,$name_panel);
+            if(!$clients)return [];
+            $usernameac  = $username;
+            $configs = array(
+                "object" => 'clients',
+                'action' => "edit",
+                "data" => array(
+                    "id" => $clients['id'],
+                    "enable" => $clients['enable'],
+                    "name" => $usernameac,
+                    "config" => $clients['config'],
+                    "inbounds" => $clients['inbounds'],
+                    "links" => $clients['links'],
+                    "volume" => $clients['volume'],
+                    "expiry" => $clients['expiry'],
+                    "desc" => $clients['desc']
+                ),
+            );
+            $configs['data'] = array_merge($configs['data'], $config);
+            $configs['data'] = json_encode($configs['data'],true);
+            return updateClientS_ui($Get_Data_Panel['name_panel'],$configs);
         }
 
     }
