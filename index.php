@@ -1297,19 +1297,18 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
                 sendmessage($from_id, $textbotlang['Admin']['Product']['nullpProduct'], null, 'HTML');
                 return;
             }
-            $textproduct = "🛍 برای خرید اشتراک سرویس مدنظر خود را انتخاب کنید
-لوکیشن سرویس  :{$panel['name_panel']} ";
+            $textproduct = sprintf($textbotlang['users']['buy']['selectService'],$panel['name_panel']);
             sendmessage($from_id,$textproduct, KeyboardProduct($panel['name_panel'],"backuser",$panel['MethodUsername']), 'HTML');
         }else{
             $emptycategory = select("category", "*", null, null, "count");
             if ($emptycategory == 0) {
-                sendmessage($from_id, "❌ دسته بندی برای نمایش یافت نشد.", null, 'HTML');
+                sendmessage($from_id,$textbotlang['users']['category']['NotFound'], null, 'HTML');
                 return;
             }
             if($datain == "buy"){
-                Editmessagetext($from_id, $message_id, "📌 دسته بندی مورد نظر خود را انتخاب نمایید.", KeyboardCategorybuy("backuser",$panel['name_panel']));
+                Editmessagetext($from_id, $message_id,$textbotlang['users']['category']['selectCategory'], KeyboardCategorybuy("backuser",$panel['name_panel']));
             }else{
-                sendmessage($from_id, "📌 دسته بندی مورد نظر خود را انتخاب نمایید.", KeyboardCategorybuy("backuser",$panel['name_panel']), 'HTML');
+                sendmessage($from_id,$textbotlang['users']['category']['selectCategory'], KeyboardCategorybuy("backuser",$panel['name_panel']), 'HTML');
             }
         }
     } else {
@@ -1329,12 +1328,10 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
     }
     $location = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
     if($location == false){
-        sendmessage($from_id, "❌ خطایی رخ داده است مراحل خرید را از اول انجام دهید.", null, 'HTML');
+        sendmessage($from_id, $textbotlang['users']['category']['error'], null, 'HTML');
         return;
     }
-    $textproduct = "🛍 برای خرید اشتراک سرویس مدنظر خود را انتخاب کنید
-لوکیشن سرویس  :{$location['name_panel']} ";
-    Editmessagetext($from_id, $message_id,$textproduct, KeyboardProduct($location['name_panel'],"buy",$location['MethodUsername'], $categoryid));
+    Editmessagetext($from_id, $message_id,sprintf($textbotlang['users']['buy']['selectService'],$location['name_panel']), KeyboardProduct($location['name_panel'],"buy",$location['MethodUsername'], $categoryid));
     update("user", "Processing_value", $location['name_panel'], "id", $from_id);
 }elseif (preg_match('/^location_(.*)/', $datain, $dataget)) {
     $locationid = $dataget[1];
@@ -1347,16 +1344,14 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
             sendmessage($from_id, $textbotlang['Admin']['Product']['nullpProduct'], null, 'HTML');
             return;
         }
-        $textproduct = "🛍 برای خرید اشتراک سرویس مدنظر خود را انتخاب کنید
-لوکیشن سرویس  :{$panellist['name_panel']} ";
-        Editmessagetext($from_id, $message_id,$textproduct, KeyboardProduct($panellist['name_panel'],"buy",$panellist['MethodUsername']));
+        Editmessagetext($from_id, $message_id,sprintf($textbotlang['users']['buy']['selectService'],$location['name_panel']), KeyboardProduct($panellist['name_panel'],"buy",$panellist['MethodUsername']));
     }else{
         $emptycategory = select("category", "*", null, null, "count");
         if ($emptycategory == 0) {
-            sendmessage($from_id, "❌ دسته بندی برای نمایش یافت نشد.", null, 'HTML');
+            sendmessage($from_id, $textbotlang['users']['category']['NotFound'], null, 'HTML');
             return;
         }
-        Editmessagetext($from_id, $message_id, "📌 دسته بندی مورد نظر خود را انتخاب نمایید.", KeyboardCategorybuy("buy",$panellist['name_panel']));
+        Editmessagetext($from_id, $message_id, $textbotlang['users']['category']['selectCategory'], KeyboardCategorybuy("buy",$panellist['name_panel']));
     }
 } elseif (preg_match('/^prodcutservices_(.*)/', $datain, $dataget)) {
     $prodcut = $dataget[1];
@@ -1368,7 +1363,7 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
         $prodcut = $dataget[1];
     }
     $panellist = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
-    if ($panellist['MethodUsername'] == "نام کاربری دلخواه") {
+    if ($panellist['MethodUsername'] == $textbotlang['users']['customusername']) {
         if (!preg_match('~(?!_)^[a-z][a-z\d_]{2,32}(?<!_)$~i', $text)) {
             sendmessage($from_id, $textbotlang['users']['invalidusername'], $backuser, 'HTML');
             return;
@@ -1379,7 +1374,7 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
         $loc = $prodcut;
     }
     if($loc == null){
-        sendmessage($from_id, '❌ خطایی رخ داده است مراحل خرید را مجددا انجام دهید', $keyboard, 'html');
+        sendmessage($from_id,$textbotlang['users']['category']['error'], $keyboard, 'html');
         step("home",$from_id);
         return;
     }
@@ -1402,16 +1397,7 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
         $info_product['Volume_constraint'] = $textbotlang['users']['stateus']['Unlimited'];
     $info_product['price_product'] = number_format($info_product['price_product'], 0);
     $user['Balance'] = number_format($user['Balance']);
-    $textin = "
-             📇 پیش فاکتور شما:
-👤 نام کاربری: <code>$username_ac</code>
-🔐 نام سرویس: {$info_product['name_product']}
-📆 مدت اعتبار: {$info_product['Service_time']} روز
-💶 قیمت: {$info_product['price_product']}  تومان
-👥 حجم اکانت: {$info_product['Volume_constraint']} گیگ
-💵 موجودی کیف پول شما : {$user['Balance']}
-    
-💰 سفارش شما آماده پرداخت است.  ";
+    $textin = sprintf($textbotlang['users']['buy']['invoicebuy'],$username_ac,$info_product['name_product'],$info_product['Service_time'],$info_product['price_product'],$info_product['Volume_constraint'],$user['Balance']);
     sendmessage($from_id, $textin, $payment, 'HTML');
     step('payment', $from_id);
 } elseif ($user['step'] == "payment" && $datain == "confirmandgetservice" || $datain == "confirmandgetserviceDiscount") {
@@ -1425,10 +1411,9 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
     if($marzban_list_get['linksubx'] == null and in_array($marzban_list_get['type'],["x-ui_single","alireza"])){
         foreach ($admin_ids as $admin) {
-            sendmessage($admin, "❌ ادمین عزیز پنل زیر فعال نیست جهت فعالسازی پنل باید حتما لینک ساب را از پنل ثنایی فعال و داخل ربات تنظیم کنید سپس در صورتی که میخواهید کانفیگ دهید یا لینک ساب از مدیریت پنل می توانید تنظیم نمایید.
-نام پنل : {$marzban_list_get['name_panel']}", null, 'HTML');
+            sendmessage($admin,sprintf($textbotlang['Admin']['managepanel']['notsetlinksub'],$marzban_list_get['name_panel']), null, 'HTML');
         }
-        sendmessage($from_id, "❌ پنل درحال حاضر فعال نمی باشد.", $keyboard, 'HTML');
+        sendmessage($from_id, $textbotlang['Admin']['managepanel']['paneldeactive'], $keyboard, 'HTML');
         return;
     }
     $username_ac = $user['Processing_value_tow'];
@@ -1486,12 +1471,7 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
     if ($dataoutput['username'] == null) {
         $dataoutput['msg'] = json_encode($dataoutput['msg']);
         sendmessage($from_id, $textbotlang['users']['sell']['ErrorConfig'], $keyboard, 'HTML');
-        $texterros = "
-⭕️ یک کاربر قصد دریافت اکانت داشت که ساخت کانفیگ با خطا مواجه شده و به کاربر کانفیگ داده نشد
-✍️ دلیل خطا : 
-{$dataoutput['msg']}
-آیدی کابر : $from_id
-نام کاربری کاربر : @$username";
+        $texterros =sprintf($textbotlang['users']['buy']['errorInCreate'],$dataoutput['msg'],$from_id,$username);
         foreach ($admin_ids as $admin) {
             sendmessage($admin, $texterros, null, 'HTML');
         }
@@ -1502,7 +1482,7 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
         $SellDiscountlimit = select("DiscountSell", "*", "codeDiscount", $partsdic[0], "select");
         $value = intval($SellDiscountlimit['usedDiscount']) + 1;
         update("DiscountSell", "usedDiscount", $value, "codeDiscount", $partsdic[0]);
-        $text_report = "⭕️ یک کاربر با نام کاربری @$username  و آیدی عددی $from_id از کد تخفیف {$partsdic[0]} استفاده کرد.";
+        $text_report = sprintf($textbotlang['users']['Report']['discountused'],$username,$from_id,$partsdic[0]);
         if (isset($setting['Channel_Report']) &&strlen($setting['Channel_Report']) > 0) {
             sendmessage($setting['Channel_Report'], $text_report, null, 'HTML');
         }
@@ -1516,9 +1496,7 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
             $Balance_prim = $user_Balance['Balance'] + $result;
             update("user", "Balance", $Balance_prim, "id", $user['affiliates']);
             $result = number_format($result);
-            $textadd = "🎁  پرداخت پورسانت 
-    
-مبلغ $result تومان به حساب شما از طرف  زیر مجموعه تان به کیف پول شما واریز گردید";
+            $textadd = sprintf($textbotlang['users']['affiliates']['porsantuser'],$result);
             sendmessage($user['affiliates'], $textadd, null, 'HTML');
         }
     }
@@ -1528,7 +1506,7 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
     $configqr = "";
     if ($marzban_list_get['sublink'] == "onsublink") {
         $output_config_link = $dataoutput['subscription_url'];
-        $link_config = "<code>$output_config_link</code>";
+        $link_config = $output_config_link;
     }
     if ($marzban_list_get['configManual'] == "onconfig") {
         if(isset($dataoutput['configs']) and count($dataoutput['configs']) !=0){
@@ -1540,7 +1518,7 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
             $config .= "";
             $configqr .= "";
         }
-        $text_config = "<code>$config</code>";
+        $text_config = $config;
     }
     $Shoppinginfo = json_encode([
         'inline_keyboard' => [
@@ -1549,19 +1527,7 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
             ]
         ]
     ]);
-    $textcreatuser = "✅ سرویس با موفقیت ایجاد شد
-    
-👤 نام کاربری سرویس : <code>$username_ac</code>
-🌿 نام سرویس: {$info_product['name_product']}
-‏🇺🇳 لوکیشن: {$marzban_list_get['name_panel']}
-⏳ مدت زمان: {$info_product['Service_time']}  روز
-🗜 حجم سرویس:  {$info_product['Volume_constraint']} گیگ
-    
-لینک اتصال:
-$text_config
-$link_config
-    
-📚 راهنمای اتصال به سرویس را از طریق کلیک کردن دکمه زیر مطالعه بفرمایید";
+    $textcreatuser = sprintf($textbotlang['users']['buy']['createservice'],$username_ac,$info_product['name_product'],$marzban_list_get['name_panel'],$info_product['Service_time'],$info_product['Volume_constraint'],$text_config,$link_config);
     if ($marzban_list_get['sublink'] == "onsublink") {
         $urlimage = "$from_id$randomString.png";
         $writer = new PngWriter();
@@ -1612,19 +1578,7 @@ $link_config
     $Balance_prim = $user['Balance'] - $priceproduct;
     update("user", "Balance", $Balance_prim, "id", $from_id);
     $user['Balance'] = number_format($user['Balance'], 0);
-    $text_report = " 🛍 خرید جدید
-            
-    ⚙️ یک کاربر اکانت  با نام کانفیگ <code>$username_ac</code> خریداری کرد
-    
-    قیمت محصول : {$info_product['price_product']} تومان
-    حجم محصول : {$info_product['Volume_constraint']} 
-    آیدی عددی کاربر : <code>$from_id</code>
-    شماره تلفن کاربر : {$user['number']}
-    موقعیت سرویس کاربر :{$user['Processing_value']}
-    موجودی کاربر : {$user['Balance']} تومان
-    
-        اطلاعات کاربر 👇👇
-        ⚜️ نام کاربری کاربر: @$username";
+    $text_report = sprintf($textbotlang['users']['Report']['reportbuy'],$username_ac,$info_product['price_product'],$info_product['Volume_constraint'],$from_id,$user['number'],$user['Processing_value'],$user['Balance'],$username);
     if (isset($setting['Channel_Report']) &&strlen($setting['Channel_Report']) > 0) {
         sendmessage($setting['Channel_Report'], $text_report, null, 'HTML');
     }
@@ -1672,19 +1626,10 @@ $link_config
     $info_product['price_product'] = round($info_product['price_product']);
     if ($info_product['price_product'] < 0)
         $info_product['price_product'] = 0;
-    $textin = "
-             📇 پیش فاکتور شما:
-👤 نام کاربری: <code>{$user['Processing_value_tow']}</code>
-🔐 نام سرویس: {$info_product['name_product']}
-📆 مدت اعتبار: {$info_product['Service_time']} روز
-💶 قیمت: {$info_product['price_product']}  تومان
-👥 حجم اکانت: {$info_product['Volume_constraint']} گیگ
-💵 موجودی کیف پول شما : {$user['Balance']}
-              
-💰 سفارش شما آماده پرداخت است.  ";
+    $textin = sprintf($textbotlang['users']['buy']['invoicebuy'],$user['Processing_value_tow'],$info_product['name_product'],$info_product['Service_time'],$info_product['price_product'],$info_product['Volume_constraint'],$user['Balance']);
     $paymentDiscount = json_encode([
         'inline_keyboard' => [
-            [['text' => "💰 پرداخت و دریافت سرویس", 'callback_data' => "confirmandgetserviceDiscount"]],
+            [['text' => $textbotlang['users']['buy']['payandGet'], 'callback_data' => "confirmandgetserviceDiscount"]],
             [['text' => $textbotlang['users']['backhome'], 'callback_data' => "backuser"]]
         ]
     ]);
@@ -1717,17 +1662,7 @@ if ($text == $datatextbot['text_Add_Balance'] || $text == "/wallet") {
     if ($datain == "cart_to_offline") {
         $PaySetting = select("PaySetting", "ValuePay", "NamePay", "CartDescription", "select")['ValuePay'];
         $Processing_value = number_format($user['Processing_value']);
-        $textcart = "برای افزایش موجودی به صورت دستی، مبلغ $Processing_value  تومان  را به شماره‌ی حساب زیر واریز کنید 👇🏻
-    
-    ==================== 
-    $PaySetting
-    ====================
-    
-🌅 عکس رسید خود را در این مرحله ارسال نمایید. 
-    
-⚠️ حداکثر واریز مبلغ 10 میلیون تومان می باشد.
-⚠️ امکان برداشت وجه از کیف پول  نیست.
-⚠️ مسئولیت واریز اشتباهی با شماست.";
+        $textcart = sprintf($textbotlang['users']['moeny']['carttext'],$Processing_value,$PaySetting);
         sendmessage($from_id, $textcart, $backuser, 'HTML');
         step('cart_to_cart_user', $from_id);
     }
@@ -1763,16 +1698,9 @@ if ($text == $datatextbot['text_Add_Balance'] || $text == "/wallet") {
             ]
         ]);
         $user['Processing_value'] = number_format($user['Processing_value'], 0);
-        $textnowpayments = "
-✅ فاکتور پرداخت ایجاد شد.
-        
-🔢 شماره فاکتور : $randomString
-💰 مبلغ فاکتور : {$user['Processing_value']} تومان
-    
-    جهت پرداخت از دکمه زیر استفاده کنید👇🏻";
+        $textnowpayments = sprintf($textbotlang['users']['moeny']['aqayepardakht'],$randomString,$user['Processing_value']);
         sendmessage($from_id, $textnowpayments, $paymentkeyboard, 'HTML');
     }
-
     if ($datain == "nowpayments") {
         $price_rate = tronratee();
         $USD = $price_rate['result']['USD'];
@@ -1805,19 +1733,7 @@ if ($text == $datatextbot['text_Add_Balance'] || $text == "/wallet") {
         ]);
         $Processing_value = number_format($user['Processing_value'], 0);
         $USD = number_format($USD, 0);
-        $textnowpayments = "
-            ✅ فاکتور پرداخت ارزی NOWPayments ایجاد شد.
-        
-🔢 شماره فاکتور : $randomString
-💰 مبلغ فاکتور : $Processing_value تومان
-        
-📊 قیمت دلار روز : $USD تومان
-💵 نهایی:$usdprice دلار 
-        
-        
-🌟 امکان پرداخت با ارز های مختلف وجود دارد
-        
-جهت پرداخت از دکمه زیر استفاده کنید👇🏻";
+        $textnowpayments = sprintf($textbotlang['users']['moeny']['nowpayment'],$randomString,$Processing_value,$USD,$usdprice);
         sendmessage($from_id, $textnowpayments, $paymentkeyboard, 'HTML');
     }
     if ($datain == "iranpay") {
@@ -1856,12 +1772,7 @@ if ($text == $datatextbot['text_Add_Balance'] || $text == "/wallet") {
             sendmessage($from_id, $textbotlang['users']['Balance']['errorLinkPayment'], $keyboard, 'HTML');
             step('home', $from_id);
             foreach ($admin_ids as $admin) {
-                $ErrorsLinkPayment = "
-⭕️ یک کاربر قصد پرداخت داشت که ساخت لینک پرداخت  با خطا مواجه شده و به کاربر لینک داده نشد
-✍️ دلیل خطا : $text_error
-        
-آیدی کابر : $from_id
-نام کاربری کاربر : @$username";
+                $ErrorsLinkPayment = sprintf($textbotlang['users']['moeny']['eror'],$text_error,$from_id,$username);
                 sendmessage($admin, $ErrorsLinkPayment, $keyboard, 'HTML');
             }
             return;
@@ -1880,29 +1791,7 @@ if ($text == $datatextbot['text_Add_Balance'] || $text == "/wallet") {
             ]
         ]);
         $pricetoman = number_format($user['Processing_value'], 0);
-        $textnowpayments = "✅ تراکنش شما ایجاد شد
-    
-🛒 کد پیگیری:  <code>$randomString</code> 
-🌐 شبکه: TRX
-💳 آدرس ولت: <code>$pay_address</code>
-💲 مبلغ تراکنش به ترون : <code>$trxprice</code>
-💲 مبلغ تراکنش به تومان  : <code>$pricetoman</code>
-💲 نرخ ترون   : <code>$trx</code>
-    
-    
-    
-📌 مبلغ $pricetoman  تومان بعد از تایید پرداخت توسط شبکه بلاکچین به کیف پول شما اضافه میشود
-    
-💢 لطفا به این نکات قبل از پرداخت توجه کنید 👇
-    
-🔸 در صورت اشتباه وارد کردن آدرس کیف پول، تراکنش تایید نمیشود و بازگشت وجه امکان پذیر نیست
-🔹 مبلغ ارسالی نباید کمتر و یا بیشتر از مبلغ اعلام شده باشد.
-🔸 کارمزد تراکنش باید از سمت کاربر پرداخت شود و باید دقیقا مبلغی که اعلام شده ارسال شود.
-🔹 در صورت واریز بیش از مقدار گفته شده، امکان اضافه کردن تفاوت وجه وجود ندارد.
-🔸 هر کیف پول فقط برای یک تراکنش قابل استفاده است و درصورت ارسال مجدد ارز امکان برگشت وجه نیست.
-🔹 هر تراکنش بین 10 دقیقه الی  15 دقیقه  معتبر است .
-    
-✅ در صورت مشکل میتوانید با پشتیبانی در ارتباط باشید";
+        $textnowpayments = sprintf($textbotlang['users']['moeny']['iranpay'],$randomString,$pay_address,$trxprice,$pricetoman,$trx,$pricetoman);
         sendmessage($from_id, $textnowpayments, $paymentkeyboard, 'HTML');
     }
     if ($datain == "perfectmoney") {
@@ -1942,9 +1831,7 @@ if ($user['step'] == "getvcodeuser") {
         sendmessage($from_id, $textbotlang['users']['perfectmoney']['errors'], null, 'HTML');
         foreach ($admin_ids as $id_admin) {
             $texterrors = "";
-            sendmessage($id_admin, "❌ یک کاربر قصد افزایش موجودی با ووچر را داشته اما با خطا مواجه شده است 
-    
-دلیل خطا : $errorMessage", null, 'HTML');
+            sendmessage($id_admin, sprintf($textbotlang['users']['moeny']['eror'],$texterrors,$form_id,$username), null, 'HTML');
         }
         return;
     }
@@ -2009,11 +1896,7 @@ if (preg_match('/Confirmpay_user_(\w+)_(\w+)/', $datain, $dataget)) {
         update("Payment_report", "payment_Status", "paid", "id_order", $Payment_report['id_order']);
         sendmessage($from_id, $textbotlang['users']['Balance']['Confirmpay'], null, 'HTML');
         $Payment_report['price'] = number_format($Payment_report['price']);
-        $text_report = "💵 پرداخت جدید
-            
-آیدی عددی کاربر : $from_id
-مبلغ تراکنش : {$Payment_report['price']} 
-روش پرداخت :  درگاه ارزی ریالی";
+        $text_report = sprintf($textbotlang['users']['Report']['reportpayiranpay'],$from_id,$Payment_report['price']);
         if (isset($setting['Channel_Report']) &&strlen($setting['Channel_Report']) > 0) {
             sendmessage($setting['Channel_Report'], $text_report, null, 'HTML');
         }
@@ -2082,7 +1965,7 @@ if (preg_match('/Confirmpay_user_(\w+)_(\w+)/', $datain, $dataget)) {
     $stmt->bindParam(7, $invoice);
     $stmt->execute();
     if ($user['Processing_value_tow'] == "getconfigafterpay"){
-        sendmessage($from_id, "🚀 رسید پرداخت شما ارسال شد پس از تایید توسط مدیریت سفارش شما ارسال خواهد شد", $keyboard, 'HTML');
+        sendmessage($from_id, $textbotlang['users']['Balance']['Send-receip-buy'], $keyboard, 'HTML');
     }else{
         sendmessage($from_id, $textbotlang['users']['Balance']['Send-receipt'], $keyboard, 'HTML');
     }
@@ -2095,16 +1978,7 @@ if (preg_match('/Confirmpay_user_(\w+)_(\w+)/', $datain, $dataget)) {
         ]
     ]);
     $Processing_value = number_format($user['Processing_value']);
-    $textsendrasid = "
-                ⭕️ یک پرداخت جدید انجام شده است .
-            
-👤 شناسه کاربر: $from_id
-🛒 کد پیگیری پرداخت: $randomString
-⚜️ نام کاربری: @$username
-💸 مبلغ پرداختی: $Processing_value تومان
-            
-توضیحات: $caption
-✍️ در صورت درست بودن رسید پرداخت را تایید نمایید.";
+    $textsendrasid = sprintf($textbotlang['users']['moeny']['cartresid'],$from_id,$randomString,$username,$Processing_value,$caption);
     foreach ($admin_ids as $id_admin) {
         telegram('sendphoto', [
             'chat_id' => $id_admin,
@@ -2151,20 +2025,14 @@ if ($datain == "Discount") {
     $get_codesql = $stmt->fetch(PDO::FETCH_ASSOC);
     step('home', $from_id);
     number_format($get_codesql['price']);
-    $text_balance_code = "کد هدیه با موفقیت ثبت شد و به موجودی شما مبلغ {$get_codesql['price']} تومان اضافه گردید. 🥳";
+    $text_balance_code = sprintf($textbotlang['users']['Discount']['acceptdiscount'],$get_codesql['price']);
     sendmessage($from_id, $text_balance_code, $keyboard, 'HTML');
     $stmt = $pdo->prepare("INSERT INTO Giftcodeconsumed (id_user, code) VALUES (?, ?)");
     $stmt->bindParam(1, $from_id);
     $stmt->bindParam(2, $text, PDO::PARAM_STR);
     $stmt->execute();
-    $text_report = "کد هدیه $text استفاده شد
-            
-    اطلاعات کاربر : 
-            
-🪪 آیدی عددی : <code>$from_id</code>
-🪪  نام کاربری : @$username
-💰 مبلغ هدیه {$get_codesql['price']} تومان";
-    if (isset($setting['Channel_Report']) &&strlen($setting['Channel_Report']) > 0) {
+    $text_report = sprintf($textbotlang['users']['Report']['discountuser'],$text,$from_id,$username,$get_codesql['price']);
+    if (isset($setting['Channel_Report']) && strlen($setting['Channel_Report']) > 0) {
         sendmessage($setting['Channel_Report'], $text_report, null, 'HTML');
     }
 }
@@ -2176,7 +2044,7 @@ if ($datain == "closelist") {
     deletemessage($from_id, $message_id);
     sendmessage($from_id, $textbotlang['users']['back'], $keyboard, 'HTML');
 }
-if ($text == "👥 زیر مجموعه گیری") {
+if ($text == $textbotlang['users']['affiliates']['btn']) {
     $affiliatesvalue = select("affiliates", "*", null, null, "select")['affiliatesstatus'];
     if ($affiliatesvalue == "offaffiliates") {
         sendmessage($from_id, $textbotlang['users']['affiliates']['offaffiliates'], $keyboard, 'HTML');
@@ -2201,16 +2069,7 @@ if ($text == "👥 زیر مجموعه گیری") {
     } else {
         $price_Discount = $textbotlang['users']['stateus']['disabled'];
     }
-    $textaffiliates = "🤔 زیرمجموعه گیری به چه صورت است ؟
-    
-👨🏻‍💻 ما برای شما محیطی فراهم کرده ایم  تا بتوانید بدون پرداخت حتی 1 ریال به ما، بتوانید موجودی کیف پول خودتان را در ربات افزایش دهید و از خدمات ربات استفاده نمایید.
-    
-👥 شما میتوانید با دعوت دوستان و آشنایان خود به ربات ما از طریق لینک اختصاصی شما! کسب درآمد کنید و حتی با هر خرید زیرمجموعه ها به شما پورسانت داده خواهد شد.
-
-👤 شما می توانید با استفاده از بنر بالا برای خود زیرمجموعه جمع کنید
-    
-💵 مبلغ هدیه به ازای هر عضویت :  $price_Discount
-💴 میزان پورسانت از خرید زیرمجموعه :  $affiliatespercentage";
+    $textaffiliates = sprintf($textbotlang['users']['affiliates']['infotext'],$price_Discount,$affiliatespercentage);
     sendmessage($from_id, $textaffiliates, $keyboard, 'HTML');
 }
 require_once 'admin.php';
