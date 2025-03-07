@@ -239,11 +239,11 @@ if (!in_array($tch, ['member', 'creator', 'administrator']) && $channels['Channe
     return;
 }
 #-----------roll------------#
-if ($setting['roll_Status'] == "1" && $user['roll_Status'] == 0 && $text != "✅ قوانین را می پذیرم" && !in_array($from_id, $admin_ids)) {
+if ($setting['roll_Status'] == "1" && $user['roll_Status'] == 0 && $text != $textbotlang['users']['rulesaccept'] && !in_array($from_id, $admin_ids)) {
     sendmessage($from_id, $datatextbot['text_roll'], $confrimrolls, 'html');
     return;
 }
-if ($text == "✅ قوانین را می پذیرم") {
+if ($text == $textbotlang['users']['rulesaccept']) {
     sendmessage($from_id, $textbotlang['users']['Rules'], $keyboard, 'html');
     $confrim = true;
     update("user", "roll_Status", $confrim, "id", $from_id);
@@ -323,7 +323,7 @@ if ($text == $datatextbot['text_Purchased_services'] || $datain == "backorder" |
     }
     update("user", "pagenumber", "1", "id", $from_id);
     $page = 1;
-    $items_per_page = 5;
+    $items_per_page = 10;
     $start_index = ($page - 1) * $items_per_page;
     $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user AND (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn') ORDER BY username ASC LIMIT $start_index, $items_per_page");
     $stmt->bindParam(':id_user', $from_id);
@@ -365,6 +365,101 @@ if ($text == $datatextbot['text_Purchased_services'] || $datain == "backorder" |
     } else {
         sendmessage($from_id, $textbotlang['users']['sell']['service_sell'], $keyboard_json, 'html');
     }
+}
+if ($datain == 'next_page') {
+    $numpage = select("invoice", "id_user", "id_user", $from_id, "count");
+    $page = $user['pagenumber'];
+    $items_per_page = 10;
+    $sum = $user['pagenumber'] * $items_per_page;
+    if ($sum > $numpage) {
+        $next_page = 1;
+    } else {
+        $next_page = $page + 1;
+    }
+    $start_index = ($next_page - 1) * $items_per_page;
+    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user AND (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn') ORDER BY username ASC LIMIT $start_index, $items_per_page");
+    $stmt->bindParam(':id_user', $from_id);
+    $stmt->execute();
+    $keyboardlists = [
+        'inline_keyboard' => [],
+    ];
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $keyboardlists['inline_keyboard'][] = [
+            [
+                'text' => "🌟️" . $row['username'] . "🌟️",
+                'callback_data' => "product_" . $row['username']
+            ],
+        ];
+    }
+    $pagination_buttons = [
+        [
+            'text' => $textbotlang['users']['page']['next'],
+            'callback_data' => 'next_page'
+        ],
+        [
+            'text' => $textbotlang['users']['page']['previous'],
+            'callback_data' => 'previous_page'
+        ]
+    ];
+    $usernotlist = [
+        [
+            'text' => $textbotlang['Admin']['Status']['notusenameinbot'],
+            'callback_data' => 'usernotlist'
+        ]
+    ];
+    if ($setting['NotUser'] == "1") {
+        $keyboardlists['inline_keyboard'][] = $usernotlist;
+    }
+    $keyboardlists['inline_keyboard'][] = $pagination_buttons;
+    $keyboard_json = json_encode($keyboardlists);
+    update("user", "pagenumber", $next_page, "id", $from_id);
+    Editmessagetext($from_id, $message_id, $text_callback, $keyboard_json);
+} elseif ($datain == 'previous_page') {
+    $page = $user['pagenumber'];
+    $items_per_page = 10;
+    if ($user['pagenumber'] <= 1) {
+        $next_page = 1;
+    } else {
+        $next_page = $page - 1;
+    }
+    $start_index = ($next_page - 1) * $items_per_page;
+    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user AND (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn') ORDER BY username ASC LIMIT $start_index, $items_per_page");
+    $stmt->bindParam(':id_user', $from_id);
+    $stmt->execute();
+    $keyboardlists = [
+        'inline_keyboard' => [],
+    ];
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $keyboardlists['inline_keyboard'][] = [
+            [
+                'text' => "🌟️" . $row['username'] . "🌟️",
+                'callback_data' => "product_" . $row['username']
+            ],
+        ];
+    }
+    $pagination_buttons = [
+        [
+            'text' => $textbotlang['users']['page']['next'],
+            'callback_data' => 'next_page'
+        ],
+        [
+            'text' => $textbotlang['users']['page']['previous'],
+            'callback_data' => 'previous_page'
+        ]
+    ];
+    $usernotlist = [
+        [
+            'text' => $textbotlang['Admin']['Status']['notusenameinbot'],
+            'callback_data' => 'usernotlist'
+        ]
+    ];
+    if ($setting['NotUser'] == "1") {
+        $keyboardlists['inline_keyboard'][] = $usernotlist;
+    }
+    $keyboardlists['inline_keyboard'][] = $pagination_buttons;
+    $keyboard_json = json_encode($keyboardlists);
+    update("user", "pagenumber", $next_page, "id", $from_id);
+    Editmessagetext($from_id, $message_id, $text_callback, $keyboard_json);
 }
 if ($datain == "usernotlist") {
     sendmessage($from_id, $textbotlang['users']['stateus']['SendUsername'], $backuser, 'html');
@@ -451,101 +546,6 @@ if ($user['step'] == "getusernameinfo") {
     sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboard, 'html');
     step('home', $from_id);
 }
-if ($datain == 'next_page') {
-    $numpage = select("invoice", "id_user", "id_user", $from_id, "count");
-    $page = $user['pagenumber'];
-    $items_per_page = 5;
-    $sum = $user['pagenumber'] * $items_per_page;
-    if ($sum > $numpage) {
-        $next_page = 1;
-    } else {
-        $next_page = $page + 1;
-    }
-    $start_index = ($next_page - 1) * $items_per_page;
-    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user AND (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn') ORDER BY username ASC LIMIT $start_index, $items_per_page");
-    $stmt->bindParam(':id_user', $from_id);
-    $stmt->execute();
-    $keyboardlists = [
-        'inline_keyboard' => [],
-    ];
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $keyboardlists['inline_keyboard'][] = [
-            [
-                'text' => "🌟️" . $row['username'] . "🌟️",
-                'callback_data' => "product_" . $row['username']
-            ],
-        ];
-    }
-    $pagination_buttons = [
-        [
-            'text' => $textbotlang['users']['page']['next'],
-            'callback_data' => 'next_page'
-        ],
-        [
-            'text' => $textbotlang['users']['page']['previous'],
-            'callback_data' => 'previous_page'
-        ]
-    ];
-    $usernotlist = [
-        [
-            'text' => $textbotlang['Admin']['Status']['notusenameinbot'],
-            'callback_data' => 'usernotlist'
-        ]
-    ];
-    if ($setting['NotUser'] == "1") {
-        $keyboardlists['inline_keyboard'][] = $usernotlist;
-    }
-    $keyboardlists['inline_keyboard'][] = $pagination_buttons;
-    $keyboard_json = json_encode($keyboardlists);
-    update("user", "pagenumber", $next_page, "id", $from_id);
-    Editmessagetext($from_id, $message_id, $text_callback, $keyboard_json);
-} elseif ($datain == 'previous_page') {
-    $page = $user['pagenumber'];
-    $items_per_page = 5;
-    if ($user['pagenumber'] <= 1) {
-        $next_page = 1;
-    } else {
-        $next_page = $page - 1;
-    }
-    $start_index = ($next_page - 1) * $items_per_page;
-    $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user AND (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn') ORDER BY username ASC LIMIT $start_index, $items_per_page");
-    $stmt->bindParam(':id_user', $from_id);
-    $stmt->execute();
-    $keyboardlists = [
-        'inline_keyboard' => [],
-    ];
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $keyboardlists['inline_keyboard'][] = [
-            [
-                'text' => "🌟️" . $row['username'] . "🌟️",
-                'callback_data' => "product_" . $row['username']
-            ],
-        ];
-    }
-    $pagination_buttons = [
-        [
-            'text' => $textbotlang['users']['page']['next'],
-            'callback_data' => 'next_page'
-        ],
-        [
-            'text' => $textbotlang['users']['page']['previous'],
-            'callback_data' => 'previous_page'
-        ]
-    ];
-    $usernotlist = [
-        [
-            'text' => $textbotlang['Admin']['Status']['notusenameinbot'],
-            'callback_data' => 'usernotlist'
-        ]
-    ];
-    if ($setting['NotUser'] == "1") {
-        $keyboardlists['inline_keyboard'][] = $usernotlist;
-    }
-    $keyboardlists['inline_keyboard'][] = $pagination_buttons;
-    $keyboard_json = json_encode($keyboardlists);
-    update("user", "pagenumber", $next_page, "id", $from_id);
-    Editmessagetext($from_id, $message_id, $text_callback, $keyboard_json);
-}
 if (preg_match('/product_(\w+)/', $datain, $dataget)) {
     $username = $dataget[1];
     $nameloc = select("invoice", "*", "username", $username, "select");
@@ -601,7 +601,7 @@ if (preg_match('/product_(\w+)/', $datain, $dataget)) {
                     ['text' => $textbotlang['users']['extend']['title'], 'callback_data' => 'extend_' . $username],
                 ],
                 [
-                    ['text' => "🗑 حذف سرویس", 'callback_data' => 'removebyuser-' . $username],
+                    ['text' => $textbotlang['users']['stateus']['RemoveSerivecbtn'], 'callback_data' => 'removebyuser-' . $username],
                     ['text' => $textbotlang['users']['Extra_volume']['sellextra'], 'callback_data' => 'Extra_volume_' . $username],
                 ],
                 [
@@ -609,16 +609,7 @@ if (preg_match('/product_(\w+)/', $datain, $dataget)) {
                 ]
             ]
         ]);
-        $textinfo = "وضعیت سرویس : $status_var
-نام کاربری سرویس : {$DataUserOut['username']}
-لوکیشن :{$nameloc['Service_location']}
-کد سرویس:{$nameloc['id_invoice']}
-    
-📥 حجم مصرفی : $usedTrafficGb
-♾ حجم سرویس : $LastTraffic
-
-📅 فعال تا تاریخ : $expirationDate ($day)
-";
+        $textinfo = sprintf($textbotlang['users']['stateus']['InfoSerivceDisable'],$status_var,$DataUserOut['username'],$nameloc['Service_location'],$nameloc['id_invoice'],$usedTrafficGb,$LastTraffic,$expirationDate,$day);
 
     }else{
         $keyboardsetting = json_encode([
@@ -640,19 +631,7 @@ if (preg_match('/product_(\w+)/', $datain, $dataget)) {
                 ]
             ]
         ]);
-        $textinfo = "وضعیت سرویس : $status_var
-نام کاربری سرویس : {$DataUserOut['username']}
-لوکیشن :{$nameloc['Service_location']}
-کد سرویس:{$nameloc['id_invoice']}
-    
-🟢 اخرین زمان اتصال شما : $lastonline
-    
-📥 حجم مصرفی : $usedTrafficGb
-♾ حجم سرویس : $LastTraffic
-
-📅 فعال تا تاریخ : $expirationDate ($day)
-    
-🚫 برای تغییر لینک و قطع دسترسی دیگران کافیست روی گزینه ' بروزرسانی اشتراک ' کلیک کنید.";
+        $textinfo = sprintf($textbotlang['users']['stateus']['InfoSerivceActive'],$status_var,$DataUserOut['username'],$nameloc['Service_location'],$nameloc['id_invoice'],$lastonline,$usedTrafficGb,$LastTraffic,$expirationDate,$day);
     }
     Editmessagetext($from_id, $message_id, $textinfo, $keyboardsetting);
 }
@@ -755,17 +734,7 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
             ]
         ]
     ]);
-    $textextend = "🧾 فاکتور تمدید شما برای نام کاربری {$nameloc['username']} ایجاد شد.
-            
-🛍 نام محصول :  {$product['name_product']}
-مبلغ تمدید :  {$product['price_product']}
-مدت زمان تمدید : {$product['Service_time']} روز
-حجم تمدید : {$product['Volume_constraint']} گیگ
-            
-            
-✅ برای تایید و تمدید سرویس روی دکمه زیر کلیک کنید
-            
-❌ برای تمدید باید کیف پول خود را شارژ کنید.";
+    $textextend = sprintf($textbotlang['users']['extend']['invoicExtend'] ,$nameloc['username'],$product['name_product'],$product['price_product'],$product['Service_time'],$product['Service_time'],$product['Volume_constraint']);
     Editmessagetext($from_id, $message_id, $textextend, $keyboardextend);
 } elseif (preg_match('/confirmserivce-(.*)/', $datain, $dataget)) {
     $codeproduct = $dataget[1];
@@ -877,17 +846,7 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
     $priceproductformat = number_format($product['price_product']);
     $balanceformatsell = number_format(select("user", "Balance", "id", $from_id, "select")['Balance']);
     sendmessage($from_id, $textbotlang['users']['extend']['thanks'], $keyboardextendfnished, 'HTML');
-    $text_report = "⭕️ یک کاربر سرویس خود را تمدید کرد.
-            
-    اطلاعات کاربر : 
-            
-🪪 آیدی عددی : <code>$from_id</code>
-🪪  نام کاربری : @$username
-🛍 نام محصول :  {$product['name_product']}
-💰 مبلغ تمدید $priceproductformat تومان
-👤 نام کاربری مشتری در پنل  : $usernamepanel
-موجودی کاربر : $balanceformatsell تومان
-لوکیشن سرویس کاربر : {$nameloc['Service_location']}";
+    $text_report = sprintf($textbotlang['Admin']['Report']['extend'],$from_id,$username,$product['name_product'],$priceproductformat,$usernamepanel,$balanceformatsell,$nameloc['Service_location']);
     if (isset($setting['Channel_Report']) &&strlen($setting['Channel_Report']) > 0) {
         sendmessage($setting['Channel_Report'], $text_report, null, 'HTML');
     }
@@ -1985,7 +1944,12 @@ if ($text == $datatextbot['text_Add_Balance'] || $text == "/wallet") {
             sendmessage($from_id, $textbotlang['users']['Balance']['errorLinkPayment'], $keyboard, 'HTML');
             step('home', $from_id);
             foreach ($admin_ids as $admin) {
-                $ErrorsLinkPayment = sprintf($textbotlang['users']['Balance']['payment_error_admin'], $text_error, $from_id, $username);
+                $ErrorsLinkPayment = "
+⭕️ یک کاربر قصد پرداخت داشت که ساخت لینک پرداخت  با خطا مواجه شده و به کاربر لینک داده نشد
+✍️ دلیل خطا : $text_error
+        
+آیدی کابر : $from_id
+نام کاربری کاربر : @$username";
                 sendmessage($admin, $ErrorsLinkPayment, $keyboard, 'HTML');
             }
             return;
@@ -2318,12 +2282,12 @@ if ($text == "👥 زیر مجموعه گیری") {
     if ($affiliatescommission['status_commission'] == "oncommission") {
         $affiliatespercentage = $affiliatescommission['affiliatespercentage'] . " درصد";
     } else {
-        $affiliatespercentage = "غیرفعال";
+        $affiliatespercentage = $textbotlang['users']['stateus']['disabled'];
     }
     if ($affiliatescommission['Discount'] == "onDiscountaffiliates") {
         $price_Discount = $affiliatescommission['price_Discount'] . " تومان";
     } else {
-        $price_Discount = "غیرفعال";
+        $price_Discount = $textbotlang['users']['stateus']['disabled'];
     }
     $textaffiliates = "🤔 زیرمجموعه گیری به چه صورت است ؟
     
