@@ -9,7 +9,7 @@ if (function_exists('fastcgi_finish_request')) {
 }
 
 ini_set('error_log', 'error_log');
-$version = "4.13";
+$version = "4.13.1";
 date_default_timezone_set('Asia/Tehran');
 require_once 'config.php';
 require_once 'botapi.php';
@@ -28,7 +28,7 @@ use Endroid\QrCode\Writer\PngWriter;
 $first_name = sanitizeUserName($first_name);
 if(!in_array($Chat_type,["private"]))return;
 #-----------telegram_ip_ranges------------#
-if (!checktelegramip()) die("دسترسی غیرمجاز");
+if (!checktelegramip()) die("Unauthorized access");
 #-------------Variable----------#
 $users_ids = select("user", "id",null,null,"FETCH_COLUMN");
 $setting = select("setting", "*");
@@ -37,15 +37,11 @@ if(!in_array($from_id,$users_ids) && intval($from_id) != 0){
     $Response = json_encode([
         'inline_keyboard' => [
             [
-                ['text' => "ارسال پیام به کاربر", 'callback_data' => 'Response_' . $from_id],
+                ['text' => $textbotlang['Admin']['ManageUser']['sendmessageUser'], 'callback_data' => 'Response_' . $from_id],
             ]
         ]
     ]);
-    $newuser = "
-    🎉یک کاربر جدید ربات را استارت کرد
-نام : $first_name
-نام کاربری : @$username
-آیدی عددی : <a href = \"tg://user?id=$from_id\">$from_id</a>";
+    $newuser = sprintf($textbotlang['Admin']['ManageUser']['NewUserMessage'],$first_name,$username,$from_id,$from_id);
     foreach ($admin_ids as $admin) {
         sendmessage($admin, $newuser, $Response, 'html');
     }
@@ -77,7 +73,7 @@ if ($user == false) {
     );
 }
 if(($setting['status_verify'] == "1" && intval($user['verify']) == 0) && !in_array($from_id,$admin_ids)){
-    sendmessage($from_id, "⚠️ حساب شما احراز نشده است جهت احراز هویت به اکانت پشتیبانی پیام دهید.", null, 'html');
+    sendmessage($from_id,$textbotlang['users']['VerifyUser'], null, 'html');
     return;
 };
 $channels = array();
@@ -142,17 +138,13 @@ if ($user['username'] == "none" || $user['username'] == null) {
 }
 #-----------User_Status------------#
 if ($user['User_Status'] == "block") {
-    $textblock = "
-🚫 شما از طرف مدیریت بلاک شده اید.
-                    
-✍️ دلیل مسدودی: {$user['description_blocking']}
-                    ";
+    $textblock = sprintf($textbotlang['Admin']['ManageUser']['BlockedUser'],$user['description_blocking']);
     sendmessage($from_id, $textblock, null, 'html');
     return;
 }
 if (strpos($text, "/start ") !== false) {
     if ($user['affiliates'] != 0) {
-        sendmessage($from_id, "❌ شما زیرمجموعه کاربر {$user['affiliates']} هستید و نمی توانید زیر مجموعه کاربری دیگه ای باشید", null, 'html');
+        sendmessage($from_id, sprintf($textbotlang['users']['affiliates']['affiliateseduser'],$user['affiliates']), null, 'html');
         return;
     }
     $affiliatesvalue = select("affiliates", "*", null, null, "select")['affiliatesstatus'];
@@ -177,7 +169,7 @@ if (strpos($text, "/start ") !== false) {
             $Balance_add_user = $Balance_user['Balance'] + $marzbanDiscountaffiliates['price_Discount'];
             update("user", "Balance", $Balance_add_user, "id", $affiliatesid);
             $addbalancediscount = number_format($marzbanDiscountaffiliates['price_Discount'], 0);
-            sendmessage($affiliatesid, "🎁 مبلغ $addbalancediscount به موجودی شما از طرف زیر مجموعه با شناسه کاربری $from_id اضافه گردید.", null, 'html');
+            sendmessage($affiliatesid, sprintf($textbotlang['users']['affiliates']['giftuser'],$addbalancediscount,$from_id), null, 'html');
         }
         sendmessage($from_id, $datatextbot['text_start'], $keyboard, 'html');
         $useraffiliates = select("user", "*", "id", $affiliatesid, "select");
@@ -205,15 +197,11 @@ if (floor($TimeLastMessage / 60) >= 1) {
 
     }
     if($setting['Bot_Status'] == "✅  ربات روشن است" and !in_array($from_id, $admin_ids)) {
-        sendmessage($from_id, "❌ ربات درحال بروزرسانی است ساعتی دیگر مراجعه کنید", null, 'html');
+        sendmessage($from_id, $textbotlang['users']['updatingbot'], null, 'html');
         foreach ($admin_ids as $admin) {
             sendmessage($admin, "❌ ادمین عزیز ربات فعال نیست جهت فعالسازی به منوی تنظیمات عمومی > وضعیت قابلیت ها بروید تا رباتتان فعال شود.", null, 'html');
         }
-        return;
-    }elseif($setting['Bot_Status'] == "❌ ربات خاموش است" and !in_array($from_id, $admin_ids))  {
-        sendmessage($from_id, "❌ ربات درحال بروزرسانی است ساعتی دیگر مراجعه کنید", null, 'html');
-        return;
-    }
+        return;}
 
 }#-----------Channel------------#
 if ($datain == "confirmchannel") {
@@ -294,7 +282,7 @@ if ($text == "/start") {
     return;
 }
 #-----------back------------#
-if ($text == "🏠 بازگشت به منوی اصلی" || $datain == "backuser") {
+if ($text == $textbotlang['users']['backhome'] || $datain == "backuser") {
     update("user","Processing_value","0", "id",$from_id);
     update("user","Processing_value_one","0", "id",$from_id);
     update("user","Processing_value_tow","0", "id",$from_id);
@@ -1997,12 +1985,7 @@ if ($text == $datatextbot['text_Add_Balance'] || $text == "/wallet") {
             sendmessage($from_id, $textbotlang['users']['Balance']['errorLinkPayment'], $keyboard, 'HTML');
             step('home', $from_id);
             foreach ($admin_ids as $admin) {
-                $ErrorsLinkPayment = "
-⭕️ یک کاربر قصد پرداخت داشت که ساخت لینک پرداخت  با خطا مواجه شده و به کاربر لینک داده نشد
-✍️ دلیل خطا : $text_error
-        
-آیدی کابر : $from_id
-نام کاربری کاربر : @$username";
+                $ErrorsLinkPayment = sprintf($textbotlang['users']['Balance']['payment_error_admin'], $text_error, $from_id, $username);
                 sendmessage($admin, $ErrorsLinkPayment, $keyboard, 'HTML');
             }
             return;
@@ -2021,29 +2004,13 @@ if ($text == $datatextbot['text_Add_Balance'] || $text == "/wallet") {
             ]
         ]);
         $pricetoman = number_format($user['Processing_value'], 0);
-        $textnowpayments = "✅ تراکنش شما ایجاد شد
-    
-🛒 کد پیگیری:  <code>$randomString</code> 
-🌐 شبکه: TRX
-💳 آدرس ولت: <code>$pay_address</code>
-💲 مبلغ تراکنش به ترون : <code>$trxprice</code>
-💲 مبلغ تراکنش به تومان  : <code>$pricetoman</code>
-💲 نرخ ترون   : <code>$trx</code>
-    
-    
-    
-📌 مبلغ $pricetoman  تومان بعد از تایید پرداخت توسط شبکه بلاکچین به کیف پول شما اضافه میشود
-    
-💢 لطفا به این نکات قبل از پرداخت توجه کنید 👇
-    
-🔸 در صورت اشتباه وارد کردن آدرس کیف پول، تراکنش تایید نمیشود و بازگشت وجه امکان پذیر نیست
-🔹 مبلغ ارسالی نباید کمتر و یا بیشتر از مبلغ اعلام شده باشد.
-🔸 کارمزد تراکنش باید از سمت کاربر پرداخت شود و باید دقیقا مبلغی که اعلام شده ارسال شود.
-🔹 در صورت واریز بیش از مقدار گفته شده، امکان اضافه کردن تفاوت وجه وجود ندارد.
-🔸 هر کیف پول فقط برای یک تراکنش قابل استفاده است و درصورت ارسال مجدد ارز امکان برگشت وجه نیست.
-🔹 هر تراکنش بین 10 دقیقه الی  15 دقیقه  معتبر است .
-    
-✅ در صورت مشکل میتوانید با پشتیبانی در ارتباط باشید";
+        $textnowpayments = $textbotlang['users']['Balance']['transaction_created'] . "\n\n" .
+            $textbotlang['users']['Balance']['tracking_code'] . " <code>$randomString</code>\n" .
+            $textbotlang['users']['Balance']['network'] . " TRX\n" .
+            $textbotlang['users']['Balance']['wallet_address'] . " <code>$pay_address</code>\n" .
+            $textbotlang['users']['Balance']['amount_trx'] . " <code>$trxprice</code>\n" .
+            $textbotlang['users']['Balance']['amount_toman'] . " <code>$pricetoman</code>\n" .
+            $textbotlang['users']['Balance']['trx_rate'] . " <code>$trx</code>\n";
         sendmessage($from_id, $textnowpayments, $paymentkeyboard, 'HTML');
     }
     if ($datain == "perfectmoney") {
@@ -2297,8 +2264,17 @@ if ($datain == "Discount") {
     $stmt = $pdo->prepare("INSERT INTO Giftcodeconsumed (id_user, code) VALUES (?, ?)");
     $stmt->bindParam(1, $from_id);
     $stmt->bindParam(2, $text, PDO::PARAM_STR);
-
     $stmt->execute();
+    $text_report = "کد هدیه $text استفاده شد
+            
+    اطلاعات کاربر : 
+            
+🪪 آیدی عددی : <code>$from_id</code>
+🪪  نام کاربری : @$username
+💰 مبلغ هدیه {$get_codesql['price']} تومان";
+    if (isset($setting['Channel_Report']) &&strlen($setting['Channel_Report']) > 0) {
+        sendmessage($setting['Channel_Report'], $text_report, null, 'HTML');
+    }
 }
 #----------------[  text_Tariff_list  ]------------------#
 if ($text == $datatextbot['text_Tariff_list']) {
