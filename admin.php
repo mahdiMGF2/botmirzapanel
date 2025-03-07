@@ -1,37 +1,22 @@
 <?php
 
 #----------------[  admin section  ]------------------#
-$textadmin = ["panel", "/panel", "پنل مدیریت", "ادمین"];
+$textadmin = ["panel", "/panel",$textbotlang['Admin']['commendadminmanagment'], $textbotlang['Admin']['commendadmin']];
 if (!in_array($from_id, $admin_ids)) {
     if (in_array($text, $textadmin)) {
         sendmessage($from_id, $textbotlang['users']['Invalid-comment'], null, 'HTML');
         foreach ($admin_ids as $admin) {
-            $textadmin = "
-                مدیر عزیز یک کاربر قصد ورود به پنل ادمین را داشت 
-        نام کاربری : @$username
-        آیدی عددی : $from_id
-        نام کاربر  :$first_name
-                ";
+            $textadmin = sprintf($textbotlang['Admin']['Unauthorized-entry'],$username,$from_id,$first_name);
             sendmessage($admin, $textadmin, null, 'HTML');
         }
     }
     return;
 }
 if (in_array($text, $textadmin)) {
-    $text_admin = "
-سلا 😍
-⭕️ نسخه فعلی ربات شما : $version
-
-channel : @mirzapanel
-group : @mirzapanelgroup
-
-❓راهنمایی : 
-1 - برای اضافه کردن پنل دکمه پنل   را زده و دکمه اضافه کردن پنل را بزنید.
-2- از دکمه مالی میتوانید وضعیت درگاه و مرچنت ها را تنظیم کنید
-3-  درگاه ارزی ریالی باید فقط api nowpayments را تنظیم کنید و تمام تنظیمات کیف پول و... داخل سایت nowpayments است";
+    $text_admin = sprintf($textbotlang['Admin']['login-admin'],$version);
     sendmessage($from_id, $text_admin, $keyboardadmin, 'HTML');
 }
-if ($text == "🏠 بازگشت به منوی مدیریت") {
+if ($text == $textbotlang['Admin']['Back-Adminment']) {
     sendmessage($from_id, $textbotlang['Admin']['Back-Admin'], $keyboardadmin, 'HTML');
     step('home', $from_id);
     return;
@@ -62,7 +47,7 @@ if ($text == "🔑 روشن / خاموش کردن قفل کانال") {
         update("channels", "link", $text);
     }
 }
-if ($text == "👨‍💻 اضافه کردن ادمین") {
+if ($text == $textbotlang['Admin']['Addedadmin']) {
     sendmessage($from_id, $textbotlang['Admin']['manageadmin']['getid'], $backadmin, 'HTML');
     step('addadmin', $from_id);
 }
@@ -73,12 +58,12 @@ if ($user['step'] == "addadmin") {
     $stmt->bindParam(1, $text);
     $stmt->execute();
 }
-if ($text == "❌ حذف ادمین") {
+if ($text == $textbotlang['Admin']['Removeedadmin']) {
     sendmessage($from_id, $textbotlang['Admin']['manageadmin']['getid'], $backadmin, 'HTML');
     step('deleteadmin', $from_id);
 } elseif ($user['step'] == "deleteadmin") {
     if(intval($text) == $adminnumber){
-        sendmessage($from_id,"❌امکان حذف ادمین اصلی وجود ندارد برای تغییر ادمین اصلی باید از فایل config.php  ابتدا ایدی عددی ادمین اصلی  را تغییر سپس از این بخش حذف نمایید", null, 'HTML');
+        sendmessage($from_id,$textbotlang['Admin']['manageadmin']['InfoAdd'], null, 'HTML');
         return;
     }
     if (!is_numeric($text) || !in_array($text, $admin_ids))
@@ -100,7 +85,7 @@ elseif (preg_match('/limitusertest_(.*)/', $datain, $dataget)) {
     step('home', $from_id);
     update("user", "limit_usertest", $text, "id", $user['Processing_value']);
 }
-if ($text == "➕ محدودیت ساخت اکانت تست برای همه") {
+if ($text == $textbotlang['Admin']['getlimitusertest']['setlimitallbtn']) {
     sendmessage($from_id, $textbotlang['Admin']['getlimitusertest']['limitall'], $backadmin, 'HTML');
     step('limit_usertest_allusers', $from_id);
 } elseif ($user['step'] == "limit_usertest_allusers") {
@@ -109,11 +94,11 @@ if ($text == "➕ محدودیت ساخت اکانت تست برای همه") {
     update("setting", "limit_usertest_all", $text);
     update("user", "limit_usertest", $text);
 }
-if ($text == "📯 تنظیمات کانال") {
+if ($text == $textbotlang['Admin']['channel']['setting']) {
     sendmessage($from_id, $textbotlang['users']['selectoption'], $channelkeyboard, 'HTML');
 }
 #-------------------------#
-if ($text == "📊 آمار ربات") {
+if ($text == $textbotlang['Admin']['Statistics']['titlebtn']) {
     $current_date_time = time();
     $datefirst = $current_date_time - 86400;
     $desired_date_time_start = $current_date_time - 3600;
@@ -144,21 +129,11 @@ if ($text == "📊 آمار ربات") {
     $ping = sys_getloadavg();
     $ping = number_format(floatval($ping[0]),2);
     $timeacc = jdate('H:i:s', time());
-    $statisticsall = "
-📊 آمار کلی ربات  
-
-📌 تعداد کاربران : $statistics نفر
-📌 موجودی کل کاربران : {$Balanceall['SUM(Balance)']}
-📌 پینگ ربات  : $ping
-📌 تعداد اکانت های تست گرفته شده : $count_usertest نفر
-📌 تعداد فروش کل : $invoice عدد
-📌 جمع فروش کل : $invoicesum تومان
-📌 تعداد فروش یک روز گذشته : $dayListSell عدد
-📌 تعداد پنل ها : $sumpanel عدد";
+    $statisticsall = sprintf($textbotlang['Admin']['Statistics']['info'],$statistics,$Balanceall['SUM(Balance)'],$ping,$count_usertest,$invoice ,$invoicesum,$dayListSell,$sumpanel);
     sendmessage($from_id, $statisticsall, null, 'HTML');
 }
 
-if ($text == "🔌 وضعیت اتصال پنل") {
+if ($text == $textbotlang['Admin']['managepanel']['btnshowconnect']) {
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
     if ($marzban_list_get['type'] == "marzban") {
         $Check_token = token_panel($marzban_list_get['id']);
@@ -170,20 +145,10 @@ if ($text == "🔌 وضعیت اتصال پنل") {
             $mem_used = formatBytes($System_Stats['mem_used']);
             $bandwidth = formatBytes($System_Stats['outgoing_bandwidth'] + $System_Stats['incoming_bandwidth']);
             $Condition_marzban = "";
-            $text_marzban = "
-    آمار پنل شما👇:
-                                 
-    🖥 وضعیت اتصال پنل مرزبان: ✅ پنل متصل است
-    👥  تعداد کل کاربران: $total_user
-    👤 تعداد کاربران فعال: $active_users
-    📡 نسخه پنل مرزبان :  {$System_Stats['version']}
-    💻 رم  کل سرور  : $mem_total
-    💻 مصرف رم پنل مرزبان  : $mem_used
-    🌐 ترافیک کل مصرف شده  ( آپلود / دانلود) : $bandwidth";
+            $text_marzban = sprintf($textbotlang['Admin']['managepanel']['infomarzban'],$total_user,$active_users,$System_Stats['version'],$mem_total,$mem_used,$bandwidth);
             sendmessage($from_id, $text_marzban, null, 'HTML');
         } elseif (isset ($Check_token['detail']) && $Check_token['detail'] == "Incorrect username or password") {
-            $text_marzban = "❌ نام کاربری یا رمز عبور پنل اشتباه است";
-            sendmessage($from_id, $text_marzban, null, 'HTML');
+            sendmessage($from_id, $textbotlang['Admin']['managepanel']['Incorrectinfo'], null, 'HTML');
         } else {
             $text_marzban = $textbotlang['Admin']['managepanel']['errorstateuspanel'] . json_encode($Check_token);
             sendmessage($from_id, $text_marzban, null, 'HTML');
@@ -194,14 +159,10 @@ if ($text == "🔌 وضعیت اتصال پنل") {
             $System_Stats = Get_System_Statsm($user['Processing_value']);
             $active_users = $System_Stats['active'];
             $total_user = $System_Stats['total'];
-            $text_marzban = "
-    آمار پنل شما👇:
-🖥 وضعیت اتصال پنل مرزبان: ✅ پنل متصل است
-👥  تعداد کل کاربران: $total_user
-👤 تعداد کاربران فعال: $active_users";
+            $text_marzban = sprintf($textbotlang['Admin']['managepanel']['infomarzneshin'],$total_user,$active_users);
             sendmessage($from_id, $text_marzban, null, 'HTML');
         } elseif (isset ($Check_token['detail']) && $Check_token['detail'] == "Incorrect username or password") {
-            $text_marzban = "❌ نام کاربری یا رمز عبور پنل اشتباه است";
+            $text_marzban = $textbotlang['Admin']['managepanel']['Incorrectinfo'];
             sendmessage($from_id, $text_marzban, null, 'HTML');
         } else {
             $text_marzban = $textbotlang['Admin']['managepanel']['errorstateuspanel'] . json_encode($Check_token);
@@ -212,7 +173,7 @@ if ($text == "🔌 وضعیت اتصال پنل") {
         if ($x_ui_check_connect['success']) {
             sendmessage($from_id, $textbotlang['Admin']['managepanel']['connectx-ui'], null, 'HTML');
         } elseif ($x_ui_check_connect['msg'] == "Invalid username or password.") {
-            $text_marzban = "❌ نام کاربری یا رمز عبور پنل اشتباه است";
+            $text_marzban = $textbotlang['Admin']['managepanel']['Incorrectinfo'];
             sendmessage($from_id, $text_marzban, null, 'HTML');
         } else {
             $text_marzban = $textbotlang['Admin']['managepanel']['errorstateuspanel'];
@@ -223,7 +184,7 @@ if ($text == "🔌 وضعیت اتصال پنل") {
         if ($x_ui_check_connect['success']) {
             sendmessage($from_id, $textbotlang['Admin']['managepanel']['connectx-ui'], null, 'HTML');
         } elseif ($x_ui_check_connect['msg'] == "Invalid username or password.") {
-            $text_marzban = "❌ نام کاربری یا رمز عبور پنل اشتباه است";
+            $text_marzban = $textbotlang['Admin']['managepanel']['Incorrectinfo'];
             sendmessage($from_id, $text_marzban, null, 'HTML');
         } else {
             $text_marzban = $textbotlang['Admin']['managepanel']['errorstateuspanel'];
@@ -232,15 +193,13 @@ if ($text == "🔌 وضعیت اتصال پنل") {
     }
     step('home', $from_id);
 }
-if ($text == "📜 مشاهده لیست ادمین ها") {
+if ($text == $textbotlang['Admin']['manageadmin']['showlistbtn']) {
     $List_admin = null;
     $admin_ids = array_filter($admin_ids);
     foreach ($admin_ids as $admin) {
         $List_admin .= "$admin\n";
     }
-    $list_admin_text = "👨‍🔧 آیدی عددی ادمین ها: 
-                
-            $List_admin";
+    $list_admin_text = sprintf($textbotlang['Admin']['manageadmin']['showlist'],$List_admin);
     sendmessage($from_id, $list_admin_text, $admin_section_panel, 'HTML');
 }
 if ($text == "🖥  اضافه کردن پنل") {

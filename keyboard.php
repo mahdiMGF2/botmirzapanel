@@ -468,7 +468,7 @@ if ($table_exists) {
 }
 $payment = json_encode([
     'inline_keyboard' => [
-        [['text' => "💰 پرداخت و دریافت سرویس", 'callback_data' => "confirmandgetservice"]],
+        [['text' => $textbotlang['users']['buy']['payandGet'], 'callback_data' => "confirmandgetservice"]],
         [['text' => "🎁 ثبت کد تخفیف", 'callback_data' => "aptdc"]],
         [['text' => $textbotlang['users']['backhome'] ,  'callback_data' => "backuser"]]
     ]
