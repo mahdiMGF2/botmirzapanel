@@ -2060,12 +2060,12 @@ if ($text == $textbotlang['users']['affiliates']['btn']) {
     ]);
     $affiliatescommission = select("affiliates", "*", null, null, "select");
     if ($affiliatescommission['status_commission'] == "oncommission") {
-        $affiliatespercentage = $affiliatescommission['affiliatespercentage'] . " درصد";
+        $affiliatespercentage = $affiliatescommission['affiliatespercentage'] . $textbotlang['users']['Percentage'];
     } else {
         $affiliatespercentage = $textbotlang['users']['stateus']['disabled'];
     }
     if ($affiliatescommission['Discount'] == "onDiscountaffiliates") {
-        $price_Discount = $affiliatescommission['price_Discount'] . " تومان";
+        $price_Discount = $affiliatescommission['price_Discount'] .$textbotlang['users']['IRT'];
     } else {
         $price_Discount = $textbotlang['users']['stateus']['disabled'];
     }
