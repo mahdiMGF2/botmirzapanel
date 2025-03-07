@@ -310,7 +310,6 @@ if ($user['step'] == 'get_number') {
     update("user", "number", $user_phone, "id", $from_id);
     step('home', $from_id);
 }
-
 #-----------Purchased services------------#
 if ($text == $datatextbot['text_Purchased_services'] || $datain == "backorder" || $text == "/services") {
     $stmt = $pdo->prepare("SELECT * FROM invoice WHERE id_user = :id_user AND (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn')");
@@ -880,10 +879,8 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
 } elseif (preg_match('/Extra_volume_(\w+)/', $datain, $dataget)) {
     $username = $dataget[1];
     update("user", "Processing_value", $username, "id", $from_id);
-    $textextra = " ⭕️ مقدار حجمی که میخواهید خریداری کنید را ارسال کنید.
-    
-⚠️ هر گیگ حجم اضافه  {$setting['Extra_volume']} است.";
-    sendmessage($from_id, $textextra, $backuser, 'HTML');
+    $textextra = " .";
+    sendmessage($from_id, sprintf($textbotlang['users']['Extra_volume']['VolumeValue'],$setting['Extra_volume']), $backuser, 'HTML');
     step('getvolumeextra', $from_id);
 } elseif ($user['step'] == "getvolumeextra") {
     if (!ctype_digit($text)) {
@@ -904,13 +901,7 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
     ]);
     $priceextra = number_format($priceextra);
     $setting['Extra_volume'] = number_format($setting['Extra_volume']);
-    $textextra = "📇 فاکتور خرید حجم اضافه برای شما ایجاد شد.
-    
-💰 قیمت هر گیگابایت حجم اضافه :  {$setting['Extra_volume']} تومان
-📝 مبلغ  فاکتور شما :  $priceextra تومان
-📥 حجم اضافه درخواستی : $text  گیگابایت
-
-✅ جهت پرداخت و اضافه شدن حجم، روی دکمه زیر کلیک کنید.";
+    $textextra = sprintf($textbotlang['users']['Extra_volume']['invoiceExtraVolume'],$setting['Extra_volume'],$priceextra,$text);
     sendmessage($from_id, $textextra, $keyboardsetting, 'HTML');
     step('home', $from_id);
 } elseif (preg_match('/confirmaextra_(\w+)/', $datain, $dataget)) {
@@ -980,11 +971,7 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
     sendmessage($from_id, $textbotlang['users']['Extra_volume']['extraadded'], $keyboardextrafnished, 'HTML');
     $volumes = $volume / $setting['Extra_volume'];
     $volume = number_format($volume);
-    $text_report = "⭕️ یک کاربر حجم اضافه خریده است
-    اطلاعات کاربر : 
-🪪 آیدی عددی : $from_id
-🛍 حجم خریداری شده  : $volumes
-💰 مبلغ پرداختی : $volume تومان";
+    $text_report = sprintf($textbotlang['Admin']['Report']['Extra_volume'],$from_id,$volumes,$volume);
     if (isset($setting['Channel_Report']) &&strlen($setting['Channel_Report']) > 0) {
         sendmessage($setting['Channel_Report'], $text_report, null, 'HTML');
     }
@@ -1005,7 +992,7 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
     $confirmremove = json_encode([
         'inline_keyboard' => [
             [
-                ['text' => "✅  درخواست حذف سرویس را دارم", 'callback_data' => "confirmremoveservices-$username"],
+                ['text' => $textbotlang['users']['stateus']['RequestRemove'], 'callback_data' => "confirmremoveservices-$username"],
             ],
         ]
     ]);
@@ -1016,8 +1003,7 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
     $marzban_list_get = select("marzban_panel","*","name_panel",$nameloc['Service_location'],"select");
     $ManagePanel->RemoveUser($nameloc['Service_location'],$nameloc['username']);
     update('invoice','status','removebyuser','id_invoice',$nameloc['id_invoice']);
-    $tetremove = "ادمین عزیز یک کاربر سرویس خود را پس از پایان حجم یا زمان حدف کرده است
-نام کاربری کانفیک : {$nameloc['username']}";
+    $tetremove = sprintf($textbotlang['Admin']['Report']['NotifRemoveByUser'],$nameloc['username']);
     if (strlen($setting['Channel_Report']) > 0) {
         telegram('sendmessage',[
             'chat_id' => $setting['Channel_Report'],
@@ -1026,7 +1012,7 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
         ]);
     }
     deletemessage($from_id, $message_id);
-    sendmessage($from_id, "📌 سرویس با موفقیت حذف شد", null, 'html');
+    sendmessage($from_id,$textbotlang['users']['stateus']['RemovedService'], null, 'html');
 } elseif (preg_match('/confirmremoveservices-(\w+)/', $datain, $dataget)) {
     $checkcancelservice = mysqli_query($connect, "SELECT * FROM cancel_service WHERE id_user = '$from_id' AND status = 'waiting'");
     if (mysqli_num_rows($checkcancelservice) != 0) {
@@ -1065,25 +1051,7 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
     $timeDiff = $DataUserOut['expire'] - time();
     $day = $DataUserOut['expire'] ? floor($timeDiff / 86400) . $textbotlang['users']['stateus']['day'] : $textbotlang['users']['stateus']['Unlimited'];
     #-----------------------------#
-    $textinfoadmin = "سلام ادمین 👋
-            
-📌 یک درخواست حذف سرویس  توسط کاربر برای شما ارسال شده است. لطفا بررسی کرده و در صورت درست بودن و موافقت تایید کنید. 
-⚠️ نکات تایید :
-1 -  مبلغ قابل بازگشت به کاربر توسط شما تعیین خواهد شد.
-            
-            
-📊 اطلاعات سرویس کاربر :
-آیدی عددی کاربر : $from_id
-نام کاربری کاربر : @$username
-نام کاربری کانفیگ : {$nameloc['username']}
-وضعیت سرویس : $status_var
-لوکیشن : {$nameloc['Service_location']}
-کد سرویس:{$nameloc['id_invoice']}
-    
-📥 حجم مصرفی : $usedTrafficGb
-♾ حجم سرویس : $LastTraffic
-🪫 حجم باقی مانده : $RemainingVolume
-📅 فعال تا تاریخ : $expirationDate ($day)";
+    $textinfoadmin = sprintf($textbotlang['users']['stateus']['RequestInfoRemove'],$from_id,$username,$nameloc['username'],$status_var,$nameloc['Service_location'],$nameloc['id_invoice'],$usedTrafficGb,$LastTraffic,$RemainingVolume,$expirationDate,$day);
     $confirmremoveadmin = json_encode([
         'inline_keyboard' => [
             [
@@ -1139,7 +1107,7 @@ if ($user['step'] == "createusertest" || preg_match('/locationtests_(.*)/', $dat
     $randomString = bin2hex(random_bytes(2));
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $name_panel, "select");
 
-    if ($marzban_list_get['MethodUsername'] == "نام کاربری دلخواه") {
+    if ($marzban_list_get['MethodUsername'] == $textbotlang['users']['customusername']) {
         if ($user['step'] != "createusertest") {
             step('createusertest', $from_id);
             update("user", "Processing_value_one", $name_panel, "id", $from_id);
@@ -1161,12 +1129,7 @@ if ($user['step'] == "createusertest" || preg_match('/locationtests_(.*)/', $dat
     if ($dataoutput['username'] == null) {
         $dataoutput['msg'] = json_encode($dataoutput['msg']);
         sendmessage($from_id, $textbotlang['users']['usertest']['errorcreat'], $keyboard, 'html');
-        $texterros = "
-⭕️ یک کاربر قصد دریافت اکانت تست داشت که ساخت کانفیگ با خطا مواجه شده و به کاربر کانفیگ داده نشد
-✍️ دلیل خطا : 
-{$dataoutput['msg']}
-آیدی کابر : $from_id
-نام کاربری کاربر : @$username";
+        $texterros = sprintf($textbotlang['users']['buy']['errorInCreate'],$dataoutput['msg'],$from_id,$username);
         foreach ($admin_ids as $admin) {
             sendmessage($admin, $texterros, null, 'html');
         }
@@ -1212,19 +1175,7 @@ if ($user['step'] == "createusertest" || preg_match('/locationtests_(.*)/', $dat
             ]
         ]
     ]);
-    $textcreatuser = "✅ سرویس با موفقیت ایجاد شد
-    
-👤 نام کاربری سرویس : <code>$username_ac</code>
-🌿 نام سرویس: تست
-‏🇺🇳 لوکیشن: {$marzban_list_get['name_panel']}
-⏳ مدت زمان: {$setting['time_usertest']}  ساعت
-🗜 حجم سرویس:  {$setting['val_usertest']} مگابایت
-    
-لینک اتصال:
-<code>$output_config_link</code>
-<code>$text_config</code>
-    
-📚 راهنمای اتصال به سرویس را از طریق کلیک کردن دکمه زیر مطالعه بفرمایید";
+    $textcreatuser = sprintf($textbotlang['users']['buy']['createservicetest'],$username_ac,$marzban_list_get['name_panel'],$setting['time_usertest'],$setting['time_usertest'],$setting['val_usertest'],$output_config_link,$text_config);
     if ($marzban_list_get['sublink'] == "onsublink") {
         $urlimage = "$from_id$randomString.png";
         $writer = new PngWriter();
@@ -1253,27 +1204,9 @@ if ($user['step'] == "createusertest" || preg_match('/locationtests_(.*)/', $dat
     $limit_usertest = $user['limit_usertest'] - 1;
     update("user", "limit_usertest", $limit_usertest, "id", $from_id);
     step('home', $from_id);
-    $usertestReport = json_encode([
-        'inline_keyboard' => [
-            [
-                ['text' => $user['number'], 'callback_data' => "iduser"],
-                ['text' => $textbotlang['users']['usertest']['phonenumber'], 'callback_data' => "iduser"],
-            ],
-            [
-                ['text' => $name_panel, 'callback_data' => "namepanel"],
-                ['text' => $textbotlang['users']['usertest']['namepanel'], 'callback_data' => "namepanel"],
-            ],
-        ]
-    ]);
-    $text_report = " ⚜️ اکانت تست داده شد
-            
-⚙️ یک کاربر اکانت  با نام کانفیگ <code>$username_ac</code>  اکانت تست دریافت کرد
-            
-اطلاعات کاربر 👇👇
-⚜️ نام کاربری کاربر: @{$user['username']}
-آیدی عددی کاربر : <code>$from_id</code>";
+    $text_report = sprintf($textbotlang['Admin']['Report']['ReportTestCreate'],$username_ac,$user['username'],$from_id,$user['number'],$name_panel);
     if (isset($setting['Channel_Report']) &&strlen($setting['Channel_Report']) > 0) {
-        sendmessage($setting['Channel_Report'], $text_report, $usertestReport, 'HTML');
+        sendmessage($setting['Channel_Report'], $text_report, null, 'HTML');
     }
 }
 #-----------help------------#
@@ -1313,22 +1246,11 @@ if ($text == $datatextbot['text_support'] || $text == "/support") {
     ]);
     foreach ($admin_ids as $id_admin) {
         if ($text) {
-            $textsendadmin = "
-📥 یک پیام از کاربر دریافت شد برای پاسخ روی دکمه زیر کلیک کنید  و پیام خود را ارسال کنید.
-        
-آیدی عددی : $from_id
-نام کاربری کاربر : @$username
-📝 متن پیام : $text
-            ";
+            $textsendadmin = sprintf($textbotlang['users']['support']['GetMessageOfUser'],$from_id,$username,$text);
             sendmessage($id_admin, $textsendadmin, $Response, 'HTML');
         }
         if ($photo) {
-            $textsendadmin = "
-📥 یک پیام از کاربر دریافت شد برای پاسخ روی دکمه زیر کلیک کنید  و پیام خود را ارسال کنید.
-        
-آیدی عددی : $from_id
-نام کاربری کاربر : @$username
-📝 متن پیام : $caption";
+            $textsendadmin = sprintf($textbotlang['users']['support']['GetMessageOfUser'],$from_id,$username,$caption);
             telegram('sendphoto', [
                 'chat_id' => $id_admin,
                 'photo' => $photoid,
@@ -1350,17 +1272,7 @@ if ($text == $datatextbot['text_account']) {
     $first_name = htmlspecialchars($first_name);
     $Balanceuser = number_format($user['Balance'], 0);
     $countorder = select("invoice", "id_user", 'id_user', $from_id, "count");
-    $text_account = "
-👨🏻‍💻 وضعیت حساب کاربری شما:
-            
-👤 نام: $first_name
-🕴🏻 شناسه کاربری: <code>$from_id</code>
-💰 موجودی: $Balanceuser تومان
-🛍 تعداد سرویس های خریداری شده : $countorder
-🤝 تعداد زیر مجموعه های شما : {$user['affiliatescount']} نفر
-    
-📆 $dateacc → ⏰ $timeacc
-                ";
+    $text_account = sprintf($textbotlang['users']['account'],$first_name,$from_id,$Balanceuser,$countorder,$user['affiliatescount'],$dateacc,$timeacc);
     sendmessage($from_id, $text_account, $keyboardPanel, 'HTML');
 }
 if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
