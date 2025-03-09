@@ -144,7 +144,7 @@ function formatBytes($bytes, $precision = 2): string
 {
     $base = log($bytes, 1024);
     $power = $bytes > 0 ? floor($base) : 0;
-    $suffixes = ['بایت', 'کیلوبایت', 'مگابایت', 'گیگابایت', 'ترابایت'];
+    $suffixes = [$textbotlang['users']['format']['byte'],$textbotlang['users']['format']['kilobyte'],$textbotlang['users']['format']['MBbyte'], $textbotlang['users']['format']['GBbyte'],$textbotlang['users']['format']['TBbyte']];
     return round(pow(1024, $base - $power), $precision) . ' ' . $suffixes[$power];
 }
 #---------------------[ ]--------------------------#
@@ -153,19 +153,19 @@ function generateUsername($from_id,$Metode,$username,$randomString,$text)
     global $connect;
     $setting = select("setting", "*");
     global $connect;
-    if($Metode == "آیدی عددی + حروف و عدد رندوم"){
+    if($Metode == $textbotlang['users']['customidAndRandom']){
         return $from_id."_".$randomString;
     }
-    elseif($Metode == "نام کاربری + حروف و عدد رندوم"){
+    elseif($Metode == $textbotlang['users']['customusernameandorder']){
         return $username."_".$randomString;
     }
-    elseif($Metode == "نام کاربری + عدد به ترتیب"){
+    elseif($Metode == $textbotlang['users']['customusernameorder']){
         $statistics = mysqli_fetch_assoc(mysqli_query($connect, "SELECT COUNT(id_user)  FROM invoice WHERE id_user = '$from_id'"));
         $countInvoice = intval($statistics['COUNT(id_user)']) + 1 ;
         return $username."_".$countInvoice;
     }
-    elseif($Metode == "نام کاربری دلخواه")return $text;
-    elseif($Metode == "متن دلخواه + عدد رندوم")return $setting['namecustome']."_".$randomString;
+    elseif($Metode == $textbotlang['users']['customusername'])return $text;
+    elseif($Metode == $textbotlang['users']['customtextandrandom'])return $setting['namecustome']."_".$randomString;
 }
 
 function outputlunk($text){
@@ -218,13 +218,7 @@ function DirectPayment($order_id){
         if ($dataoutput['username'] == null) {
             $dataoutput['msg'] = json_encode($dataoutput['msg']);
             sendmessage($Balance_id['id'], $textbotlang['users']['sell']['ErrorConfig'], $keyboard, 'HTML');
-            $texterros = "
-⭕️ یک کاربر قصد دریافت اکانت داشت که ساخت کانفیگ با خطا مواجه شده و به کاربر کانفیگ داده نشد
-✍️ دلیل خطا : 
-{$dataoutput['msg']}
-آیدی کابر : {$Balance_id['id']}
-نام کاربری کاربر : @{$Balance_id['username']}
-نام پنل : {$marzban_list_get['name_panel']}";
+            $texterros = sprintf($textbotlang['users']['buy']['errorInCreate'],$dataoutput['msg'],$Balance_id['id'],$Balance_id['username']);
             foreach ($admin_ids as $admin) {
                 sendmessage($admin, $texterros, null, 'HTML');
                 step('home', $admin);
@@ -255,18 +249,7 @@ function DirectPayment($order_id){
             }
         }
         $Shoppinginfo = json_encode($Shoppinginfo);
-        $textcreatuser = "✅ سرویس با موفقیت ایجاد شد
-    
-👤 نام کاربری سرویس : <code>{$dataoutput['username']}</code>
-🌿 نام سرویس: {$get_invoice['name_product']}
-‏🇺🇳 لوکیشن: {$marzban_list_get['name_panel']}
-⏳ مدت زمان: {$get_invoice['Service_time']}  روز
-🗜 حجم سرویس:  {$get_invoice['Volume']} گیگ
-    
-لینک اتصال:
-<code>{$config}{$output_config_link}</code>
-    
-📚 راهنمای اتصال به سرویس را از طریق کلیک کردن دکمه زیر مطالعه بفرمایید";
+        $textcreatuser = sprintf($textbotlang['users']['buy']['createservice'],$dataoutput['username'],$get_invoice['name_product'],$marzban_list_get['name_panel'],$get_invoice['Service_time'],$get_invoice['Volume'],$config,$output_config_link);
         if ($marzban_list_get['configManual'] == "onconfig") {
             if (count($dataoutput['configs']) == 1) {
                 $urlimage = "{$get_invoice['id_user']}$randomString.png";
@@ -322,7 +305,7 @@ function DirectPayment($order_id){
             $stmt->execute();
             $result = ($SellDiscountlimit['price'] / 100) * $get_invoice['price_product'];
             $pricediscount = $get_invoice['price_product'] - $result;
-            $text_report = "⭕️ یک کاربر با نام کاربری @{$Balance_id['username']}  و آیدی عددی {$Balance_id['id']} از کد تخفیف {$partsdic[1]} استفاده کرد.";
+            $text_report = sprintf($textbotlang['users']['Report']['discountused'],$Balance_id['username'],$Balance_id['id'],$partsdic[1]);
             if (strlen($setting['Channel_Report']) > 0) {
                 telegram('sendmessage',[
                     'chat_id' => $setting['Channel_Report'],
@@ -344,9 +327,7 @@ function DirectPayment($order_id){
                 $Balance_prim = $user_Balance['Balance'] + $result;
                 update("user","Balance",$Balance_prim, "id",$Balance_id['affiliates']);
                 $result = number_format($result);
-                $textadd = "🎁  پرداخت پورسانت 
-        
-        مبلغ $result تومان به حساب شما از طرف  زیر مجموعه تان به کیف پول شما واریز گردید";
+                $textadd =sprintf($textbotlang['users']['affiliates']['porsantuser'],$result);
                 sendmessage($Balance_id['affiliates'], $textadd, null, 'HTML');
             }
         }
@@ -355,21 +336,7 @@ function DirectPayment($order_id){
         update("user","Balance",$Balance_prims, "id",$Balance_id['id']);
         $Balance_id['Balance'] = select("user", "Balance", "id", $get_invoice['id_user'],"select")['Balance'];
         $balanceformatsell = number_format($Balance_id['Balance'], 0);
-        $text_report = " 🛍 خرید جدید بعد پرداخت موفق
-                
-⚙️ یک کاربر اکانت  با نام کانفیگ {$get_invoice['username']} خریداری کرد
-        
-        
-قیمت محصول : {$get_invoice['price_product']} تومان
-حجم محصول : {$get_invoice['Volume']} 
-آیدی عددی کاربر : <code>{$get_invoice['id_user']}</code>
-شماره تلفن کاربر : {$Balance_id['number']}
-موقعیت سرویس کاربر :{$get_invoice['Service_location']}
-موجودی کاربر : $balanceformatsell  تومان
-کد پیگیری: $randomString
-        
-            اطلاعات کاربر 👇👇
-            ⚜️ نام کاربری کاربر: @{$Balance_id['username']}";
+        $text_report = sprintf($textbotlang['users']['Report']['reportbuyafterpay'] ,$get_invoice['username'],$get_invoice['price_product'],$get_invoice['Volume'],$get_invoice['id_user'],$Balance_id['number'],$get_invoice['Service_location'],$balanceformatsell,$randomString,$Balance_id['username']);
         if (strlen($setting['Channel_Report']) > 0) {
             telegram('sendmessage',[
                 'chat_id' => $setting['Channel_Report'],
@@ -382,7 +349,7 @@ function DirectPayment($order_id){
             update("invoice","Status","active","id_invoice",$get_invoice['id_invoice']);
             telegram('answerCallbackQuery', array(
                     'callback_query_id' => $callback_query_id,
-                    'text' => "سفارش تایید شد",
+                    'text' => $textbotlang['users']['moeny']['acceptedcart'],
                     'show_alert' => true,
                     'cache_time' => 5,
                 )
@@ -397,15 +364,14 @@ function DirectPayment($order_id){
         if($Payment_report['Payment_Method'] == "cart to cart"){
             telegram('answerCallbackQuery', array(
                     'callback_query_id' => $callback_query_id,
-                    'text' => "سفارش تایید شد",
+                    'text' => $textbotlang['users']['moeny']['acceptedcart'],
                     'show_alert' => true,
                     'cache_time' => 5,
                 )
             );
         }
-        sendmessage($Payment_report['id_user'], "💎 کاربر گرامی مبلغ {$Payment_report['price']} تومان به کیف پول شما واریز گردید با تشکراز پرداخت شما.
-                
-🛒 کد پیگیری شما: {$Payment_report['id_order']}", null, 'HTML');
+        $textpay = sprintf($textbotlang['users']['moeny']['Charged.'],$Payment_report['price'],$Payment_report['id_order']);
+        sendmessage($Payment_report['id_user'], $textpay, null, 'HTML');
     }
 }
 function savedata($type,$namefiled,$valuefiled){
