@@ -1053,7 +1053,6 @@ EOF
     clear
     echo -e "\e[32mBot installed successfully alongside Marzban!\033[0m"
     echo -e "\e[102mDomain Bot: https://${YOUR_DOMAIN}\033[0m"
-    echo -e "\e[104mDatabase address: https://${YOUR_DOMAIN}/phpmyadmin\033[0m"
     echo -e "\e[33mDatabase name: \e[36m$dbname\033[0m"
     echo -e "\e[33mDatabase username: \e[36m$dbuser\033[0m"
     echo -e "\e[33mDatabase password: \e[36m$dbpass\033[0m"
@@ -1153,27 +1152,41 @@ function remove_bot() {
     LOG_FILE="/var/log/remove_bot.log"
     echo "Log file: $LOG_FILE" > "$LOG_FILE"
 
+    # Check if Mirza Bot is installed
+    BOT_DIR="/var/www/html/mirzabotconfig"
+    if [ ! -d "$BOT_DIR" ]; then
+        echo -e "\e[31m[ERROR]\033[0m Mirza Bot is not installed (/var/www/html/mirzabotconfig not found)." | tee -a "$LOG_FILE"
+        echo -e "\e[33mNothing to remove. Exiting...\033[0m" | tee -a "$LOG_FILE"
+        sleep 2
+        exit 1
+    fi
+
     # User Confirmation
-    read -p "Are you sure you want to remove Mirza Bot, MySQL, and all its dependencies? (y/n): " choice
+    read -p "Are you sure you want to remove Mirza Bot and its dependencies? (y/n): " choice
     if [[ "$choice" != "y" ]]; then
         echo "Aborting..." | tee -a "$LOG_FILE"
         exit 0
     fi
 
+    # Check if Marzban is installed and redirect to appropriate function
+    if check_marzban_installed; then
+        echo -e "\e[41m[IMPORTANT NOTICE]\033[0m \e[33mMarzban detected. Proceeding with Marzban-compatible removal.\033[0m" | tee -a "$LOG_FILE"
+        remove_bot_with_marzban
+        return 0
+    fi
+
+    # Proceed with normal removal if Marzban is not installed
     echo "Removing Mirza Bot..." | tee -a "$LOG_FILE"
 
     # Delete the Bot Directory
-    BOT_DIR="/var/www/html/mirzabotconfig"
     if [ -d "$BOT_DIR" ]; then
         sudo rm -rf "$BOT_DIR" && echo -e "\e[92mBot directory removed: $BOT_DIR\033[0m" | tee -a "$LOG_FILE" || {
             echo -e "\e[91mFailed to remove bot directory: $BOT_DIR. Exiting...\033[0m" | tee -a "$LOG_FILE"
             exit 1
         }
-    else
-        echo -e "\e[93mBot directory not found: $BOT_DIR\033[0m" | tee -a "$LOG_FILE"
     fi
 
-# Delete Configuration File
+    # Delete Configuration File
     CONFIG_PATH="/root/config.php"
     if [ -f "$CONFIG_PATH" ]; then
         sudo shred -u -n 5 "$CONFIG_PATH" && echo -e "\e[92mConfig file securely removed: $CONFIG_PATH\033[0m" | tee -a "$LOG_FILE" || {
@@ -1181,7 +1194,7 @@ function remove_bot() {
         }
     fi
 
-# Delete MySQL and Database Data
+    # Delete MySQL and Database Data
     echo -e "\e[33mRemoving MySQL and database...\033[0m" | tee -a "$LOG_FILE"
     sudo systemctl stop mysql
     sudo systemctl disable mysql
@@ -1207,7 +1220,7 @@ function remove_bot() {
 
     echo -e "\e[92mMySQL has been completely removed.\033[0m" | tee -a "$LOG_FILE"
 
-# Delete PHPMyAdmin
+    # Delete PHPMyAdmin
     echo -e "\e[33mRemoving PHPMyAdmin...\033[0m" | tee -a "$LOG_FILE"
     if dpkg -s phpmyadmin &>/dev/null; then
         sudo apt-get purge -y phpmyadmin && echo -e "\e[92mPHPMyAdmin removed.\033[0m" | tee -a "$LOG_FILE"
@@ -1216,18 +1229,33 @@ function remove_bot() {
         echo -e "\e[93mPHPMyAdmin is not installed.\033[0m" | tee -a "$LOG_FILE"
     fi
 
-# Delete Apache and PHP Settings
+    # Remove Apache
+    echo -e "\e[33mRemoving Apache...\033[0m" | tee -a "$LOG_FILE"
+    sudo systemctl stop apache2 || {
+        echo -e "\e[91mFailed to stop Apache. Continuing anyway...\033[0m" | tee -a "$LOG_FILE"
+    }
+    sudo systemctl disable apache2 || {
+        echo -e "\e[91mFailed to disable Apache. Continuing anyway...\033[0m" | tee -a "$LOG_FILE"
+    }
+    sudo apt-get purge -y apache2 apache2-utils apache2-bin apache2-data libapache2-mod-php* || {
+        echo -e "\e[91mFailed to purge Apache packages.\033[0m" | tee -a "$LOG_FILE"
+    }
+    sudo apt-get autoremove --purge -y
+    sudo apt-get autoclean -y
+    sudo rm -rf /etc/apache2 /var/www/html
+
+    # Delete Apache and PHP Settings
     echo -e "\e[33mRemoving Apache and PHP configurations...\033[0m" | tee -a "$LOG_FILE"
     sudo a2disconf phpmyadmin.conf &>/dev/null
     sudo rm -f /etc/apache2/conf-available/phpmyadmin.conf
     sudo systemctl restart apache2
 
-# Remove Unnecessary Packages
+    # Remove Unnecessary Packages
     echo -e "\e[33mRemoving additional packages...\033[0m" | tee -a "$LOG_FILE"
     sudo apt-get remove -y php-soap php-ssh2 libssh2-1-dev libssh2-1 \
         && echo -e "\e[92mRemoved additional PHP packages.\033[0m" | tee -a "$LOG_FILE" || echo -e "\e[93mSome additional PHP packages may not be installed.\033[0m" | tee -a "$LOG_FILE"
 
-# Reset Firewall (without changing SSL rules)
+    # Reset Firewall (without changing SSL rules)
     echo -e "\e[33mResetting firewall rules (except SSL)...\033[0m" | tee -a "$LOG_FILE"
     sudo ufw delete allow 'Apache'
     sudo ufw reload
@@ -1235,40 +1263,166 @@ function remove_bot() {
     echo -e "\e[92mMirza Bot, MySQL, and their dependencies have been completely removed.\033[0m" | tee -a "$LOG_FILE"
 }
 
-# Function to extract database credentials from config.php
-function extract_db_credentials() {
-    CONFIG_PATH="/var/www/html/mirzabotconfig/config.php"
+function remove_bot_with_marzban() {
+    echo -e "\e[33mRemoving Mirza Bot alongside Marzban...\033[0m" | tee -a "$LOG_FILE"
 
-    if [ ! -f "$CONFIG_PATH" ]; then
-        echo -e "\033[31m[ERROR]\033[0m File config.php not found at $CONFIG_PATH."
-        return 1
+    # Define Bot Directory
+    BOT_DIR="/var/www/html/mirzabotconfig"
+
+    # Check if Bot Directory exists before proceeding
+    if [ ! -d "$BOT_DIR" ]; then
+        echo -e "\e[93mWarning: Bot directory $BOT_DIR not found. Assuming it was already removed.\033[0m" | tee -a "$LOG_FILE"
+        DB_NAME="mirzabot"  # Fallback to default database name
+        DB_USER=""
+    else
+        # Get database credentials from config.php BEFORE removing the directory
+        CONFIG_PATH="$BOT_DIR/config.php"
+        if [ -f "$CONFIG_PATH" ]; then
+            DB_USER=$(grep '^\$usernamedb' "$CONFIG_PATH" | awk -F"'" '{print $2}')
+            DB_NAME=$(grep '^\$dbname' "$CONFIG_PATH" | awk -F"'" '{print $2}')
+            if [ -z "$DB_USER" ] || [ -z "$DB_NAME" ]; then
+                echo -e "\e[91mError: Could not extract database credentials from $CONFIG_PATH. Using defaults.\033[0m" | tee -a "$LOG_FILE"
+                DB_NAME="mirzabot"  # Fallback to default
+                DB_USER=""
+            else
+                echo -e "\e[92mFound database credentials: User=$DB_USER, Database=$DB_NAME\033[0m" | tee -a "$LOG_FILE"
+            fi
+        else
+            echo -e "\e[93mWarning: config.php not found at $CONFIG_PATH. Assuming default database name 'mirzabot'.\033[0m" | tee -a "$LOG_FILE"
+            DB_NAME="mirzabot"
+            DB_USER=""
+        fi
+
+        # Now remove the Bot Directory
+        sudo rm -rf "$BOT_DIR" && echo -e "\e[92mBot directory removed: $BOT_DIR\033[0m" | tee -a "$LOG_FILE" || {
+            echo -e "\e[91mFailed to remove bot directory: $BOT_DIR. Exiting...\033[0m" | tee -a "$LOG_FILE"
+            exit 1
+        }
     fi
 
-    # Extracting credentials with more precision
-    DB_USER=$(grep '^\$usernamedb' "$CONFIG_PATH" | awk -F"'" '{print $2}')
-    DB_PASS=$(grep '^\$passworddb' "$CONFIG_PATH" | awk -F"'" '{print $2}')
-    DB_NAME=$(grep '^\$dbname' "$CONFIG_PATH" | awk -F"'" '{print $2}')
-
-    if [ -z "$DB_USER" ] || [ -z "$DB_PASS" ] || [ -z "$DB_NAME" ]; then
-        echo -e "\033[31m[ERROR]\033[0m Could not extract database credentials from config.php."
-        return 1
+    # Get MySQL root password from Marzban's .env
+    ENV_FILE="/opt/marzban/.env"
+    if [ -f "$ENV_FILE" ]; then
+        MYSQL_ROOT_PASSWORD=$(grep "MYSQL_ROOT_PASSWORD=" "$ENV_FILE" | cut -d'=' -f2 | tr -d '[:space:]' | sed 's/"//g')
+        ROOT_USER="root"
+    else
+        echo -e "\e[91mError: Marzban .env file not found. Cannot proceed without MySQL root password.\033[0m" | tee -a "$LOG_FILE"
+        exit 1
     fi
 
-    # Add these lines to debug extracted variables
-    echo "DB_USER: $DB_USER"
-    echo "DB_PASS: $DB_PASS"
-    echo "DB_NAME: $DB_NAME"
+    # Find MySQL container
+    MYSQL_CONTAINER=$(docker ps -q --filter "name=mysql" --no-trunc)
+    if [ -z "$MYSQL_CONTAINER" ]; then
+        echo -e "\e[91mError: Could not find a running MySQL container. Ensure Marzban is running.\033[0m" | tee -a "$LOG_FILE"
+        exit 1
+    fi
 
-    export DB_USER DB_PASS DB_NAME
-    return 0
+    # Remove database
+    if [ -n "$DB_NAME" ]; then
+        echo -e "\e[33mRemoving database $DB_NAME...\033[0m" | tee -a "$LOG_FILE"
+        docker exec "$MYSQL_CONTAINER" bash -c "mysql -u '$ROOT_USER' -p'$MYSQL_ROOT_PASSWORD' -e \"DROP DATABASE IF EXISTS $DB_NAME;\"" && {
+            echo -e "\e[92mDatabase $DB_NAME removed successfully.\033[0m" | tee -a "$LOG_FILE"
+        } || {
+            echo -e "\e[91mFailed to remove database $DB_NAME.\033[0m" | tee -a "$LOG_FILE"
+        }
+    fi
+
+    # Remove user if DB_USER is available
+    if [ -n "$DB_USER" ]; then
+        echo -e "\e[33mRemoving database user $DB_USER...\033[0m" | tee -a "$LOG_FILE"
+        docker exec "$MYSQL_CONTAINER" bash -c "mysql -u '$ROOT_USER' -p'$MYSQL_ROOT_PASSWORD' -e \"DROP USER IF EXISTS '$DB_USER'@'%'; FLUSH PRIVILEGES;\"" && {
+            echo -e "\e[92mUser $DB_USER removed successfully.\033[0m" | tee -a "$LOG_FILE"
+        } || {
+            echo -e "\e[91mFailed to remove user $DB_USER.\033[0m" | tee -a "$LOG_FILE"
+        }
+    else
+        echo -e "\e[93mWarning: No database user specified. Checking for non-default users...\033[0m" | tee -a "$LOG_FILE"
+        # Check for non-default users
+        MIRZA_USERS=$(docker exec "$MYSQL_CONTAINER" bash -c "mysql -u '$ROOT_USER' -p'$MYSQL_ROOT_PASSWORD' -e \"SELECT User FROM mysql.user WHERE User NOT IN ('root', 'mysql.infoschema', 'mysql.session', 'mysql.sys', 'marzban');\"" | grep -v "User" | awk '{print $1}')
+        if [ -n "$MIRZA_USERS" ]; then
+            for user in $MIRZA_USERS; do
+                echo -e "\e[33mRemoving detected non-default user: $user...\033[0m" | tee -a "$LOG_FILE"
+                docker exec "$MYSQL_CONTAINER" bash -c "mysql -u '$ROOT_USER' -p'$MYSQL_ROOT_PASSWORD' -e \"DROP USER IF EXISTS '$user'@'%'; FLUSH PRIVILEGES;\"" && {
+                    echo -e "\e[92mUser $user removed successfully.\033[0m" | tee -a "$LOG_FILE"
+                } || {
+                    echo -e "\e[91mFailed to remove user $user.\033[0m" | tee -a "$LOG_FILE"
+                }
+            done
+        else
+            echo -e "\e[93mNo non-default users found.\033[0m" | tee -a "$LOG_FILE"
+        fi
+    fi
+
+    # Remove Apache
+    echo -e "\e[33mRemoving Apache...\033[0m" | tee -a "$LOG_FILE"
+    sudo systemctl stop apache2 || {
+        echo -e "\e[91mFailed to stop Apache. Continuing anyway...\033[0m" | tee -a "$LOG_FILE"
+    }
+    sudo systemctl disable apache2 || {
+        echo -e "\e[91mFailed to disable Apache. Continuing anyway...\033[0m" | tee -a "$LOG_FILE"
+    }
+    sudo apt-get purge -y apache2 apache2-utils apache2-bin apache2-data libapache2-mod-php* || {
+        echo -e "\e[91mFailed to purge Apache packages.\033[0m" | tee -a "$LOG_FILE"
+    }
+    sudo apt-get autoremove --purge -y
+    sudo apt-get autoclean -y
+    sudo rm -rf /etc/apache2 /var/www/html
+
+    # Reset Firewall (only remove Apache rule, keep SSL)
+    echo -e "\e[33mResetting firewall rules (keeping SSL)...\033[0m" | tee -a "$LOG_FILE"
+    sudo ufw delete allow 'Apache' || {
+        echo -e "\e[91mFailed to remove Apache rule from UFW.\033[0m" | tee -a "$LOG_FILE"
+    }
+    sudo ufw reload
+
+    echo -e "\e[92mMirza Bot has been removed alongside Marzban. SSL certificates remain intact.\033[0m" | tee -a "$LOG_FILE"
 }
 
+# Extract database credentials from config.php
+function extract_db_credentials() {
+    CONFIG_PATH="/var/www/html/mirzabotconfig/config.php"
+    if [ -f "$CONFIG_PATH" ]; then
+        DB_USER=$(grep '^\$usernamedb' "$CONFIG_PATH" | awk -F"'" '{print $2}')
+        DB_PASS=$(grep '^\$passworddb' "$CONFIG_PATH" | awk -F"'" '{print $2}')
+        DB_NAME=$(grep '^\$dbname' "$CONFIG_PATH" | awk -F"'" '{print $2}')
+        TELEGRAM_TOKEN=$(grep '^\$APIKEY' "$CONFIG_PATH" | awk -F"'" '{print $2}')
+        TELEGRAM_CHAT_ID=$(grep '^\$adminnumber' "$CONFIG_PATH" | awk -F"'" '{print $2}')
+        if [ -z "$DB_USER" ] || [ -z "$DB_PASS" ] || [ -z "$DB_NAME" ] || [ -z "$TELEGRAM_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+            echo -e "\033[31m[ERROR]\033[0m Failed to extract required credentials from $CONFIG_PATH."
+            return 1
+        fi
+        return 0
+    else
+        echo -e "\033[31m[ERROR]\033[0m config.php not found at $CONFIG_PATH."
+        return 1
+    fi
+}
+
+# Translate cron schedule to human-readable format
+function translate_cron() {
+    local cron_line="$1"
+    local schedule=""
+    case "$cron_line" in
+        "* * * * *"*) schedule="Every Minute" ;;
+        "0 * * * *"*) schedule="Every Hour" ;;
+        "0 0 * * *"*) schedule="Every Day" ;;
+        "0 0 * * 0"*) schedule="Every Week" ;;
+        *) schedule="Custom Schedule ($cron_line)" ;;
+    esac
+    echo "$schedule"
+}
 
 # Export Database Function
 function export_database() {
     echo -e "\033[33mChecking database configuration...\033[0m"
 
     if ! extract_db_credentials; then
+        return 1
+    fi
+
+    # Check if Marzban is installed
+    if check_marzban_installed; then
+        echo -e "\033[31m[ERROR]\033[0m Exporting database is not supported when Marzban is installed due to database being managed by Docker."
         return 1
     fi
 
@@ -1289,12 +1443,17 @@ function export_database() {
 
     echo -e "\033[32mBackup successfully created at $BACKUP_FILE.\033[0m"
 }
-
 # Import Database Function
 function import_database() {
     echo -e "\033[33mChecking database configuration...\033[0m"
 
     if ! extract_db_credentials; then
+        return 1
+    fi
+
+    # Check if Marzban is installed
+    if check_marzban_installed; then
+        echo -e "\033[31m[ERROR]\033[0m Importing database is not supported when Marzban is installed due to database being managed by Docker."
         return 1
     fi
 
@@ -1328,59 +1487,130 @@ function import_database() {
 
 # Function for automated backup
 function auto_backup() {
-    echo -e "\033[33mChecking database configuration...\033[0m"
+    echo -e "\033[36mConfigure Automated Backup\033[0m"
 
+    # Check if Mirza Bot is installed
+    BOT_DIR="/var/www/html/mirzabotconfig"
+    if [ ! -d "$BOT_DIR" ]; then
+        echo -e "\033[31m[ERROR]\033[0m Mirza Bot is not installed ($BOT_DIR not found)."
+        echo -e "\033[33mExiting...\033[0m"
+        sleep 2
+        return 1
+    fi
+
+    # Extract credentials
     if ! extract_db_credentials; then
         return 1
     fi
 
-    echo -e "\033[33mVerifying database existence...\033[0m"
-
-    if ! mysql -u "$DB_USER" -p"$DB_PASS" -e "USE $DB_NAME;" 2>/dev/null; then
-        echo -e "\033[31m[ERROR]\033[0m Database $DB_NAME does not exist or credentials are incorrect."
-        return 1
-    fi
-
-    TELEGRAM_TOKEN=$(grep '\$APIKEY' "$CONFIG_PATH" | cut -d"'" -f2)
-    TELEGRAM_CHAT_ID=$(grep '\$adminnumber' "$CONFIG_PATH" | cut -d"'" -f2)
-
-    if [ -z "$TELEGRAM_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
-        echo -e "\033[31m[ERROR]\033[0m Telegram token or chat ID not found in config.php."
-        return 1
-    fi
-
-    while true; do
-        echo -e "\033[36mChoose backup frequency:\033[0m"
-        echo -e "\033[36m1) Every minute\033[0m"
-        echo -e "\033[36m2) Every hour\033[0m"
-        echo -e "\033[36m3) Every day\033[0m"
-        read -p "Enter your choice (1-3): " frequency
-
-        case $frequency in
-            1) cron_time="* * * * *" ; break ;;
-            2) cron_time="0 * * * *" ; break ;;
-            3) cron_time="0 0 * * *" ; break ;;
-            *)
-                echo -e "\033[31mInvalid option. Please try again.\033[0m"
-                ;;
-        esac
-    done
-
-    BACKUP_SCRIPT="/root/auto_backup.sh"
-    cat <<EOF > "$BACKUP_SCRIPT"
+    # Determine backup script based on Marzban presence
+    if check_marzban_installed; then
+        echo -e "\033[41m[NOTICE]\033[0m \033[33mMarzban detected. Using Marzban-compatible backup.\033[0m"
+        BACKUP_SCRIPT="/root/backup_mirza_marzban.sh"
+        MYSQL_CONTAINER=$(docker ps -q --filter "name=mysql" --no-trunc)
+        if [ -z "$MYSQL_CONTAINER" ]; then
+            echo -e "\033[31m[ERROR]\033[0m No running MySQL container found for Marzban."
+            return 1
+        fi
+        # Create Marzban backup script
+        cat <<EOF > "$BACKUP_SCRIPT"
 #!/bin/bash
 BACKUP_FILE="/root/\${DB_NAME}_\$(date +\"%Y%m%d_%H%M%S\").sql"
-if mysqldump -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" > "\$BACKUP_FILE"; then
+docker exec $MYSQL_CONTAINER mysqldump -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" > "\$BACKUP_FILE"
+if [ \$? -eq 0 ]; then
+    curl -F document=@"\$BACKUP_FILE" "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendDocument" -F chat_id="$TELEGRAM_CHAT_ID"
+    rm "\$BACKUP_FILE"
+else
+    echo -e "\033[31m[ERROR]\033[0m Failed to create Marzban database backup."
+fi
+EOF
+    else
+        echo -e "\033[33mUsing standard backup.\033[0m"
+        BACKUP_SCRIPT="/root/mirza_backup.sh"
+        # Verify database existence
+        if ! mysql -u "$DB_USER" -p"$DB_PASS" -e "USE $DB_NAME;" 2>/dev/null; then
+            echo -e "\033[31m[ERROR]\033[0m Database $DB_NAME does not exist or credentials are incorrect."
+            return 1
+        fi
+        # Create standard backup script
+        cat <<EOF > "$BACKUP_SCRIPT"
+#!/bin/bash
+BACKUP_FILE="/root/\${DB_NAME}_\$(date +\"%Y%m%d_%H%M%S\").sql"
+mysqldump -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" > "\$BACKUP_FILE"
+if [ \$? -eq 0 ]; then
     curl -F document=@"\$BACKUP_FILE" "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendDocument" -F chat_id="$TELEGRAM_CHAT_ID"
     rm "\$BACKUP_FILE"
 else
     echo -e "\033[31m[ERROR]\033[0m Failed to create database backup."
 fi
 EOF
+    fi
 
+    # Make the script executable
     chmod +x "$BACKUP_SCRIPT"
-    (crontab -l 2>/dev/null; echo "$cron_time bash $BACKUP_SCRIPT") | crontab -
-    echo -e "\033[32mAutomated backup configured successfully.\033[0m"
+
+    # Check current cron and translate it
+    CURRENT_CRON=$(crontab -l 2>/dev/null | grep "$BACKUP_SCRIPT" | grep -v "^#")
+    if [ -n "$CURRENT_CRON" ]; then
+        SCHEDULE=$(translate_cron "$CURRENT_CRON")
+        echo -e "\033[33mCurrent Backup Schedule:\033[0m $SCHEDULE"
+    else
+        echo -e "\033[33mNo active backup schedule found.\033[0m"
+    fi
+
+    # Show backup frequency options
+    echo -e "\033[36m1) Every Minute\033[0m"
+    echo -e "\033[36m2) Every Hour\033[0m"
+    echo -e "\033[36m3) Every Day\033[0m"
+    echo -e "\033[36m4) Every Week\033[0m"
+    echo -e "\033[36m5) Disable Backup\033[0m"
+    echo -e "\033[36m6) Back to Menu\033[0m"
+    echo ""
+    read -p "Select an option [1-6]: " backup_option
+
+    # Function to update cron
+    update_cron() {
+        local cron_line="$1"
+        if [ -n "$CURRENT_CRON" ]; then
+            crontab -l 2>/dev/null | grep -v "$BACKUP_SCRIPT" | crontab - && {
+                echo -e "\033[92mRemoved previous backup schedule.\033[0m"
+            } || {
+                echo -e "\033[31mFailed to remove existing cron.\033[0m"
+            }
+        fi
+        if [ -n "$cron_line" ]; then
+            (crontab -l 2>/dev/null; echo "$cron_line") | crontab - && {
+                echo -e "\033[92mBackup scheduled: $(translate_cron "$cron_line")\033[0m"
+                bash "$BACKUP_SCRIPT" &>/dev/null &
+            } || {
+                echo -e "\033[31mFailed to schedule backup.\033[0m"
+            }
+        fi
+    }
+
+    # Process user choice
+    case $backup_option in
+        1) update_cron "* * * * * bash $BACKUP_SCRIPT" ;;
+        2) update_cron "0 * * * * bash $BACKUP_SCRIPT" ;;
+        3) update_cron "0 0 * * * bash $BACKUP_SCRIPT" ;;
+        4) update_cron "0 0 * * 0 bash $BACKUP_SCRIPT" ;;
+        5)
+            if [ -n "$CURRENT_CRON" ]; then
+                crontab -l 2>/dev/null | grep -v "$BACKUP_SCRIPT" | crontab - && {
+                    echo -e "\033[92mAutomated backup disabled.\033[0m"
+                } || {
+                    echo -e "\033[31mFailed to disable backup.\033[0m"
+                }
+            else
+                echo -e "\033[93mNo backup schedule to disable.\033[0m"
+            fi
+            ;;
+        6) show_menu ;;
+        *)
+            echo -e "\033[31mInvalid option. Please try again.\033[0m"
+            auto_backup
+            ;;
+    esac
 }
 
 # Function to renew SSL certificates
@@ -1417,6 +1647,14 @@ function renew_ssl() {
 }
 # Function to Manage Additional Bots
 function manage_additional_bots() {
+    # Check if Mirza main bot is installed
+    if [ ! -d "/var/www/html/mirzabotconfig" ]; then
+        echo -e "\033[31m[ERROR]\033[0m The main Mirza Bot is not installed (/var/www/html/mirzabotconfig not found)."
+        echo -e "\033[33mYou are not allowed to use this section without the main bot installed. Exiting...\033[0m"
+        sleep 2
+        exit 1
+    fi
+
     # Check if Marzban is installed
     if check_marzban_installed; then
         echo -e "\033[31m[ERROR]\033[0m Additional bot management is not available when Marzban is installed."
@@ -1425,7 +1663,7 @@ function manage_additional_bots() {
         exit 1
     fi
 
-    # If Marzban is not installed, proceed with the menu
+    # If both checks pass, proceed with the menu
     echo -e "\033[36m1) Install Additional Bot\033[0m"
     echo -e "\033[36m2) Update Additional Bot\033[0m"
     echo -e "\033[36m3) Remove Additional Bot\033[0m"
@@ -1456,27 +1694,36 @@ function change_domain() {
         [[ ! "$new_domain" =~ ^[a-zA-Z0-9.-]+$ ]] && echo -e "\033[31mInvalid domain format\033[0m"
     done
 
+    echo -e "\033[33mStopping Apache to configure SSL...\033[0m"
+    if ! sudo systemctl stop apache2; then
+        echo -e "\033[31m[ERROR] Failed to stop Apache!\033[0m"
+        return 1
+    fi
 
     echo -e "\033[33mConfiguring SSL for new domain...\033[0m"
     if ! sudo certbot --apache --redirect --agree-tos --preferred-challenges http -d "$new_domain"; then
         echo -e "\033[31m[ERROR] SSL configuration failed!\033[0m"
         echo -e "\033[33mCleaning up...\033[0m"
         sudo certbot delete --cert-name "$new_domain" 2>/dev/null
+        echo -e "\033[33mRestarting Apache after cleanup...\033[0m"
+        sudo systemctl start apache2 || echo -e "\033[31m[ERROR] Failed to restart Apache!\033[0m"
         return 1
     fi
 
-  
+    echo -e "\033[33mRestarting Apache after SSL configuration...\033[0m"
+    if ! sudo systemctl start apache2; then
+        echo -e "\033[31m[ERROR] Failed to restart Apache!\033[0m"
+        return 1
+    fi
+
     CONFIG_FILE="/var/www/html/mirzabotconfig/config.php"
     if [ -f "$CONFIG_FILE" ]; then
-       
         sudo cp "$CONFIG_FILE" "$CONFIG_FILE.$(date +%s).bak"
 
         sudo sed -i "s/\$domainhosts = '.*\/mirzabotconfig';/\$domainhosts = '${new_domain}\/mirzabotconfig';/" "$CONFIG_FILE"
 
-        
         NEW_SECRET=$(openssl rand -base64 12 | tr -dc 'a-zA-Z0-9')
         sudo sed -i "s/\$secrettoken = '.*';/\$secrettoken = '${NEW_SECRET%%}';/" "$CONFIG_FILE"
-        
         
         BOT_TOKEN=$(awk -F"'" '/\$APIKEY/{print $2}' "$CONFIG_FILE")
         curl -s -o /dev/null -F "url=https://${new_domain}/mirzabotconfig/index.php" \
@@ -1489,7 +1736,6 @@ function change_domain() {
         return 1
     fi
 
-   
     if curl -sI "https://${new_domain}" | grep -q "200 OK"; then
         echo -e "\033[32mDomain successfully migrated to ${new_domain}\033[0m"
         echo -e "\033[33mOld domain configuration has been automatically cleaned up\033[0m"
@@ -2199,13 +2445,35 @@ EOF
 }
 
 # Main Execution
-if [[ "$1" == -v* || ("$1" == "-v" && -n "$2") || "$1" == "-beta" || ("$1" == "-" && "$2" == "beta") || "$1" == "-update" ]]; then
-    if [[ "$1" == "-update" ]]; then
-        update_bot "$2"
-        exit 0
-    else
-        install_bot "$1" "$2"
-    fi
-else
-    show_menu
-fi
+process_arguments() {
+    local version=""
+    case "$1" in
+        -v*)
+            version="${1#-v}"
+            if [ -n "$version" ]; then
+                install_bot "-v" "$version"
+            else
+                if [ -n "$2" ]; then
+                    install_bot "-v" "$2"
+                else
+                    echo -e "\033[31m[ERROR]\033[0m Please specify a version with -v (e.g., -v 4.11.1)"
+                    exit 1
+                fi
+            fi
+            ;;
+        -beta)
+            install_bot "-beta"
+            ;;
+        --beta)  
+            install_bot "-beta"
+            ;;
+        -update)
+            update_bot "$2"
+            ;;
+        *)
+            show_menu
+            ;;
+    esac
+}
+
+process_arguments "$1" "$2"
