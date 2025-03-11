@@ -150,7 +150,7 @@ function formatBytes($bytes, $precision = 2): string
 #---------------------[ ]--------------------------#
 function generateUsername($from_id,$Metode,$username,$randomString,$text)
 {
-    global $connect;
+    global $connect,$textbotlang;
     $setting = select("setting", "*");
     global $connect;
     if($Metode == $textbotlang['users']['customidAndRandom']){
