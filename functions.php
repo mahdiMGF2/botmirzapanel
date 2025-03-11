@@ -419,3 +419,18 @@ function generateAuthStr($length = 10) {
     $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     return substr(str_shuffle(str_repeat($characters, ceil($length / strlen($characters)))), 0, $length);
 }
+function channel($id_channel){
+    global $from_id,$APIKEY;
+    $channel_link = array();
+    $response = json_decode(file_get_contents('https://api.telegram.org/bot' . $APIKEY . "/getChatMember?chat_id=@$id_channel&user_id=$from_id",true),true);
+    if($response){
+        if(!in_array($response['result']['status'], ['member', 'creator', 'administrator'])){
+            $channel_link[] = $id_channel;
+        }
+    }
+    if(count($channel_link) == 0){
+        return [];
+    }else{
+        return $channel_link;
+    }
+}

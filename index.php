@@ -128,11 +128,6 @@ if (strpos($existingCronCommands, $cronCommand) === false) {
     shell_exec($command);
 }
 #---------channel--------------#
-$tch = '';
-if (isset ($channels['link']) && $from_id != 0) {
-    $response = json_decode(file_get_contents('https://api.telegram.org/bot' . $APIKEY . "/getChatMember?chat_id=@{$channels['link']}&user_id=$from_id"));
-    $tch = $response->result->status;
-}
 if ($user['username'] == "none" || $user['username'] == null) {
     update("user", "username", $username, "id", $from_id);
 }
@@ -204,8 +199,9 @@ if (floor($TimeLastMessage / 60) >= 1) {
         return;}
 
 }#-----------Channel------------#
+$chanelcheck = channel($channels['link']);
 if ($datain == "confirmchannel") {
-    if (!in_array($tch, ['member', 'creator', 'administrator'])) {
+    if(count($chanelcheck) != 0 && !in_array($from_id, $admin_ids)){
         telegram('answerCallbackQuery', array(
                 'callback_query_id' => $callback_query_id,
                 'text' => $textbotlang['users']['channel']['notconfirmed'],
@@ -219,16 +215,11 @@ if ($datain == "confirmchannel") {
     }
     return;
 }
-if ($channels == false) {
-    unset($channels);
-    $channels['Channel_lock'] = "off";
-    $channels['link'] = $textbotlang['users']['channel']['link'];
-}
-if (!in_array($tch, ['member', 'creator', 'administrator']) && $channels['Channel_lock'] == "on" && !in_array($from_id, $admin_ids)) {
+if(count($chanelcheck) != 0 && !in_array($from_id, $admin_ids)){
     $link_channel = json_encode([
         'inline_keyboard' => [
             [
-                ['text' => $textbotlang['users']['channel']['text_join'], 'url' => "https://t.me/" . $channels['link']],
+                ['text' => $textbotlang['users']['channel']['text_join'], 'url' => "https://t.me/" .$chanelcheck[0]],
             ],
             [
                 ['text' => $textbotlang['users']['channel']['confirmjoin'], 'callback_data' => "confirmchannel"],

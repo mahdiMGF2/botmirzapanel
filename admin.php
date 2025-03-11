@@ -21,26 +21,21 @@ if ($text == $textbotlang['Admin']['Back-Adminment']) {
     step('home', $from_id);
     return;
 }
-if ($text == "🔑 روشن / خاموش کردن قفل کانال") {
-    if ($channels['Channel_lock'] == "off") {
-        sendmessage($from_id, $textbotlang['Admin']['channel']['join-channel-on'], $channelkeyboard, 'HTML');
-        update("channels", "Channel_lock", "on");
-    } else {
-        sendmessage($from_id, $textbotlang['Admin']['channel']['join-channel-off'], $channelkeyboard, 'HTML');
-        update("channels", "Channel_lock", "off");
-    }
-} elseif ($text == "📣 تنظیم کانال جوین اجباری") {
+elseif ($text == "📣 تنظیم کانال جوین اجباری") {
     sendmessage($from_id, $textbotlang['Admin']['channel']['changechannel'] . $channels['link'], $backadmin, 'HTML');
     step('addchannel', $from_id);
 } elseif ($user['step'] == "addchannel") {
     sendmessage($from_id, $textbotlang['Admin']['channel']['setchannel'], $channelkeyboard, 'HTML');
     step('home', $from_id);
     $channels_ch = select("channels", "link", null, null, "count");
+    $Check_filde = $connect->query("SHOW COLUMNS FROM channels LIKE 'Channel_lock'");
+    if (mysqli_num_rows($Check_filde) == 1) {
+        $connect->query("ALTER TABLE channels DROP COLUMN Channel_lock;");
+        $stmt->execute();
+    }
     if ($channels_ch == 0) {
-        $Channel_lock = 'off';
-        $stmt = $pdo->prepare("INSERT INTO channels (link, Channel_lock) VALUES (?, ?)");
+        $stmt = $pdo->prepare("INSERT INTO channels (link) VALUES (?)");
         $stmt->bindParam(1, $text, PDO::PARAM_STR);
-        $stmt->bindParam(2, $Channel_lock);
 
         $stmt->execute();
     } else {

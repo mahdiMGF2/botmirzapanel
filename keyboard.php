@@ -245,7 +245,6 @@ $Feature_status = json_encode([
 $channelkeyboard = json_encode([
     'keyboard' => [
         [['text' => "📣 تنظیم کانال جوین اجباری"]],
-        [['text' => "🔑 روشن / خاموش کردن قفل کانال"]],
         [['text' => $textbotlang['Admin']['Back-Adminment']]]
     ],
     'resize_keyboard' => true

@@ -312,8 +312,7 @@ try {
 
     if (!$table_exists) {
         $result =  $connect->query("CREATE TABLE channels (
-Channel_lock varchar(200) NOT NULL,
-link varchar(200) NOT NULL )");
+            link varchar(200) NOT NULL )");
         if (!$result) {
             echo "table channels".mysqli_error($connect);
         }
