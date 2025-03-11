@@ -1,6 +1,7 @@
 <?php
 $randomString = bin2hex(random_bytes(3));
 require_once 'config.php';
+require_once 'text.php';
 global $connect;
 //-----------------------------------------------------------------
 try {
@@ -181,9 +182,6 @@ try {
         $active_phone_text = "0";
         $active_phone_iran_text = "0";
         $active_help = "0";
-        $sublink = "✅ لینک اشتراک فعال است.";
-        $configManual = "❌ ارسال کانفیگ دستی خاموش است";
-        $configManual = "❌ ارسال کانفیگ دستی خاموش است";
         $connect->query("INSERT INTO setting (Bot_Status,roll_Status,get_number,limit_usertest_all,time_usertest,val_usertest,help_Status,iran_number,NotUser,namecustome,removedayc,status_verify,statuscategory) VALUES ('$active_bot_text','$active_roll_text','$active_phone_text','1','1','100','$active_help','$active_phone_iran_text','0','0','1','0','1')");
     } else {
         $Check_filde = $connect->query("SHOW COLUMNS FROM setting LIKE 'status_verify'");
@@ -266,9 +264,7 @@ try {
             echo "The roll_Status field was added ✅";
         }
         $settingsql = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM setting"));
-        $sublink = "✅ لینک اشتراک فعال است.";
         $active_phone_iran_text = "0";
-        $configManual = "❌ ارسال کانفیگ دستی خاموش است";
         if(!isset($settingsql['iran_number'])){
             $stmt = $connect->prepare("UPDATE setting SET iran_number = ?");
             $stmt->bind_param("s", $active_phone_iran_text);
@@ -403,9 +399,8 @@ try {
         }
         $Check_filde = $connect->query("SHOW COLUMNS FROM marzban_panel LIKE 'MethodUsername'");
         if (mysqli_num_rows($Check_filde) != 1) {
-            $MethodUsername ="آیدی عددی + حروف و عدد رندوم";
             $connect->query("ALTER TABLE marzban_panel ADD MethodUsername VARCHAR(900)");
-            $connect->query("UPDATE marzban_panel SET MethodUsername = '$MethodUsername'");
+            $connect->query("UPDATE marzban_panel SET MethodUsername = '{$textbotlang['users']['customidAndRandom']}'");
             echo "The MethodUsername field was added ✅";
         }
         $Check_filde = $connect->query("SHOW COLUMNS FROM marzban_panel LIKE 'inboundid'");
@@ -579,57 +574,6 @@ try {
 try {
     $result = $connect->query("SHOW TABLES LIKE 'textbot'");
     $table_exists = ($result->num_rows > 0);
-    $text_roll = "
-♨️ قوانین استفاده از خدمات ما
-
-1- به اطلاعیه هایی که داخل کانال گذاشته می شود حتما توجه کنید.
-2- در صورتی که اطلاعیه ای در مورد قطعی در کانال گذاشته نشده به اکانت پشتیبانی پیام دهید
-3- سرویس ها را از طریق پیامک ارسال نکنید برای ارسال پیامک می توانید از طریق ایمیل ارسال کنید.
-    ";
-    $text_dec_fq = " 
- 💡 سوالات متداول ⁉️
-
-1️⃣ فیلترشکن شما آیپی ثابته؟ میتونم برای صرافی های ارز دیجیتال استفاده کنم؟
-
-✅ به دلیل وضعیت نت و محدودیت های کشور سرویس ما مناسب ترید نیست و فقط لوکیشن‌ ثابته.
-
-2️⃣ اگه قبل از منقضی شدن اکانت، تمدیدش کنم روزهای باقی مانده می سوزد؟
-
-✅ خیر، روزهای باقیمونده اکانت موقع تمدید حساب میشن و اگه مثلا 5 روز قبل از منقضی شدن اکانت 1 ماهه خودتون اون رو تمدید کنید 5 روز باقیمونده + 30 روز تمدید میشه.
-
-3️⃣ اگه به یک اکانت بیشتر از حد مجاز متصل شیم چه اتفاقی میافته؟
-
-✅ در این صورت حجم سرویس شما زود تمام خواهد شد.
-
-4️⃣ فیلترشکن شما از چه نوعیه؟
-
-✅ فیلترشکن های ما v2ray است و پروتکل‌های مختلفی رو ساپورت میکنیم تا حتی تو دورانی که اینترنت اختلال داره بدون مشکل و افت سرعت بتونید از سرویستون استفاده کنید.
-
-5️⃣ فیلترشکن از کدوم کشور است؟
-
-✅ سرور فیلترشکن ما از کشور  آلمان است
-
-6️⃣ چطور باید از این فیلترشکن استفاده کنم؟
-
-✅ برای آموزش استفاده از برنامه، روی دکمه «📚 آموزش» بزنید.
-
-7️⃣ فیلترشکن وصل نمیشه، چیکار کنم؟
-
-✅ به همراه یک عکس از پیغام خطایی که میگیرید به پشتیبانی مراجعه کنید.
-
-8️⃣ فیلترشکن شما تضمینی هست که همیشه مواقع متصل بشه؟
-
-✅ به دلیل قابل پیش‌بینی نبودن وضعیت نت کشور، امکان دادن تضمین نیست فقط می‌تونیم تضمین کنیم که تمام تلاشمون رو برای ارائه سرویس هر چه بهتر انجام بدیم.
-
-9️⃣ امکان بازگشت وجه دارید؟
-
-✅ امکان بازگشت وجه در صورت حل نشدن مشکل از سمت ما وجود دارد.
-
-💡 در صورتی که جواب سوالتون رو نگرفتید میتونید به «پشتیبانی» مراجعه کنید.";
-    $text_channel = "   
-        ⚠️ کاربر گرامی؛ شما عضو چنل ما نیستید
-از طریق دکمه زیر وارد کانال شده و عضو شوید
-پس از عضویت دکمه بررسی عضویت را کلیک کنید";
     if (!$table_exists) {
         $result = $connect->query("CREATE TABLE textbot (
         id_text varchar(600) PRIMARY KEY NOT NULL,
@@ -638,42 +582,40 @@ try {
         if (!$result) {
             echo "table textbot".mysqli_error($connect);
         }
-        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_start','سلام خوش آمدید') ");
-        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_usertest','🔑 اکانت تست')");
-        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_Purchased_services','🛍 سرویس های من')");
-        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_support','☎️ پشتیبانی')");
-        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_help','📚 آموزش')");
-        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_bot_off','❌ ربات خاموش است، لطفا دقایقی دیگر مراجعه کنید')");
-        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_roll','$text_roll')");
-        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_fq','❓ سوالات متداول')");
-        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_dec_fq','$text_dec_fq')");
-        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_account','👨🏻‍💻 مشخصات کاربری')");
-        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_sell','🔐 خرید اشتراک')");
-        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_Add_Balance','💰 افزایش موجودی')");
-        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_channel','$text_channel')");
-        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_Discount','🎁 کد هدیه')");
-        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_Tariff_list','💰 تعرفه اشتراک ها')");
-        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_dec_Tariff_list','تنظیم نشده است')");
-        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_Account_op','🎛 حساب کاربری')");
+        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_start','{$textbotlang['users']['start']}') ");
+        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_usertest','{$textbotlang['users']['usertest']['usertestbtn']}')");
+        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_Purchased_services','{$textbotlang['Admin']['Status']['title']}')");
+        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_support','{$textbotlang['users']['support']['title']}')");
+        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_help','{$textbotlang['users']['help']['title']}')");
+        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_bot_off','{$textbotlang['users']['botoff']}')");
+        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_roll','{$textbotlang['users']['RulesDescription']}')");
+        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_fq','{$textbotlang['users']['fqbtn']}')");
+        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_dec_fq','{$textbotlang['users']['fqDescription']}')");
+        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_account','{$textbotlang['users']['accountbtn']}')");
+        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_sell','{$textbotlang['users']['buybtn']}')");
+        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_Add_Balance','{$textbotlang['users']['add_balance']}')");
+        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_channel','{$textbotlang['users']['channeldosntjoin']}')");
+        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_Discount','{$textbotlang['users']['Discount']['titlebtn']}')");
+        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_Tariff_list','{$textbotlang['users']['pricelist']}')");
+        $connect->query("INSERT INTO textbot (id_text,text) VALUES ('text_dec_Tariff_list','not set')");
     }
     else{
-        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_start','سلام خوش آمدید')");
-        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_usertest','🔑 اکانت تست')");
-        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_Purchased_services','🛍 سرویس های من')");
-        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_support','☎️ پشتیبانی')");
-        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_help','📚 آموزش')");
-        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_bot_off','❌ ربات خاموش است، لطفا دقایقی دیگر مراجعه کنید')");
-        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_roll','$text_roll')");
-        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_fq','❓ سوالات متداول')");
-        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_dec_fq','$text_dec_fq')");
-        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_account','👨🏻‍💻 مشخصات کاربری')");
-        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_sell','🔐 خرید اشتراک')");
-        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_Add_Balance','💰 افزایش موجودی')");
-        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_channel','$text_channel')");
-        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_Discount','🎁 کد هدیه')");
-        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_Tariff_list','💰 تعرفه اشتراک ها')");
-        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_dec_Tariff_list','تنظیم نشده است')");
-        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_Account_op','🎛 حساب کاربری')");
+        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_start','{$textbotlang['users']['start']}')");
+        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_usertest','{$textbotlang['users']['usertest']['usertestbtn']}')");
+        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_Purchased_services','{$textbotlang['Admin']['Status']['title']}')");
+        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_support','{$textbotlang['users']['support']['title']}')");
+        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_help','{$textbotlang['users']['help']['title']}')");
+        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_bot_off','{$textbotlang['users']['botoff']}')");
+        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_roll','{$textbotlang['users']['RulesDescription']}')");
+        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_fq','{$textbotlang['users']['fqbtn']}')");
+        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_dec_fq','{$textbotlang['users']['fqDescription']}')");
+        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_account','{$textbotlang['users']['accountbtn']}')");
+        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_sell','{$textbotlang['users']['buybtn']}')");
+        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_Add_Balance','{$textbotlang['users']['add_balance']}')");
+        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_channel','{$textbotlang['users']['channeldosntjoin']}')");
+        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_Discount','{$textbotlang['users']['Discount']['titlebtn']}')");
+        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_Tariff_list','{$textbotlang['users']['pricelist']}')");
+        $connect->query("INSERT IGNORE INTO textbot (id_text,text) VALUES ('text_dec_Tariff_list','not set')");
 
 
     }
