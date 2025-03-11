@@ -605,7 +605,7 @@ $helpedit =  json_encode([
     'resize_keyboard' => true
 ]);
 function KeyboardCategory(){
-    global $pdo;
+    global $pdo,$textbotlang;
     $stmt = $pdo->prepare("SELECT * FROM category");
     $stmt->execute();
     $list_category = [
