@@ -142,6 +142,7 @@ function StatusPayment($paymentid){
 }
 function formatBytes($bytes, $precision = 2): string
 {
+    global $textbotlang;
     $base = log($bytes, 1024);
     $power = $bytes > 0 ? floor($base) : 0;
     $suffixes = [$textbotlang['users']['format']['byte'],$textbotlang['users']['format']['kilobyte'],$textbotlang['users']['format']['MBbyte'], $textbotlang['users']['format']['GBbyte'],$textbotlang['users']['format']['TBbyte']];
