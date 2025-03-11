@@ -66,6 +66,7 @@ $textbotlang['users']['online'] = "آنلاین";
 $textbotlang['users']['offline'] = "آفلاین";
 $textbotlang['users']['unlimited'] = "نامحدود";
 $textbotlang['users']['start'] = "سلام خوش آمدید🌹";
+$textbotlang['users']['sendmessagesupport'] = "🎟 ارسال پیام به پشتیبانی";
 
 
 $textbotlang['users']['number']['false'] = "❌ شماره تلفن صحبح نیست شماره تلفن صحبح را ارسال نمایید.";
@@ -188,10 +189,30 @@ $textbotlang['users']['buy']['invoicebuy'] = "📇 پیش فاکتور شما:
     
 💰 سفارش شما آماده پرداخت است.  ";
 $textbotlang['users']['buy']['payandGet'] = "💰 پرداخت و دریافت سرویس";
+$textbotlang['users']['buy']['discount'] = "🎁 ثبت کد تخفیف";
+
+
+
 
 $textbotlang['users']['category']['NotFound'] = "❌ دسته بندی برای نمایش یافت نشد.";
 $textbotlang['users']['category']['selectCategory'] = "📌 دسته بندی مورد نظر خود را انتخاب نمایید.";
 $textbotlang['users']['category']['error'] = "❌ خطایی رخ داده است مراحل خرید را از اول انجام دهید.";
+
+
+$textbotlang['users']['changetext']['set_start_text'] = "تنظیم متن شروع";
+$textbotlang['users']['changetext']['purchased_service_button'] = "دکمه سرویس خریداری شده";
+$textbotlang['users']['changetext']['test_account_button'] = "دکمه اکانت تست";
+$textbotlang['users']['changetext']['faq_button'] = "دکمه سوالات متداول";
+$textbotlang['users']['changetext']['tutorial_button'] = "متن دکمه 📚 آموزش";
+$textbotlang['users']['changetext']['support_button'] = "متن دکمه ☎️ پشتیبانی";
+$textbotlang['users']['changetext']['increase_balance_button'] = "دکمه افزایش موجودی";
+$textbotlang['users']['changetext']['law_text'] = "⚖️ متن قانون";
+$textbotlang['users']['changetext']['buy_subscription_button'] = "متن دکمه خرید اشتراک";
+$textbotlang['users']['changetext']['tariff_list_button'] = "متن دکمه لیست تعرفه";
+$textbotlang['users']['changetext']['tariff_list_description'] = "متن توضیحات لیست تعرفه";
+$textbotlang['users']['changetext']['user_account_button'] = "متن دکمه حساب کاربری";
+$textbotlang['users']['changetext']['mandatory_membership_description'] = "📝 تنظیم متن توضیحات عضویت اجباری";
+$textbotlang['users']['changetext']['faq_description'] = "📝 تنظیم متن توضیحات سوالات متداول";
 
 
 
@@ -361,6 +382,20 @@ $textbotlang['users']['Discount']['acceptdiscount']  = "کد هدیه با مو�
 
 
 
+
+$textbotlang['users']['moeny']['offline_gateway_settings'] = "💳 تنظبمات درگاه آفلاین";
+$textbotlang['users']['moeny']['nowpayment_settings'] = "💵 تنظیمات nowpayment";
+$textbotlang['users']['moeny']['currency_rial_gateway'] = "💎 درگاه ارزی ریالی";
+$textbotlang['users']['moeny']['mr_payment_gateway'] = "🔵 درگاه آقای پرداخت";
+$textbotlang['users']['moeny']['perfect_money_gateway'] = "🔴 درگاه پرفکت مانی";
+$textbotlang['users']['moeny']['card_number_settings'] = "💳 تنظیم شماره کارت";
+$textbotlang['users']['moeny']['offline_gateway_status'] = "🔌 وضعیت درگاه آفلاین";
+$textbotlang['users']['moeny']['alsat_merchant_settings'] = "تنظیم مرچنت";
+$textbotlang['users']['moeny']['alsat_gateway_status'] = "وضعیت درگاه آل سات";
+$textbotlang['users']['moeny']['mr_payment_merchant_settings'] = "تنظیم مرچنت آقای پرداخت";
+$textbotlang['users']['moeny']['mr_payment_gateway_status'] = "وضعیت درگاه آقای پرداخت ";
+$textbotlang['users']['moeny']['nowpayment_api'] = "🧩 api nowpayment";
+$textbotlang['users']['moeny']['nowpayment_gateway_status'] = "🔌 وضعیت درگاه nowpayments";
 $textbotlang['users']['moeny']['carttext'] =  "برای افزایش موجودی به صورت دستی، مبلغ %s  تومان  را به شماره‌ی حساب زیر واریز کنید 👇🏻
     
     ==================== 
@@ -514,6 +549,13 @@ $textbotlang['users']['affiliates']['infotext'] = "🤔 زیرمجموعه گی�
     
 💵 مبلغ هدیه به ازای هر عضویت :  %s
 💴 میزان پورسانت از خرید زیرمجموعه :  %s";
+$textbotlang['users']['closelist'] = "❌ بستن لیست";
+
+
+
+
+
+
 #--------------[ admin ]--------------#
 $textbotlang['Admin']['commendadmin'] = "ادمین";
 $textbotlang['Admin']['commendadminmanagment'] = "پنل مدیریت";
@@ -864,16 +906,6 @@ $textbotlang['Admin']['Discount']['NotCode'] = "❌ خطا
 
 
 
-
-$textbotlang['Admin']['Protocol']['Title'] = "در این بخش می توانید تعیین کنید که به مشتری چه پروتکل هایی داده شود.
-📨 برای اضافه کردن پروتکل از لیست زیر پروتکل خود را ارسال کنید";
-$textbotlang['Admin']['Protocol']['invalidProtocol'] = "❌ پروتکل نامعتبر";
-$textbotlang['Admin']['Protocol']['AddedProtocol'] = "✅ پروتکل اضافه شد.";
-$textbotlang['Admin']['Protocol']['RemoveProtocol'] = "پروتکلی که میخواهید حذف کنید را انتخاب کنید.";
-$textbotlang['Admin']['Protocol']['RemovedProtocol'] = "پروتکل با موفقیت حذف گردید.";
-
-
-
 $textbotlang['Admin']['AlgortimeUsername']['SaveData'] = "✅روش ساخت نام کاربری با موفقیت آپدیت شد";
 
 
@@ -891,6 +923,22 @@ $textbotlang['Admin']['Discount']['invalidcodedis'] ="❌  کد تخفیف نا�
 
 
 $textbotlang['Admin']['mesage']['nottextmessage'] ="❌  در ارسال همگانی فقط متن می توانید ارسال نمایید.";
+
+
+$textbotlang['Admin']['keyboardadmin']['bot_statistics'] = "📊 آمار ربات";
+$textbotlang['Admin']['keyboardadmin']['manage_panel'] = "✏️ مدیریت پنل";
+$textbotlang['Admin']['keyboardadmin']['add_panel'] = "🖥 اضافه کردن پنل";
+$textbotlang['Admin']['keyboardadmin']['test_account_settings'] = "🔑 تنظیمات اکانت تست";
+$textbotlang['Admin']['keyboardadmin']['shop_section'] = "🏬 بخش فروشگاه";
+$textbotlang['Admin']['keyboardadmin']['finance'] = "💵 مالی";
+$textbotlang['Admin']['keyboardadmin']['admin_section'] = "👨‍🔧 بخش ادمین";
+$textbotlang['Admin']['keyboardadmin']['bot_text_settings'] = "📝 تنظیم متن ربات";
+$textbotlang['Admin']['keyboardadmin']['user_services'] = "👤 خدمات کاربر";
+$textbotlang['Admin']['keyboardadmin']['user_search'] = "👁‍🗨 جستجو کاربر";
+$textbotlang['Admin']['keyboardadmin']['send_message'] = "📨 ارسال پیام";
+$textbotlang['Admin']['keyboardadmin']['affiliate_settings'] = "👥 تنظیمات زیر مجموعه گیری";
+$textbotlang['Admin']['keyboardadmin']['tutorial_section'] = "📚 بخش آموزش";
+$textbotlang['Admin']['keyboardadmin']['settings'] = "⚙️ تنظیمات";
 
 
 $textbotlang['Admin']['Report']['extend'] = "⭕️ یک کاربر سرویس خود را تمدید کرد.

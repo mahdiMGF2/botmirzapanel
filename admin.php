@@ -1183,21 +1183,6 @@ if ($text == "❌ حذف کد هدیه") {
     $stmt->execute();
     sendmessage($from_id, $textbotlang['Admin']['Discount']['RemovedCode'], $shopkeyboard, 'HTML');
 }
-#----------------[  REMOVE protocol   ]------------------#
-if ($text == "🗑 حذف پروتکل") {
-    sendmessage($from_id, $textbotlang['Admin']['Protocol']['RemoveProtocol'], $keyboardprotocollist, 'HTML');
-    step('removeprotocol', $from_id);
-} elseif ($user['step'] == "removeprotocol") {
-    if (!in_array($text, $protocoldata)) {
-        sendmessage($from_id, $textbotlang['Admin']['Protocol']['invalidProtocol'], null, 'HTML');
-        return;
-    }
-    sendmessage($from_id, $textbotlang['Admin']['Protocol']['RemovedProtocol'], $keyboardadmin, 'HTML');
-    $stmt = $pdo->prepare($sql);
-    $stmt->bindParam(1, $text);
-    $stmt->execute();
-    step('home', $from_id);
-}
 if ($text == "❌ حذف سرویس کاربر") {
     sendmessage($from_id, $textbotlang['Admin']['ManageUser']['RemoveService'], $backadmin, 'HTML');
     step('removeservice', $from_id);
