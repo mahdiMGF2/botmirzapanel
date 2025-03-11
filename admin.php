@@ -197,7 +197,7 @@ if ($text == $textbotlang['Admin']['manageadmin']['showlistbtn']) {
     $list_admin_text = sprintf($textbotlang['Admin']['manageadmin']['showlist'],$List_admin);
     sendmessage($from_id, $list_admin_text, $admin_section_panel, 'HTML');
 }
-if ($text == "🖥  اضافه کردن پنل") {
+if ($text == $textbotlang['Admin']['keyboardadmin']['add_panel']) {
     $textx = "📌 نوع پنل را ارسال نمایید
     
 ⚠️ در صورت انتخاب پنل ثنایی پس از اضافه کردن پنل به بخش ویرایش پنل > تنظیم شناسه اینباند رفته و شناسه اینباند را ثبت کنید";
