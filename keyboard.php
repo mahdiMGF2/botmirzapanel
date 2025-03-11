@@ -621,7 +621,7 @@ function KeyboardCategory(){
     return json_encode($list_category);
 }
 function KeyboardCategorybuy($callback_data,$location){
-    global $pdo;
+    global $pdo,$textbotlang;
     $stmt = $pdo->prepare("SELECT * FROM category");
     $stmt->execute();
     $list_category = ['inline_keyboard' => [],];
@@ -636,6 +636,7 @@ function KeyboardCategorybuy($callback_data,$location){
     $list_category['inline_keyboard'][] = [
         ['text' => $textbotlang['users']['backmenu'],"callback_data" => $callback_data],
     ];
+    file_put_contents('ss',json_encode($list_category));
     return json_encode($list_category);
 }
 function KeyboardProduct($location,$backdata,$MethodUsername, $categoryid = null){

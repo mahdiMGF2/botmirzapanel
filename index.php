@@ -9,7 +9,7 @@ if (function_exists('fastcgi_finish_request')) {
 }
 
 ini_set('error_log', 'error_log');
-$version = "4.13.3";
+$version = "4.13.4";
 date_default_timezone_set('Asia/Tehran');
 require_once 'config.php';
 require_once 'botapi.php';
@@ -1335,7 +1335,7 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
             sendmessage($from_id, $textbotlang['Admin']['Product']['nullpProduct'], null, 'HTML');
             return;
         }
-        Editmessagetext($from_id, $message_id,sprintf($textbotlang['users']['buy']['selectService'],$location['name_panel']), KeyboardProduct($panellist['name_panel'],"buy",$panellist['MethodUsername']));
+        Editmessagetext($from_id, $message_id,sprintf($textbotlang['users']['buy']['selectService'],$panellist['name_panel']), KeyboardProduct($panellist['name_panel'],"buy",$panellist['MethodUsername']));
     }else{
         $emptycategory = select("category", "*", null, null, "count");
         if ($emptycategory == 0) {
