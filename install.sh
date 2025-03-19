@@ -733,14 +733,63 @@ function install_bot_with_marzban() {
 
     # Test MySQL connection inside Docker container
     echo "Testing MySQL connection..."
-    docker exec "$MYSQL_CONTAINER" bash -c "echo 'SELECT 1;' | mysql -u '$ROOT_USER' -p'$MYSQL_ROOT_PASSWORD'" 2>/dev/null || {
-        echo -e "\e[91mError: Failed to connect to MySQL in Marzban Docker container.\033[0m"
-        echo -e "\e[93mPlease ensure the MySQL root password is correct and the container is running.\033[0m"
-        echo -e "\e[93mContainer found: $MYSQL_CONTAINER\033[0m"
-        echo -e "\e[93mPassword used: $MYSQL_ROOT_PASSWORD\033[0m"
-        exit 1
-    }
-    echo -e "\e[92mMySQL connection successful.\033[0m"
+    
+    # Read MySQL root password from .env
+    if [ -f "/opt/marzban/.env" ]; then
+        MYSQL_ROOT_PASSWORD=$(grep -E '^MYSQL_ROOT_PASSWORD=' /opt/marzban/.env | cut -d '=' -f2- | tr -d '" \n\r')
+        if [ -z "$MYSQL_ROOT_PASSWORD" ]; then
+            echo -e "\e[93mWarning: MYSQL_ROOT_PASSWORD not found in .env. Please enter it manually.\033[0m"
+            read -s -p "Enter MySQL root password: " MYSQL_ROOT_PASSWORD
+            echo
+        fi
+    else
+        echo -e "\e[93mWarning: .env file not found. Please enter MySQL root password manually.\033[0m"
+        read -s -p "Enter MySQL root password: " MYSQL_ROOT_PASSWORD
+        echo
+    fi
+    
+    ROOT_USER="root"
+    MYSQL_CONTAINER=$(docker ps -q --filter "name=marzban_mysql" --no-trunc)
+    
+    # Try connecting directly to host first (for mysql:latest with network_mode: host)
+    mysql -u "$ROOT_USER" -p"$MYSQL_ROOT_PASSWORD" -h 127.0.0.1 -P 3306 -e "SELECT 1;" 2>/tmp/mysql_error.log
+    if [ $? -eq 0 ]; then
+        echo -e "\e[92mMySQL connection successful (direct host method).\033[0m"
+    else
+        # If direct connection fails, try inside container (for mysql:lts)
+        if [ -n "$MYSQL_CONTAINER" ]; then
+            echo -e "\e[93mDirect connection failed, trying inside container...\033[0m"
+            docker exec "$MYSQL_CONTAINER" bash -c "echo 'SELECT 1;' | mysql -u '$ROOT_USER' -p'$MYSQL_ROOT_PASSWORD'" 2>/tmp/mysql_error.log
+            if [ $? -eq 0 ]; then
+                echo -e "\e[92mMySQL connection successful (container method).\033[0m"
+            else
+                echo -e "\e[91mError: Failed to connect to MySQL using both methods.\033[0m"
+                echo -e "\e[93mPassword used: '$MYSQL_ROOT_PASSWORD'\033[0m"
+                echo -e "\e[93mError details:\033[0m"
+                cat /tmp/mysql_error.log
+                echo -e "\e[93mPlease ensure MySQL is running and the root password is correct.\033[0m"
+                read -s -p "Enter the correct MySQL root password: " NEW_PASSWORD
+                echo
+                MYSQL_ROOT_PASSWORD="$NEW_PASSWORD"
+                # Retry with new password (direct method first)
+                mysql -u "$ROOT_USER" -p"$MYSQL_ROOT_PASSWORD" -h 127.0.0.1 -P 3306 -e "SELECT 1;" 2>/tmp/mysql_error.log || {
+                    docker exec "$MYSQL_CONTAINER" bash -c "echo 'SELECT 1;' | mysql -u '$ROOT_USER' -p'$MYSQL_ROOT_PASSWORD'" 2>/tmp/mysql_error.log || {
+                        echo -e "\e[91mError: Still can't connect with new password.\033[0m"
+                        echo -e "\e[93mError details:\033[0m"
+                        cat /tmp/mysql_error.log
+                        exit 1
+                    }
+                }
+                echo -e "\e[92mMySQL connection successful with new password.\033[0m"
+            fi
+        else
+            echo -e "\e[91mError: No MySQL container found and direct connection failed.\033[0m"
+            echo -e "\e[93mPassword used: '$MYSQL_ROOT_PASSWORD'\033[0m"
+            echo -e "\e[93mError details:\033[0m"
+            cat /tmp/mysql_error.log
+            exit 1
+        fi
+    fi
 
     # Ask for database username and password like Marzban
     clear
