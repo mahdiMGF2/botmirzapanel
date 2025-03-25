@@ -17,9 +17,9 @@ $ManagePanel = new ManagePanel();
 // verify Transaction
 
 $data = [
-'pin'    => $PaySetting,
-'amount'    => $price,
-'transid' => $_POST['transid'],
+    'pin'    => $PaySetting,
+    'amount'    => $price,
+    'transid' => $_POST['transid'],
 ];
 $data = json_encode($data);
 $ch = curl_init('https://panel.aqayepardakht.ir/api/v2/verify');
@@ -29,54 +29,49 @@ curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
 
 curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-'Content-Type: application/json',
-'Content-Length: ' . strlen($data))
+        'Content-Type: application/json',
+        'Content-Length: ' . strlen($data))
 );
 $result = curl_exec($ch);
 curl_close($ch);
 $result = json_decode($result);
 if ($result->code == "1") {
     $setting = select("setting", "*");
-    $payment_status = "پرداخت موفق";
-    $dec_payment_status = "از انجام تراکنش متشکریم!";
+    $payment_status = $textbotlang['users']['moeny']['payment_success'];
+    $dec_payment_status = $textbotlang['users']['moeny']['payment_success_dec'];
     $Payment_report = select("Payment_report", "*", "id_order", $invoice_id,"select");
     $Balance_id = select("user", "*", "id", $Payment_report['id_user'], "select");
     if($Payment_report['payment_Status'] != "paid"){
-    DirectPayment($Payment_report['id_order']);
-    update("user","Processing_value","0", "id",$Balance_id['id']);
-    update("user","Processing_value_one","0", "id",$Balance_id['id']);
-    update("user","Processing_value_tow","0", "id",$Balance_id['id']);
-    update("Payment_report","payment_Status","paid","id_order",$Payment_report['id_order']);
-$text_report = "💵 پرداخت جدید
-        
-آیدی عددی کاربر : {$Payment_report['id_user']}
-مبلغ تراکنش $price
-روش پرداخت :  درگاه آقای پرداخت";
-    if (strlen($setting['Channel_Report']) > 0) {
-        sendmessage($setting['Channel_Report'], $text_report, null, 'HTML');
+        DirectPayment($Payment_report['id_order']);
+        update("user","Processing_value","0", "id",$Balance_id['id']);
+        update("user","Processing_value_one","0", "id",$Balance_id['id']);
+        update("user","Processing_value_tow","0", "id",$Balance_id['id']);
+        update("Payment_report","payment_Status","paid","id_order",$Payment_report['id_order']);
+        if (strlen($setting['Channel_Report']) > 0) {
+            sendmessage($setting['Channel_Report'], sprintf($textbotlang['Admin']['Report']['aqayepardakht'],$Payment_report['id_user'],$price), null, 'HTML');
+        }
     }
-}
 }else {
-        $payment_status = [
+    $payment_status = [
         '0' => "پرداخت انجام نشد",
         '2' => "تراکنش قبلا وریفای و پرداخت شده است",
 
     ][$result->code];
-     $dec_payment_status = "";
+    $dec_payment_status = "";
 }
 ?>
 <html>
 <head>
-    <title>فاکتور پرداخت</title>
+    <title><?php echo $textbotlang['users']['moeny']['invoice_title']; ?></title>
     <style>
-    @font-face {
-    font-family: 'vazir';
-    src: url('/Vazir.eot');
-    src: local('☺'), url('../fonts/Vazir.woff') format('woff'), url('../fonts/Vazir.ttf') format('truetype');
-}
+        @font-face {
+            font-family: 'vazir';
+            src: url('/Vazir.eot');
+            src: local('☺'), url('../fonts/Vazir.woff') format('woff'), url('../fonts/Vazir.ttf') format('truetype');
+        }
 
         body {
-            font-family:vazir;
+            font-family: vazir;
             background-color: #f2f2f2;
             margin: 0;
             padding: 20px;
@@ -90,7 +85,7 @@ $text_report = "💵 پرداخت جدید
         .confirmation-box {
             background-color: #ffffff;
             border-radius: 8px;
-            width:25%;
+            width: 25%;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             padding: 40px;
             text-align: center;
@@ -105,25 +100,25 @@ $text_report = "💵 پرداخت جدید
             color: #666666;
             margin-bottom: 10px;
         }
-        .btn{
-            display:block;
-            margin : 10px 0;
-            padding:10px 20px;
-            background-color:#49b200;
-            color:#fff;
-            text-decoration :none;
-            border-radius:10px;
+        .btn {
+            display: block;
+            margin: 10px 0;
+            padding: 10px 20px;
+            background-color: #49b200;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="confirmation-box">
-        <h1><?php echo $payment_status ?></h1>
-        <p>شماره تراکنش:<span><?php echo $invoice_id ?></span></p>
-        <p>مبلغ پرداختی:  <span><?php echo  $price; ?></span>تومان</p>
-        <p>تاریخ: <span>  <?php echo jdate('Y/m/d')  ?>  </span></p>
-        <p><?php echo $dec_payment_status ?></p>
-        <a class = "btn" href = "https://t.me/<?php echo $usernamebot ?>">بازگشت به ربات</a>
-    </div>
+<div class="confirmation-box">
+    <h1><?php echo $payment_status ?></h1>
+    <p><?php echo $textbotlang['users']['moeny']['transaction_number']; ?><span><?php echo $invoice_id ?></span></p>
+    <p><?php echo $textbotlang['users']['moeny']['payment_amount']; ?> <span><?php echo $price; ?></span><?php echo $textbotlang['users']['moeny']['currency']; ?></p>
+    <p><?php echo $textbotlang['users']['moeny']['date_label']; ?> <span><?php echo jdate('Y/m/d') ?></span></p>
+    <p><?php echo $dec_payment_status ?></p>
+    <a class="btn" href="https://t.me/<?php echo $usernamebot ?>"><?php echo $textbotlang['users']['moeny']['back_to_bot']; ?></a>
+</div>
 </body>
 </html>
