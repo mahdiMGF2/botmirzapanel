@@ -5,10 +5,11 @@ require_once '../config.php';
 require_once '../botapi.php';
 require_once '../panels.php';
 require_once '../functions.php';
+require_once '../text.php';
 $ManagePanel = new ManagePanel();
 
 
-// buy service 
+// buy service
 $stmt = $pdo->prepare("SELECT * FROM invoice WHERE (status = 'active' OR status = 'end_of_volume') AND name_product != 'usertest' ORDER BY RAND() LIMIT 5");
 $stmt->execute();
 while ($line = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -25,14 +26,12 @@ while ($line = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $Response = json_encode([
                 'inline_keyboard' => [
                     [
-                        ['text' => "💊 تمدید سرویس", 'callback_data' => 'extend_' . $resultss['username']],
+                        ['text' => $textbotlang['users']['extend']['title'], 'callback_data' => 'extend_' . $resultss['username']],
                     ],
                 ]
             ]);
             if ($timeservice <= "167000" && $timeservice > 0) {
-                $text = "با سلام خدمت شما کاربر گرامی 👋
-📌 از مهلت زمانی استفاده از سرویس {$resultss['username']} فقط $day روز باقی مانده است. لطفاً در صورت تمایل برای تمدید این سرویس، از طریق بخش «{$textservice}» اقدام بفرمایین. با تشکر از همراهی شما";
-                sendmessage($resultss['id_user'], $text, $Response, 'HTML');
+                sendmessage($resultss['id_user'], sprintf($textbotlang['users']['cron']['cronday'],$resultss['username'],$day,$textservice), $Response, 'HTML');
                 if($resultss['Status'] === "end_of_volume"){
                     update("invoice","Status","sendedwarn", "username",$line['username']);
                 }else{
