@@ -134,16 +134,16 @@ $admin_section_panel =  json_encode([
 $keyboard_usertest =  json_encode([
     'keyboard' => [
         [['text' => $textbotlang['Admin']['getlimitusertest']['setlimitallbtn']]],
-        [['text' => "⏳ زمان سرویس تست"], ['text' => "💾 حجم اکانت تست"]],
+        [['text' => $textbotlang['Admin']['Usertest']['settimeusertest']], ['text' => $textbotlang['Admin']['Usertest']['setvolumeusertest']]],
         [['text' => $textbotlang['Admin']['Back-Adminment']]]
     ],
     'resize_keyboard' => true
 ]);
 $setting_panel =  json_encode([
     'keyboard' => [
-        [['text' => "🕚 تنظیمات کرون جاب"]],
-        [['text' => '⚙️ وضعیت قابلیت ها']],
-        [['text' => "📣 تنظیم کانال گزارش"], ['text' => "📯 تنظیمات کانال"]],
+        [['text' => $textbotlang['Admin']['keyboardadmin']['settingscron']]],
+        [['text' => $textbotlang['Admin']['keyboardadmin']['seetingstatus']]],
+        [['text' => $textbotlang['Admin']['channel']['channelreport']], ['text' => $textbotlang['Admin']['channel']['setting']]],
         [['text' => $textbotlang['Admin']['Back-Adminment']]]
     ],
     'resize_keyboard' => true
@@ -158,27 +158,27 @@ $step_payment = [
 ];
 if($PaySettingcard == "oncard"){
     $step_payment['inline_keyboard'][] = [
-        ['text' => "💳 کارت به کارت" ,'callback_data' => "cart_to_offline"],
+        ['text' => $textbotlang['users']['moeny']['cart_to_Cart_btn'] ,'callback_data' => "cart_to_offline"],
     ];
 }
 if($PaySettingnow == "onnowpayment"){
     $step_payment['inline_keyboard'][] = [
-        ['text' => "💵 پرداخت nowpayments", 'callback_data' => "nowpayments" ]
+        ['text' => $textbotlang['users']['moeny']['nowpaymentbtn'], 'callback_data' => "nowpayments" ]
     ];
 }
 if($PaySettingdigi == "ondigi"){
     $step_payment['inline_keyboard'][] = [
-        ['text' => "💎درگاه پرداخت ارزی (ریالی)" , 'callback_data' => "iranpay" ]
+        ['text' => $textbotlang['users']['moeny']['currency_rial_gateway'] , 'callback_data' => "iranpay" ]
     ];
 }
 if($PaySettingaqayepardakht == "onaqayepardakht"){
     $step_payment['inline_keyboard'][] = [
-        ['text' => "🔵 درگاه آقای پرداخت" , 'callback_data' => "aqayepardakht" ]
+        ['text' => $textbotlang['users']['moeny']['mr_payment_gateway'] , 'callback_data' => "aqayepardakht" ]
     ];
 }
 if($PaySettingperfectmoney == "onperfectmoney"){
     $step_payment['inline_keyboard'][] = [
-        ['text' => "🔴 درگاه پرفکت مانی" , 'callback_data' => "perfectmoney" ]
+        ['text' => $textbotlang['users']['moeny']['perfect_money_gateway'] , 'callback_data' => "perfectmoney" ]
     ];
 }
 $step_payment['inline_keyboard'][] = [
@@ -187,64 +187,56 @@ $step_payment['inline_keyboard'][] = [
 $step_payment = json_encode($step_payment);
 $User_Services = json_encode([
     'keyboard' => [
-        [['text' => "🛍 مشاهده سفارشات کاربر"]],
-        [['text' => "❌ حذف سرویس کاربر"],['text' => "👥 شارژ همگانی"]],
+        [['text' => $textbotlang['Admin']['ManageUser']['vieworderuser']]],
+        [['text' => $textbotlang['Admin']['ManageUser']['removeorderbtn']],['text' => $textbotlang['Admin']['Balance']['SendBalanceAll']]],
         [['text' => $textbotlang['Admin']['Back-Adminment']]]
     ],
     'resize_keyboard' => true
 ]);
 $keyboardhelpadmin = json_encode([
     'keyboard' => [
-        [['text' => "📚 اضافه کردن آموزش"], ['text' => "❌ حذف آموزش"]],
-        [['text' => "✏️ ویرایش آموزش"]],
+        [['text' => $textbotlang['Admin']['Help']['addhelp']], ['text' => $textbotlang['Admin']['Help']['removehelpbtn']]],
+        [['text' => $textbotlang['Admin']['Help']['edithelp']]],
         [['text' => $textbotlang['Admin']['Back-Adminment']]]
     ],
     'resize_keyboard' => true
 ]);
 $shopkeyboard = json_encode([
     'keyboard' => [
-        [['text' => "🛍 اضافه کردن محصول"], ['text' => "❌ حذف محصول"]],
-        [['text' => "🛒 اضافه کردن دسته بندی"], ['text' => "❌ حذف دسته بندی"]],
-        [['text' => "✏️ ویرایش محصول"]],
-        [['text' => "➕ تنظیم قیمت حجم اضافه"]],
-        [['text' => "🎁 ساخت کد هدیه"],['text' => "❌ حذف کد هدیه"]],
-        [['text' => "🎁 ساخت کد تخفیف"],['text' => "❌ حذف کد تخفیف"]],
+        [['text' => $textbotlang['Admin']['Product']['addproduct']], ['text' => $textbotlang['Admin']['Product']['titlebtnremove']]],
+        [['text' => $textbotlang['Admin']['category']['add']], ['text' => $textbotlang['Admin']['category']['remove']]],
+        [['text' => $textbotlang['Admin']['Product']['titlebtnedit']]],
+        [['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['setvolume']]],
+        [['text' => $textbotlang['Admin']['Discount']['titlebtn']], ['text' => $textbotlang['Admin']['Discount']['titlebtnremove']]],
+        [['text' => $textbotlang['Admin']['Discountsell']['create']], ['text' => $textbotlang['Admin']['Discountsell']['remove']]],
         [['text' => $textbotlang['Admin']['Back-Adminment']]]
     ],
     'resize_keyboard' => true
 ]);
 $confrimrolls = json_encode([
     'keyboard' => [
-        [['text' => "✅ قوانین را می پذیرم"]],
+        [['text' => $textbotlang['users']['rulesaccept']]],
     ],
     'resize_keyboard' => true
 ]);
 $request_contact = json_encode([
     'keyboard' => [
-        [['text' => "☎️ ارسال شماره تلفن", 'request_contact' => true]],
+        [['text' => $textbotlang['users']['sendnumber'], 'request_contact' => true]],
         [['text' => $textbotlang['users']['backhome']]]
     ],
     'resize_keyboard' => true
 ]);
 $sendmessageuser = json_encode([
     'keyboard' => [
-        [['text' => "✉️ ارسال همگانی"], ['text' => "📤 فوروارد همگانی"]],
-        [['text' => "✍️ ارسال پیام برای یک کاربر"]],
-        [['text' => $textbotlang['Admin']['Back-Adminment']]]
-    ],
-    'resize_keyboard' => true
-]);
-$Feature_status = json_encode([
-    'keyboard' => [
-        [['text' => "قابلیت مشاهده اطلاعات اکانت"]],
-        [['text' => "قابلیت اکانت تست"], ['text' => "قابلیت آموزش"]],
+        [['text' => $textbotlang['Admin']['systemsms']['sendbulkbtn']], ['text' => $textbotlang['Admin']['systemsms']['forwardbulkbtn']]],
+        [['text' => $textbotlang['Admin']['systemsms']['sendmessageauser']]],
         [['text' => $textbotlang['Admin']['Back-Adminment']]]
     ],
     'resize_keyboard' => true
 ]);
 $channelkeyboard = json_encode([
     'keyboard' => [
-        [['text' => "📣 تنظیم کانال جوین اجباری"]],
+        [['text' => $textbotlang['Admin']['channel']['changechannelbtn']]],
         [['text' => $textbotlang['Admin']['Back-Adminment']]]
     ],
     'resize_keyboard' => true
@@ -254,14 +246,12 @@ $backuser = json_encode([
         [['text' => $textbotlang['users']['backhome']]]
     ],
     'resize_keyboard' => true,
-    'input_field_placeholder' =>"برای بازگشت روی دکمه زیر کلیک کنید"
 ]);
 $backadmin = json_encode([
     'keyboard' => [
         [['text' => $textbotlang['Admin']['Back-Adminment']]]
     ],
     'resize_keyboard' => true,
-    'input_field_placeholder' =>"برای بازگشت روی دکمه زیر کلیک کنید"
 ]);
 $stmt = $pdo->prepare("SHOW TABLES LIKE 'marzban_panel'");
 $stmt->execute();
@@ -477,8 +467,8 @@ $payment = json_encode([
 ]);
 $change_product = json_encode([
     'keyboard' => [
-        [['text' => "قیمت"], ['text' => "حجم"], ['text' => "زمان"]],
-        [['text' => "نام محصول"],['text' => "دسته بندی"]],
+        [['text' => $textbotlang['Admin']['Product']['editprice']], ['text' => $textbotlang['Admin']['Product']['editvolume']], ['text' => $textbotlang['Admin']['Product']['edittime']]],
+        [['text' => $textbotlang['Admin']['Product']['editname']],['text' => $textbotlang['Admin']['Product']['editcategory']]],
         [['text' => $textbotlang['Admin']['Back-Adminment']]]
     ],
     'resize_keyboard' => true
@@ -495,54 +485,54 @@ $MethodUsername = json_encode([
 ]);
 $optionMarzban = json_encode([
     'keyboard' => [
-        [['text' => "🔌 وضعیت اتصال پنل "],['text' => "👁‍🗨 وضعیت نمایش پنل"]],
-        [['text' => "🎁 وضعیت اکانت تست"],['text' => "⚙️ تنظیم پروتکل و اینباند"]],
-        [['text' => "✍️ نام پنل"],['text' => "❌ حذف پنل"]],
-        [['text'=>"🔗 ویرایش آدرس پنل"],['text' => "👤 ویرایش نام کاربری"]],
-        [['text' => "🔐 ویرایش رمز عبور"]],
-        [['text' => "💡 روش ساخت نام کاربری"]],
-        [['text' => "🔗 ارسال لینک سابسکرایبشن"],['text' => "⚙️ارسال کانفیگ"]],
-        [['text' => "⏳ قابلیت اولین اتصال"]],
+        [['text' => $textbotlang['Admin']['managepanel']['btnshowconnect']], ['text' => $textbotlang['Admin']['managepanel']['showpanelbtn']]],
+        [['text' => $textbotlang['Admin']['managepanel']['showpaneltestbtn']], ['text' => $textbotlang['Admin']['managepanel']['setinbound']]],
+        [['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['namepanel']], ['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['removepanel']]],
+        [['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['editurl']], ['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['editusername']]],
+        [['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['editpassword']]],
+        [['text' => $textbotlang['Admin']['managepanel']['methodusername']]],
+        [['text' => $textbotlang['Admin']['managepanel']['sublinkstatus']], ['text' => $textbotlang['Admin']['managepanel']['configstatus']]],
+        [['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['on_hold_status']]],
         [['text' => $textbotlang['Admin']['Back-Adminment']]]
     ],
     'resize_keyboard' => true
 ]);
 $options_ui = json_encode([
     'keyboard' => [
-        [['text' => "👁‍🗨 وضعیت نمایش پنل"]],
-        [['text' => "🎁 وضعیت اکانت تست"],['text' => "⚙️ تنظیم پروتکل و اینباند"]],
-        [['text' => "✍️ نام پنل"],['text' => "❌ حذف پنل"]],
-        [['text'=>"🔗 ویرایش آدرس پنل"],['text' => "👤 ویرایش نام کاربری"]],
-        [['text' => "🔐 ویرایش رمز عبور"],['text' => '🔗 دامنه لینک ساب']],
-        [['text' => "💡 روش ساخت نام کاربری"]],
-        [['text' => "🔗 ارسال لینک سابسکرایبشن"],['text' => "⚙️ارسال کانفیگ"]],
+        [['text' => $textbotlang['Admin']['managepanel']['showpanelbtn']]],
+        [['text' => $textbotlang['Admin']['managepanel']['showpaneltestbtn']],['text' => $textbotlang['Admin']['managepanel']['setinbound']]],
+        [['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['namepanel']],['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['removepanel']]],
+        [['text'=>$textbotlang['Admin']['managepanel']['keyboardpanel']['editurl']],['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['editusername']]],
+        [['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['editpassword']],['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['linksub']]],
+        [['text' => $textbotlang['Admin']['managepanel']['methodusername']]],
+        [['text' => $textbotlang['Admin']['managepanel']['sublinkstatus']],['text' => $textbotlang['Admin']['managepanel']['configstatus']]],
         [['text' => $textbotlang['Admin']['Back-Adminment']]]
     ],
     'resize_keyboard' => true
 ]);
 $optionMarzneshin = json_encode([
     'keyboard' => [
-        [['text' => $textbotlang['Admin']['managepanel']['btnshowconnect']],['text' => "👁‍🗨 وضعیت نمایش پنل"]],
-        [['text' => "🎁 وضعیت اکانت تست"]],
-        [['text' => "✍️ نام پنل"],['text' => "❌ حذف پنل"]],
-        [['text'=>"🔗 ویرایش آدرس پنل"],['text' => "👤 ویرایش نام کاربری"]],
-        [['text' => "🔐 ویرایش رمز عبور"],['text' => "⚙️ تنظیمات سرویس"]],
-        [['text' => "💡 روش ساخت نام کاربری"],['text' => "⏳ قابلیت اولین اتصال"]],
-        [['text' => "🔗 ارسال لینک سابسکرایبشن"],['text' => "⚙️ارسال کانفیگ"]],
+        [['text' => $textbotlang['Admin']['managepanel']['btnshowconnect']],['text' => $textbotlang['Admin']['managepanel']['showpanelbtn']]],
+        [['text' => $textbotlang['Admin']['managepanel']['showpaneltestbtn']]],
+        [['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['namepanel']],['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['removepanel']]],
+        [['text'=>$textbotlang['Admin']['managepanel']['keyboardpanel']['editurl']],['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['editusername']]],
+        [['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['editpassword']],['text' => $textbotlang['users']['stateus']['manageService']]],
+        [['text' => $textbotlang['Admin']['managepanel']['methodusername']],['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['on_hold_status']]],
+        [['text' => $textbotlang['Admin']['managepanel']['sublinkstatus']],['text' => $textbotlang['Admin']['managepanel']['configstatus']]],
         [['text' => $textbotlang['Admin']['Back-Adminment']]]
     ],
     'resize_keyboard' => true
 ]);
 $optionX_ui_single = json_encode([
     'keyboard' => [
-        [['text' => "🔌 وضعیت اتصال پنل "],['text' => "👁‍🗨 وضعیت نمایش پنل"]],
-        [['text' => "🎁 وضعیت اکانت تست"]],
-        [['text' => "✍️ نام پنل"],['text' => "❌ حذف پنل"]],
-        [['text' => "💡 روش ساخت نام کاربری"]],
-        [['text' => "🔐 ویرایش رمز عبور"],['text' => "👤 ویرایش نام کاربری"]],
-        [['text'=>"🔗 ویرایش آدرس پنل"],['text' => "💎 تنظیم شناسه اینباند"]],
-        [['text' => "🔗 ارسال لینک سابسکرایبشن"],['text' => "⚙️ارسال کانفیگ"]],
-        [['text' => '🔗 دامنه لینک ساب']],
+        [['text' => $textbotlang['Admin']['managepanel']['btnshowconnect']],['text' => $textbotlang['Admin']['managepanel']['showpanelbtn']]],
+        [['text' => $textbotlang['Admin']['managepanel']['showpaneltestbtn']]],
+        [['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['namepanel']],['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['removepanel']]],
+        [['text' => $textbotlang['Admin']['managepanel']['methodusername']]],
+        [['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['editpassword']],['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['editusername']]],
+        [['text'=>$textbotlang['Admin']['managepanel']['keyboardpanel']['editurl']],['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['editinound']]],
+        [['text' => $textbotlang['Admin']['managepanel']['sublinkstatus']],['text' => $textbotlang['Admin']['managepanel']['configstatus']]],
+        [['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['linksub']]],
         [['text' => $textbotlang['Admin']['Back-Adminment']]]
     ],
     'resize_keyboard' => true
@@ -559,19 +549,20 @@ $supportoption = json_encode([
 ]);
 $perfectmoneykeyboard = json_encode([
     'keyboard' => [
-        [['text' => "تنظیم شماره کیف پول"],['text' => "تنظیم شماره اکانت"]],
-        [['text' => "تنظیم رمز اکانت"],['text' => "وضعیت پرفکت مانی"]],
+        [['text' => $textbotlang['Admin']['perfectmoney']['setnumuberwallet']], ['text' => $textbotlang['Admin']['perfectmoney']['setnumberaccount']]],
+        [['text' => $textbotlang['Admin']['perfectmoney']['setpasswordaccount']], ['text' => $textbotlang['Admin']['perfectmoney']['statusperfect']]],
         [['text' => $textbotlang['Admin']['Back-Adminment']]]
     ],
     'resize_keyboard' => true
 ]);
-$affiliates =  json_encode([
+
+$affiliates = json_encode([
     'keyboard' => [
-        [['text' => "🎁 وضعیت زیرمجموعه گیری"]],
-        [['text' => "🧮 تنظیم درصد زیرمجموعه"]],
-        [['text' => "🏞 تنظیم بنر زیرمجموعه گیری"]],
-        [['text' => "🎁 پورسانت بعد از خرید"],['text' => "🎁 دریافت هدیه "]],
-        [['text' => "🌟 مبلغ هدیه استارت"]],
+        [['text' => $textbotlang['Admin']['affiliate']['status']]],
+        [['text' => $textbotlang['Admin']['affiliate']['Percentageset']]],
+        [['text' => $textbotlang['Admin']['affiliate']['setbaner']]],
+        [['text' => $textbotlang['Admin']['affiliate']['porsantafterbuy']], ['text' => $textbotlang['Admin']['affiliate']['gift']]],
+        [['text' => $textbotlang['Admin']['affiliate']['giftstart']]],
         [['text' => $textbotlang['Admin']['Back-Adminment']]]
     ],
     'resize_keyboard' => true
@@ -585,21 +576,22 @@ $typepanel =  json_encode([
     ],
     'resize_keyboard' => true
 ]);
-$keyboardcronjob =  json_encode([
+$keyboardcronjob = json_encode([
     'keyboard' => [
-        [['text' => 'فعال شدن کرون تست'],['text' => 'غیر فعال شدن کرون تست']],
-        [['text' => 'فعال شدن کرون حجم'],['text' => 'غیر فعال شدن کرون حجم']],
-        [['text' => 'فعال شدن کرون زمان'],['text' => 'غیر فعال شدن کرون زمان']],
-        [['text' => 'فعال شدن کرون حذف'],['text' => 'غیر فعال شدن کرون حذف']],
-        [['text' => "زمان حذف اکانت"]],
+        [['text' => $textbotlang['Admin']['cron']['test']['active']], ['text' => $textbotlang['Admin']['cron']['test']['disable']]],
+        [['text' => $textbotlang['Admin']['cron']['volume']['active']], ['text' => $textbotlang['Admin']['cron']['volume']['disable']]],
+        [['text' => $textbotlang['Admin']['cron']['time']['active']], ['text' => $textbotlang['Admin']['cron']['time']['disable']]],
+        [['text' => $textbotlang['Admin']['cron']['remove']['active']], ['text' => $textbotlang['Admin']['cron']['remove']['disable']]],
+        [['text' => $textbotlang['Admin']['cron']['remove']['timeset']]],
         [['text' => $textbotlang['Admin']['Back-Adminment']]]
     ],
     'resize_keyboard' => true
 ]);
-$helpedit =  json_encode([
+
+$helpedit = json_encode([
     'keyboard' => [
-        [['text' =>"ویرایش نام"],['text' =>"ویرایش توضیحات"]],
-        [['text' => "ویرایش رسانه"]],
+        [['text' => $textbotlang['Admin']['Help']['change']['name']], ['text' => $textbotlang['Admin']['Help']['change']['dec']]],
+        [['text' => $textbotlang['Admin']['Help']['change']['editmedia']]],
         [['text' => $textbotlang['Admin']['Back-Adminment']]]
     ],
     'resize_keyboard' => true

@@ -93,7 +93,7 @@ if ($text == $textbotlang['Admin']['channel']['setting']) {
     sendmessage($from_id, $textbotlang['users']['selectoption'], $channelkeyboard, 'HTML');
 }
 #-------------------------#
-if ($text == $textbotlang['Admin']['Statistics']['titlebtn']) {
+if ($text == $textbotlang['Admin']['keyboardadmin']['bot_statistics']) {
     $current_date_time = time();
     $datefirst = $current_date_time - 86400;
     $desired_date_time_start = $current_date_time - 3600;
@@ -431,7 +431,7 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['bot_text_settings']) {
     sendmessage($from_id, $textbotlang['Admin']['ManageUser']['SaveText'], $textbot, 'HTML');
     update("textbot", "text", $text, "id_text", "text_Add_Balance");
     step('home', $from_id);
-} elseif ($text == $textbotlang['Admin']['changetext']['text_sell']) {
+} elseif ($text == $textbotlang['users']['changetext']['buy_subscription_button']) {
     sendmessage($from_id, $textbotlang['Admin']['ManageUser']['ChangeTextGet'] . $datatextbot['text_sell'], $backadmin, 'HTML');
     step('text_sell', $from_id);
 } elseif ($user['step'] == "text_sell") {
