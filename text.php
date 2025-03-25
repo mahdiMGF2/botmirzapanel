@@ -488,15 +488,27 @@ $textbotlang['users']['moeny']['rejectresid'] = "❌ کاربر گرامی پر�
 🛒 کد پیگیری پرداخت: %s";
 $textbotlang['users']['moeny']['sendcart'] = "💳 شماره کارت خود را ارسال کنید
     
-    ⭕️ همراه با شماره کارت می توانید نام صاحب کارت هم ارسال نمایید.
+⭕️ همراه با شماره کارت می توانید نام صاحب کارت هم ارسال نمایید.
     
-    💳 شماره کارت فعلی شما :%s";
+💳 شماره کارت فعلی شما :%s";
 $textbotlang['users']['moeny']['getapinowpayment'] = "⚙️ api سایت nowpayments.io را ارسال نمایید
     
-    api nowpayment :%s";
+api nowpayment :%s";
 $textbotlang['users']['moeny']['getmarchent'] = "💳 مرچنت کد خود را ازآقای پرداخت دریافت و در این قسمت وارد کنید
     
-    مرچنت کد فعلی شما :%s";
+مرچنت کد فعلی شما :%s";
+$textbotlang['users']['moeny']['invalidprice'] = "مبلغ ارسال شده نامعتبر است";
+$textbotlang['users']['moeny']['payment_success'] = "پرداخت موفق";
+$textbotlang['users']['moeny']['payment_failed'] = "پرداخت ناموفق بوده است";
+$textbotlang['users']['moeny']['payment_success_dec'] = "از انجام تراکنش متشکریم";
+$textbotlang['users']['moeny']['invoice_title'] = "فاکتور پرداخت";
+$textbotlang['users']['moeny']['transaction_number'] = "شماره تراکنش";
+$textbotlang['users']['moeny']['payment_amount'] = "مبلغ پرداختی :";
+$textbotlang['users']['moeny']['currency'] = "تومان";
+$textbotlang['users']['moeny']['date_label'] = "تاریخ : ";
+$textbotlang['users']['moeny']['back_to_bot'] = "بازگشت به ربات";
+
+
 
 
 $textbotlang['users']['format']['byte'] = "بایت";
@@ -1224,6 +1236,16 @@ $textbotlang['Admin']['Report']['reportremove'] = "⭕️ یک ادمین سرو
 آیدی عددی درخواست کننده کنسل کردن : %s";
 $textbotlang['Admin']['Report']['reportremovecron'] = "❌ سرویس با نام کاربری %s حذف گردید
             دلیل حذف : %s ";
+$textbotlang['Admin']['Report']['aqayepardakht'] = "💵 پرداخت جدید
+        
+آیدی عددی کاربر : %s
+مبلغ تراکنش %s
+روش پرداخت :  درگاه آقای پرداخت";
+$textbotlang['Admin']['Report']['nowpayment'] = "💵 پرداخت جدید
+        
+آیدی عددی کاربر : %s
+مبلغ تراکنش %s
+روش پرداخت : nowpayment  ";
 $textbotlang['users']['Report']['discountused'] = "⭕️ یک کاربر با نام کاربری @%s  و آیدی عددی %s از کد تخفیف %s استفاده کرد.";
 $textbotlang['users']['Report']['reportbuy'] = " 🛍 خرید جدید
             
