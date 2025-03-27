@@ -1,13 +1,14 @@
 <?php
-$NP_id = htmlspecialchars($_GET['NP_id'], ENT_QUOTES, 'UTF-8');
 $rootPath = filter_input(INPUT_SERVER, 'DOCUMENT_ROOT', FILTER_SANITIZE_STRING);
 $PHP_SELF = filter_input(INPUT_SERVER, 'PHP_SELF', FILTER_SANITIZE_STRING);
 $Pathfile = dirname(dirname($PHP_SELF, 2));
+ini_set('error_log', 'error_log');
 $Pathfiles = $rootPath.$Pathfile;
 require_once $Pathfiles.'/config.php';
 require_once $Pathfiles.'/functions.php';
 require_once $Pathfiles.'/jdf.php';
 require_once $Pathfiles.'/botapi.php';
+require_once $Pathfiles.'/text.php';
 $apinowpayments = select("PaySetting", "ValuePay", "NamePay", "apinowpayment","select")['ValuePay'];
 $NP_id = htmlspecialchars($_GET['NP_id'], ENT_QUOTES, 'UTF-8');
 $price_rate = tronratee();
@@ -36,7 +37,7 @@ if($response['payment_status'] == "finished"){
     $payment_status = $textbotlang['users']['moeny']['payment_success'];
     $price = intval($usd*$response['price_amount']);
     $dec_payment_status = $textbotlang['users']['moeny']['payment_success_dec'];
-    $Payment_report = select("Payment_report", "price", "id_order", $response['order_id'],"select");
+    $Payment_report = select("Payment_report", "*", "id_order", $response['order_id'],"select");
     $Balance_id = select("user", "*", "id", $Payment_report['id_user'], "select");
     if($Payment_report['payment_Status'] != "paid"){
         DirectPayment($Payment_report['id_order']);
@@ -73,6 +74,7 @@ else{
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            direction: rtl;
         }
 
         .confirmation-box {
@@ -107,7 +109,7 @@ else{
 <body>
 <div class="confirmation-box">
     <h1><?php echo $payment_status ?></h1>
-    <p><?php echo $textbotlang['users']['moeny']['transaction_number']; ?><span><?php echo $invoice_id ?></span></p>
+    <p><?php echo $textbotlang['users']['moeny']['transaction_number']; ?><span><?php echo $Payment_report['id_order']?></span></p>
     <p><?php echo $textbotlang['users']['moeny']['payment_amount']; ?> <span><?php echo $price; ?></span><?php echo $textbotlang['users']['moeny']['currency']; ?></p>
     <p><?php echo $textbotlang['users']['moeny']['date_label']; ?> <span><?php echo jdate('Y/m/d') ?></span></p>
     <p><?php echo $dec_payment_status ?></p>

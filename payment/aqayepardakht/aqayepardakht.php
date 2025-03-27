@@ -1,13 +1,12 @@
 <?php
 $rootPath = filter_input(INPUT_SERVER, 'DOCUMENT_ROOT', FILTER_SANITIZE_STRING);
 $PHP_SELF = filter_input(INPUT_SERVER, 'PHP_SELF', FILTER_SANITIZE_STRING);
+ini_set('error_log', 'error_log');
 $Pathfile = dirname(dirname($PHP_SELF, 2));
 $Pathfiles = $rootPath.$Pathfile;
-$Pathfile = $Pathfiles.'/config.php';
-$functions = $Pathfiles.'/functions.php';
-$functions = $Pathfiles.'/text.php';
-require_once $Pathfile;
-require_once $functions;
+require_once $Pathfiles.'/config.php';
+require_once $Pathfiles.'/functions.php';
+require_once $Pathfiles.'/text.php';
 $amount =     htmlspecialchars($_GET['price'], ENT_QUOTES, 'UTF-8');;
 $invoice_id = htmlspecialchars($_GET['order_id'], ENT_QUOTES, 'UTF-8');;
 $PaySetting = select("PaySetting", "ValuePay", "NamePay", "merchant_id_aqayepardakht","select")['ValuePay'];
