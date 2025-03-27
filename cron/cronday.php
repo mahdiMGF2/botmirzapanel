@@ -12,8 +12,7 @@ $ManagePanel = new ManagePanel();
 // buy service
 $stmt = $pdo->prepare("SELECT * FROM invoice WHERE (status = 'active' OR status = 'end_of_volume') AND name_product != 'usertest' ORDER BY RAND() LIMIT 5");
 $stmt->execute();
-while ($line = $stmt->fetch(PDO::FETCH_ASSOC)) {
-    $resultss = $line;
+while ($resultss = $stmt->fetch(PDO::FETCH_ASSOC)) {
     $marzban_list_get = select("marzban_panel","*","name_panel",$resultss['Service_location'],"select");
     $get_username_Check = $ManagePanel->DataUser($resultss['Service_location'],$resultss['username']);
     if($get_username_Check['status'] != "Unsuccessful"){

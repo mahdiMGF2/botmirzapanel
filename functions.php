@@ -174,6 +174,8 @@ function outputlunk($text){
     curl_setopt($ch, CURLOPT_URL, $text);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
     $userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36';
     curl_setopt($ch, CURLOPT_USERAGENT, $userAgent);
     $response = curl_exec($ch);
@@ -437,4 +439,25 @@ function channel($id_channel){
     }else{
         return $channel_link;
     }
+}
+function addFieldToTable($tableName, $fieldName, $defaultValue = null , $datatype = "VARCHAR(500)") {
+    global $pdo;
+    $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM information_schema.tables WHERE table_name = :tableName");
+    $stmt->bindParam(':tableName', $tableName);
+    $stmt->execute();
+    $tableExists = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($tableExists['count'] == 0)return;
+    $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?");
+    $stmt->execute([$pdo->query("SELECT DATABASE()")->fetchColumn(), $tableName, $fieldName]);
+    $filedExists = $stmt->fetch(PDO::FETCH_ASSOC);
+    if($filedExists['count'] != 0)return;
+    $query = "ALTER TABLE $tableName ADD $fieldName $datatype";
+    $statement = $pdo->prepare($query);
+    $statement->execute();
+    if($defaultValue != null){
+        $stmt = $pdo->prepare("UPDATE $tableName SET $fieldName= ?");
+        $stmt->bindParam(1, $defaultValue);
+        $stmt->execute();
+    }
+    echo "The $fieldName field was added ✅";
 }
