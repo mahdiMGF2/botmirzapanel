@@ -763,7 +763,7 @@ function install_bot_with_marzban() {
     fi
 
     ROOT_USER="root"
-    MYSQL_CONTAINER=$(docker ps -q --filter "name=marzban_mysql" --no-trunc)
+    MYSQL_CONTAINER=$(docker ps -q --filter "name=marzban-mysql-1" --no-trunc)
 
     # Try connecting directly to host first (for mysql:latest with network_mode: host)
     mysql -u "$ROOT_USER" -p"$MYSQL_ROOT_PASSWORD" -h 127.0.0.1 -P 3306 -e "SELECT 1;" 2>/tmp/mysql_error.log
