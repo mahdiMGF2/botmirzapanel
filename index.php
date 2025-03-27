@@ -1195,7 +1195,7 @@ if ($user['step'] == "createusertest" || preg_match('/locationtests_(.*)/', $dat
     $limit_usertest = $user['limit_usertest'] - 1;
     update("user", "limit_usertest", $limit_usertest, "id", $from_id);
     step('home', $from_id);
-    $text_report = sprintf($textbotlang['Admin']['Report']['ReportTestCreate'],$username_ac,$user['username'],$from_id,$user['number'],$name_panel);
+    $text_report = sprintf($textbotlang['Admin']['Report']['ReportTestCreate'] ,$from_id,$username,$username_ac,$first_name,$marzban_list_get['name_panel'],$user['number']);
     if (isset($setting['Channel_Report']) &&strlen($setting['Channel_Report']) > 0) {
         sendmessage($setting['Channel_Report'], $text_report, null, 'HTML');
     }
@@ -1785,78 +1785,7 @@ if ($text == $datatextbot['text_Add_Balance'] || $text == "/wallet") {
         $textnowpayments = sprintf($textbotlang['users']['moeny']['iranpay'],$randomString,$pay_address,$trxprice,$pricetoman,$trx,$pricetoman);
         sendmessage($from_id, $textnowpayments, $paymentkeyboard, 'HTML');
     }
-    if ($datain == "perfectmoney") {
-        deletemessage($from_id, $message_id);
-        sendmessage($from_id, $textbotlang['users']['perfectmoney']['getvcode'], $backuser, 'HTML');
-        step('getvcodeuser', $from_id);
-    }
 
-}
-if ($user['step'] == "getvcodeuser") {
-    update("user", "Processing_value", $text, "id", $from_id);
-    step('getvnumbervuser', $from_id);
-    sendmessage($from_id, $textbotlang['users']['perfectmoney']['getvnumber'], $backuser, 'HTML');
-} elseif ($user['step'] == "getvnumbervuser") {
-    step('home', $from_id);
-    $Voucher = ActiveVoucher($user['Processing_value'], $text);
-    $lines = explode("\n", $Voucher);
-    foreach ($lines as $line) {
-        if (strpos($line, "Error:") !== false) {
-            $errorMessage = trim(str_replace("Error:", "", $line));
-            break;
-        }
-    }
-    if ($errorMessage == "Invalid ev_number or ev_code") {
-        sendmessage($from_id, $textbotlang['users']['perfectmoney']['invalidvcodeorev'], $keyboard, 'HTML');
-        return;
-    }
-    if ($errorMessage == "Invalid ev_number") {
-        sendmessage($from_id, $textbotlang['users']['perfectmoney']['invalid_ev_number'], $keyboard, 'HTML');
-        return;
-    }
-    if ($errorMessage == "Invalid ev_code") {
-        sendmessage($from_id, $textbotlang['users']['perfectmoney']['invalidvcode'], $keyboard, 'HTML');
-        return;
-    }
-    if (isset ($errorMessage)) {
-        sendmessage($from_id, $textbotlang['users']['perfectmoney']['errors'], null, 'HTML');
-        foreach ($admin_ids as $id_admin) {
-            $texterrors = "";
-            sendmessage($id_admin, sprintf($textbotlang['users']['moeny']['eror'],$texterrors,$form_id,$username), null, 'HTML');
-        }
-        return;
-    }
-    $Balance_id = select("user", "*", "id", $from_id, "select");
-    $startTag = "<td>VOUCHER_AMOUNT</td><td>";
-    $endTag = "</td>";
-    $startPos = strpos($Voucher, $startTag) + strlen($startTag);
-    $endPos = strpos($Voucher, $endTag, $startPos);
-    $voucherAmount = substr($Voucher, $startPos, $endPos - $startPos);
-    $USD = $voucherAmount * json_decode(file_get_contents('https://api.tetherland.com/currencies'), true)['data']['currencies']['USDT']['price'];
-    $USD = number_format($USD, 0);
-    update("Payment_report","payment_Status","paid","id_order",$Payment_report['id_order']);
-    $randomString = bin2hex(random_bytes(5));
-    $dateacc = date('Y/m/d H:i:s');
-    $payment_Status = "paid";
-    $Payment_Method = "perfectmoney";
-    if($user['Processing_value_tow'] == "getconfigafterpay"){
-        $invoice = "{$user['Processing_value_tow']}|{$user['Processing_value_one']}";
-    }else{
-        $invoice = "0|0";
-    }
-    $stmt = $pdo->prepare("INSERT INTO Payment_report (id_user, id_order, time, price, payment_Status, Payment_Method,invoice) VALUES (?, ?, ?, ?, ?, ?,?)");
-    $stmt->bindParam(1, $from_id);
-    $stmt->bindParam(2, $randomString);
-    $stmt->bindParam(3, $dateacc);
-    $stmt->bindParam(4, $USD);
-    $stmt->bindParam(5, $payment_Status);
-    $stmt->bindParam(6, $Payment_Method);
-    $stmt->bindParam(7, $invoice);
-    $stmt->execute();
-    DirectPayment($randomString);
-    update("user","Processing_value","0", "id",$Balance_id['id']);
-    update("user","Processing_value_one","0", "id",$Balance_id['id']);
-    update("user","Processing_value_tow","0", "id",$Balance_id['id']);
 }
 if (preg_match('/Confirmpay_user_(\w+)_(\w+)/', $datain, $dataget)) {
     $id_payment = $dataget[1];

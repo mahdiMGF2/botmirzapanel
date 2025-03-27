@@ -1181,9 +1181,129 @@ if ($text == $textbotlang['Admin']['managepanel']['methodusername']) {
 #----------------[  MANAGE PAYMENT   ]------------------#
 
 if ($text == $textbotlang['Admin']['keyboardadmin']['finance']) {
-    sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboardpaymentManage, 'HTML');
+    $sqlstatus_cart = select("PaySetting", "ValuePay", "NamePay", "Cartstatus", "select")['ValuePay'];
+    $sqlstatus_nowpayment = select("PaySetting", "ValuePay", "NamePay", "nowpaymentstatus", "select")['ValuePay'];
+    $sqlstatus_iranpay = select("PaySetting", "ValuePay", "NamePay", "digistatus", "select")['ValuePay'];
+    $sqlstatus_aqayepardakht = select("PaySetting", "ValuePay", "NamePay", "statusaqayepardakht", "select")['ValuePay'];
+    $status_cart = [
+        'oncard' => $textbotlang['Admin']['turnon'],
+        'offcard' => $textbotlang['Admin']['turnoff'],
+    ][$sqlstatus_cart];
+    $status_nowpayment = [
+        'onnowpayment' => $textbotlang['Admin']['turnon'],
+        'offnowpayment' => $textbotlang['Admin']['turnoff'],
+    ][$sqlstatus_nowpayment];
+    $status_iranpay = [
+        'ondigi' => $textbotlang['Admin']['turnon'],
+        'offdigi' => $textbotlang['Admin']['turnoff'],
+    ][$sqlstatus_iranpay];
+    $status_qayepardakht = [
+        'onaqayepardakht' => $textbotlang['Admin']['turnon'],
+        'offaqayepardakht' => $textbotlang['Admin']['turnoff'],
+    ][$sqlstatus_aqayepardakht];
+    $keyboardmoeny = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $textbotlang['users']['moeny']['setting'], 'callback_data' => "settingcart"],
+                ['text' => $status_cart, 'callback_data' => "editpay-cart-".$sqlstatus_cart],
+                ['text' => $textbotlang['users']['moeny']['cart_to_Cart_btn'], 'callback_data' => "none"],
+            ],
+            [
+                ['text' => $textbotlang['users']['moeny']['setting'], 'callback_data' => "SettingnowPayment"],
+                ['text' => $status_nowpayment, 'callback_data' => "editpay-nowpayment-".$sqlstatus_cart],
+                ['text' => $textbotlang['users']['moeny']['nowpayment_gateway_status'], 'callback_data' => "none"],
+            ],
+            [
+                ['text' => $textbotlang['users']['moeny']['setting'], 'callback_data' => "Settingaqayepardakht"],
+                ['text' => $status_qayepardakht, 'callback_data' => "editpay-aqayepardakht-".$sqlstatus_aqayepardakht],
+                ['text' => $textbotlang['users']['moeny']['mr_payment_gateway'], 'callback_data' => "none"],
+            ],
+            [
+                ['text' => $status_iranpay, 'callback_data' => "editpay-iranpay-".$sqlstatus_iranpay],
+                ['text' => $textbotlang['users']['moeny']['currency_rial_gateway'], 'callback_data' => "none"],
+            ],
+        ]
+    ]);
+    sendmessage($from_id,$textbotlang['users']['moeny']['settingpay'], $keyboardmoeny, 'HTML');
+}elseif(preg_match('/^editpay-(.*)-(.*)/', $datain, $dataget)) {
+    $methodpay = $dataget[1];
+    $status = $dataget[2];
+    if($methodpay == "cart"){
+        if($status == "oncard"){
+            $value = "offcard";
+        }else{
+            $value = "oncard";
+        }
+        update("PaySetting", "ValuePay", $value, "NamePay", "Cartstatus");
+    }elseif($methodpay == "nowpayment"){
+        if($status == "onnowpayment"){
+            $value = "offnowpayment";
+        }else{
+            $value = "onnowpayment";
+        }
+        update("PaySetting", "ValuePay", $value, "NamePay", "nowpaymentstatus");
+    }elseif($methodpay == "iranpay"){
+        if($status == "ondigi"){
+            $value = "offdigi";
+        }else{
+            $value = "ondigi";
+        }
+        update("PaySetting", "ValuePay", $value, "NamePay", "digistatus");
+    }
+    elseif($methodpay == "aqayepardakht"){
+        if($status == "onaqayepardakht"){
+            $value = "offaqayepardakht";
+        }else{
+            $value = "onaqayepardakht";
+        }
+        update("PaySetting", "ValuePay", $value, "NamePay", "statusaqayepardakht");
+    }
+    $sqlstatus_cart = select("PaySetting", "ValuePay", "NamePay", "Cartstatus", "select")['ValuePay'];
+    $sqlstatus_nowpayment = select("PaySetting", "ValuePay", "NamePay", "nowpaymentstatus", "select")['ValuePay'];
+    $sqlstatus_iranpay = select("PaySetting", "ValuePay", "NamePay", "digistatus", "select")['ValuePay'];
+    $sqlstatus_aqayepardakht = select("PaySetting", "ValuePay", "NamePay", "statusaqayepardakht", "select")['ValuePay'];
+    $status_cart = [
+        'oncard' => $textbotlang['Admin']['turnon'],
+        'offcard' => $textbotlang['Admin']['turnoff'],
+    ][$sqlstatus_cart];
+    $status_nowpayment = [
+        'onnowpayment' => $textbotlang['Admin']['turnon'],
+        'offnowpayment' => $textbotlang['Admin']['turnoff'],
+    ][$sqlstatus_nowpayment];
+    $status_iranpay = [
+        'ondigi' => $textbotlang['Admin']['turnon'],
+        'offdigi' => $textbotlang['Admin']['turnoff'],
+    ][$sqlstatus_iranpay];
+    $status_qayepardakht = [
+        'onaqayepardakht' => $textbotlang['Admin']['turnon'],
+        'offaqayepardakht' => $textbotlang['Admin']['turnoff'],
+    ][$sqlstatus_aqayepardakht];
+    $keyboardmoeny = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $textbotlang['users']['moeny']['setting'], 'callback_data' => "settingcart"],
+                ['text' => $status_cart, 'callback_data' => "editpay-cart-".$sqlstatus_cart],
+                ['text' => $textbotlang['users']['moeny']['cart_to_Cart_btn'], 'callback_data' => "none"],
+            ],
+            [
+                ['text' => $textbotlang['users']['moeny']['setting'], 'callback_data' => "SettingnowPayment"],
+                ['text' => $status_nowpayment, 'callback_data' => "editpay-nowpayment-".$sqlstatus_cart],
+                ['text' => $textbotlang['users']['moeny']['nowpayment_gateway_status'], 'callback_data' => "none"],
+            ],
+            [
+                ['text' => $textbotlang['users']['moeny']['setting'], 'callback_data' => "Settingaqayepardakht"],
+                ['text' => $status_qayepardakht, 'callback_data' => "editpay-aqayepardakht-".$sqlstatus_aqayepardakht],
+                ['text' => $textbotlang['users']['moeny']['mr_payment_gateway'], 'callback_data' => "none"],
+            ],
+            [
+                ['text' => $status_iranpay, 'callback_data' => "editpay-iranpay-".$sqlstatus_iranpay],
+                ['text' => $textbotlang['users']['moeny']['currency_rial_gateway'], 'callback_data' => "none"],
+            ],
+        ]
+    ]);
+    Editmessagetext($from_id,$message_id,$textbotlang['users']['moeny']['settingpay'], $keyboardmoeny);
 }
-if ($text == $textbotlang['users']['moeny']['offline_gateway_settings']) {
+elseif ($datain == "settingcart") {
     sendmessage($from_id, $textbotlang['users']['selectoption'], $CartManage, 'HTML');
 }
 if ($text == $textbotlang['users']['moeny']['card_number_settings']) {
@@ -1195,25 +1315,7 @@ if ($text == $textbotlang['users']['moeny']['card_number_settings']) {
     update("PaySetting", "ValuePay", $text, "NamePay", "CartDescription");
     step('home', $from_id);
 }
-if ($text == $textbotlang['users']['moeny']['offline_gateway_status']) {
-    $PaySetting = select("PaySetting", "ValuePay", "NamePay", "Cartstatus", "select")['ValuePay'];
-    $card_Status = json_encode([
-        'inline_keyboard' => [
-            [
-                ['text' => $PaySetting, 'callback_data' => $PaySetting],
-            ],
-        ]
-    ]);
-    sendmessage($from_id, $textbotlang['Admin']['Status']['cardTitle'], $card_Status, 'HTML');
-}
-if ($datain == "oncard") {
-    update("PaySetting", "ValuePay", "offcard", "NamePay", "Cartstatus");
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['cardStatusOff'], null);
-} elseif ($datain == "offcard") {
-    update("PaySetting", "ValuePay", "oncard", "NamePay", "Cartstatus");
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['cardStatuson'], null);
-}
-if ($text == $textbotlang['users']['moeny']['nowpayment_settings']) {
+if ($datain == "SettingnowPayment") {
     sendmessage($from_id, $textbotlang['users']['selectoption'], $NowPaymentsManage, 'HTML');
 }
 if ($text == $textbotlang['users']['moeny']['nowpayment_api'] ) {
@@ -1225,43 +1327,7 @@ if ($text == $textbotlang['users']['moeny']['nowpayment_api'] ) {
     update("PaySetting", "ValuePay", $text, "NamePay", "apinowpayment");
     step('home', $from_id);
 }
-if ($text == $textbotlang['users']['moeny']['nowpayment_gateway_status']) {
-    $PaySetting = select("PaySetting", "ValuePay", "NamePay", "nowpaymentstatus", "select")['ValuePay'];
-    $now_Status = json_encode([
-        'inline_keyboard' => [
-            [
-                ['text' => $PaySetting, 'callback_data' => $PaySetting],
-            ],
-        ]
-    ]);
-    sendmessage($from_id, $textbotlang['Admin']['Status']['nowpaymentsTitle'], $now_Status, 'HTML');
-}
-if ($datain == "onnowpayment") {
-    update("PaySetting", "ValuePay", "offnowpayment", "NamePay", "nowpaymentstatus");
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['nowpaymentsStatusOff'], null);
-} elseif ($datain == "offnowpayment") {
-    update("PaySetting", "ValuePay", "onnowpayment", "NamePay", "nowpaymentstatus");
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['nowpaymentsStatuson'], null);
-}
-if ($text == $textbotlang['users']['moeny']['currency_rial_gateway']) {
-    $PaySetting = select("PaySetting", "ValuePay", "NamePay", "digistatus", "select")['ValuePay'];
-    $digi_Status = json_encode([
-        'inline_keyboard' => [
-            [
-                ['text' => $PaySetting, 'callback_data' => $PaySetting],
-            ],
-        ]
-    ]);
-    sendmessage($from_id, $textbotlang['Admin']['Status']['digiTitle'], $digi_Status, 'HTML');
-}
-if ($datain == "offdigi") {
-    update("PaySetting", "ValuePay", "ondigi", "NamePay", "digistatus");
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['digiStatuson'], null);
-} elseif ($datain == "ondigi") {
-    update("PaySetting", "ValuePay", "offdigi", "NamePay", "digistatus");
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['digiStatusOff'], null);
-}
-if ($text == $textbotlang['users']['moeny']['mr_payment_gateway']) {
+if ($datain == "Settingaqayepardakht") {
     sendmessage($from_id, $textbotlang['users']['selectoption'], $aqayepardakht, 'HTML');
 }
 if ($text == $textbotlang['users']['moeny']['mr_payment_merchant_settings']) {
@@ -1273,24 +1339,7 @@ if ($text == $textbotlang['users']['moeny']['mr_payment_merchant_settings']) {
     update("PaySetting", "ValuePay", $text, "NamePay", "merchant_id_aqayepardakht");
     step('home', $from_id);
 }
-if ($text == $textbotlang['users']['moeny']['mr_payment_gateway_status']) {
-    $PaySetting = select("PaySetting", "ValuePay", "NamePay", "statusaqayepardakht", "select")['ValuePay'];
-    $aqayepardakht_Status = json_encode([
-        'inline_keyboard' => [
-            [
-                ['text' => $PaySetting, 'callback_data' => $PaySetting],
-            ],
-        ]
-    ]);
-    sendmessage($from_id, $textbotlang['Admin']['Status']['aqayepardakhtTitle'], $aqayepardakht_Status, 'HTML');
-}
-if ($datain == "offaqayepardakht") {
-    update("PaySetting", "ValuePay", "onaqayepardakht", "NamePay", "statusaqayepardakht");
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['aqayepardakhtStatuson'], null);
-} elseif ($datain == "onaqayepardakht") {
-    update("PaySetting", "ValuePay", "offaqayepardakht", "NamePay", "statusaqayepardakht");
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['aqayepardakhtStatusOff'], null);
-}
+essagetext($from_id, $message_id, $textbotlang['Admin']['Status']['aqayepardakhtStatusOff'], null);
 if ($text == $textbotlang['Admin']['keyboardadmin']['manage_panel']) {
     sendmessage($from_id, $textbotlang['Admin']['managepanel']['getloc'], $json_list_marzban_panel, 'HTML');
     step('GetLocationEdit', $from_id);
@@ -1452,53 +1501,6 @@ if ($text == $textbotlang['Admin']['Balance']['SendBalanceAll']) {
         update("user", "Balance", $Balance_add_user, "id", $balance['id']);
     }
     step('home', $from_id);
-}
-if ($text == $textbotlang['users']['moeny']['perfect_money_gateway']) {
-    sendmessage($from_id, $textbotlang['users']['selectoption'], $perfectmoneykeyboard, 'HTML');
-} elseif ($text == $textbotlang['Admin']['perfectmoney']['setnumberaccount']) {
-    $PaySetting = select("PaySetting", "ValuePay", "NamePay", "perfectmoney_AccountID", "select")['ValuePay'];
-    sendmessage($from_id,sprintf($textbotlang['Admin']['perfectmoney']['getaccountnumber'],$PaySetting), $backadmin, 'HTML');
-    step('setnumberaccount', $from_id);
-} elseif ($user['step'] == "setnumberaccount") {
-    sendmessage($from_id, $textbotlang['Admin']['perfectmoney']['setnumberacount'], $perfectmoneykeyboard, 'HTML');
-    update("PaySetting", "ValuePay", $text, "NamePay", "perfectmoney_AccountID");
-    step('home', $from_id);
-}
-if ($text == $textbotlang['Admin']['perfectmoney']['setnumuberwallet']) {
-    $PaySetting = select("PaySetting", "ValuePay", "NamePay", "perfectmoney_Payer_Account", "select")['ValuePay'];
-    sendmessage($from_id, sprintf($textbotlang['Admin']['perfectmoney']['getwalletperfect'],$PaySetting), $backadmin, 'HTML');
-    step('perfectmoney_Payer_Account', $from_id);
-} elseif ($user['step'] == "perfectmoney_Payer_Account") {
-    sendmessage($from_id, $textbotlang['Admin']['perfectmoney']['setnumberacount'], $perfectmoneykeyboard, 'HTML');
-    update("PaySetting", "ValuePay", $text, "NamePay", "perfectmoney_Payer_Account");
-    step('home', $from_id);
-}
-if ($text == $textbotlang['Admin']['perfectmoney']['setpasswordaccount']) {
-    $PaySetting = select("PaySetting", "ValuePay", "NamePay", "perfectmoney_PassPhrase", "select")['ValuePay'];
-    sendmessage($from_id, sprintf($textbotlang['Admin']['perfectmoney']['getpasswordperfect'],$PaySetting), $backadmin, 'HTML');
-    step('perfectmoney_PassPhrase', $from_id);
-} elseif ($user['step'] == "perfectmoney_PassPhrase") {
-    sendmessage($from_id, $textbotlang['Admin']['perfectmoney']['setnumberacount'], $perfectmoneykeyboard, 'HTML');
-    update("PaySetting", "ValuePay", $text, "NamePay", "perfectmoney_PassPhrase");
-    step('home', $from_id);
-}
-if ($text == $textbotlang['Admin']['perfectmoney']['statusperfect']) {
-    $PaySetting = select("PaySetting", "ValuePay", "NamePay", "status_perfectmoney", "select")['ValuePay'];
-    $status_perfectmoney = json_encode([
-        'inline_keyboard' => [
-            [
-                ['text' => $PaySetting, 'callback_data' => $PaySetting],
-            ],
-        ]
-    ]);
-    sendmessage($from_id, $textbotlang['Admin']['Status']['perfectmoneyTitle'], $status_perfectmoney, 'HTML');
-}
-if ($datain == "offperfectmoney") {
-    update("PaySetting", "ValuePay", "onperfectmoney", "NamePay", "status_perfectmoney");
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['perfectmoneyStatuson'], null);
-} elseif ($datain == "onperfectmoney") {
-    update("PaySetting", "ValuePay", "offperfectmoney", "NamePay", "status_perfectmoney");
-    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['perfectmoneyStatusOff'], null);
 }
 if ($text == $textbotlang['Admin']['Discountsell']['create']) {
     sendmessage($from_id, $textbotlang['Admin']['Discountsell']['GetCode'], $backadmin, 'HTML');

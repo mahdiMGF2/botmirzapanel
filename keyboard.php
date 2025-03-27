@@ -80,35 +80,17 @@ $keyboardadmin = json_encode([
     ],
     'resize_keyboard' => true
 ]);
-$keyboardpaymentManage = json_encode([
-    'keyboard' => [
-        [['text' => $textbotlang['users']['moeny']['offline_gateway_settings']]],
-        [['text' => $textbotlang['users']['moeny']['nowpayment_settings']], ['text' => $textbotlang['users']['moeny']['currency_rial_gateway']]],
-        [['text' => $textbotlang['users']['moeny']['mr_payment_gateway']], ['text' => $textbotlang['users']['moeny']['perfect_money_gateway']]],
-        [['text' => $textbotlang['Admin']['Back-Adminment']]]
-    ],
-    'resize_keyboard' => true
-]);
 
 $CartManage = json_encode([
     'keyboard' => [
         [['text' => $textbotlang['users']['moeny']['card_number_settings']]],
-        [['text' => $textbotlang['users']['moeny']['offline_gateway_status']]],
         [['text' => $textbotlang['Admin']['Back-Adminment']]]
     ],
     'resize_keyboard' => true
 ]);
-$alsat = json_encode([
-    'keyboard' => [
-        [['text' => $textbotlang['users']['moeny']['alsat_merchant_settings']], ['text' => $textbotlang['users']['moeny']['alsat_gateway_status']]],
-        [['text' => $textbotlang['Admin']['Back-Adminment']]]
-    ],
-    'resize_keyboard' => true
-]);
-
 $aqayepardakht = json_encode([
     'keyboard' => [
-        [['text' => $textbotlang['users']['moeny']['mr_payment_merchant_settings']], ['text' => $textbotlang['users']['moeny']['mr_payment_gateway_status']]],
+        [['text' => $textbotlang['users']['moeny']['mr_payment_merchant_settings']]],
         [['text' => $textbotlang['Admin']['Back-Adminment']]]
     ],
     'resize_keyboard' => true
@@ -117,7 +99,6 @@ $aqayepardakht = json_encode([
 $NowPaymentsManage = json_encode([
     'keyboard' => [
         [['text' => $textbotlang['users']['moeny']['nowpayment_api']]],
-        [['text' => $textbotlang['users']['moeny']['nowpayment_gateway_status']]],
         [['text' => $textbotlang['Admin']['Back-Adminment']]]
     ],
     'resize_keyboard' => true
@@ -152,7 +133,6 @@ $PaySettingcard = select("PaySetting", "ValuePay", "NamePay", 'Cartstatus',"sele
 $PaySettingnow = select("PaySetting", "ValuePay", "NamePay", 'nowpaymentstatus',"select")['ValuePay'];
 $PaySettingdigi = select("PaySetting", "ValuePay", "NamePay", 'digistatus',"select")['ValuePay'];
 $PaySettingaqayepardakht = select("PaySetting", "ValuePay", "NamePay", 'statusaqayepardakht',"select")['ValuePay'];
-$PaySettingperfectmoney = select("PaySetting", "ValuePay", "NamePay", 'status_perfectmoney',"select")['ValuePay'];
 $step_payment = [
     'inline_keyboard' => []
 ];
@@ -174,11 +154,6 @@ if($PaySettingdigi == "ondigi"){
 if($PaySettingaqayepardakht == "onaqayepardakht"){
     $step_payment['inline_keyboard'][] = [
         ['text' => $textbotlang['users']['moeny']['mr_payment_gateway'] , 'callback_data' => "aqayepardakht" ]
-    ];
-}
-if($PaySettingperfectmoney == "onperfectmoney"){
-    $step_payment['inline_keyboard'][] = [
-        ['text' => $textbotlang['users']['moeny']['perfect_money_gateway'] , 'callback_data' => "perfectmoney" ]
     ];
 }
 $step_payment['inline_keyboard'][] = [
@@ -547,15 +522,6 @@ $supportoption = json_encode([
         ],
     ]
 ]);
-$perfectmoneykeyboard = json_encode([
-    'keyboard' => [
-        [['text' => $textbotlang['Admin']['perfectmoney']['setnumuberwallet']], ['text' => $textbotlang['Admin']['perfectmoney']['setnumberaccount']]],
-        [['text' => $textbotlang['Admin']['perfectmoney']['setpasswordaccount']], ['text' => $textbotlang['Admin']['perfectmoney']['statusperfect']]],
-        [['text' => $textbotlang['Admin']['Back-Adminment']]]
-    ],
-    'resize_keyboard' => true
-]);
-
 $affiliates = json_encode([
     'keyboard' => [
         [['text' => $textbotlang['Admin']['affiliate']['status']]],

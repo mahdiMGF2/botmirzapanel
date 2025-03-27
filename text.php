@@ -363,22 +363,6 @@ $textbotlang['users']['stateus']['getpriceforadd'] = "💰 مقدار مبلغی
 $textbotlang['users']['stateus']['addedbalanceremove'] = "💰کاربر گرامی مبلغ %s تومان به موجودی شما اضافه گردید.";
 $textbotlang['users']['stateus']['acceptrequest'] = "✅ کاربری گرامی درخواست حذف شما با نام کاربری  %s موافقت گردید.";
 
-
-
-$textbotlang['users']['perfectmoney']['getvcode'] = "⭕️ برای  افزایش موجودی  ابتدا کد ووچر پرفکت مانی خود را ارسال کنید";
-$textbotlang['users']['perfectmoney']['getvnumber'] = "⭕️ کد ووچر دریافت شد حالا کد فعالسازی را ارسال کنید";
-$textbotlang['users']['perfectmoney']['errors'] = "❌  خطایی در بررسی ووچر پیش آمده است برای بررسی مشکل با پشتیبانی در ارتباط باشید";
-$textbotlang['users']['perfectmoney']['invalidvcodeorev'] = "❌ ووچر ارسال شده نامعتبر است";
-$textbotlang['users']['perfectmoney']['invalidvcode'] = "❌ کد ووچر ارسال شده نامعتبر است";
-$textbotlang['users']['perfectmoney']['invalid_ev_number'] = "❌ کد فعالسازی ارسال شده نامعتبر است";
-$textbotlang['users']['perfectmoney']['getvcode'] = "⭕️ برای  افزایش موجودی  ابتدا کد ووچر پرفکت مانی خود را ارسال کنید";
-$textbotlang['users']['perfectmoney']['getvnumber'] = "⭕️ کد ووچر دریافت شد حالا کد فعالسازی را ارسال کنید";
-$textbotlang['users']['perfectmoney']['errors'] = "❌  خطایی در بررسی ووچر پیش آمده است برای بررسی مشکل با پشتیبانی در ارتباط باشید";
-$textbotlang['users']['perfectmoney']['invalidvcodeorev'] = "❌ ووچر ارسال شده نامعتبر است";
-$textbotlang['users']['perfectmoney']['invalidvcode'] = "❌ کد ووچر ارسال شده نامعتبر است";
-$textbotlang['users']['perfectmoney']['invalid_ev_number'] = "❌ کد فعالسازی ارسال شده نامعتبر است";
-
-
 $textbotlang['users']['Discount']['titlebtn'] = "🎁 کد هدیه";
 $textbotlang['users']['Discount']['getcode']  = "💝 برای دریافت موجودی کد هدیه خود را ارسال نمایید";
 $textbotlang['users']['Discount']['notcode']  = "❌ کد نامعتبر است";
@@ -393,21 +377,16 @@ $textbotlang['users']['Discount']['acceptdiscount']  = "کد هدیه با مو�
 
 
 
-$textbotlang['users']['moeny']['offline_gateway_settings'] = "💳 تنظبمات درگاه آفلاین";
 $textbotlang['users']['moeny']['cart_to_Cart_btn'] = "💳 کارت به کارت";
 $textbotlang['users']['moeny']['nowpaymentbtn'] = "💵 پرداخت nowpayments";
-$textbotlang['users']['moeny']['nowpayment_settings'] = "💵 تنظیمات nowpayment";
-$textbotlang['users']['moeny']['currency_rial_gateway'] = "💎 درگاه ارزی ریالی";
-$textbotlang['users']['moeny']['mr_payment_gateway'] = "🔵 درگاه آقای پرداخت";
-$textbotlang['users']['moeny']['perfect_money_gateway'] = "🔴 درگاه پرفکت مانی";
+$textbotlang['users']['moeny']['currency_rial_gateway'] = "💎 ارزی ریالی";
+$textbotlang['users']['moeny']['mr_payment_gateway'] = "🔵 آقای پرداخت";
 $textbotlang['users']['moeny']['card_number_settings'] = "💳 تنظیم شماره کارت";
-$textbotlang['users']['moeny']['offline_gateway_status'] = "🔌 وضعیت درگاه آفلاین";
 $textbotlang['users']['moeny']['alsat_merchant_settings'] = "تنظیم مرچنت";
-$textbotlang['users']['moeny']['alsat_gateway_status'] = "وضعیت درگاه آل سات";
 $textbotlang['users']['moeny']['mr_payment_merchant_settings'] = "تنظیم مرچنت آقای پرداخت";
 $textbotlang['users']['moeny']['mr_payment_gateway_status'] = "وضعیت درگاه آقای پرداخت";
 $textbotlang['users']['moeny']['nowpayment_api'] = "🧩 api nowpayment";
-$textbotlang['users']['moeny']['nowpayment_gateway_status'] = "🔌 وضعیت درگاه nowpayments";
+$textbotlang['users']['moeny']['nowpayment_gateway_status'] = "nowpayments 🔌";
 $textbotlang['users']['moeny']['carttext'] =  "برای افزایش موجودی به صورت دستی، مبلغ %s  تومان  را به شماره‌ی حساب زیر واریز کنید 👇🏻
     
     ==================== 
@@ -507,6 +486,8 @@ $textbotlang['users']['moeny']['payment_amount'] = "مبلغ پرداختی :";
 $textbotlang['users']['moeny']['currency'] = "تومان";
 $textbotlang['users']['moeny']['date_label'] = "تاریخ : ";
 $textbotlang['users']['moeny']['back_to_bot'] = "بازگشت به ربات";
+$textbotlang['users']['moeny']['setting'] = "⚙️ تنظیمات";
+$textbotlang['users']['moeny']['settingpay'] = "📌 از لیست زیر می توانید درگاه های موجود را انتخاب و مدیریت کنید";
 
 
 
@@ -634,6 +615,12 @@ $textbotlang['Admin']['Removeedadmin'] = "❌ حذف ادمین";
 $textbotlang['Admin']['not-user'] = "کاربری با این شناسه یافت نشد";
 $textbotlang['Admin']['invalidvalue'] = "⭕️ ورودی نا معتبر";
 $textbotlang['Admin']['maxvalue'] = "❌ مبلغ بازگشتی بزرگ تر از مبلغ محصول است!";
+$textbotlang['Admin']['turnon'] = "✅ روشن";
+$textbotlang['Admin']['turnoff'] = "❌ خاموش";
+
+
+
+
 $textbotlang['Admin']['channel']['changechannel'] = "برای تنظیم کانال عضویت اجباری لطفا آیدی کانال خود را بدون @ وارد نمایید.
     کانال فعلی شما: @";
 $textbotlang['Admin']['channel']['setchannel'] = "🔰 کانال با موفقیت تنظیم گردید.
@@ -964,24 +951,6 @@ $textbotlang['Admin']['Status']['subStatuson'] = "لینک سابسکرایب ف
 $textbotlang['Admin']['Status']['configTitle'] = "در این قسمت می توانید تعیین کنید که بعد از خرید کاربر کانفیگ های دستی دریافت کند یا خیر";
 $textbotlang['Admin']['Status']['configStatusOff'] = "⭕️ ارسال کانفیگ دستی غیرفعال گردید. از این پس کاربر پس از خرید  کانفیگ دستی دریافت نخواهد کرد.";
 $textbotlang['Admin']['Status']['configStatuson'] = "ارسال کانفیگ بعد خرید فعال شد از این پس کاربران کانفیگ دستی هم دریافت خواهند کرد";
-$textbotlang['Admin']['Status']['cardTitle'] = "در این بخش می توانید درگاه آفلاین را خاموش یا روشن کنید";
-$textbotlang['Admin']['Status']['cardStatusOff'] = "⭕ وضعیت درگاه آفلاین خاموش گردید";
-$textbotlang['Admin']['Status']['cardStatuson'] = "وضعیت درگاه آفلاین روشن گردید";
-$textbotlang['Admin']['Status']['nowpaymentsTitle'] = "در این بخش می توانید درگاه نیوپیمنت  را فعال یا غیرفعال کنید";
-$textbotlang['Admin']['Status']['nowpaymentsStatusOff'] = "⭕ وضعیت درگاه  خاموش گردید";
-$textbotlang['Admin']['Status']['nowpaymentsStatuson'] = "وضعیت درگاه  روشن گردید";
-$textbotlang['Admin']['Status']['digiTitle'] = "در این بخش می توانید درگاه سواپینو  را فعال یا غیرفعال کنید";
-$textbotlang['Admin']['Status']['digiStatusOff'] = "⭕ درگاه  خاموش گردید";
-$textbotlang['Admin']['Status']['digiStatuson'] = "درگاه  روشن گردید";
-$textbotlang['Admin']['Status']['aqayepardakhtTitle'] = "در این بخش می توانید درگاه آقای پرداخت  را فعال یا غیرفعال کنید";
-$textbotlang['Admin']['Status']['aqayepardakhtStatusOff'] = "⭕ درگاه  خاموش گردید";
-$textbotlang['Admin']['Status']['aqayepardakhtStatuson'] = "درگاه  روشن گردید";
-$textbotlang['Admin']['Status']['perfectmoneyTitle'] = "در این بخش می توانید درگاه پرفکت مانی را فعال یا غیرفعال کنید";
-$textbotlang['Admin']['Status']['perfectmoneyStatusOff'] = "⭕ درگاه  خاموش گردید";
-$textbotlang['Admin']['Status']['perfectmoneyStatuson'] = "درگاه  روشن گردید";
-$textbotlang['Admin']['Status']['perfectmoneyTitle'] = "در این بخش می توانید درگاه پرفکت مانی را فعال یا غیرفعال کنید";
-$textbotlang['Admin']['Status']['perfectmoneyStatusOff'] = "⭕ درگاه  خاموش گردید";
-$textbotlang['Admin']['Status']['perfectmoneyStatuson'] = "درگاه  روشن گردید";
 $textbotlang['Admin']['Status']['affiliates'] = "📌 در این بخش می توانید قابلیت زیر مجموعه گیری در ربات را خاموش یا روشن کنید";
 $textbotlang['Admin']['Status']['affiliatesStatusOff'] = "قابلیت زیرمجموعه گیری غیرفعال شد";
 $textbotlang['Admin']['Status']['affiliatesStatuson'] = "قابلیت زیر مجموعه روشن شد";
@@ -1109,19 +1078,6 @@ $textbotlang['Admin']['AlgortimeUsername']['SaveData'] = "✅روش ساخت ن�
 $textbotlang['Admin']['SettingPayment']['Savacard'] = "✅ شماره کارت شما با موفقیت ثبت شد.";
 $textbotlang['Admin']['SettingnowPayment']['Savaapi'] = "✅ تغییرات  با موفقیت ثبت شد";
 
-$textbotlang['Admin']['perfectmoney']['setnumberaccount'] = "تنظیم شماره اکانت";
-$textbotlang['Admin']['perfectmoney']['getaccountnumber'] = "⭕️ شماره اکانت پرفکت مانی خود را ارسال کنید
- مثال : 93293828
-شماره اکانت فعلی :%s";
-$textbotlang['Admin']['perfectmoney']['setnumuberwallet'] = "تنظیم شماره کیف پول";
-$textbotlang['Admin']['perfectmoney']['getwalletperfect'] = "⭕️ شماره کیف پولی که میخواهید ووچر پرفکت مانی به آن واریز شود را ارسال کنید 
-مثال : u234082394
-شماره کیف پول فعلی : %s";
-$textbotlang['Admin']['perfectmoney']['setpasswordaccount'] = "تنظیم رمز اکانت";
-$textbotlang['Admin']['perfectmoney']['getpasswordperfect'] = "⭕️ رمز اکانت پرفکت مانی خود را ارسال کنید
-    رمز عبور فعلی : %s";
-$textbotlang['Admin']['perfectmoney']['setnumberacount'] = "✅ شماره اکانت با موفقیت ثبت شد";
-$textbotlang['Admin']['perfectmoney']['statusperfect'] = "وضعیت پرفکت مانی";
 
 $textbotlang['Admin']['Discountsell']['create'] = "🎁 ساخت کد تخفیف";
 $textbotlang['Admin']['Discountsell']['remove'] = "❌ حذف کد تخفیف";
@@ -1213,15 +1169,14 @@ $textbotlang['Admin']['Report']['Extra_volume'] = "⭕️ یک کاربر حجم
 💰 مبلغ پرداختی : %s تومان";
 $textbotlang['Admin']['Report']['NotifRemoveByUser'] = "ادمین عزیز یک کاربر سرویس خود را پس از پایان حجم یا زمان حدف کرده است
 نام کاربری کانفیک : %s";
-$textbotlang['Admin']['Report']['ReportTestCreate'] = " ⚜️ اکانت تست داده شد
-            
-⚙️ یک کاربر اکانت  با نام کانفیگ <code>%s</code>  اکانت تست دریافت کرد
-            
-اطلاعات  👇👇
-⚜️ نام کاربری کاربر: @%s
-آیدی عددی کاربر : <code>%s</code>
-شماره موبایل کاربر : %s,
-نام پنل :  %s";
+$textbotlang['Admin']['Report']['ReportTestCreate'] = "📣 جزئیات ساخت اکانت تست در ربات شما ثبت شد .
+
+▫️آیدی عددی کاربر : %s
+▫️نام کاربری کاربر :@%s
+▫️نام کاربری کانفیگ : %s
+▫️نام کاربر : %s
+▫️موقعیت سرویس سرویس : %s
+▫️شماره تلفن کاربر : %s";
 $textbotlang['Admin']['Report']['acceptcartresid'] = "📣 یک ادمین رسید پرداخت کارت به کارت را تایید کرد.
 اطلاعات :
 👤آیدی عددی  ادمین تایید کننده : %s

@@ -486,10 +486,6 @@ try {
         $connect->query("INSERT INTO PaySetting (NamePay,ValuePay) VALUES ('digistatus','offdigi') ");
         $connect->query("INSERT INTO PaySetting (NamePay,ValuePay) VALUES ('statusaqayepardakht','offaqayepardakht') ");
         $connect->query("INSERT INTO PaySetting (NamePay,ValuePay) VALUES ('merchant_id_aqayepardakht','0')");
-        $connect->query("INSERT INTO PaySetting (NamePay,ValuePay) VALUES ('perfectmoney_Payer_Account','0')");
-        $connect->query("INSERT INTO PaySetting (NamePay,ValuePay) VALUES ('perfectmoney_AccountID','0')");
-        $connect->query("INSERT INTO PaySetting (NamePay,ValuePay) VALUES ('perfectmoney_PassPhrase','0')");
-        $connect->query("INSERT INTO PaySetting (NamePay,ValuePay) VALUES ('status_perfectmoney','offperfectmoney')");
     }
     else{
         $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('Cartstatus','oncard') ");
@@ -499,10 +495,6 @@ try {
         $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('digistatus','offdigi')");
         $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('statusaqayepardakht','offaqayepardakht')");
         $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('merchant_id_aqayepardakht','0')");
-        $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('perfectmoney_Payer_Account','0')");
-        $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('perfectmoney_AccountID','0')");
-        $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('perfectmoney_PassPhrase','0')");
-        $connect->query("INSERT IGNORE INTO PaySetting (NamePay,ValuePay) VALUES ('status_perfectmoney','offperfectmoney')");
 
 
 
