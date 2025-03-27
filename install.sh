@@ -65,11 +65,19 @@ function check_marzban_installed() {
 # Detect database type for Marzban
 function detect_database_type() {
     COMPOSE_FILE="/opt/marzban/docker-compose.yml"
-    if grep -q "mysql:" "$COMPOSE_FILE"; then
-        return 0  # MySQL detected
+    if [ ! -f "$COMPOSE_FILE" ]; then
+        echo "unknown"  # File not found, cannot determine database type
+        return 1
+    fi
+    if grep -q "^[[:space:]]*mysql:" "$COMPOSE_FILE"; then
+        echo "mysql"
+        return 0
+    elif grep -q "^[[:space:]]*mariadb:" "$COMPOSE_FILE"; then
+        echo "mariadb"
+        return 1
     else
-        echo -e "\033[31m[ERROR] Marzban is installed but MySQL database is not present. Installation cannot proceed.\033[0m"
-        exit 1
+        echo "sqlite"  # Assume SQLite if neither MySQL nor MariaDB is found
+        return 1
     fi
 }
 
@@ -625,7 +633,6 @@ echo -e "$text_to_save" >> /var/www/html/mirzabotconfig/config.php
 
 }
 
-
 function install_bot_with_marzban() {
     # Display warning and confirmation
     echo -e "\033[41m[IMPORTANT WARNING]\033[0m \033[1;33mMarzban panel is detected on your server. Please make sure to backup the Marzban database before installing Mirza Bot.\033[0m"
@@ -635,7 +642,15 @@ function install_bot_with_marzban() {
         exit 0
     fi
 
-    echo -e "\e[32mInstalling Mirza Bot alongside Marzban...\033[0m\n"
+    # Check database type
+    echo -e "\e[32mChecking Marzban database type...\033[0m"
+    DB_TYPE=$(detect_database_type)
+    if [ "$DB_TYPE" != "mysql" ]; then
+        echo -e "\e[91mError: Your database is $DB_TYPE. To install Mirza Bot, you must use MySQL.\033[0m"
+        echo -e "\e[93mPlease configure Marzban to use MySQL and try again.\033[0m"
+        exit 1
+    fi
+    echo -e "\e[92mMySQL detected. Proceeding with installation...\033[0m"
 
     # Check if port 80 is free before proceeding
     echo -e "\e[32mChecking port 80 availability...\033[0m"
@@ -731,9 +746,8 @@ function install_bot_with_marzban() {
         exit 1
     fi
 
-    # Test MySQL connection inside Docker container
     echo "Testing MySQL connection..."
-    
+
     # Read MySQL root password from .env
     if [ -f "/opt/marzban/.env" ]; then
         MYSQL_ROOT_PASSWORD=$(grep -E '^MYSQL_ROOT_PASSWORD=' /opt/marzban/.env | cut -d '=' -f2- | tr -d '" \n\r')
@@ -747,10 +761,10 @@ function install_bot_with_marzban() {
         read -s -p "Enter MySQL root password: " MYSQL_ROOT_PASSWORD
         echo
     fi
-    
+
     ROOT_USER="root"
     MYSQL_CONTAINER=$(docker ps -q --filter "name=marzban_mysql" --no-trunc)
-    
+
     # Try connecting directly to host first (for mysql:latest with network_mode: host)
     mysql -u "$ROOT_USER" -p"$MYSQL_ROOT_PASSWORD" -h 127.0.0.1 -P 3306 -e "SELECT 1;" 2>/tmp/mysql_error.log
     if [ $? -eq 0 ]; then
@@ -790,7 +804,6 @@ function install_bot_with_marzban() {
             exit 1
         fi
     fi
-
     # Ask for database username and password like Marzban
     clear
     echo -e "\e[33mConfiguring Mirza Bot database credentials...\033[0m"
