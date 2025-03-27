@@ -61,6 +61,13 @@ function deletemessage($chat_id, $message_id){
         'message_id' => $message_id,
     ]);
 }
+function sendDocument($chat_id, $documentPath, $caption) {
+    return telegram('sendDocument',[
+        'chat_id' => $chat_id,
+        'document' => new CURLFile($documentPath),
+        'caption' => $caption,
+    ]);
+}
 #-----------------------------#
 $update = json_decode(file_get_contents("php://input"), true);
 $from_id = $update['message']['from']['id'] ?? $update['callback_query']['from']['id'] ?? 0;

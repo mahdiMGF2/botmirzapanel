@@ -599,10 +599,10 @@ if (preg_match('/product_(\w+)/', $datain, $dataget)) {
                 ]
             ]
         ]);
-        $textinfo = sprintf($textbotlang['users']['stateus']['InfoSerivceDisable'],$status_var,$DataUserOut['username'],$nameloc['Service_location'],$nameloc['id_invoice'],$usedTrafficGb,$LastTraffic,$expirationDate,$day);
+        $textinfo = sprintf($textbotlang['users']['stateus']['InfoSerivceDisable'],$status_var,$DataUserOut['username'],$nameloc['Service_location'],$nameloc['id_invoice'],$LastTraffic,$usedTrafficGb,$expirationDate,$day);
 
     }else{
-        $keyboardsetting = json_encode([
+        $keyboardsetting = [
             'inline_keyboard' => [
                 [
                     ['text' => $textbotlang['users']['stateus']['linksub'], 'callback_data' => 'subscriptionurl_' . $username],
@@ -620,8 +620,11 @@ if (preg_match('/product_(\w+)/', $datain, $dataget)) {
                     ['text' => $textbotlang['users']['stateus']['backlist'], 'callback_data' => 'backorder'],
                 ]
             ]
-        ]);
-        $textinfo = sprintf($textbotlang['users']['stateus']['InfoSerivceActive'],$status_var,$DataUserOut['username'],$nameloc['Service_location'],$nameloc['id_invoice'],$lastonline,$usedTrafficGb,$LastTraffic,$expirationDate,$day);
+        ];
+        if($marzban_list_get['type'] == "wgdashboard")unset($keyboardsetting['inline_keyboard'][0][1]);
+        if($marzban_list_get['type'] == "wgdashboard")unset($keyboardsetting['inline_keyboard'][1][1]);
+        $keyboardsetting = json_encode($keyboardsetting);
+        $textinfo = sprintf($textbotlang['users']['stateus']['InfoSerivceActive'],$status_var,$DataUserOut['username'],$nameloc['Service_location'],$nameloc['id_invoice'],$lastonline,$LastTraffic,$usedTrafficGb,$expirationDate,$day);
     }
     Editmessagetext($from_id, $message_id, $textinfo, $keyboardsetting);
 }
@@ -631,7 +634,11 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'], "select");
     $DataUserOut = $ManagePanel->DataUser($nameloc['Service_location'], $username);
     $subscriptionurl = $DataUserOut['subscription_url'];
-    $textsub = "<code>$subscriptionurl</code>";
+    if($marzban_list_get['type'] == "wgdashboard"){
+        $textsub = "";
+    }else{
+        $textsub = "<code>$subscriptionurl</code>";
+    }
     $randomString = bin2hex(random_bytes(2));
     $urlimage = "$from_id$randomString.png";
     $writer = new PngWriter();
@@ -649,6 +656,12 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
         'caption' => $textsub,
         'parse_mode' => "HTML",
     ]);
+    if($marzban_list_get['type'] == "wgdashboard"){
+        $urlimage = "{$marzban_list_get['inboundid']}_{$nameloc['username']}.conf";
+        file_put_contents($urlimage,$DataUserOut['subscription_url']);
+        sendDocument($from_id, $urlimage, $textbotlang['users']['buy']['configwg']);
+        unlink($urlimage);
+    }
     unlink($urlimage);
 } elseif (preg_match('/config_(\w+)/', $datain, $dataget)) {
     $username = $dataget[1];
@@ -823,6 +836,48 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
         );
         $ManagePanel->Modifyuser($user['Processing_value'], $nameloc['Service_location'], $config);
     }
+    elseif($marzban_list_get['type'] == "wgdashboard"){
+        $usernamepanel = $nameloc['username'];
+        $namepanel = $nameloc['Service_location'];
+        $datauser = get_userwg($usernamepanel, $namepanel);
+        allowAccessPeers($namepanel,$usernamepanel);
+        $count = 0;
+        foreach ($datauser['jobs'] as $jobsvolume){
+            if($jobsvolume['Field'] == "date"){
+                break;
+            }
+            $count +=1;
+        }
+        $datam = array(
+            "Job" => $datauser['jobs'][$count],
+        );
+        deletejob($namepanel,$datam);
+        $count = 0;
+        foreach ($datauser['jobs'] as $jobsvolume){
+            if($jobsvolume['Field'] == "total_data"){
+                break;
+            }
+            $count +=1;
+        }
+        $datam = array(
+            "Job" => $datauser['jobs'][$count],
+        );
+        deletejob($namepanel,$datam);
+
+        if(intval($product['Service_time']) == 0){
+            $newDate = 0;
+        }else{
+            $date = strtotime("+" . $product['Service_time'] . "day");
+            $newDate = strtotime(date("Y-m-d H:i:s", $date));
+        }
+        if($newDate != 0){
+            $newDate = date("Y-m-d H:i:s", $newDate);
+            setjob($namepanel,"date",$newDate,$datauser['id']);
+        }
+        setjob($namepanel,"total_data",$product['Volume_constraint'],$datauser['id']);
+
+
+    }
     $keyboardextendfnished = json_encode([
         'inline_keyboard' => [
             [
@@ -950,6 +1005,27 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
         $datam = array(
             "volume" => $data_limit,
         );
+    }
+    elseif ($marzban_list_get['type'] == "wgdashboard") {
+        $data_limit = ($DataUserOut['data_limit']/pow(1024, 3)) + ($volume / $setting['Extra_volume']);
+        $datauser = get_userwg($nameloc['username'],$nameloc['Service_location']);
+        $count = 0;
+        foreach ($datauser['jobs'] as $jobsvolume){
+            if($jobsvolume['Field'] == "total_data"){
+                break;
+            }
+            $count +=1;
+        }
+        allowAccessPeers($nameloc['Service_location'],$nameloc['username']);
+        if(isset($datauser['jobs'][$count])){
+            $datam = array(
+                "Job" => $datauser['jobs'][$count],
+            );
+            deletejob($nameloc['Service_location'],$datam);
+        }else{
+            ResetUserDataUsagewg($datauser['id'], $nameloc['Service_location']);
+        }
+        setjob($nameloc['Service_location'],"total_data",$data_limit,$datauser['id']);
     }
     $ManagePanel->Modifyuser($user['Processing_value'], $marzban_list_get['name_panel'], $datam);
     $keyboardextrafnished = json_encode([
@@ -1149,9 +1225,6 @@ if ($user['step'] == "createusertest" || preg_match('/locationtests_(.*)/', $dat
     $output_config_link = "";
     if ($marzban_list_get['sublink'] == "onsublink") {
         $output_config_link = $dataoutput['subscription_url'];
-        $link_config = "            
-        {$textbotlang['users']['stateus']['linksub']}
-        $output_config_link";
     }
     if ($marzban_list_get['configManual'] == "onconfig") {
         foreach ($dataoutput['configs'] as $configs) {
@@ -1166,7 +1239,11 @@ if ($user['step'] == "createusertest" || preg_match('/locationtests_(.*)/', $dat
             ]
         ]
     ]);
-    $textcreatuser = sprintf($textbotlang['users']['buy']['createservicetest'],$username_ac,$marzban_list_get['name_panel'],$setting['time_usertest'],$setting['val_usertest'],$output_config_link,$text_config);
+    if($marzban_list_get['type'] == "wgdashboard"){
+        $textcreatuser = sprintf($textbotlang['users']['buy']['createservicewg'],$username_ac,$marzban_list_get['name_panel'],$setting['time_usertest'],$setting['val_usertest']);
+    }else{
+        $textcreatuser = sprintf($textbotlang['users']['buy']['createservicetest'],$username_ac,$marzban_list_get['name_panel'],$setting['time_usertest'],$setting['val_usertest'],$output_config_link,$text_config);
+    }
     if ($marzban_list_get['sublink'] == "onsublink") {
         $urlimage = "$from_id$randomString.png";
         $writer = new PngWriter();
@@ -1185,6 +1262,12 @@ if ($user['step'] == "createusertest" || preg_match('/locationtests_(.*)/', $dat
             'caption' => $textcreatuser,
             'parse_mode' => "HTML",
         ]);
+        if($marzban_list_get['type'] == "wgdashboard"){
+            $urlimage = "{$marzban_list_get['inboundid']}_{$dataoutput['username']}.conf";
+            file_put_contents($urlimage,$output_config_link);
+            sendDocument($from_id, $urlimage,$textbotlang['users']['buy']['configwg']);
+            unlink($urlimage);
+        }
         sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboard, 'HTML');
         unlink($urlimage);
     } else {
@@ -1518,7 +1601,11 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
             ]
         ]
     ]);
-    $textcreatuser = sprintf($textbotlang['users']['buy']['createservice'],$username_ac,$info_product['name_product'],$marzban_list_get['name_panel'],$info_product['Service_time'],$info_product['Volume_constraint'],$text_config,$link_config);
+    if($marzban_list_get['type'] == "wgdashboard"){
+        $textcreatuser = sprintf($textbotlang['users']['buy']['createservicewgbuy'],$username_ac,$info_product['name_product'],$marzban_list_get['name_panel'],$info_product['Service_time'],$info_product['Volume_constraint']);
+    }else{
+        $textcreatuser = sprintf($textbotlang['users']['buy']['createservice'],$username_ac,$info_product['name_product'],$marzban_list_get['name_panel'],$info_product['Service_time'],$info_product['Volume_constraint'],$text_config,$link_config);
+    }
     if ($marzban_list_get['sublink'] == "onsublink") {
         $urlimage = "$from_id$randomString.png";
         $writer = new PngWriter();
@@ -1537,6 +1624,12 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
             'caption' => $textcreatuser,
             'parse_mode' => "HTML",
         ]);
+        if($marzban_list_get['type'] == "wgdashboard"){
+            $urlimage = "{$marzban_list_get['inboundid']}_{$dataoutput['username']}.conf";
+            file_put_contents($urlimage,$output_config_link);
+            sendDocument($from_id, $urlimage,$textbotlang['users']['buy']['configwg']);
+            unlink($urlimage);
+        }
         sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboard, 'HTML');
         unlink($urlimage);
     }elseif ($marzban_list_get['config'] == "onconfig") {

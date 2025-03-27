@@ -252,7 +252,11 @@ function DirectPayment($order_id){
             }
         }
         $Shoppinginfo = json_encode($Shoppinginfo);
-        $textcreatuser = sprintf($textbotlang['users']['buy']['createservice'],$dataoutput['username'],$get_invoice['name_product'],$marzban_list_get['name_panel'],$get_invoice['Service_time'],$get_invoice['Volume'],$config,$output_config_link);
+        if($marzban_list_get['type'] == "wgdashboard"){
+            $textcreatuser = sprintf($textbotlang['users']['buy']['createservicewgbuy'],$dataoutput['username'],$get_invoice['name_product'],$marzban_list_get['name_panel'],$get_invoice['Service_time'],$get_invoice['Volume']);
+        }else{
+            $textcreatuser = sprintf($textbotlang['users']['buy']['createservice'],$dataoutput['username'],$get_invoice['name_product'],$marzban_list_get['name_panel'],$get_invoice['Service_time'],$get_invoice['Volume'],$config,$output_config_link);
+        }
         if ($marzban_list_get['configManual'] == "onconfig") {
             if (count($dataoutput['configs']) == 1) {
                 $urlimage = "{$get_invoice['id_user']}$randomString.png";
@@ -295,6 +299,12 @@ function DirectPayment($order_id){
                 'caption' => $textcreatuser,
                 'parse_mode' => "HTML",
             ]);
+            if($marzban_list_get['type'] == "wgdashboard"){
+                $urlimage = "{$marzban_list_get['inboundid']}_{$dataoutput['username']}.conf";
+                file_put_contents($urlimage,$output_config_link);
+                sendDocument($get_invoice['id_user'], $urlimage,$textbotlang['users']['buy']['configwg']);
+                unlink($urlimage);
+            }
             unlink($urlimage);
         }
         $partsdic = explode("_", $Balance_id['Processing_value_four']);
@@ -460,4 +470,18 @@ function addFieldToTable($tableName, $fieldName, $defaultValue = null , $datatyp
         $stmt->execute();
     }
     echo "The $fieldName field was added ✅";
+}
+
+function publickey(){
+    $privateKey = sodium_crypto_box_keypair();
+    $privateKeyEncoded = base64_encode(sodium_crypto_box_secretkey($privateKey));
+    $publicKey = sodium_crypto_box_publickey($privateKey);
+    $publicKeyEncoded = base64_encode($publicKey);
+    $presharedKey = base64_encode(random_bytes(32));
+    return [
+        'private_key' => $privateKeyEncoded,
+        'public_key' => $publicKeyEncoded,
+        'preshared_key' => $presharedKey
+    ];
+
 }

@@ -2,6 +2,7 @@
 $randomString = bin2hex(random_bytes(3));
 require_once 'config.php';
 require_once 'text.php';
+require_once 'functions.php';
 global $connect;
 //-----------------------------------------------------------------
 $tableName = "user";
@@ -324,6 +325,7 @@ try {
         price_product varchar(2000) NULL,
         Volume varchar(2000) NULL,
         Service_time varchar(200) NULL,
+        user_info TEXT NULL,
         Status varchar(200) NULL)
         ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin");
         if (!$result) {
@@ -334,6 +336,10 @@ try {
         $Check_filde = $connect->query("SHOW COLUMNS FROM invoice LIKE 'time_sell'");
         if (mysqli_num_rows($Check_filde) != 1) {
             $result = $connect->query("ALTER TABLE invoice ADD time_sell VARCHAR(2000)");
+        }
+        $Check_filde = $connect->query("SHOW COLUMNS FROM invoice LIKE 'user_info'");
+        if (mysqli_num_rows($Check_filde) != 1) {
+            $result = $connect->query("ALTER TABLE invoice ADD user_info TEXT");
         }
         $Check_filde = $connect->query("SHOW COLUMNS FROM invoice LIKE 'Status'");
         if (mysqli_num_rows($Check_filde) != 1) {

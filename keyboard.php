@@ -472,6 +472,18 @@ $optionMarzban = json_encode([
     ],
     'resize_keyboard' => true
 ]);
+$optionwgdashboard = json_encode([
+    'keyboard' => [
+        [['text' => $textbotlang['Admin']['managepanel']['btnshowconnect']],['text' => $textbotlang['Admin']['managepanel']['showpanelbtn']]],
+        [['text' => $textbotlang['Admin']['managepanel']['showpaneltestbtn']]],
+        [['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['namepanel']],['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['removepanel']]],
+        [['text' => $textbotlang['Admin']['managepanel']['methodusername']]],
+        [['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['editpassword']],['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['editusername']]],
+        [['text'=>$textbotlang['Admin']['managepanel']['keyboardpanel']['editurl']],['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['editinound']]],
+        [['text' => $textbotlang['Admin']['Back-Adminment']]]
+    ],
+    'resize_keyboard' => true
+]);
 $options_ui = json_encode([
     'keyboard' => [
         [['text' => $textbotlang['Admin']['managepanel']['showpanelbtn']]],
@@ -537,7 +549,7 @@ $typepanel =  json_encode([
     'keyboard' => [
         [['text' => "marzban"],['text' => "x-ui_single"]],
         [['text' => "marzneshin"],['text' => "alireza"]],
-        [['text' => "s_ui"]],
+        [['text' => "s_ui"],['text' => "wgdashboard"]],
         [['text' => $textbotlang['Admin']['Back-Adminment']]]
     ],
     'resize_keyboard' => true
@@ -594,7 +606,6 @@ function KeyboardCategorybuy($callback_data,$location){
     $list_category['inline_keyboard'][] = [
         ['text' => $textbotlang['users']['backmenu'],"callback_data" => $callback_data],
     ];
-    file_put_contents('ss',json_encode($list_category));
     return json_encode($list_category);
 }
 function KeyboardProduct($location,$backdata,$MethodUsername, $categoryid = null){

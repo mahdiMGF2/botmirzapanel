@@ -6,6 +6,7 @@ require_once 'x-ui_single.php';
 require_once 'marzneshin.php';
 require_once 'alireza_single.php';
 require_once 's_ui.php';
+require_once 'wgdashboard.php';
 class ManagePanel{
     public $name_panel;
     public $connect;
@@ -102,6 +103,26 @@ class ManagePanel{
                 $Output['configs'] = [outputlunk($Get_Data_Panel['linksubx']."/$usernameC")];
             }
 
+        }
+        elseif($Get_Data_Panel['type'] == "wgdashboard"){
+            $data_limit = round($data_limit / (1024*1024*1024),2);
+            $data_Output = addpear($Get_Data_Panel['name_panel'],$usernameC);
+            if($data_limit != 0){
+                setjob($Get_Data_Panel['name_panel'],"total_data",$data_limit,$data_Output['public_key']);
+            }
+            if($expire != 0){
+                setjob($Get_Data_Panel['name_panel'],"date",date('Y-m-d H:i:s',$expire),$data_Output['public_key']);
+            }
+            update("invoice","user_info",json_encode($data_Output),"username",$usernameC);
+            if(!$data_Output['status']){
+                $Output['status'] = 'Unsuccessful';
+                $Output['msg'] = $data_Output['msg'];
+            }else{
+                $Output['status'] = 'successful';
+                $Output['username'] = $usernameC;
+                $Output['subscription_url'] = strval(downloadconfig($Get_Data_Panel['name_panel'],$data_Output['public_key'])['file']);
+                $Output['configs'] = [];
+            }
         }
         else{
             $Output['status'] = 'Unsuccessful';
@@ -289,6 +310,56 @@ class ManagePanel{
                     'used_traffic' => $useage,
                     'links' => $links,
                     'subscription_url' => $Get_Data_Panel['linksubx']."/{$UsernameData['name']}",
+                    'sub_updated_at' => null,
+                    'sub_last_user_agent'=> null,
+                );
+            }
+        }
+        elseif($Get_Data_Panel['type'] == "wgdashboard"){
+            $UsernameData = get_userwg($username,$Get_Data_Panel['name_panel']);
+            $invoiceinfo = select("invoice","*","username",$username,"select");
+            $infoconfig = json_decode($invoiceinfo['user_info'],true);
+            if(!isset($UsernameData['id'])){
+                $Output = array(
+                    'status' => 'Unsuccessful',
+                    'msg' => $UsernameData['msg']
+                );
+            }else{
+                $jobtime = [];
+                $jobvolume = [];
+                foreach ($UsernameData['jobs'] as $job){
+                    if($job['Field'] == "total_data"){
+                        $jobvolume = $job;
+                    }elseif($job['Field'] == "date"){
+                        $jobtime = $job;
+                    }
+                }
+                if(intval($invoiceinfo['Service_time']) == 0){
+                    $expire = 0;
+                }else{
+                    if(isset($jobtime['Value'])){
+                        $expire = strtotime($jobtime['Value']);
+                    }else{
+                        $expire = 0;
+                    }
+                }
+                $status = "active";
+                if ($expire != 0 and $expire - time() < 0 ){
+                    $status = "expired";
+                }
+                $data_useage = ($UsernameData['total_data'] * pow(1024,3)) + ($UsernameData['cumu_data'] * pow(1024,3));
+                if(($jobvolume['Value'] * pow(1024,3)) < $data_useage){
+                    $status = "limited";
+                }
+                $Output = array(
+                    'status' => $status,
+                    'username' => $UsernameData['name'],
+                    'data_limit' => $jobvolume['Value'] * pow(1024,3),
+                    'expire' => $expire,
+                    'online_at' => null,
+                    'used_traffic' => $data_useage,
+                    'links' => [],
+                    'subscription_url' => strval(downloadconfig($Get_Data_Panel['name_panel'],$infoconfig['public_key'])['file']),
                     'sub_updated_at' => null,
                     'sub_last_user_agent'=> null,
                 );
@@ -557,6 +628,20 @@ class ManagePanel{
                 );
             }
         }
+        elseif($Get_Data_Panel['type'] == "wgdashboard"){
+            $UsernameData = remove_userwg($Get_Data_Panel['name_panel'],$username);
+            if(!$UsernameData['status']){
+                $Output = array(
+                    'status' => 'Unsuccessful',
+                    'msg' => $UsernameData['msg']
+                );
+            }else{
+                $Output = array(
+                    'status' => 'successful',
+                    'username' => $username,
+                );
+            }
+        }
         else{
             $Output = array(
                 'status' => 'Unsuccessful',
@@ -581,6 +666,11 @@ class ManagePanel{
             ResetUserDataUsagealirezasin($username, $name_panel);
         }elseif($Get_Data_Panel['type'] == "s_ui"){
             ResetUserDataUsages_ui($username, $name_panel);
+        }
+        elseif($Get_Data_Panel['type'] == "wgdashboard"){
+            $datauser = get_userwg($username, $name_panel);
+            allowAccessPeers($name_panel,$username);
+            ResetUserDataUsagewg($datauser['id'], $name_panel);
         }
     }
     function Modifyuser($username,$name_panel,$config = array()){
@@ -665,6 +755,23 @@ class ManagePanel{
             $configs['data'] = array_merge($configs['data'], $config);
             $configs['data'] = json_encode($configs['data'],true);
             return updateClientS_ui($Get_Data_Panel['name_panel'],$configs);
+        }
+        elseif($Get_Data_Panel['type'] == "WGDashboard"){
+            $data_user = get_userwg($username, $name_panel);
+            $configs = array(
+                "DNS" =>  $data_user['DNS'],
+                "allowed_ip" => $data_user['allowed_ip'],
+                "endpoint_allowed_ip" => "0.0.0.0/0",
+                "jobs" => $data_user['jobs'],
+                "id" =>  $data_user['id'],
+                "keepalive" => $data_user['keepalive'],
+                "mtu" =>  $data_user['mtu'],
+                "name" =>$data_user['name'],
+                "preshared_key" => $data_user['preshared_key'],
+                "private_key" => $data_user['private_key']
+            );
+            $configs = array_merge($configs, $config);
+            return updatepear($Get_Data_Panel['name_panel'],$configs);
         }
 
     }

@@ -186,6 +186,16 @@ if ($text == $textbotlang['Admin']['managepanel']['btnshowconnect']) {
             sendmessage($from_id, $text_marzban, null, 'HTML');
         }
     }
+    elseif ($marzban_list_get['type'] == "wgdashboard") {
+        $wg_check_connect = loginwg($marzban_list_get['url_panel'],$marzban_list_get['username_panel'],$marzban_list_get['password_panel']);
+        unlink('cookie.txt');
+        if($wg_check_connect['status']){
+            sendmessage($from_id, $textbotlang['Admin']['managepanel']['connectx-ui'], $optionwg, 'HTML');
+        }else {
+            $text_marzban = $textbotlang['Admin']['managepanel']['errorstateuspanel']."\n\n".$wg_check_connect['message'];
+            sendmessage($from_id, $text_marzban, $optionwg, 'HTML');
+        }
+    }
     step('home', $from_id);
 }
 if ($text == $textbotlang['Admin']['manageadmin']['showlistbtn']) {
@@ -247,6 +257,8 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['add_panel']) {
         sendmessage($from_id,$textbotlang['Admin']['managepanel']['notex-ui'], null, 'HTML');
     }elseif($userdata['type'] == "marzban" || $userdata['type'] == "s_ui" || $userdata['type'] == "marzneshin"){
         sendmessage($from_id,$textbotlang['Admin']['managepanel']['notemarzban'], null, 'HTML');
+    }elseif($userdata['type'] == "wgdashboard"){
+        sendmessage($from_id,$textbotlang['Admin']['managepanel']['wgdashboard'], null, 'HTML');
     }
     step('home', $from_id);
 }
@@ -1174,6 +1186,8 @@ if ($text == $textbotlang['Admin']['managepanel']['methodusername']) {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['savedname'], $optionX_ui_single, 'HTML');
     }elseif ($listpanel['type'] == "alireza") {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['savedname'], $optionX_ui_single, 'HTML');
+    }elseif($listpanel['type'] == "wgdashboard"){
+        sendmessage($from_id,$textbotlang['Admin']['managepanel']['savedname'], $optionwgdashboard, 'HTML');
     }else{
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['savedname'], $optionMarzban, 'HTML');
     }
@@ -1339,7 +1353,6 @@ if ($text == $textbotlang['users']['moeny']['mr_payment_merchant_settings']) {
     update("PaySetting", "ValuePay", $text, "NamePay", "merchant_id_aqayepardakht");
     step('home', $from_id);
 }
-essagetext($from_id, $message_id, $textbotlang['Admin']['Status']['aqayepardakhtStatusOff'], null);
 if ($text == $textbotlang['Admin']['keyboardadmin']['manage_panel']) {
     sendmessage($from_id, $textbotlang['Admin']['managepanel']['getloc'], $json_list_marzban_panel, 'HTML');
     step('GetLocationEdit', $from_id);
@@ -1356,6 +1369,8 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['manage_panel']) {
         sendmessage($from_id, $textbotlang['users']['selectoption'], $optionX_ui_single, 'HTML');
     } elseif ($listpanel['type'] == "alireza") {
         sendmessage($from_id, $textbotlang['users']['selectoption'], $optionX_ui_single, 'HTML');
+    }elseif($listpanel['type'] == "wgdashboard"){
+        sendmessage($from_id, $textbotlang['users']['selectoption'], $optionwgdashboard, 'HTML');
     }else{
         sendmessage($from_id, $textbotlang['users']['selectoption'], $optionMarzban, 'HTML');
     }
@@ -1375,6 +1390,8 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['manage_panel']) {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedNmaePanel'], $optionX_ui_single, 'HTML');
     }elseif ($typepanel['type'] == "s_ui") {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedNmaePanel'], $options_ui, 'HTML');
+    }elseif($listpanel['type'] == "wgdashboard"){
+        sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedNmaePanel'], $optionwgdashboard, 'HTML');
     }
     update("marzban_panel", "name_panel", $text, "name_panel", $user['Processing_value']);
     update("invoice", "Service_location", $text, "Service_location", $user['Processing_value']);
@@ -1400,6 +1417,8 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['manage_panel']) {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedurlPanel'], $optionMarzneshin, 'HTML');
     }elseif ($typepanel['type'] == "s_ui") {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedurlPanel'], $options_ui, 'HTML');
+    }elseif($listpanel['type'] == "wgdashboard"){
+        sendmessage($from_id,$textbotlang['Admin']['managepanel']['ChangedurlPanel'], $optionwgdashboard, 'HTML');
     }
     update("marzban_panel", "url_panel", $text, "name_panel", $user['Processing_value']);
     step('home', $from_id);
@@ -1418,6 +1437,8 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['manage_panel']) {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedusernamePanel'], $optionMarzneshin, 'HTML');
     }elseif ($typepanel['type'] == "s_ui") {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedusernamePanel'], $options_ui, 'HTML');
+    }elseif($listpanel['type'] == "wgdashboard"){
+        sendmessage($from_id,$textbotlang['Admin']['managepanel']['ChangedusernamePanel'], $optionwgdashboard, 'HTML');
     }
     update("marzban_panel", "username_panel", $text, "name_panel", $user['Processing_value']);
     step('home', $from_id);
@@ -1436,6 +1457,8 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['manage_panel']) {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedpasswordPanel'], $optionMarzneshin, 'HTML');
     }elseif ($typepanel['type'] == "s_ui") {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedpasswordPanel'], $options_ui, 'HTML');
+    }elseif($listpanel['type'] == "wgdashboard"){
+        sendmessage($from_id,$textbotlang['Admin']['managepanel']['ChangedpasswordPanel'], $optionwgdashboard, 'HTML');
     }
     update("marzban_panel", "password_panel", $text, "name_panel", $user['Processing_value']);
     step('home', $from_id);
@@ -1443,6 +1466,20 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['manage_panel']) {
     sendmessage($from_id, $textbotlang['Admin']['managepanel']['keyboardpanel']['getidinbound'], $backadmin, 'HTML');
     step('getinboundiid', $from_id);
 } elseif ($user['step'] == "getinboundiid") {
+    $typepanel = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
+    if ($typepanel['type'] == "marzban") {
+        sendmessage($from_id, $textbotlang['Admin']['managepanel']['keyboardpanel']['setinbound'], $optionMarzban, 'HTML');
+    } elseif ($typepanel['type'] == "x-ui_single") {
+        sendmessage($from_id, $textbotlang['Admin']['managepanel']['keyboardpanel']['setinbound'], $optionX_ui_single, 'HTML');
+    } elseif ($typepanel['type'] == "alireza") {
+        sendmessage($from_id, $textbotlang['Admin']['managepanel']['keyboardpanel']['setinbound'], $optionX_ui_single, 'HTML');
+    }elseif ($typepanel['type'] == "marzneshin") {
+        sendmessage($from_id, $textbotlang['Admin']['managepanel']['keyboardpanel']['setinbound'], $optionMarzneshin, 'HTML');
+    }elseif ($typepanel['type'] == "s_ui") {
+        sendmessage($from_id, $textbotlang['Admin']['managepanel']['keyboardpanel']['setinbound'], $options_ui, 'HTML');
+    }elseif($listpanel['type'] == "wgdashboard"){
+        sendmessage($from_id,$textbotlang['Admin']['managepanel']['keyboardpanel']['setinbound'], $optionwgdashboard, 'HTML');
+    }
     sendmessage($from_id, $textbotlang['Admin']['managepanel']['keyboardpanel']['setinbound'], $optionX_ui_single, 'HTML');
     update("marzban_panel", "inboundid", $text, "name_panel", $user['Processing_value']);
     step('home', $from_id);
@@ -1459,6 +1496,8 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['manage_panel']) {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedurlPanel'], $optionX_ui_single, 'HTML');
     }elseif($panel['type'] == "s_ui"){
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedurlPanel'], $options_ui, 'HTML');
+    }elseif($listpanel['type'] == "wgdashboard"){
+        sendmessage($from_id,$textbotlang['Admin']['managepanel']['ChangedurlPanel'], $optionwgdashboard, 'HTML');
     }
     update("marzban_panel", "linksubx", $text, "name_panel", $user['Processing_value']);
     step('home', $from_id);
