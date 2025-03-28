@@ -162,7 +162,7 @@ $step_payment['inline_keyboard'][] = [
 $step_payment = json_encode($step_payment);
 $User_Services = json_encode([
     'keyboard' => [
-        [['text' => $textbotlang['Admin']['ManageUser']['vieworderuser']]],
+        [['text' => $textbotlang['Admin']['ManageUser']['searchorder']]],
         [['text' => $textbotlang['Admin']['ManageUser']['removeorderbtn']],['text' => $textbotlang['Admin']['Balance']['SendBalanceAll']]],
         [['text' => $textbotlang['Admin']['Back-Adminment']]]
     ],

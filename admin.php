@@ -1111,20 +1111,14 @@ if ($datain == "onconfig") {
     Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['configStatuson'], $configkeyboard);
 }
 #----------------[  view order user  ]------------------#
-if ($text == $textbotlang['Admin']['ManageUser']['vieworderuser']) {
-    sendmessage($from_id, $textbotlang['Admin']['ManageUser']['ViewOrder'], $backadmin, 'HTML');
-    step('GetIdAndOrdedrs', $from_id);
-} elseif ($user['step'] == "GetIdAndOrdedrs") {
-    if (!in_array($text, $users_ids)) {
-        sendmessage($from_id, $textbotlang['Admin']['not-user'], $backadmin, 'HTML');
-        return;
-    }
-    $OrderUsers = select("invoice", "*", "id_user", $text, "fetchAll");
+elseif (preg_match('/vieworderall_(\w+)/', $datain, $dataget)) {
+    $iduser = $dataget[1];
+    $OrderUsers = select("invoice", "*", "id_user", $iduser, "fetchAll");
     foreach ($OrderUsers as $OrderUser) {
         $timeacc = jdate('Y/m/d H:i:s', $OrderUser['time_sell']);
         sendmessage($from_id, sprintf($textbotlang['Admin']['ManageUser']['Datails'],$OrderUser['id_invoice'],$OrderUser['Status'],$OrderUser['id_user'],$OrderUser['username'],$OrderUser['Service_location'],$OrderUser['name_product'],$OrderUser['price_product'],$OrderUser['Volume'],$OrderUser['Service_time'],$timeacc), null, 'HTML');
     }
-    sendmessage($from_id, $textbotlang['Admin']['ManageUser']['SendOrder'], $User_Services, 'HTML');
+    sendmessage($from_id, $textbotlang['Admin']['ManageUser']['SendOrder'], $keyboardadmin, 'HTML');
     step('home', $from_id);
 }
 #----------------[  remove Discount   ]------------------#
@@ -1948,6 +1942,7 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['user_search']) {
             [['text' => $textbotlang['Admin']['ManageUser']['confirmnumber'], 'callback_data' => "confirmnumber_" . $text]],
             [['text' => $textbotlang['Admin']['getlimitusertest']['setlimitbtn'], 'callback_data' => "limitusertest_" . $text]],
             [['text' => $textbotlang['Admin']['ManageUser']['verify'], 'callback_data' => "verify_" . $text],['text' =>$textbotlang['Admin']['ManageUser']['removeverify'], 'callback_data' => "verifyun_" . $text]],
+            [['text' => $textbotlang['Admin']['ManageUser']['vieworderuser'], 'callback_data' => "vieworderall_" . $text]],
         ]
     ];
     $keyboardmanage = json_encode($keyboardmanage);
@@ -2333,4 +2328,17 @@ elseif(preg_match('/^editstsuts-(.*)-(.*)/', $datain, $dataget)) {
     $stmt = $pdo->prepare("DELETE FROM category WHERE remark = :remark ");
     $stmt->bindParam(':remark', $text);
     $stmt->execute();
+}
+elseif($text == $textbotlang['Admin']['ManageUser']['searchorder']){
+    sendmessage($from_id,$textbotlang['Admin']['ManageUser']['ViewOrder'], $backadmin, 'HTML');
+    step("getidfororder",$from_id);
+}elseif($user['step'] == "getidfororder"){
+    $OrderUser = select("invoice", "*", "username", $text, "select");
+    if(!$OrderUser){
+        sendmessage($from_id, $textbotlang['Admin']['ManageUser']['OrderNotFound'], null, 'HTML');
+        return;
+    }
+    $timeacc = jdate('Y/m/d H:i:s', $OrderUser['time_sell']);
+    sendmessage($from_id, sprintf($textbotlang['Admin']['ManageUser']['Datails'],$OrderUser['id_invoice'],$OrderUser['Status'],$OrderUser['id_user'],$OrderUser['username'],$OrderUser['Service_location'],$OrderUser['name_product'],$OrderUser['price_product'],$OrderUser['Volume'],$OrderUser['Service_time'],$timeacc), $User_Services, 'HTML');
+    step('home', $from_id);
 }
