@@ -134,6 +134,11 @@ function install_bot() {
     }
     echo -e "\e[92mThe server was successfully updated ...\033[0m\n"
 
+    sudo apt-get install software-properties-common || {
+        echo -e "\e[91mError: Failed to install software-properties-common.\033[0m"
+        exit 1
+    }
+    
     sudo apt install -y git unzip curl || {
         echo -e "\e[91mError: Failed to install required packages.\033[0m"
         exit 1
@@ -653,13 +658,16 @@ function install_bot_with_marzban() {
     echo -e "\e[92mMySQL detected. Proceeding with installation...\033[0m"
 
     # Check if port 80 is free before proceeding
-    echo -e "\e[32mChecking port 80 availability...\033[0m"
-    if sudo netstat -tuln | grep -q ":80 "; then
-        echo -e "\e[91mError: Port 80 is already in use. Please free port 80 (e.g., stop any service using it like Marzban's HTTP) and run the script again.\033[0m"
+    echo -e "\e[32mChecking port availability...\033[0m"
+    if sudo ss -tuln | grep -q ":80 "; then
+        echo -e "\e[91mError: Port 80 is already in use. Please free port 80 and run the script again.\033[0m"
         exit 1
-    else
-        echo -e "\e[92mPort 80 is free. Proceeding with installation...\033[0m"
     fi
+    if sudo ss -tuln | grep -q ":88 "; then
+        echo -e "\e[91mError: Port 88 is already in use. Please free port 88 and run the script again.\033[0m"
+        exit 1
+    fi
+    echo -e "\e[92mPorts 80 and 88 are free. Proceeding with installation...\033[0m"
 
     # Update system and upgrade packages
     sudo apt update && sudo apt upgrade -y || {
@@ -667,6 +675,11 @@ function install_bot_with_marzban() {
         exit 1
     }
     echo -e "\e[92mSystem updated successfully...\033[0m\n"
+
+    sudo apt-get install software-properties-common || {
+        echo -e "\e[91mError: Failed to install software-properties-common.\033[0m"
+        exit 1
+    }
 
     # Install MySQL client if not already installed
     echo -e "\e[32mChecking and installing MySQL client...\033[0m"
@@ -720,6 +733,11 @@ function install_bot_with_marzban() {
     # Install additional Apache module
     sudo apt install -y libapache2-mod-php8.2 || {
         echo -e "\e[91mError: Failed to install libapache2-mod-php8.2.\033[0m"
+        exit 1
+    }
+
+    sudo apt install -y python3-certbot-apache || {
+        echo -e "\e[91mError: Failed to install Certbot for Apache.\033[0m"
         exit 1
     }
 
@@ -954,10 +972,6 @@ EOF
     DOMAIN_NAME="$domainname"
     echo -e "\e[92mDomain set to: $DOMAIN_NAME\033[0m"
 
-    sudo apt install -y letsencrypt python3-certbot-apache || {
-        echo -e "\e[91mError: Failed to install SSL tools.\033[0m"
-        exit 1
-    }
     sudo systemctl restart apache2 || {
         echo -e "\e[91mError: Failed to restart Apache2 before Certbot.\033[0m"
         exit 1
@@ -997,39 +1011,39 @@ EOF
         echo -e "\e[91mError: Failed to enable SSL site.\033[0m"
         exit 1
     }
+    # Force ports.conf to only listen on 88 before restarting Apache
+    sudo bash -c "echo -n > /etc/apache2/ports.conf"
+    cat <<EOF | sudo tee /etc/apache2/ports.conf
+Listen 88
+EOF
+    sudo apache2ctl configtest || {
+        echo -e "\e[91mError: Apache configuration test failed after Certbot.\033[0m"
+        exit 1
+    }
     sudo systemctl restart apache2 || {
         echo -e "\e[91mError: Failed to restart Apache2 after SSL configuration.\033[0m"
+        systemctl status apache2.service
         exit 1
     }
 
     # Disable port 80 after SSL is configured
     echo -e "\e[32mDisabling port 80 as it's no longer needed...\033[0m"
-    sudo bash -c "echo -n > /etc/apache2/ports.conf"  # Clear the file again
-    cat <<EOF | sudo tee /etc/apache2/ports.conf
-# If you just change the port or add more ports here, you will likely also
-# have to change the VirtualHost statement in
-# /etc/apache2/sites-enabled/000-default.conf
-
-Listen 88
-
-# vim: syntax=apache ts=4 sw=4 sts=4 sr noet
-EOF
-    if [ $? -ne 0 ]; then
-        echo -e "\e[91mError: Failed to reconfigure ports.conf.\033[0m"
-        exit 1
-    fi
-
-    # Remove port 80 VirtualHost from all config files
-    sudo sed -i '/<VirtualHost \*:80>/,/<\/VirtualHost>/d' /etc/apache2/sites-available/* || {
-        echo -e "\e[91mError: Failed to remove VirtualHost for port 80 from all config files.\033[0m"
+    # Ports.conf already set to Listen 88 in previous step, just verify
+    sudo a2dissite 000-default.conf || {
+        echo -e "\e[91mError: Failed to disable port 80 VirtualHost.\033[0m"
         exit 1
     }
     sudo ufw delete allow 80 || {
         echo -e "\e[91mError: Failed to remove port 80 from firewall.\033[0m"
         exit 1
     }
+    sudo apache2ctl configtest || {
+        echo -e "\e[91mError: Apache configuration test failed.\033[0m"
+        exit 1
+    }
     sudo systemctl restart apache2 || {
-        echo -e "\e[91mError: Failed to restart Apache2 after SSL.\033[0m"
+        echo -e "\e[91mError: Failed to restart Apache2 after disabling port 80.\033[0m"
+        systemctl status apache2.service
         exit 1
     }
     echo -e "\e[92mSSL configured successfully on port 88. Port 80 disabled.\033[0m"
