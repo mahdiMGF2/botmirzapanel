@@ -87,7 +87,7 @@ class ManagePanel{
             }else{
                 $Output['status'] = 'successful';
                 $Output['username'] = $usernameC;
-                $Output['subscription_url'] = "{$Get_Data_Panel['linksubx']}/{$subId}/?name=$usernameC";
+                $Output['subscription_url'] = "{$Get_Data_Panel['linksubx']}/{$subId}?name=$usernameC";
                 $Output['configs'] = [outputlunk($Output['subscription_url'])];
             }
         }
@@ -260,7 +260,7 @@ class ManagePanel{
                 }
                 $subId = $UsernameData2['subId'];
                 $status_user = get_onlinecli($Get_Data_Panel['name_panel'],$username);
-                $linksub = "{$Get_Data_Panel['linksubx']}/{$subId}/?name=$username";
+                $linksub = "{$Get_Data_Panel['linksubx']}/{$subId}?name=$username";
                 $Output = array(
                     'status' => $UsernameData['enable'],
                     'username' => $UsernameData['email'],

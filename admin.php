@@ -1498,6 +1498,8 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['manage_panel']) {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedurlPanel'], $options_ui, 'HTML');
     }elseif($listpanel['type'] == "wgdashboard"){
         sendmessage($from_id,$textbotlang['Admin']['managepanel']['ChangedurlPanel'], $optionwgdashboard, 'HTML');
+    }elseif($listpanel['type'] == "alireza"){
+        sendmessage($from_id,$textbotlang['Admin']['managepanel']['ChangedurlPanel'], $optionX_ui_single, 'HTML');
     }
     update("marzban_panel", "linksubx", $text, "name_panel", $user['Processing_value']);
     step('home', $from_id);

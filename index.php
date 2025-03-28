@@ -890,6 +890,7 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
     ]);
     $priceproductformat = number_format($product['price_product']);
     $balanceformatsell = number_format(select("user", "Balance", "id", $from_id, "select")['Balance']);
+    update("invoice","Status","active","id_invoice",$nameloc['id_invoice']);
     sendmessage($from_id, $textbotlang['users']['extend']['thanks'], $keyboardextendfnished, 'HTML');
     $text_report = sprintf($textbotlang['Admin']['Report']['extend'],$from_id,$username,$product['name_product'],$priceproductformat,$usernamepanel,$balanceformatsell,$nameloc['Service_location']);
     if (isset($setting['Channel_Report']) &&strlen($setting['Channel_Report']) > 0) {
