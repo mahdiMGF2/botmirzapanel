@@ -97,10 +97,13 @@ class ManagePanel{
                 $Output['status'] = 'Unsuccessful';
                 $Output['msg'] = $data_Output['msg'];
             }else{
+                $setting_app = get_settig($Get_Data_Panel['name_panel']);
+                $url = explode(":",$Get_Data_Panel['url_panel']);
+                $url_sub = $url[0] . $url[1] . ":" . $setting_app['subPort'] . $setting_app['subPath'] . $usernameC;
                 $Output['status'] = 'successful';
                 $Output['username'] = $usernameC;
-                $Output['subscription_url'] = $Get_Data_Panel['linksubx']."/$usernameC";
-                $Output['configs'] = [outputlunk($Get_Data_Panel['linksubx']."/$usernameC")];
+                $Output['subscription_url'] = $url_sub;
+                $Output['configs'] = [outputlunk($url_sub)];
             }
 
         }
@@ -288,6 +291,9 @@ class ManagePanel{
                         $links[] = $config['uri'];
                     }
                 }
+                $setting_app = get_settig($Get_Data_Panel['name_panel']);
+                $url = explode(":",$Get_Data_Panel['url_panel']);
+                $url_sub = $url[0] . $url[1] . ":" . $setting_app['subPort'] . $setting_app['subPath'] . $username;
                 $data_limit = $UsernameData['volume'];
                 $useage = $UsernameData['up'] + $UsernameData['down'];
                 $RemainingVolume = $data_limit - $useage;
@@ -309,7 +315,7 @@ class ManagePanel{
                     'online_at' => $onlinestatus,
                     'used_traffic' => $useage,
                     'links' => $links,
-                    'subscription_url' => $Get_Data_Panel['linksubx']."/{$UsernameData['name']}",
+                    'subscription_url' => $url_sub,
                     'sub_updated_at' => null,
                     'sub_last_user_agent'=> null,
                 );
@@ -552,10 +558,13 @@ class ManagePanel{
                     'msg' => 'Unsuccessful'
                 );
             }else{
+                $setting_app = get_settig($Get_Data_Panel['name_panel']);
+                $url = explode(":",$Get_Data_Panel['url_panel']);
+                $url_sub = $url[0] . $url[1] . ":" . $setting_app['subPort'] . $setting_app['subPath'] . $username;
                 $Output = array(
                     'status' => 'successful',
-                    'configs' => [outputlunk($Get_Data_Panel['linksubx']."/{$usernameac}")],
-                    'subscription_url' => $Get_Data_Panel['linksubx']."/{$usernameac}",
+                    'configs' => [outputlunk($url_sub)],
+                    'subscription_url' => $url_sub,
                 );
             }
         }
@@ -775,7 +784,4 @@ class ManagePanel{
         }
 
     }
-
-
-
 }

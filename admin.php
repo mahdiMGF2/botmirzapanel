@@ -2051,18 +2051,17 @@ elseif($text == $textbotlang['Admin']['Help']['change']['editmedia']) {
         update("marzban_panel","inbounds",json_encode($DataUserOut['inbounds']),"name_panel",$user['Processing_value']);
         update("marzban_panel","proxies",json_encode($DataUserOut['proxies']),"name_panel",$user['Processing_value']);
     }else{
-        $data = GetClientsS_UI($text,$panel['name_panel']);{
-            if(count($data) == 0){
-                sendmessage($from_id, $textbotlang['Admin']['managepanel']['keyboardpanel']['usernotfount'], $options_ui, 'HTML');
-                return;
-            }
-            $servies = [];
-            foreach ($data['inbounds'] as $service){
-                $servies[] = $service;
-            }
+        $data = GetClientsS_UI($text,$panel['name_panel']);
+        if(count($data) == 0){
+            sendmessage($from_id, $textbotlang['Admin']['managepanel']['keyboardpanel']['usernotfount'], $options_ui, 'HTML');
+            return;
         }
-        update("marzban_panel","proxies",json_encode($servies,true),"name_panel",$user['Processing_value']);
+        $servies = [];
+        foreach ($data['inbounds'] as $service){
+            $servies[] = $service;
+        }
     }
+    update("marzban_panel","proxies",json_encode($servies,true),"name_panel",$user['Processing_value']);
     sendmessage($from_id,$textbotlang['Admin']['managepanel']['setedinbound'], $optionMarzban, 'HTML');
     step("home",$from_id);
 }elseif($text == $textbotlang['Admin']['keyboardadmin']['seetingstatus']) {

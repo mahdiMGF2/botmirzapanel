@@ -6,7 +6,7 @@ function get_Clients_ui($username,$namepanel){
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $namepanel,"select");
     $curl = curl_init();
     curl_setopt_array($curl, array(
-        CURLOPT_URL => $marzban_list_get['url_panel'].'/app/apiv2/clients',
+        CURLOPT_URL => $marzban_list_get['url_panel'].'/apiv2/clients',
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_ENCODING => '',
         CURLOPT_MAXREDIRS => 10,
@@ -36,7 +36,7 @@ function GetClientsS_UI($username,$namepanel){
     if(count($userdata) == 0)return [];
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $namepanel,"select");
     $curl = curl_init();curl_setopt_array($curl, array(
-        CURLOPT_URL => $marzban_list_get['url_panel'].'/app/apiv2/clients?id='.$userdata['id'],
+        CURLOPT_URL => $marzban_list_get['url_panel'].'/apiv2/clients?id='.$userdata['id'],
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_ENCODING => '',
         CURLOPT_MAXREDIRS => 10,
@@ -127,7 +127,7 @@ function addClientS_ui($namepanel, $usernameac, $Expire,$Total,$inboundid){
     );
     $curl = curl_init();
     curl_setopt_array($curl, array(
-        CURLOPT_URL => $marzban_list_get['url_panel'].'/app/apiv2/save',
+        CURLOPT_URL => $marzban_list_get['url_panel'].'/apiv2/save',
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_ENCODING => '',
         CURLOPT_MAXREDIRS => 10,
@@ -149,7 +149,7 @@ function updateClientS_ui($namepanel,array $config){
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $namepanel,"select");
     $curl = curl_init();
     curl_setopt_array($curl, array(
-        CURLOPT_URL => $marzban_list_get['url_panel'].'/app/apiv2/save',
+        CURLOPT_URL => $marzban_list_get['url_panel'].'/apiv2/save',
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_ENCODING => '',
         CURLOPT_MAXREDIRS => 10,
@@ -201,7 +201,7 @@ function removeClientS_ui($location,$username){
     );
     $curl = curl_init();
     curl_setopt_array($curl, array(
-        CURLOPT_URL => $marzban_list_get['url_panel'].'/app/apiv2/save',
+        CURLOPT_URL => $marzban_list_get['url_panel'].'/apiv2/save',
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_ENCODING => '',
         CURLOPT_MAXREDIRS => 10,
@@ -223,7 +223,7 @@ function get_onlineclients_ui($name_panel,$username){
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $name_panel,"select");
     $curl = curl_init();
     curl_setopt_array($curl, array(
-        CURLOPT_URL => $marzban_list_get['url_panel'].'/app/apiv2/onlines',
+        CURLOPT_URL => $marzban_list_get['url_panel'].'/apiv2/onlines',
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_ENCODING => '',
         CURLOPT_MAXREDIRS => 10,
@@ -242,5 +242,29 @@ function get_onlineclients_ui($name_panel,$username){
     if(in_array($username,$response))return "online";
     return "offline";
     curl_close($curl);
+
+}
+function get_settig($name_panel){
+    $marzban_list_get = select("marzban_panel", "*", "name_panel", $name_panel,"select");
+    $curl = curl_init();
+    curl_setopt_array($curl, array(
+        CURLOPT_URL => $marzban_list_get['url_panel'].'/apiv2/settings',
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => '',
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT_MS => 4000,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => 'GET',
+        CURLOPT_HTTPHEADER => array(
+            'Token: '.$marzban_list_get['password_panel']
+        ),
+    ));
+    $response = curl_exec($curl);
+    if($response == null)return [];
+    $response = json_decode($response,true)['obj'];
+    if(!is_array($response))return [];
+    curl_close($curl);
+    return $response;
 
 }
