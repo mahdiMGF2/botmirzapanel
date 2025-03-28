@@ -668,6 +668,18 @@ function install_bot_with_marzban() {
     }
     echo -e "\e[92mSystem updated successfully...\033[0m\n"
 
+    # Install MySQL client if not already installed
+    echo -e "\e[32mChecking and installing MySQL client...\033[0m"
+    if ! command -v mysql &>/dev/null; then
+        sudo apt install -y mysql-client || {
+            echo -e "\e[91mError: Failed to install MySQL client. Please install it manually and try again.\033[0m"
+            exit 1
+        }
+        echo -e "\e[92mMySQL client installed successfully.\033[0m"
+    else
+        echo -e "\e[92mMySQL client is already installed.\033[0m"
+    fi
+
     # Add Ondřej Surý PPA for PHP 8.2
     sudo apt install -y software-properties-common || {
         echo -e "\e[91mError: Failed to install software-properties-common.\033[0m"
@@ -763,7 +775,7 @@ function install_bot_with_marzban() {
     fi
 
     ROOT_USER="root"
-    MYSQL_CONTAINER=$(docker ps -q --filter "name=marzban_mysql" --no-trunc)
+    echo -e "\e[32mUsing MySQL container: $(docker inspect -f '{{.Name}}' "$MYSQL_CONTAINER" | cut -c2-)\033[0m"
 
     # Try connecting directly to host first (for mysql:latest with network_mode: host)
     mysql -u "$ROOT_USER" -p"$MYSQL_ROOT_PASSWORD" -h 127.0.0.1 -P 3306 -e "SELECT 1;" 2>/tmp/mysql_error.log
@@ -804,6 +816,7 @@ function install_bot_with_marzban() {
             exit 1
         fi
     fi
+
     # Ask for database username and password like Marzban
     clear
     echo -e "\e[33mConfiguring Mirza Bot database credentials...\033[0m"
