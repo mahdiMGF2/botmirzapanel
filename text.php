@@ -1171,10 +1171,13 @@ $textbotlang['Admin']['cron']['remove']['timeseted'] = "زمان با موفقی
 $textbotlang['Admin']['category']['status'] = "🕹 دسته بندی";
 $textbotlang['Admin']['category']['add'] = "🛒 اضافه کردن دسته بندی";
 $textbotlang['Admin']['category']['remove'] = "❌ حذف دسته بندی";
+$textbotlang['Admin']['category']['getname'] = "📌 جهت اضافه کردن دسته بندی نام دسته بندی را ارسال کنید.";
 $textbotlang['Admin']['category']['addedcategry'] = "✅ دسته بندی با موفقیت اضافه گردید.";
 $textbotlang['Admin']['category']['getcatgory'] = "📌 دسته بندی خود را جهت حذف انتخاب کنید";
 $textbotlang['Admin']['category']['removedcategory'] = "✅ دسته بندی با موفقیت حذف گردید.";
 $textbotlang['Admin']['category']['added'] = "📌 دسته بندی خود را جهت حذف انتخاب کنید";
+
+
 
 $textbotlang['Admin']['Report']['extend'] = "⭕️ یک کاربر سرویس خود را تمدید کرد.
             

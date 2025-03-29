@@ -99,7 +99,7 @@ class ManagePanel{
             }else{
                 $setting_app = get_settig($Get_Data_Panel['name_panel']);
                 $url = explode(":",$Get_Data_Panel['url_panel']);
-                $url_sub = $url[0] . $url[1] . ":" . $setting_app['subPort'] . $setting_app['subPath'] . $usernameC;
+                $url_sub = $url[0] .":". $url[1] . ":" . $setting_app['subPort'] . $setting_app['subPath'] . $usernameC;
                 $Output['status'] = 'successful';
                 $Output['username'] = $usernameC;
                 $Output['subscription_url'] = $url_sub;
@@ -293,7 +293,7 @@ class ManagePanel{
                 }
                 $setting_app = get_settig($Get_Data_Panel['name_panel']);
                 $url = explode(":",$Get_Data_Panel['url_panel']);
-                $url_sub = $url[0] . $url[1] . ":" . $setting_app['subPort'] . $setting_app['subPath'] . $username;
+                $url_sub = $url[0] .":". $url[1] . ":" . $setting_app['subPort'] . $setting_app['subPath'] . $username;
                 $data_limit = $UsernameData['volume'];
                 $useage = $UsernameData['up'] + $UsernameData['down'];
                 $RemainingVolume = $data_limit - $useage;
@@ -560,7 +560,7 @@ class ManagePanel{
             }else{
                 $setting_app = get_settig($Get_Data_Panel['name_panel']);
                 $url = explode(":",$Get_Data_Panel['url_panel']);
-                $url_sub = $url[0] . $url[1] . ":" . $setting_app['subPort'] . $setting_app['subPath'] . $username;
+                $url_sub = $url[0] .":". $url[1] . ":" . $setting_app['subPort'] . $setting_app['subPath'] . $username;
                 $Output = array(
                     'status' => 'successful',
                     'configs' => [outputlunk($url_sub)],

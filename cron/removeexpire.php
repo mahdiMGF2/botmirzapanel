@@ -16,6 +16,7 @@ $stmt->execute();
 while ($resultss = $stmt->fetch(PDO::FETCH_ASSOC)) {
     $line  = trim($resultss['username']);
     $marzban_list_get =select("marzban_panel","*","name_panel",$resultss['Service_location'],"select");
+    if($marzban_list_get == false)continue;
     $get_username_Check = $ManagePanel->DataUser($resultss['Service_location'],$resultss['username']);
     if($get_username_Check['status'] != "Unsuccessful"){
         if(in_array($get_username_Check['status'],['limited','expired'])){
