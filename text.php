@@ -617,7 +617,7 @@ $textbotlang['Admin']['Unauthorized-entry'] = "مدیر عزیز یک کاربر
 آیدی عددی : %s
 نام کاربر  :%s";
 $textbotlang['Admin']['login-admin'] = "
-سلا 😍
+سلام 😍
 ⭕️ نسخه فعلی ربات شما : %s
 
 channel : @mirzapanel

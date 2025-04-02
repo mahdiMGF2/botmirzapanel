@@ -2055,8 +2055,8 @@ elseif($text == $textbotlang['Admin']['Help']['change']['editmedia']) {
         foreach ($data['inbounds'] as $service){
             $servies[] = $service;
         }
+        update("marzban_panel","proxies",json_encode($servies,true),"name_panel",$user['Processing_value']);
     }
-    update("marzban_panel","proxies",json_encode($servies,true),"name_panel",$user['Processing_value']);
     sendmessage($from_id,$textbotlang['Admin']['managepanel']['setedinbound'], $optionMarzban, 'HTML');
     step("home",$from_id);
 }elseif($text == $textbotlang['Admin']['keyboardadmin']['seetingstatus']) {
