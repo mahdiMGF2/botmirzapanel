@@ -9,7 +9,7 @@ if (function_exists('fastcgi_finish_request')) {
 }
 
 ini_set('error_log', 'error_log');
-$version = "4.14.1";
+$version = "4.14.2";
 date_default_timezone_set('Asia/Tehran');
 require_once 'config.php';
 require_once 'botapi.php';
@@ -1272,7 +1272,7 @@ if ($user['step'] == "createusertest" || preg_match('/locationtests_(.*)/', $dat
         sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboard, 'HTML');
         unlink($urlimage);
     } else {
-        sendmessage($from_id, $textcreatuser, $usertestinfo, 'HTML');
+        sendmessage($from_id, $textcreatuser, $Shoppinginfo, 'HTML');
         sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboard, 'HTML');
     }
     step('home', $from_id);
