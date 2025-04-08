@@ -9,7 +9,7 @@ $tableName = "user";
 try {
     $result = $connect->query("SHOW TABLES LIKE 'user'");
     $table_exists = ($result->num_rows > 0);
-
+    $tableName = "user";
     if (!$table_exists) {
         $result = $connect->query("CREATE TABLE user (
         id varchar(500)  PRIMARY KEY,
@@ -77,7 +77,7 @@ try {
 try {
     $result = $connect->query("SHOW TABLES LIKE 'setting'");
     $table_exists = ($result->num_rows > 0);
-
+    $tableName = "setting";
     if (!$table_exists) {
         $result = $connect->query("CREATE TABLE setting (
         Bot_Status varchar(200)  CHARACTER SET utf8mb4 COLLATE utf8mb4_bin  NULL,
