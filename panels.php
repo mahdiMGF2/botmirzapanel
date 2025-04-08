@@ -73,7 +73,7 @@ class ManagePanel{
             }else{
                 $Output['status'] = 'successful';
                 $Output['username'] = $usernameC;
-                $Output['subscription_url'] = "{$Get_Data_Panel['linksubx']}/{$subId}/?name=$usernameC";
+                $Output['subscription_url'] = "{$Get_Data_Panel['linksubx']}/{$subId}#$usernameC";
                 $Output['configs'] = [outputlunk($Output['subscription_url'])];
             }
         }
@@ -234,7 +234,7 @@ class ManagePanel{
                 }
                 $subId = $UsernameData2['subId'];
                 $status_user = get_onlinecli($Get_Data_Panel['name_panel'],$username);
-                $linksub = "{$Get_Data_Panel['linksubx']}/{$subId}/?name=$username";
+                $linksub = "{$Get_Data_Panel['linksubx']}/{$subId}#$username";
                 $Output = array(
                     'status' => $UsernameData['enable'],
                     'username' => $UsernameData['email'],
@@ -424,7 +424,7 @@ class ManagePanel{
         elseif($Get_Data_Panel['type'] == "x-ui_single"){
             $clients = get_clinets($username,$name_panel);
             $subId = bin2hex(random_bytes(8));
-            $linksub = "{$Get_Data_Panel['linksubx']}/{$subId}/?name=$username";
+            $linksub = "{$Get_Data_Panel['linksubx']}/{$subId}#$username";
             $config = array(
                 'id' => intval($Get_Data_Panel['inboundid']),
                 'settings' => json_encode(array(
