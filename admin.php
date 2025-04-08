@@ -1218,7 +1218,7 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['finance']) {
             ],
             [
                 ['text' => $textbotlang['users']['moeny']['setting'], 'callback_data' => "SettingnowPayment"],
-                ['text' => $status_nowpayment, 'callback_data' => "editpay-nowpayment-".$sqlstatus_cart],
+                ['text' => $status_nowpayment, 'callback_data' => "editpay-nowpayment-".$sqlstatus_nowpayment],
                 ['text' => $textbotlang['users']['moeny']['nowpayment_gateway_status'], 'callback_data' => "none"],
             ],
             [
@@ -1295,7 +1295,7 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['finance']) {
             ],
             [
                 ['text' => $textbotlang['users']['moeny']['setting'], 'callback_data' => "SettingnowPayment"],
-                ['text' => $status_nowpayment, 'callback_data' => "editpay-nowpayment-".$sqlstatus_cart],
+                ['text' => $status_nowpayment, 'callback_data' => "editpay-nowpayment-".$sqlstatus_nowpayment],
                 ['text' => $textbotlang['users']['moeny']['nowpayment_gateway_status'], 'callback_data' => "none"],
             ],
             [
