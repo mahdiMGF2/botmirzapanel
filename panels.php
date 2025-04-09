@@ -328,7 +328,7 @@ class ManagePanel{
             if(!isset($UsernameData['id'])){
                 $Output = array(
                     'status' => 'Unsuccessful',
-                    'msg' => $UsernameData['msg']
+                    'msg' => isset($UsernameData['msg']) ? $UsernameData['msg'] : ''
                 );
             }else{
                 $jobtime = [];

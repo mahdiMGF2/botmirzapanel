@@ -1167,6 +1167,9 @@ $textbotlang['Admin']['cron']['remove']['invalidtime'] = "زمان ناعمتب�
 $textbotlang['Admin']['cron']['remove']['timeseted'] = "زمان با موفقیت تنظیم شد";
 
 
+$textbotlang['Admin']['Automatic_confirmation']['title'] = "🤖 تایید خودکار بدون بررسی";
+
+
 
 $textbotlang['Admin']['category']['status'] = "🕹 دسته بندی";
 $textbotlang['Admin']['category']['add'] = "🛒 اضافه کردن دسته بندی";
@@ -1229,6 +1232,11 @@ $textbotlang['Admin']['Report']['nowpayment'] = "💵 پرداخت جدید
 آیدی عددی کاربر : %s
 مبلغ تراکنش %s
 روش پرداخت : nowpayment  ";
+$textbotlang['Admin']['Report']['autocart'] = "💵 پرداخت جدید
+        
+آیدی عددی کاربر : %s
+مبلغ تراکنش %s
+روش پرداخت : تایید خودکار بدون بررسی  ";
 $textbotlang['users']['Report']['discountused'] = "⭕️ یک کاربر با نام کاربری @%s  و آیدی عددی %s از کد تخفیف %s استفاده کرد.";
 $textbotlang['users']['Report']['reportbuy'] = " 🛍 خرید جدید
             

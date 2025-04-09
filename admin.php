@@ -2128,6 +2128,17 @@ elseif($text == $textbotlang['Admin']['Help']['change']['editmedia']) {
         '1' => $textbotlang['Admin']['Status']['statuson'],
         '0' => $textbotlang['Admin']['Status']['statusoff']
     ][$setting['statuscategory']];
+    $cronCommand = "*/4 * * * * curl https://$domainhosts/cron/croncard.php";
+    $existingCronCommands = shell_exec('crontab -l');
+    if (strpos($existingCronCommands, $cronCommand) === false) {
+        $cronstatus = 0;
+    }else{
+        $cronstatus = 1;
+    }
+    $status_Automatic_confirmation  = [
+        '1' => $textbotlang['Admin']['Status']['statuson'],
+        '0' => $textbotlang['Admin']['Status']['statusoff']
+    ][$cronstatus];
     $Bot_Status = json_encode([
         'inline_keyboard' => [
             [
@@ -2158,6 +2169,9 @@ elseif($text == $textbotlang['Admin']['Help']['change']['editmedia']) {
             ],[
                 ['text' => $statusv_category, 'callback_data' => "editstsuts-category-{$setting['statuscategory']}"],
                 ['text' => $textbotlang['Admin']['category']['status'] , 'callback_data' => "statuscategory"],
+            ],[
+                ['text' => $status_Automatic_confirmation, 'callback_data' => "editstsuts-Automatic_confirmation-$cronstatus"],
+                ['text' => $textbotlang['Admin']['Automatic_confirmation']['title'] , 'callback_data' => "Automatic_confirmation"],
             ]
         ]
     ]);
@@ -2222,6 +2236,23 @@ elseif(preg_match('/^editstsuts-(.*)-(.*)/', $datain, $dataget)) {
             $valuenew = "1";
         }
         update("setting","statuscategory",$valuenew);
+    }elseif($type == "Automatic_confirmation"){
+        if($value == "1"){
+            $currentCronJobs = shell_exec("crontab -l");
+            $jobToRemove = "*/4 * * * * curl https://$domainhosts/cron/croncard.php";
+            $newCronJobs = preg_replace('/'.preg_quote($jobToRemove, '/').'/', '', $currentCronJobs);
+            file_put_contents('/tmp/crontab.txt', $newCronJobs);
+            shell_exec('crontab /tmp/crontab.txt');
+            unlink('/tmp/crontab.txt');
+        }else{
+            $existingCronCommands = shell_exec('crontab -l');
+            $phpFilePath = "https://$domainhosts/cron/croncard.php";
+            $cronCommand = "*/4 * * * * curl $phpFilePath";
+            if (strpos($existingCronCommands, $cronCommand) === false) {
+                $command = "(crontab -l ; echo '$cronCommand') | crontab -";
+                shell_exec($command);
+            }
+        }
     }
     $setting = select("setting", "*");
     $name_status   = [
@@ -2256,6 +2287,17 @@ elseif(preg_match('/^editstsuts-(.*)-(.*)/', $datain, $dataget)) {
         '1' => $textbotlang['Admin']['Status']['statuson'],
         '0' => $textbotlang['Admin']['Status']['statusoff']
     ][$setting['statuscategory']];
+    $cronCommand = "*/4 * * * * curl https://$domainhosts/cron/croncard.php";
+    $existingCronCommands = shell_exec('crontab -l');
+    if (strpos($existingCronCommands, $cronCommand) === false) {
+        $cronstatus = 0;
+    }else{
+        $cronstatus = 1;
+    }
+    $status_Automatic_confirmation  = [
+        '1' => $textbotlang['Admin']['Status']['statuson'],
+        '0' => $textbotlang['Admin']['Status']['statusoff']
+    ][$cronstatus];
     $Bot_Status = json_encode([
         'inline_keyboard' => [
             [
@@ -2286,6 +2328,9 @@ elseif(preg_match('/^editstsuts-(.*)-(.*)/', $datain, $dataget)) {
             ],[
                 ['text' => $statusv_category, 'callback_data' => "editstsuts-category-{$setting['statuscategory']}"],
                 ['text' => $textbotlang['Admin']['category']['status'] , 'callback_data' => "statuscategory"],
+            ],[
+                ['text' => $status_Automatic_confirmation, 'callback_data' => "editstsuts-Automatic_confirmation-$cronstatus"],
+                ['text' => $textbotlang['Admin']['Automatic_confirmation']['title'] , 'callback_data' => "Automatic_confirmation"],
             ]
         ]
     ]);

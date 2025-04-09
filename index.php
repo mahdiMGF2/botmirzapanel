@@ -9,7 +9,7 @@ if (function_exists('fastcgi_finish_request')) {
 }
 
 ini_set('error_log', 'error_log');
-$version = "4.14.2";
+$version = "4.14.3";
 date_default_timezone_set('Asia/Tehran');
 require_once 'config.php';
 require_once 'botapi.php';
@@ -1962,7 +1962,7 @@ if (preg_match('/Confirmpay_user_(\w+)_(\w+)/', $datain, $dataget)) {
     }
     $dateacc = date('Y/m/d H:i:s');
     $randomString = bin2hex(random_bytes(5));
-    $payment_Status = "Unpaid";
+    $payment_Status = "waiting";
     $Payment_Method = "cart to cart";
     if($user['Processing_value_tow'] == "getconfigafterpay"){
         $invoice = "{$user['Processing_value_tow']}|{$user['Processing_value_one']}";
