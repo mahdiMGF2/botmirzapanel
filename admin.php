@@ -1474,7 +1474,6 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['manage_panel']) {
     }elseif($listpanel['type'] == "wgdashboard"){
         sendmessage($from_id,$textbotlang['Admin']['managepanel']['keyboardpanel']['setinbound'], $optionwgdashboard, 'HTML');
     }
-    sendmessage($from_id, $textbotlang['Admin']['managepanel']['keyboardpanel']['setinbound'], $optionX_ui_single, 'HTML');
     update("marzban_panel", "inboundid", $text, "name_panel", $user['Processing_value']);
     step('home', $from_id);
 } elseif ($text == $textbotlang['Admin']['managepanel']['keyboardpanel']['linksub']) {
@@ -1631,6 +1630,10 @@ if ($text == $textbotlang['Admin']['affiliate']['Percentageset']) {
     sendmessage($from_id, $textbotlang['users']['affiliates']['setpercentage'], $backadmin, 'HTML');
     step('setpercentage', $from_id);
 } elseif ($user['step'] == "setpercentage") {
+    if (!ctype_digit($text)) {
+        sendmessage($from_id, $textbotlang['Admin']['invalidvalue'], null, 'HTML');
+        return;
+    }
     sendmessage($from_id, $textbotlang['users']['affiliates']['changedpercentage'], $affiliates, 'HTML');
     update("affiliates", "affiliatespercentage", $text);
     step('home', $from_id);
@@ -1715,6 +1718,10 @@ if ($text == $textbotlang['Admin']['affiliate']['giftstart']) {
     sendmessage($from_id, $textbotlang['users']['affiliates']['priceDiscount'], $backadmin, 'HTML');
     step('getdiscont', $from_id);
 } elseif ($user['step'] == "getdiscont") {
+    if (!ctype_digit($text)) {
+        sendmessage($from_id, $textbotlang['Admin']['invalidvalue'], null, 'HTML');
+        return;
+    }
     sendmessage($from_id, $textbotlang['users']['affiliates']['changedpriceDiscount'], $affiliates, 'HTML');
     update("affiliates", "price_Discount", $text);
     step('home', $from_id);
