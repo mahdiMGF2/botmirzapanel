@@ -9,7 +9,7 @@ if (function_exists('fastcgi_finish_request')) {
 }
 
 ini_set('error_log', 'error_log');
-$version = "4.14.3";
+$version = "4.14.4";
 date_default_timezone_set('Asia/Tehran');
 require_once 'config.php';
 require_once 'botapi.php';
@@ -48,9 +48,9 @@ if(!in_array($from_id,$users_ids) && intval($from_id) != 0){
 }
 if (intval($from_id) != 0) {
     if(intval($setting['status_verify']) == 1){
-        $verify = 0;
+     $verify = 0;
     }else{
-        $verify = 1;
+    $verify = 1;
     }
     $stmt = $pdo->prepare("INSERT IGNORE INTO user (id, step, limit_usertest, User_Status, number, Balance, pagenumber, username, message_count, last_message_time, affiliatescount, affiliates,verify) VALUES (:from_id, 'none', :limit_usertest_all, 'Active', 'none', '0', '1', :username, '0', '0', '0', '0',:verify)");
     $stmt->bindParam(':verify', $verify);
@@ -191,13 +191,13 @@ if (floor($TimeLastMessage / 60) >= 1) {
         }
 
     }
-    if($setting['Bot_Status'] == "✅  ربات روشن است" and !in_array($from_id, $admin_ids)) {
+if($setting['Bot_Status'] == "✅  ربات روشن است" and !in_array($from_id, $admin_ids)) {
         sendmessage($from_id, $textbotlang['users']['updatingbot'], null, 'html');
         foreach ($admin_ids as $admin) {
-            sendmessage($admin, "❌ ادمین عزیز ربات فعال نیست جهت فعالسازی به منوی تنظیمات عمومی > وضعیت قابلیت ها بروید تا رباتتان فعال شود.", null, 'html');
+        sendmessage($admin, "❌ ادمین عزیز ربات فعال نیست جهت فعالسازی به منوی تنظیمات عمومی > وضعیت قابلیت ها بروید تا رباتتان فعال شود.", null, 'html');
         }
         return;}
-
+    
 }#-----------Channel------------#
 $chanelcheck = channel($channels['link']);
 if ($datain == "confirmchannel") {
@@ -635,9 +635,9 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
     $DataUserOut = $ManagePanel->DataUser($nameloc['Service_location'], $username);
     $subscriptionurl = $DataUserOut['subscription_url'];
     if($marzban_list_get['type'] == "wgdashboard"){
-        $textsub = "";
+    $textsub = "";
     }else{
-        $textsub = "<code>$subscriptionurl</code>";
+    $textsub = "<code>$subscriptionurl</code>";
     }
     $randomString = bin2hex(random_bytes(2));
     $urlimage = "$from_id$randomString.png";
@@ -657,11 +657,11 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
         'parse_mode' => "HTML",
     ]);
     if($marzban_list_get['type'] == "wgdashboard"){
-        $urlimage = "{$marzban_list_get['inboundid']}_{$nameloc['username']}.conf";
-        file_put_contents($urlimage,$DataUserOut['subscription_url']);
-        sendDocument($from_id, $urlimage, $textbotlang['users']['buy']['configwg']);
-        unlink($urlimage);
-    }
+            $urlimage = "{$marzban_list_get['inboundid']}_{$nameloc['username']}.conf";
+            file_put_contents($urlimage,$DataUserOut['subscription_url']);
+            sendDocument($from_id, $urlimage, $textbotlang['users']['buy']['configwg']);
+            unlink($urlimage);
+        }
     unlink($urlimage);
 } elseif (preg_match('/config_(\w+)/', $datain, $dataget)) {
     $username = $dataget[1];
@@ -833,7 +833,7 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
         $config = array(
             "volume" => $data_limit,
             "expiry" => $newDate
-        );
+            );
         $ManagePanel->Modifyuser($user['Processing_value'], $nameloc['Service_location'], $config);
     }
     elseif($marzban_list_get['type'] == "wgdashboard"){
@@ -844,26 +844,26 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
         $count = 0;
         foreach ($datauser['jobs'] as $jobsvolume){
             if($jobsvolume['Field'] == "date"){
-                break;
+                 break;   
             }
             $count +=1;
-        }
+            }
         $datam = array(
-            "Job" => $datauser['jobs'][$count],
-        );
+                "Job" => $datauser['jobs'][$count],
+            );
         deletejob($namepanel,$datam);
         $count = 0;
         foreach ($datauser['jobs'] as $jobsvolume){
-            if($jobsvolume['Field'] == "total_data"){
-                break;
+                if($jobsvolume['Field'] == "total_data"){
+                 break;   
+                }
+                $count +=1;
             }
-            $count +=1;
-        }
         $datam = array(
-            "Job" => $datauser['jobs'][$count],
-        );
+                "Job" => $datauser['jobs'][$count],
+            );
         deletejob($namepanel,$datam);
-
+        
         if(intval($product['Service_time']) == 0){
             $newDate = 0;
         }else{
@@ -871,12 +871,12 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
             $newDate = strtotime(date("Y-m-d H:i:s", $date));
         }
         if($newDate != 0){
-            $newDate = date("Y-m-d H:i:s", $newDate);
-            setjob($namepanel,"date",$newDate,$datauser['id']);
+        $newDate = date("Y-m-d H:i:s", $newDate);
+        setjob($namepanel,"date",$newDate,$datauser['id']);
         }
         setjob($namepanel,"total_data",$product['Volume_constraint'],$datauser['id']);
-
-
+        
+    
     }
     $keyboardextendfnished = json_encode([
         'inline_keyboard' => [
@@ -1013,7 +1013,7 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
         $count = 0;
         foreach ($datauser['jobs'] as $jobsvolume){
             if($jobsvolume['Field'] == "total_data"){
-                break;
+             break;   
             }
             $count +=1;
         }
@@ -1372,8 +1372,8 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
                 sendmessage($from_id, $textbotlang['Admin']['Product']['nullpProduct'], null, 'HTML');
                 return;
             }
-            $textproduct = sprintf($textbotlang['users']['buy']['selectService'],$panel['name_panel']);
-            sendmessage($from_id,$textproduct, KeyboardProduct($panel['name_panel'],"backuser",$panel['MethodUsername']), 'HTML');
+        $textproduct = sprintf($textbotlang['users']['buy']['selectService'],$panel['name_panel']);
+        sendmessage($from_id,$textproduct, KeyboardProduct($panel['name_panel'],"backuser",$panel['MethodUsername']), 'HTML');
         }else{
             $emptycategory = select("category", "*", null, null, "count");
             if ($emptycategory == 0) {
@@ -1383,14 +1383,14 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
             if($datain == "buy"){
                 Editmessagetext($from_id, $message_id,$textbotlang['users']['category']['selectCategory'], KeyboardCategorybuy("backuser",$panel['name_panel']));
             }else{
-                sendmessage($from_id,$textbotlang['users']['category']['selectCategory'], KeyboardCategorybuy("backuser",$panel['name_panel']), 'HTML');
+        sendmessage($from_id,$textbotlang['users']['category']['selectCategory'], KeyboardCategorybuy("backuser",$panel['name_panel']), 'HTML');
             }
         }
     } else {
         if($datain == "buy"){
-            Editmessagetext($from_id, $message_id, $textbotlang['users']['Service']['Location'], $list_marzban_panel_user);
+        Editmessagetext($from_id, $message_id, $textbotlang['users']['Service']['Location'], $list_marzban_panel_user);
         }else{
-            sendmessage($from_id, $textbotlang['users']['Service']['Location'], $list_marzban_panel_user, 'HTML');
+        sendmessage($from_id, $textbotlang['users']['Service']['Location'], $list_marzban_panel_user, 'HTML');
         }
     }
 }elseif (preg_match('/^categorylist_(.*)/', $datain, $dataget)) {
@@ -1406,8 +1406,8 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
         sendmessage($from_id, $textbotlang['users']['category']['error'], null, 'HTML');
         return;
     }
-    Editmessagetext($from_id, $message_id,sprintf($textbotlang['users']['buy']['selectService'],$location['name_panel']), KeyboardProduct($location['name_panel'],"buy",$location['MethodUsername'], $categoryid));
-    update("user", "Processing_value", $location['name_panel'], "id", $from_id);
+        Editmessagetext($from_id, $message_id,sprintf($textbotlang['users']['buy']['selectService'],$location['name_panel']), KeyboardProduct($location['name_panel'],"buy",$location['MethodUsername'], $categoryid));
+        update("user", "Processing_value", $location['name_panel'], "id", $from_id);
 }elseif (preg_match('/^location_(.*)/', $datain, $dataget)) {
     $locationid = $dataget[1];
     $panellist = select("marzban_panel", "*", "id", $locationid, "select");
@@ -1420,14 +1420,14 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
             return;
         }
         Editmessagetext($from_id, $message_id,sprintf($textbotlang['users']['buy']['selectService'],$panellist['name_panel']), KeyboardProduct($panellist['name_panel'],"buy",$panellist['MethodUsername']));
-    }else{
-        $emptycategory = select("category", "*", null, null, "count");
-        if ($emptycategory == 0) {
-            sendmessage($from_id, $textbotlang['users']['category']['NotFound'], null, 'HTML');
-            return;
-        }
+        }else{
+            $emptycategory = select("category", "*", null, null, "count");
+            if ($emptycategory == 0) {
+                sendmessage($from_id, $textbotlang['users']['category']['NotFound'], null, 'HTML');
+                return;
+            }
         Editmessagetext($from_id, $message_id, $textbotlang['users']['category']['selectCategory'], KeyboardCategorybuy("buy",$panellist['name_panel']));
-    }
+        }
 } elseif (preg_match('/^prodcutservices_(.*)/', $datain, $dataget)) {
     $prodcut = $dataget[1];
     update("user", "Processing_value_one", $prodcut, "id", $from_id);
@@ -1449,9 +1449,9 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
         $loc = $prodcut;
     }
     if($loc == null){
-        sendmessage($from_id,$textbotlang['users']['category']['error'], $keyboard, 'html');
-        step("home",$from_id);
-        return;
+            sendmessage($from_id,$textbotlang['users']['category']['error'], $keyboard, 'html');
+            step("home",$from_id);
+            return;
     }
     update("user", "Processing_value_one", $loc, "id", $from_id);
     $stmt = $pdo->prepare("SELECT * FROM product WHERE code_product = :code_product AND (location = :loc1 OR location = '/all') LIMIT 1");
@@ -1603,9 +1603,9 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
         ]
     ]);
     if($marzban_list_get['type'] == "wgdashboard"){
-        $textcreatuser = sprintf($textbotlang['users']['buy']['createservicewgbuy'],$username_ac,$info_product['name_product'],$marzban_list_get['name_panel'],$info_product['Service_time'],$info_product['Volume_constraint']);
+    $textcreatuser = sprintf($textbotlang['users']['buy']['createservicewgbuy'],$username_ac,$info_product['name_product'],$marzban_list_get['name_panel'],$info_product['Service_time'],$info_product['Volume_constraint']);
     }else{
-        $textcreatuser = sprintf($textbotlang['users']['buy']['createservice'],$username_ac,$info_product['name_product'],$marzban_list_get['name_panel'],$info_product['Service_time'],$info_product['Volume_constraint'],$text_config,$link_config);
+    $textcreatuser = sprintf($textbotlang['users']['buy']['createservice'],$username_ac,$info_product['name_product'],$marzban_list_get['name_panel'],$info_product['Service_time'],$info_product['Volume_constraint'],$text_config,$link_config);
     }
     if ($marzban_list_get['sublink'] == "onsublink") {
         $urlimage = "$from_id$randomString.png";
