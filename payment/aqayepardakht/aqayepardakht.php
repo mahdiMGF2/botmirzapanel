@@ -38,7 +38,7 @@ $result = curl_exec($ch);
 curl_close($ch);
 $result = json_decode($result);
 if ($result->status == "success") {
-    header('Location: https://panel.aqayepardakht.ir/startpay/sandbox/' . $result->transid);
+    header('Location: https://panel.aqayepardakht.ir/startpay/' . $result->transid);
 } else {
     $status_pay = [
         '-1' => "amount نمی تواند خالی باشد",
