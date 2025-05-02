@@ -125,7 +125,7 @@ Ensure you have the following before installation:
 Run the following command in your server terminal:
 
 ```bash
-curl -o install.sh -L https://raw.githubusercontent.com/mahdiMGF2/botmirzapanel/main/install.sh && bash install.sh
+curl -o install.sh -L https://raw.githubusercontent.com/mohamadpython/botmirzapanel/main/install.sh && bash install.sh
 ```
 
 When prompted, **select option 1** to complete the installation.
@@ -139,7 +139,7 @@ When prompted, **select option 1** to complete the installation.
 To install the beta version, run:
 
 ```bash
-curl -o install.sh -L https://raw.githubusercontent.com/mahdiMGF2/botmirzapanel/main/install.sh && bash install.sh -beta
+curl -o install.sh -L https://raw.githubusercontent.com/mohamadpython/botmirzapanel/main/install.sh && bash install.sh -beta
 ```
 
 ---
@@ -149,7 +149,7 @@ curl -o install.sh -L https://raw.githubusercontent.com/mahdiMGF2/botmirzapanel/
 To update your bot to the latest version, use the following command:
 
 ```bash
-curl -o install.sh -L https://raw.githubusercontent.com/mahdiMGF2/botmirzapanel/main/install.sh && bash install.sh -update
+curl -o install.sh -L https://raw.githubusercontent.com/mohamadpython/botmirzapanel/main/install.sh && bash install.sh -update
 ```
 
 ---
@@ -159,7 +159,7 @@ curl -o install.sh -L https://raw.githubusercontent.com/mahdiMGF2/botmirzapanel/
 If you want to completely remove the bot from your server, run the following command:
 
 ```bash
-curl -o install.sh -L https://raw.githubusercontent.com/mahdiMGF2/botmirzapanel/main/install.sh && bash install.sh
+curl -o install.sh -L https://raw.githubusercontent.com/mohamadpython/botmirzapanel/main/install.sh && bash install.sh
 ```
 
 When prompted, **select option 3** to remove the bot.
