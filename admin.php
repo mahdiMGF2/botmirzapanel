@@ -30,9 +30,9 @@ elseif ($text == $textbotlang['Admin']['channel']['changechannelbtn']) {
     $channels_ch = select("channels", "link", null, null, "count");
     $Check_filde = $connect->query("SHOW COLUMNS FROM channels LIKE 'Channel_lock'");
     if (mysqli_num_rows($Check_filde) == 1) {
-        $connect->query("ALTER TABLE channels DROP COLUMN Channel_lock;");
-        $stmt->execute();
-    }
+            $connect->query("ALTER TABLE channels DROP COLUMN Channel_lock;");
+            $stmt->execute();
+        }
     if ($channels_ch == 0) {
         $stmt = $pdo->prepare("INSERT INTO channels (link) VALUES (?)");
         $stmt->bindParam(1, $text, PDO::PARAM_STR);
@@ -1196,19 +1196,19 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['finance']) {
     $status_cart = [
         'oncard' => $textbotlang['Admin']['turnon'],
         'offcard' => $textbotlang['Admin']['turnoff'],
-    ][$sqlstatus_cart];
+        ][$sqlstatus_cart];
     $status_nowpayment = [
         'onnowpayment' => $textbotlang['Admin']['turnon'],
         'offnowpayment' => $textbotlang['Admin']['turnoff'],
-    ][$sqlstatus_nowpayment];
+        ][$sqlstatus_nowpayment];
     $status_iranpay = [
         'ondigi' => $textbotlang['Admin']['turnon'],
         'offdigi' => $textbotlang['Admin']['turnoff'],
-    ][$sqlstatus_iranpay];
+        ][$sqlstatus_iranpay];
     $status_qayepardakht = [
         'onaqayepardakht' => $textbotlang['Admin']['turnon'],
         'offaqayepardakht' => $textbotlang['Admin']['turnoff'],
-    ][$sqlstatus_aqayepardakht];
+        ][$sqlstatus_aqayepardakht];
     $keyboardmoeny = json_encode([
         'inline_keyboard' => [
             [
@@ -1242,21 +1242,21 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['finance']) {
         }else{
             $value = "oncard";
         }
-        update("PaySetting", "ValuePay", $value, "NamePay", "Cartstatus");
+     update("PaySetting", "ValuePay", $value, "NamePay", "Cartstatus");
     }elseif($methodpay == "nowpayment"){
         if($status == "onnowpayment"){
             $value = "offnowpayment";
         }else{
             $value = "onnowpayment";
         }
-        update("PaySetting", "ValuePay", $value, "NamePay", "nowpaymentstatus");
+     update("PaySetting", "ValuePay", $value, "NamePay", "nowpaymentstatus");
     }elseif($methodpay == "iranpay"){
         if($status == "ondigi"){
             $value = "offdigi";
         }else{
             $value = "ondigi";
         }
-        update("PaySetting", "ValuePay", $value, "NamePay", "digistatus");
+     update("PaySetting", "ValuePay", $value, "NamePay", "digistatus");
     }
     elseif($methodpay == "aqayepardakht"){
         if($status == "onaqayepardakht"){
@@ -1264,7 +1264,7 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['finance']) {
         }else{
             $value = "onaqayepardakht";
         }
-        update("PaySetting", "ValuePay", $value, "NamePay", "statusaqayepardakht");
+     update("PaySetting", "ValuePay", $value, "NamePay", "statusaqayepardakht");
     }
     $sqlstatus_cart = select("PaySetting", "ValuePay", "NamePay", "Cartstatus", "select")['ValuePay'];
     $sqlstatus_nowpayment = select("PaySetting", "ValuePay", "NamePay", "nowpaymentstatus", "select")['ValuePay'];
@@ -1273,19 +1273,19 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['finance']) {
     $status_cart = [
         'oncard' => $textbotlang['Admin']['turnon'],
         'offcard' => $textbotlang['Admin']['turnoff'],
-    ][$sqlstatus_cart];
+        ][$sqlstatus_cart];
     $status_nowpayment = [
         'onnowpayment' => $textbotlang['Admin']['turnon'],
         'offnowpayment' => $textbotlang['Admin']['turnoff'],
-    ][$sqlstatus_nowpayment];
+        ][$sqlstatus_nowpayment];
     $status_iranpay = [
         'ondigi' => $textbotlang['Admin']['turnon'],
         'offdigi' => $textbotlang['Admin']['turnoff'],
-    ][$sqlstatus_iranpay];
+        ][$sqlstatus_iranpay];
     $status_qayepardakht = [
         'onaqayepardakht' => $textbotlang['Admin']['turnon'],
         'offaqayepardakht' => $textbotlang['Admin']['turnoff'],
-    ][$sqlstatus_aqayepardakht];
+        ][$sqlstatus_aqayepardakht];
     $keyboardmoeny = json_encode([
         'inline_keyboard' => [
             [
@@ -1471,7 +1471,7 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['manage_panel']) {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['keyboardpanel']['setinbound'], $optionMarzneshin, 'HTML');
     }elseif ($typepanel['type'] == "s_ui") {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['keyboardpanel']['setinbound'], $options_ui, 'HTML');
-    }elseif($listpanel['type'] == "wgdashboard"){
+    }elseif($typepanel['type'] == "wgdashboard"){
         sendmessage($from_id,$textbotlang['Admin']['managepanel']['keyboardpanel']['setinbound'], $optionwgdashboard, 'HTML');
     }
     update("marzban_panel", "inboundid", $text, "name_panel", $user['Processing_value']);
@@ -1486,9 +1486,9 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['manage_panel']) {
     }
     $panel = select("marzban_panel","*","name_panel",$user['Processing_value'],"select");
     if($panel['type'] == "x-ui_single"){
-        sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedurlPanel'], $optionX_ui_single, 'HTML');
+    sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedurlPanel'], $optionX_ui_single, 'HTML');
     }elseif($panel['type'] == "s_ui"){
-        sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedurlPanel'], $options_ui, 'HTML');
+    sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedurlPanel'], $options_ui, 'HTML');
     }elseif($listpanel['type'] == "wgdashboard"){
         sendmessage($from_id,$textbotlang['Admin']['managepanel']['ChangedurlPanel'], $optionwgdashboard, 'HTML');
     }elseif($listpanel['type'] == "alireza"){
@@ -2031,27 +2031,27 @@ elseif($text == $textbotlang['Admin']['Help']['change']['editmedia']) {
 }elseif($user['step'] == "setinboundandprotocol"){
     $panel = select("marzban_panel","*","name_panel",$user['Processing_value'],"select");
     if($panel['type'] == "marzban"){
-        $DataUserOut = getuser($text,$user['Processing_value']);
-        if ((isset($DataUserOut['msg']) && $DataUserOut['msg'] == "User not found") or !isset($DataUserOut['proxies'])) {
-            sendmessage($from_id,$textbotlang['users']['stateus']['usernotfound'], null, 'html');
-            return;
+    $DataUserOut = getuser($text,$user['Processing_value']);
+    if ((isset($DataUserOut['msg']) && $DataUserOut['msg'] == "User not found") or !isset($DataUserOut['proxies'])) {
+        sendmessage($from_id,$textbotlang['users']['stateus']['usernotfound'], null, 'html');
+        return;
+    }
+    foreach ($DataUserOut['proxies'] as $key => &$value){
+        if($key == "shadowsocks"){
+            unset($DataUserOut['proxies'][$key]['password']);
         }
-        foreach ($DataUserOut['proxies'] as $key => &$value){
-            if($key == "shadowsocks"){
-                unset($DataUserOut['proxies'][$key]['password']);
-            }
-            elseif($key == "trojan"){
-                unset($DataUserOut['proxies'][$key]['password']);
-            }
-            else{
-                unset($DataUserOut['proxies'][$key]['id']);
-            }
-            if(count($DataUserOut['proxies'][$key]) == 0){
-                $DataUserOut['proxies'][$key] = new stdClass();
-            }
+        elseif($key == "trojan"){
+            unset($DataUserOut['proxies'][$key]['password']);
         }
-        update("marzban_panel","inbounds",json_encode($DataUserOut['inbounds']),"name_panel",$user['Processing_value']);
-        update("marzban_panel","proxies",json_encode($DataUserOut['proxies']),"name_panel",$user['Processing_value']);
+        else{
+            unset($DataUserOut['proxies'][$key]['id']);
+        }
+        if(count($DataUserOut['proxies'][$key]) == 0){
+            $DataUserOut['proxies'][$key] = new stdClass();
+        }
+    }
+    update("marzban_panel","inbounds",json_encode($DataUserOut['inbounds']),"name_panel",$user['Processing_value']);
+    update("marzban_panel","proxies",json_encode($DataUserOut['proxies']),"name_panel",$user['Processing_value']);
     }else{
         $data = GetClientsS_UI($text,$panel['name_panel']);
         if(count($data) == 0){
@@ -2060,10 +2060,10 @@ elseif($text == $textbotlang['Admin']['Help']['change']['editmedia']) {
         }
         $servies = [];
         foreach ($data['inbounds'] as $service){
-            $servies[] = $service;
+        $servies[] = $service;
+            }
+        update("marzban_panel","proxies",json_encode($servies,true),"name_panel",$user['Processing_value']);  
         }
-        update("marzban_panel","proxies",json_encode($servies,true),"name_panel",$user['Processing_value']);
-    }
     sendmessage($from_id,$textbotlang['Admin']['managepanel']['setedinbound'], $optionMarzban, 'HTML');
     step("home",$from_id);
 }elseif($text == $textbotlang['Admin']['keyboardadmin']['seetingstatus']) {
@@ -2072,31 +2072,31 @@ elseif($text == $textbotlang['Admin']['Help']['change']['editmedia']) {
     }elseif($setting['Bot_Status'] == "❌ ربات خاموش است") {
         update("setting","Bot_Status","0");
     }
-
+    
     if($setting['roll_Status'] == "✅ تایید قانون روشن است") {
         update("setting","roll_Status","1");
     }elseif($setting['roll_Status'] == "❌ تایید قوانین خاموش است") {
         update("setting","roll_Status","0");
     }
-
+    
     if($setting['NotUser'] == "onnotuser") {
         update("setting","NotUser","1");
     }elseif($setting['NotUser'] == "offnotuser") {
         update("setting","NotUser","0");
     }
-
+    
     if($setting['help_Status'] == "✅ آموزش فعال است") {
         update("setting","help_Status","1");
     }elseif($setting['help_Status'] == "❌ آموزش غیرفعال است") {
         update("setting","help_Status","0");
     }
-
+    
     if($setting['get_number'] == "✅ تایید شماره موبایل روشن است") {
         update("setting","get_number","1");
     }elseif($setting['get_number'] == "❌ احرازهویت شماره تماس غیرفعال است") {
         update("setting","get_number","0");
     }
-
+    
     if($setting['iran_number'] == "✅ احرازشماره ایرانی روشن است") {
         update("setting","iran_number","1");
     }elseif($setting['iran_number'] == "❌ بررسی شماره ایرانی غیرفعال است") {
@@ -2376,7 +2376,7 @@ elseif(preg_match('/^editstsuts-(.*)-(.*)/', $datain, $dataget)) {
     step("removecategory",$from_id);
 }elseif($user['step'] == "removecategory"){
     sendmessage($from_id,$textbotlang['Admin']['category']['removedcategory'], $shopkeyboard, 'HTML');
-    step("home",$from_id);
+    step("home",$from_id);   
     $stmt = $pdo->prepare("DELETE FROM category WHERE remark = :remark ");
     $stmt->bindParam(':remark', $text);
     $stmt->execute();
@@ -2387,10 +2387,10 @@ elseif($text == $textbotlang['Admin']['ManageUser']['searchorder']){
 }elseif($user['step'] == "getidfororder"){
     $OrderUser = select("invoice", "*", "username", $text, "select");
     if(!$OrderUser){
-        sendmessage($from_id, $textbotlang['Admin']['ManageUser']['OrderNotFound'], null, 'HTML');
-        return;
+            sendmessage($from_id, $textbotlang['Admin']['ManageUser']['OrderNotFound'], null, 'HTML');
+            return;
     }
     $timeacc = jdate('Y/m/d H:i:s', $OrderUser['time_sell']);
     sendmessage($from_id, sprintf($textbotlang['Admin']['ManageUser']['Datails'],$OrderUser['id_invoice'],$OrderUser['Status'],$OrderUser['id_user'],$OrderUser['username'],$OrderUser['Service_location'],$OrderUser['name_product'],$OrderUser['price_product'],$OrderUser['Volume'],$OrderUser['Service_time'],$timeacc), $User_Services, 'HTML');
-    step('home', $from_id);
+    step('home', $from_id);   
 }
