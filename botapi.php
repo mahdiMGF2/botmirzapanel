@@ -52,7 +52,8 @@ function Editmessagetext($chat_id, $message_id, $text, $keyboard){
         'chat_id' => $chat_id,
         'message_id' => $message_id,
         'text' => $text,
-        'reply_markup' => $keyboard
+        'reply_markup' => $keyboard,
+		'parse_mode'=> 'html'
     ]);
 }
 function deletemessage($chat_id, $message_id){
