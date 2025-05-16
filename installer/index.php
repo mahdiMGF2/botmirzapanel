@@ -11,7 +11,7 @@ $domain = dirname(dirname($parsedUrl['host'] . (isset($parsedUrl['path']) ? $par
 $valid_form = true;
 
 if(strlen($token) != 0){
-if (!ctype_digit($admin_id)) {
+if (!is_numeric($admin_id)) {
     $error = "آیدی عددی ادمین نامعتبر است";
     $valid_form = false;
 }
@@ -35,7 +35,7 @@ try {
 }
 if($valid_form){
     $success =  "✅ ربات با موفقیت نصب شد !";
-    file_get_contents("https://api.telegram.org/bot".$token."/sendmessage?chat_id=$admin_id&&text=✅ ربات با موفقیت نصب گردید.");
+    file_get_contents("https://api.telegram.org/bot".$token."/sendmessage?chat_id=$admin_id&text=✅ ربات با موفقیت نصب گردید.");
     $config_file = file_get_contents('../config.php');
     $set_data = str_replace('"domain.com/bot"',"\"$domain\"",$config_file);
     $set_data = str_replace('"marzbaninfobot"',"\"{$get_webhook_info['result']['username']}\"",$set_data);

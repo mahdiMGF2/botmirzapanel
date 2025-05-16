@@ -49,7 +49,7 @@ try {
         addFieldToTable($tableName, 'Processing_value_one', '0',"VARCHAR(1000)");
         addFieldToTable($tableName, 'roll_Status','false',"bool");
         addFieldToTable($tableName, 'Processing_value_four', '0',"VARCHAR(100)");
-    }
+        }
 } catch (Exception $e) {
     file_put_contents("$randomString.txt",$e->getMessage());
 }
@@ -104,7 +104,7 @@ try {
         $active_phone_text = "0";
         $active_phone_iran_text = "0";
         $active_help = "0";
-        $connect->query("INSERT INTO setting (Bot_Status,roll_Status,get_number,limit_usertest_all,time_usertest,val_usertest,help_Status,iran_number,NotUser,namecustome,removedayc,status_verify,statuscategory) VALUES ('$active_bot_text','$active_roll_text','$active_phone_text','1','1','100','$active_help','$active_phone_iran_text','0','0','1','0','1')");
+$connect->query("INSERT INTO setting (Bot_Status,roll_Status,get_number,limit_usertest_all,time_usertest,val_usertest,help_Status,iran_number,NotUser,namecustome,removedayc,status_verify,statuscategory) VALUES ('$active_bot_text','$active_roll_text','$active_phone_text','1','1','100','$active_help','$active_phone_iran_text','0','0','1','0','1')");
     } else {
         addFieldToTable($tableName, 'status_verify', '0',"VARCHAR(50)");
         addFieldToTable($tableName, 'statuscategory', '1',"VARCHAR(50)");
@@ -114,15 +114,15 @@ try {
         $settingsql = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM setting"));
         $active_phone_iran_text = "0";
         if(!isset($settingsql['iran_number'])){
-            $stmt = $connect->prepare("UPDATE setting SET iran_number = ?");
-            $stmt->bind_param("s", $active_phone_iran_text);
-            $stmt->execute();
+        $stmt = $connect->prepare("UPDATE setting SET iran_number = ?");
+        $stmt->bind_param("s", $active_phone_iran_text);
+        $stmt->execute();
         }
         if(!isset($settingsql['NotUser'])){
-            $stmt = $connect->prepare("UPDATE setting SET NotUser = ?");
-            $text = "offnotuser";
-            $stmt->bind_param("s", $text);
-            $stmt->execute();
+        $stmt = $connect->prepare("UPDATE setting SET NotUser = ?");
+        $text = "offnotuser";
+        $stmt->bind_param("s", $text);
+        $stmt->execute();
         }
     }
 } catch (Exception $e) {
@@ -164,7 +164,7 @@ try {
         if (!$result) {
             echo "table channels".mysqli_error($connect);
         }
-    }
+        }
 } catch (Exception $e) {
     file_put_contents("$randomString.txt",$e->getMessage());
 }
@@ -197,8 +197,8 @@ try {
         if (!$result) {
             echo "table marzban_panel".mysqli_error($connect);
         }
-    }
-    else{
+        }
+        else{
         $Check_filde = $connect->query("SHOW COLUMNS FROM marzban_panel LIKE 'datelogin'");
         if (mysqli_num_rows($Check_filde) != 1) {
             $connect->query("ALTER TABLE marzban_panel ADD datelogin TEXT");
@@ -214,7 +214,7 @@ try {
             $connect->query("ALTER TABLE marzban_panel ADD proxies TEXT");
             echo "The proxies field was added ✅";
         }
-        $Check_filde = $connect->query("SHOW COLUMNS FROM marzban_panel LIKE 'statusTest'");
+         $Check_filde = $connect->query("SHOW COLUMNS FROM marzban_panel LIKE 'statusTest'");
         if (mysqli_num_rows($Check_filde) != 1) {
             $connect->query("ALTER TABLE marzban_panel ADD statusTest VARCHAR(100)");
             $connect->query("UPDATE marzban_panel SET statusTest = 'ontestshowpanel'");
@@ -266,7 +266,7 @@ try {
             $connect->query("UPDATE marzban_panel SET type = 'marzban'");
             echo "The type field was added ✅";
         }
-    }
+        }
 } catch (Exception $e) {
     file_put_contents("$randomString.txt",$e->getMessage());
 }
@@ -294,16 +294,16 @@ try {
     else{
         $Check_filde = $connect->query("SHOW COLUMNS FROM product LIKE 'Location'");
         if (mysqli_num_rows($Check_filde) != 1) {
-            $result = $connect->query("ALTER TABLE product ADD Location VARCHAR(1000)");
-        }
+           $result = $connect->query("ALTER TABLE product ADD Location VARCHAR(1000)");
+        } 
         $Check_filde = $connect->query("SHOW COLUMNS FROM product LIKE 'Category'");
         if (mysqli_num_rows($Check_filde) != 1) {
-            $result = $connect->query("ALTER TABLE product ADD Category VARCHAR(600)");
-        }
+           $result = $connect->query("ALTER TABLE product ADD Category VARCHAR(600)");
+        } 
         $Check_filde = $connect->query("SHOW COLUMNS FROM product LIKE 'code_product'");
         if (mysqli_num_rows($Check_filde) != 1) {
-            $result = $connect->query("ALTER TABLE product ADD code_product VARCHAR(200)");
-        }
+           $result = $connect->query("ALTER TABLE product ADD code_product VARCHAR(200)");
+        } 
     }
 } catch (Exception $e) {
     file_put_contents("$randomString.txt",$e->getMessage());
@@ -318,12 +318,12 @@ try {
         $result = $connect->query("CREATE TABLE invoice (
         id_invoice varchar(200) PRIMARY KEY,
         id_user varchar(200) NULL,
-        username varchar(2000) NULL,
-        Service_location varchar(2000) NULL,
-        time_sell varchar(2000) NULL,
-        name_product varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL,
-        price_product varchar(2000) NULL,
-        Volume varchar(2000) NULL,
+        username varchar(200) NULL,
+        Service_location varchar(200) NULL,
+        time_sell varchar(200) NULL,
+        name_product varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL,
+        price_product varchar(200) NULL,
+        Volume varchar(200) NULL,
         Service_time varchar(200) NULL,
         user_info TEXT NULL,
         Status varchar(200) NULL)
@@ -333,18 +333,18 @@ try {
         }
     }
     else{
-        $Check_filde = $connect->query("SHOW COLUMNS FROM invoice LIKE 'time_sell'");
+     $Check_filde = $connect->query("SHOW COLUMNS FROM invoice LIKE 'time_sell'");
         if (mysqli_num_rows($Check_filde) != 1) {
-            $result = $connect->query("ALTER TABLE invoice ADD time_sell VARCHAR(2000)");
-        }
+           $result = $connect->query("ALTER TABLE invoice ADD time_sell VARCHAR(2000)");
+        }    
         $Check_filde = $connect->query("SHOW COLUMNS FROM invoice LIKE 'user_info'");
         if (mysqli_num_rows($Check_filde) != 1) {
-            $result = $connect->query("ALTER TABLE invoice ADD user_info TEXT");
-        }
+           $result = $connect->query("ALTER TABLE invoice ADD user_info TEXT");
+        }    
         $Check_filde = $connect->query("SHOW COLUMNS FROM invoice LIKE 'Status'");
         if (mysqli_num_rows($Check_filde) != 1) {
-            $result = $connect->query("ALTER TABLE invoice ADD Status VARCHAR(2000)");
-        }
+           $result = $connect->query("ALTER TABLE invoice ADD Status VARCHAR(2000)");
+        }    
     }
 } catch (Exception $e) {
     file_put_contents("$randomString.txt",$e->getMessage());
@@ -372,16 +372,16 @@ try {
         }
     }
     else{
-        $Check_filde = $connect->query("SHOW COLUMNS FROM Payment_report LIKE 'invoice'");
+      $Check_filde = $connect->query("SHOW COLUMNS FROM Payment_report LIKE 'invoice'");
         if (mysqli_num_rows($Check_filde) != 1) {
             $connect->query("ALTER TABLE Payment_report ADD invoice VARCHAR(300)");
             echo "The invoice field was added ✅";
-        }
+        }   
         $Check_filde = $connect->query("SHOW COLUMNS FROM Payment_report LIKE 'Payment_Method'");
         if (mysqli_num_rows($Check_filde) != 1) {
             $connect->query("ALTER TABLE Payment_report ADD Payment_Method VARCHAR(1000)");
             echo "The Payment_Method field was added ✅";
-        }
+        }   
     }
 } catch (Exception $e) {
     file_put_contents("$randomString.txt",$e->getMessage());
@@ -525,11 +525,11 @@ try {
             echo "table DiscountSell".mysqli_error($connect);
         }
     }else{
-        $Check_filde = $connect->query("SHOW COLUMNS FROM DiscountSell LIKE 'usefirst'");
+      $Check_filde = $connect->query("SHOW COLUMNS FROM DiscountSell LIKE 'usefirst'");
         if (mysqli_num_rows($Check_filde) != 1) {
             $connect->query("ALTER TABLE DiscountSell ADD usefirst VARCHAR(500)");
             echo "The DiscountSell field was added ✅";
-        }
+        }   
     }
 } catch (Exception $e) {
     file_put_contents("$randomString.txt",$e->getMessage());
