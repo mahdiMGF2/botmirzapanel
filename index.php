@@ -842,8 +842,8 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
     } elseif ($marzban_list_get['type'] == "wgdashboard") {
         $usernamepanel = $nameloc['username'];
         $namepanel = $nameloc['Service_location'];
-        $datauser = get_userwg($usernamepanel, $namepanel);
         allowAccessPeers($namepanel, $usernamepanel);
+        $datauser = get_userwg($usernamepanel, $namepanel);
         $count = 0;
         foreach ($datauser['jobs'] as $jobsvolume) {
             if ($jobsvolume['Field'] == "date") {
