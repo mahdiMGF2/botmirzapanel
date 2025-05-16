@@ -13,6 +13,10 @@ if (!in_array($from_id, $admin_ids)) {
     return;
 }
 if (in_array($text, $textadmin)) {
+    if(!(function_exists('shell_exec') && is_callable('shell_exec'))){
+        $cronCommandsendmessage = "*/1 * * * * curl https://$domainhosts/cron/sendmessage.php";
+        sendmessage($from_id, sprintf($textbotlang['Admin']['cron']['active_manual_sendmessage'],$cronCommandsendmessage),null, 'HTML');
+    }
     $text_admin = sprintf($textbotlang['Admin']['login-admin'],$version);
     sendmessage($from_id, $text_admin, $keyboardadmin, 'HTML');
 }
@@ -1837,6 +1841,14 @@ if ($datain == "ononhold") {
     Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['onstatus'], $onhold_Status);
 }
 if ($text == $textbotlang['Admin']['keyboardadmin']['settingscron']) {
+    if(!(function_exists('shell_exec') && is_callable('shell_exec'))){
+        $crontest = "*/15 * * * * curl https://$domainhosts/cron/configtest.php";
+        $cronvolume = "*/1 * * * *  curl https://$domainhosts/cron/cronvolume.php";
+        $crontime = "*/1 * * * *  curl https://$domainhosts/cron/cronday.php";
+        $cronremove = "*/1 * * * *  curl https://$domainhosts/cron/cronday.php";
+        sendmessage($from_id, sprintf($textbotlang['Admin']['cron']['active_manual'],$crontest,$cronvolume,$crontime,$cronremove), null, 'HTML');
+        return;
+    }
     sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboardcronjob, 'HTML');
 }
 if($text == $textbotlang['Admin']['cron']['test']['active']){
@@ -2135,12 +2147,18 @@ elseif($text == $textbotlang['Admin']['Help']['change']['editmedia']) {
         '1' => $textbotlang['Admin']['Status']['statuson'],
         '0' => $textbotlang['Admin']['Status']['statusoff']
     ][$setting['statuscategory']];
+    if(!(function_exists('shell_exec') && is_callable('shell_exec'))){
+        $cronstatus = 1;
+        $cronCommand = "*/4 * * * * curl https://$domainhosts/cron/croncard.php";
+       sendmessage($from_id, sprintf($textbotlang['Admin']['cron']['active_manual_card'],$cronCommand), null, 'HTML');
+    }else{
     $cronCommand = "*/4 * * * * curl https://$domainhosts/cron/croncard.php";
     $existingCronCommands = shell_exec('crontab -l');
     if (strpos($existingCronCommands, $cronCommand) === false) {
         $cronstatus = 0;
     }else{
         $cronstatus = 1;
+    }
     }
     $status_Automatic_confirmation  = [
         '1' => $textbotlang['Admin']['Status']['statuson'],
@@ -2244,6 +2262,11 @@ elseif(preg_match('/^editstsuts-(.*)-(.*)/', $datain, $dataget)) {
         }
         update("setting","statuscategory",$valuenew);
     }elseif($type == "Automatic_confirmation"){
+        if(!(function_exists('shell_exec') && is_callable('shell_exec'))){
+        $cronstatus = 1;
+        $cronCommand = "*/4 * * * * curl https://$domainhosts/cron/croncard.php";
+       sendmessage($from_id, sprintf($textbotlang['Admin']['cron']['active_manual_card'],$cronCommand), null, 'HTML');
+    }else{
         if($value == "1"){
             $currentCronJobs = shell_exec("crontab -l");
             $jobToRemove = "*/4 * * * * curl https://$domainhosts/cron/croncard.php";
@@ -2260,6 +2283,7 @@ elseif(preg_match('/^editstsuts-(.*)-(.*)/', $datain, $dataget)) {
                 shell_exec($command);
             }
         }
+    }
     }
     $setting = select("setting", "*");
     $name_status   = [
@@ -2296,10 +2320,16 @@ elseif(preg_match('/^editstsuts-(.*)-(.*)/', $datain, $dataget)) {
     ][$setting['statuscategory']];
     $cronCommand = "*/4 * * * * curl https://$domainhosts/cron/croncard.php";
     $existingCronCommands = shell_exec('crontab -l');
+    if(!(function_exists('shell_exec') && is_callable('shell_exec'))){
+        $cronstatus = 1;
+        $cronCommand = "*/4 * * * * curl https://$domainhosts/cron/croncard.php";
+       sendmessage($from_id, sprintf($textbotlang['Admin']['cron']['active_manual_card'],$cronCommand), null, 'HTML');
+    }else{
     if (strpos($existingCronCommands, $cronCommand) === false) {
         $cronstatus = 0;
     }else{
         $cronstatus = 1;
+    }
     }
     $status_Automatic_confirmation  = [
         '1' => $textbotlang['Admin']['Status']['statuson'],

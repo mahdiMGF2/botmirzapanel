@@ -9,7 +9,7 @@ if (function_exists('fastcgi_finish_request')) {
 }
 
 ini_set('error_log', 'error_log');
-$version = "4.14.6";
+$version = "5.0";
 date_default_timezone_set('Asia/Tehran');
 require_once 'config.php';
 require_once 'botapi.php';
@@ -26,7 +26,9 @@ use Endroid\QrCode\ErrorCorrectionLevel;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\RoundBlockSizeMode;
 use Endroid\QrCode\Writer\PngWriter;
-
+if(is_dir('installer')){
+    rmdir('installer');
+}
 $first_name = sanitizeUserName($first_name);
 if (!in_array($Chat_type, ["private"])) return;
 #-----------telegram_ip_ranges------------#
@@ -121,13 +123,14 @@ foreach ($datatxtbot as $item) {
         $datatextbot[$item['id_text']] = $item['text'];
     }
 }
-
+if (function_exists('shell_exec') && is_callable('shell_exec')) {
 $existingCronCommands = shell_exec('crontab -l');
 $phpFilePath = "https://$domainhosts/cron/sendmessage.php";
 $cronCommand = "*/1 * * * * curl $phpFilePath";
 if (strpos($existingCronCommands, $cronCommand) === false) {
     $command = "(crontab -l ; echo '$cronCommand') | crontab -";
     shell_exec($command);
+}
 }
 #---------channel--------------#
 if ($user['username'] == "none" || $user['username'] == null) {

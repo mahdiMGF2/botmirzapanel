@@ -1,0 +1,141 @@
+:root {
+  --primary-color: #4a6cf7;
+  --secondary-color: #6b7280;
+  --success-color: #10b981;
+  --danger-color: #ef4444;
+  --dark-color: #111827;
+  --light-color: #f9fafb;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Vazir', Tahoma, Arial, sans-serif;
+}
+
+body {
+  background-color: #f3f4f6;
+  color: var(--dark-color);
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 800px;
+  margin: 50px auto;
+  padding: 30px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  color: var(--primary-color);
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 28px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: var(--dark-color);
+}
+
+input{
+  width: 100%;
+  padding: 8px 11px;
+  border: 1px solid #d1d5db;
+  border-radius: 5px;
+  font-size: 16px;
+  background-color: #fff;
+  transition: border-color 0.3s;
+}
+
+
+
+input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(74, 108, 247, 0.2);
+}
+
+button,
+.danger-btn {
+  border: none;
+  padding: 12px 20px;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.3s;
+  color: #fff;
+}
+
+button {
+  background-color: var(--primary-color);
+}
+
+button:hover {
+  background-color: #3a56d4;
+}
+
+.danger-btn {
+  background-color: #dc3545;
+}
+
+.danger-btn:hover {
+  background-color: #c82333;
+}
+
+.alert {
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+.alert-danger {
+  background-color: #fee2e2;
+  color: var(--danger-color);
+  border: 1px solid #fecaca;
+}
+
+.alert-success {
+  background-color: #d1fae5;
+  color: var(--success-color);
+  border: 1px solid #a7f3d0;
+}
+
+.warning-message {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+.critical-warning {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+
+footer {
+  text-align: center;
+  margin-top: 20px;
+  color: var(--secondary-color);
+  font-size: 14px;
+}
