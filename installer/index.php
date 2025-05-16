@@ -46,6 +46,7 @@ if($valid_form){
     $set_data = str_replace('"databasename"',"\"$namedb\"",$set_data);
     file_put_contents('../config.php',$set_data);
     file_get_contents("https://api.telegram.org/bot".$token."/setwebhook?url=https://$domain/index.php");
+    file_get_contents("https://$domain/table.php");
     unlink('index.php');
     unlink('style.css');
 }
