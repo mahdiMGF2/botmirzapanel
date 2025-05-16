@@ -1961,7 +1961,7 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['user_search']) {
             [['text' => $textbotlang['Admin']['ManageUser']['confirmnumber'], 'callback_data' => "confirmnumber_" . $text]],
             [['text' => $textbotlang['Admin']['getlimitusertest']['setlimitbtn'], 'callback_data' => "limitusertest_" . $text]],
             [['text' => $textbotlang['Admin']['ManageUser']['verify'], 'callback_data' => "verify_" . $text],['text' =>$textbotlang['Admin']['ManageUser']['removeverify'], 'callback_data' => "verifyun_" . $text]],
-            [['text' => $textbotlang['Admin']['ManageUser']['vieworderuser'], 'callback_data' => "vieworderall_" . $text]],
+            [['text' => $textbotlang['Admin']['ManageUser']['vieworderuser'], 'callback_data' => "vieworderall_" . $text],['text' => $textbotlang['Admin']['ManageUser']['addorder'], 'callback_data' => "addordermanualـ" . $text]],
         ]
     ];
     $keyboardmanage = json_encode($keyboardmanage);
@@ -2423,4 +2423,52 @@ elseif($text == $textbotlang['Admin']['ManageUser']['searchorder']){
     $timeacc = jdate('Y/m/d H:i:s', $OrderUser['time_sell']);
     sendmessage($from_id, sprintf($textbotlang['Admin']['ManageUser']['Datails'],$OrderUser['id_invoice'],$OrderUser['Status'],$OrderUser['id_user'],$OrderUser['username'],$OrderUser['Service_location'],$OrderUser['name_product'],$OrderUser['price_product'],$OrderUser['Volume'],$OrderUser['Service_time'],$timeacc), $User_Services, 'HTML');
     step('home', $from_id);   
+}elseif(preg_match('/addordermanualـ(\w+)/', $datain, $dataget)) {
+    $iduser = $dataget[1];
+    savedata("clear","userid",$iduser);
+    sendmessage($from_id, $textbotlang['Admin']['addorder']['onestep'] , $backadmin, 'HTML');
+    step('getusernameconfig',$from_id);
+}elseif($user['step'] == "getusernameconfig"){
+    $text = strtolower($text);
+    if (!preg_match('/^\w{3,32}$/', $text)) {
+        sendmessage($from_id, $textbotlang['users']['stateus']['Invalidusername'], $backuser, 'html');
+        return;
+    }
+    if(in_array($text,$usernameinvoice)){
+        sendmessage($from_id,$textbotlang['Admin']['addorder']['user_exits'], null, 'HTML');
+        return;
+    }
+    savedata("save","username",$text);
+    sendmessage($from_id, $textbotlang['Admin']['addorder']['getname_panel'] , $json_list_marzban_panel, 'HTML');
+    step('getnamepanelconfig',$from_id);
+}elseif($user['step'] == "getnamepanelconfig"){
+    savedata("save","name_panel",$text);
+    sendmessage($from_id, $textbotlang['Admin']['addorder']['get_product'] , $json_list_product_list_admin, 'HTML');
+    step('stependforaddorder',$from_id);
+}elseif($user['step'] == "stependforaddorder"){
+    $userdata = json_decode($user['Processing_value'],true);
+    $sql = "SELECT * FROM product  WHERE name_product = :name_product AND (Location = :location OR Location = '/all') LIMIT 1";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':name_product', $text, PDO::PARAM_STR);
+    $stmt->bindParam(':location', $userdata['name_panel'], PDO::PARAM_STR);
+    $stmt->execute();
+    $info_product = $stmt->fetch(PDO::FETCH_ASSOC);
+    $panel = select("marzban_panel","*","name_panel",$userdata['name_panel'],"select");
+    $date = time();
+    $randomString = bin2hex(random_bytes(2));
+    $stmt = $pdo->prepare("INSERT IGNORE INTO invoice (id_user, id_invoice, username, time_sell, Service_location, name_product, price_product, Volume, Service_time, Status) VALUES (:id_user, :id_invoice, :username, :time_sell, :Service_location, :name_product, :price_product, :Volume, :Service_time, :Status)");
+    $Status = "active";
+    $stmt->bindParam(':id_user', $userdata['userid'], PDO::PARAM_STR);
+    $stmt->bindParam(':id_invoice', $randomString, PDO::PARAM_STR);
+    $stmt->bindParam(':username', $userdata['username'], PDO::PARAM_STR);
+    $stmt->bindParam(':time_sell', $date, PDO::PARAM_STR);
+    $stmt->bindParam(':Service_location', $userdata['name_panel'], PDO::PARAM_STR);
+    $stmt->bindParam(':name_product', $info_product['name_product'], PDO::PARAM_STR);
+    $stmt->bindParam(':price_product', $info_product['price_product'], PDO::PARAM_STR);
+    $stmt->bindParam(':Volume', $info_product['Volume_constraint'], PDO::PARAM_STR);
+    $stmt->bindParam(':Service_time', $info_product['Service_time'], PDO::PARAM_STR);
+    $stmt->bindParam(':Status', $Status, PDO::PARAM_STR);
+    $stmt->execute();
+    sendmessage($from_id, $textbotlang['Admin']['addorder']['added_order'] , $keyboardadmin, 'HTML');
+    step('home',$from_id);
 }
