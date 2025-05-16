@@ -247,7 +247,7 @@ function deletejob($namepanel, array $config)
 
     $curl = curl_init();
     curl_setopt_array($curl, array(
-        CURLOPT_URL => $marzban_list_get['url_panel'] . '/api/deletePeerScheduleJob/',
+        CURLOPT_URL => $marzban_list_get['url_panel'] . '/api/deletePeerScheduleJob',
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_ENCODING => '',
         CURLOPT_MAXREDIRS => 10,
