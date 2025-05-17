@@ -253,9 +253,9 @@ function DirectPayment($order_id){
         }
         $Shoppinginfo = json_encode($Shoppinginfo);
         if($marzban_list_get['type'] == "wgdashboard"){
-            $textcreatuser = sprintf($textbotlang['users']['buy']['createservicewgbuy'],$dataoutput['username'],$get_invoice['name_product'],$marzban_list_get['name_panel'],$get_invoice['Service_time'],$get_invoice['Volume']);
+        $textcreatuser = sprintf($textbotlang['users']['buy']['createservicewgbuy'],$dataoutput['username'],$get_invoice['name_product'],$marzban_list_get['name_panel'],$get_invoice['Service_time'],$get_invoice['Volume']);
         }else{
-            $textcreatuser = sprintf($textbotlang['users']['buy']['createservice'],$dataoutput['username'],$get_invoice['name_product'],$marzban_list_get['name_panel'],$get_invoice['Service_time'],$get_invoice['Volume'],$config,$output_config_link);
+        $textcreatuser = sprintf($textbotlang['users']['buy']['createservice'],$dataoutput['username'],$get_invoice['name_product'],$marzban_list_get['name_panel'],$get_invoice['Service_time'],$get_invoice['Volume'],$config,$output_config_link);
         }
         if ($marzban_list_get['configManual'] == "onconfig") {
             if (count($dataoutput['configs']) == 1) {
@@ -300,11 +300,11 @@ function DirectPayment($order_id){
                 'parse_mode' => "HTML",
             ]);
             if($marzban_list_get['type'] == "wgdashboard"){
-                $urlimage = "{$marzban_list_get['inboundid']}_{$dataoutput['username']}.conf";
-                file_put_contents($urlimage,$output_config_link);
-                sendDocument($get_invoice['id_user'], $urlimage,$textbotlang['users']['buy']['configwg']);
-                unlink($urlimage);
-            }
+            $urlimage = "{$marzban_list_get['inboundid']}_{$dataoutput['username']}.conf";
+            file_put_contents($urlimage,$output_config_link);
+            sendDocument($get_invoice['id_user'], $urlimage,$textbotlang['users']['buy']['configwg']);
+            unlink($urlimage);
+        }
             unlink($urlimage);
         }
         $partsdic = explode("_", $Balance_id['Processing_value_four']);
@@ -331,9 +331,9 @@ function DirectPayment($order_id){
         $affiliatescommission = select("affiliates", "*", null, null,"select");
         if ($affiliatescommission['status_commission'] == "oncommission" &&($Balance_id['affiliates'] !== null || $Balance_id['affiliates'] != 0)) {
             if($pricediscount == null){
-                $result = ($get_invoice['price_product'] * $affiliatescommission['affiliatespercentage']) / 100;
+            $result = ($get_invoice['price_product'] * $affiliatescommission['affiliatespercentage']) / 100;
             }else{
-                $result = ($pricediscount * $affiliatescommission['affiliatespercentage']) / 100;
+            $result = ($pricediscount * $affiliatescommission['affiliatespercentage']) / 100;
             }
             $user_Balance = select("user", "*", "id", $Balance_id['affiliates'],"select");
             if(isset($user_Balance)){
@@ -414,7 +414,7 @@ function sanitizeUserName($userName) {
 }
 function checktelegramip(){
 
-    $telegram_ip_ranges = [
+$telegram_ip_ranges = [
         ['lower' => '149.154.160.0', 'upper' => '149.154.175.255'],
         ['lower' => '91.108.4.0',    'upper' => '91.108.7.255']
     ];
@@ -438,17 +438,17 @@ function channel($id_channel){
     $response = telegram('getChatMember',[
         "chat_id" => "@$id_channel",
         "user_id" => $from_id,
-    ]);
+        ]);
     if($response['ok']){
         if(!in_array($response['result']['status'], ['member', 'creator', 'administrator'])){
-            $channel_link[] = $id_channel;
+                $channel_link[] = $id_channel;
+            }
+        }   
+        if(count($channel_link) == 0){
+            return [];
+        }else{
+            return $channel_link;
         }
-    }
-    if(count($channel_link) == 0){
-        return [];
-    }else{
-        return $channel_link;
-    }
 }
 function addFieldToTable($tableName, $fieldName, $defaultValue = null , $datatype = "VARCHAR(500)") {
     global $pdo;
@@ -461,16 +461,16 @@ function addFieldToTable($tableName, $fieldName, $defaultValue = null , $datatyp
     $stmt->execute([$pdo->query("SELECT DATABASE()")->fetchColumn(), $tableName, $fieldName]);
     $filedExists = $stmt->fetch(PDO::FETCH_ASSOC);
     if($filedExists['count'] != 0)return;
-    $query = "ALTER TABLE $tableName ADD $fieldName $datatype";
-    $statement = $pdo->prepare($query);
-    $statement->execute();
-    if($defaultValue != null){
+        $query = "ALTER TABLE $tableName ADD $fieldName $datatype";
+        $statement = $pdo->prepare($query);
+        $statement->execute();
+        if($defaultValue != null){
         $stmt = $pdo->prepare("UPDATE $tableName SET $fieldName= ?");
         $stmt->bindParam(1, $defaultValue);
         $stmt->execute();
+        }
+        echo "The $fieldName field was added ✅";
     }
-    echo "The $fieldName field was added ✅";
-}
 
 function publickey(){
     $privateKey = sodium_crypto_box_keypair();
@@ -484,4 +484,20 @@ function publickey(){
         'preshared_key' => $presharedKey
     ];
 
+}
+function deleteFolder($folderPath) {
+    if (!is_dir($folderPath)) return false;
+
+    $files = array_diff(scandir($folderPath), ['.', '..']);
+
+    foreach ($files as $file) {
+        $filePath = $folderPath . DIRECTORY_SEPARATOR . $file;
+        if (is_dir($filePath)) {
+            deleteFolder($filePath);
+        } else {
+            unlink($filePath);
+        }
+    }
+
+    return rmdir($folderPath);
 }

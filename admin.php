@@ -1845,7 +1845,7 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['settingscron']) {
         $crontest = "*/15 * * * * curl https://$domainhosts/cron/configtest.php";
         $cronvolume = "*/1 * * * *  curl https://$domainhosts/cron/cronvolume.php";
         $crontime = "*/1 * * * *  curl https://$domainhosts/cron/cronday.php";
-        $cronremove = "*/1 * * * *  curl https://$domainhosts/cron/cronday.php";
+        $cronremove = "*/1 * * * *  curl https://$domainhosts/cron/removeexpire.php";
         sendmessage($from_id, sprintf($textbotlang['Admin']['cron']['active_manual'],$crontest,$cronvolume,$crontime,$cronremove), null, 'HTML');
         return;
     }
