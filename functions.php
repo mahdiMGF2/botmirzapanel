@@ -349,7 +349,7 @@ function DirectPayment($order_id){
         update("user","Balance",$Balance_prims, "id",$Balance_id['id']);
         $Balance_id['Balance'] = select("user", "Balance", "id", $get_invoice['id_user'],"select")['Balance'];
         $balanceformatsell = number_format($Balance_id['Balance'], 0);
-        $text_report = sprintf($textbotlang['users']['Report']['reportbuyafterpay'] ,$get_invoice['username'],$get_invoice['price_product'],$get_invoice['Volume'],$get_invoice['id_user'],$Balance_id['number'],$get_invoice['Service_location'],$balanceformatsell,$randomString,$Balance_id['username']);
+        $text_report = sprintf($textbotlang['users']['Report']['reportbuyafterpay'] ,$get_invoice['username'],$get_invoice['price_product'],$get_invoice['Volume'],$get_invoice['id_user'],$Balance_id['number'],$get_invoice['Service_location'],$balanceformatsell,$Balance_id['username']);
         if (strlen($setting['Channel_Report']) > 0) {
             telegram('sendmessage',[
                 'chat_id' => $setting['Channel_Report'],
