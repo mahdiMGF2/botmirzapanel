@@ -6,16 +6,64 @@ if [[ $EUID -ne 0 ]]; then
     exit 1
 fi
 
+# Check SSL certificate status and days remaining
+check_ssl_status() {
+    # First get domain from config file
+    if [ -f "/var/www/html/mirzabotconfig/config.php" ]; then
+        domain=$(grep '^\$domainhosts' "/var/www/html/mirzabotconfig/config.php" | cut -d"'" -f2 | cut -d'/' -f1)
+        
+        if [ -n "$domain" ] && [ -f "/etc/letsencrypt/live/$domain/cert.pem" ]; then
+            expiry_date=$(openssl x509 -enddate -noout -in "/etc/letsencrypt/live/$domain/cert.pem" | cut -d= -f2)
+            current_date=$(date +%s)
+            expiry_timestamp=$(date -d "$expiry_date" +%s)
+            days_remaining=$(( ($expiry_timestamp - $current_date) / 86400 ))
+            if [ $days_remaining -gt 0 ]; then
+                echo -e "\033[32m✅ SSL Certificate: $days_remaining days remaining (Domain: $domain)\033[0m"
+            else
+                echo -e "\033[31m❌ SSL Certificate: Expired (Domain: $domain)\033[0m"
+            fi
+        else
+            echo -e "\033[33m⚠️ SSL Certificate: Not found for domain $domain\033[0m"
+        fi
+    else
+        echo -e "\033[33m⚠️ Cannot check SSL: Config file not found\033[0m"
+    fi
+}
+
+# Check bot installation status
+check_bot_status() {
+    if [ -f "/var/www/html/mirzabotconfig/config.php" ]; then
+        echo -e "\033[32m✅ Bot is installed\033[0m"
+        check_ssl_status
+    else
+        echo -e "\033[31m❌ Bot is not installed\033[0m"
+    fi
+}
+
 # Display Logo
 function show_logo() {
     clear
     echo -e "\033[1;34m"
-    echo "========================================"
-    echo "           MIRZA INSTALL SCRIPT         "
-    echo "========================================"
+    echo "================================================================================="
+    echo "  __  __ _____ _____   ______           _____        _   _ ______ _       "
+    echo " |  \/  |_   _|  __ \ |___  /   /\     |  __ \ /\   | \ | |  ____| |      "
+    echo " | \  / | | | | |__) |   / /   /  \    | |__) /  \  |  \| | |__  | |      "
+    echo " | |\/| | | | |  _  /   / /   / /\ \   |  ___/ /\ \ | . \ |  __| | |      "
+    echo " | |  | |_| |_| | \ \  / /__ / ____ \  | |  / ____ \| |\  | |____| |____  "
+    echo " | |_|  |_|_____|_|  \_\/_____/_/    \_\ |_| /_/    \_\_| \_|______|______| "
+    echo "================================================================================="
     echo -e "\033[0m"
     echo ""
+    echo -e "\033[1;36mVersion:\033[0m \033[33m0.13\033[0m"
+    echo -e "\033[1;36mTelegram Channel:\033[0m \033[34mhttps://t.me/mirzapanel\033[0m"
+    echo -e "\033[1;36mTelegram Group:  \033[0m \033[34mhttps://t.me/mirzapanelgroup\033[0m"
+    echo -e "\033[1;36mBuy Pro Version: \033[0m \033[34mhttps://t.me/mirzaperimiumsup\033[0m"
+    echo ""
+    echo -e "\033[1;36mInstallation Status:\033[0m"
+    check_bot_status
+    echo ""
 }
+
 
 # Display Menu
 function show_menu() {
@@ -92,6 +140,55 @@ function find_free_port() {
     echo -e "\033[31m[ERROR] No free port found between 3300 and 3330.\033[0m"
     exit 1
 }
+# Function to fix update issues by changing mirrors
+function fix_update_issues() {
+    echo -e "\e[33mTrying to fix update issues by changing mirrors...\033[0m"
+    
+    # Backup original sources.list
+    cp /etc/apt/sources.list /etc/apt/sources.list.backup
+    
+    # Detect Ubuntu version
+    if [ -f /etc/os-release ]; then
+        . /etc/apt/sources.list
+        VERSION_ID=$(cat /etc/os-release | grep VERSION_ID | cut -d '"' -f2)
+        UBUNTU_CODENAME=$(cat /etc/os-release | grep UBUNTU_CODENAME | cut -d '=' -f2)
+    else
+        echo -e "\e[91mCould not detect Ubuntu version.\033[0m"
+        return 1
+    fi
+    
+    # Try different mirrors
+    MIRRORS=(
+        "archive.ubuntu.com"
+        "us.archive.ubuntu.com"
+        "fr.archive.ubuntu.com"
+        "de.archive.ubuntu.com"
+        "mirrors.digitalocean.com"
+        "mirrors.linode.com"
+    )
+    
+    for mirror in "${MIRRORS[@]}"; do
+        echo -e "\e[33mTrying mirror: $mirror\033[0m"
+        # Create new sources.list
+        cat > /etc/apt/sources.list << EOF
+deb http://$mirror/ubuntu/ $UBUNTU_CODENAME main restricted universe multiverse
+deb http://$mirror/ubuntu/ $UBUNTU_CODENAME-updates main restricted universe multiverse
+deb http://$mirror/ubuntu/ $UBUNTU_CODENAME-security main restricted universe multiverse
+EOF
+        
+        # Try updating
+        if apt-get update 2>/dev/null; then
+            echo -e "\e[32mSuccessfully updated using mirror: $mirror\033[0m"
+            return 0
+        fi
+    done
+    
+    # If all mirrors fail, restore original sources.list
+    mv /etc/apt/sources.list.backup /etc/apt/sources.list
+    echo -e "\e[91mAll mirrors failed. Restored original sources.list\033[0m"
+    return 1
+}
+
 # Install Function
 function install_bot() {
     echo -e "\e[32mInstalling mirza script ... \033[0m\n"
@@ -128,11 +225,24 @@ function install_bot() {
         fi
     fi
 
-    sudo apt update && sudo apt upgrade -y || {
-        echo -e "\e[91mError: Failed to update and upgrade packages.\033[0m"
-        exit 1
-    }
-    echo -e "\e[92mThe server was successfully updated ...\033[0m\n"
+    # Try normal update/upgrade first
+    if ! (sudo apt update && sudo apt upgrade -y); then
+        echo -e "\e[93mUpdate/upgrade failed. Attempting to fix using alternative mirrors...\033[0m"
+        if fix_update_issues; then
+            # Try update/upgrade again after fixing mirrors
+            if sudo apt update && sudo apt upgrade -y; then
+                echo -e "\e[92mThe server was successfully updated after fixing mirrors...\033[0m\n"
+            else
+                echo -e "\e[91mError: Failed to update even after trying alternative mirrors.\033[0m"
+                exit 1
+            fi
+        else
+            echo -e "\e[91mError: Failed to update/upgrade packages and mirror fix failed.\033[0m"
+            exit 1
+        fi
+    else
+        echo -e "\e[92mThe server was successfully updated ...\033[0m\n"
+    fi
 
     sudo apt-get install software-properties-common || {
         echo -e "\e[91mError: Failed to install software-properties-common.\033[0m"
@@ -669,12 +779,24 @@ function install_bot_with_marzban() {
     fi
     echo -e "\e[92mPorts 80 and 88 are free. Proceeding with installation...\033[0m"
 
-    # Update system and upgrade packages
-    sudo apt update && sudo apt upgrade -y || {
-        echo -e "\e[91mError: Failed to update and upgrade system.\033[0m"
-        exit 1
-    }
-    echo -e "\e[92mSystem updated successfully...\033[0m\n"
+    # Try normal update/upgrade first
+    if ! (sudo apt update && sudo apt upgrade -y); then
+        echo -e "\e[93mUpdate/upgrade failed. Attempting to fix using alternative mirrors...\033[0m"
+        if fix_update_issues; then
+            # Try update/upgrade again after fixing mirrors
+            if sudo apt update && sudo apt upgrade -y; then
+                echo -e "\e[92mSystem updated successfully after fixing mirrors...\033[0m\n"
+            else
+                echo -e "\e[91mError: Failed to update even after trying alternative mirrors.\033[0m"
+                exit 1
+            fi
+        else
+            echo -e "\e[91mError: Failed to update/upgrade system and mirror fix failed.\033[0m"
+            exit 1
+        fi
+    else
+        echo -e "\e[92mSystem updated successfully...\033[0m\n"
+    fi
 
     sudo apt-get install software-properties-common || {
         echo -e "\e[91mError: Failed to install software-properties-common.\033[0m"
@@ -738,6 +860,10 @@ function install_bot_with_marzban() {
 
     sudo apt install -y python3-certbot-apache || {
         echo -e "\e[91mError: Failed to install Certbot for Apache.\033[0m"
+        exit 1
+    }
+    sudo systemctl enable certbot.timer || {
+        echo -e "\e[91mError: Failed to enable certbot timer.\033[0m"
         exit 1
     }
 
@@ -1090,9 +1216,9 @@ ${ASAS}adminnumber = '$YOUR_CHAT_ID';
 ${ASAS}usernamebot = '$YOUR_BOTNAME';
 ${ASAS}secrettoken = '$secrettoken';
 
-${ASAS}connect = mysqli_connect('127.0.0.1', \$usernamedb, \$passworddb, \$dbname, 3306);
+${ASAS}connect = mysqli_connect('127.0.0.1', \$usernamedb, \$passworddb, \$dbname);
 if (${ASAS}connect->connect_error) {
-    die('Connection failed: ' . ${ASAS}connect->connect_error);
+    die('Database connection failed: ' . ${ASAS}connect->connect_error);
 }
 mysqli_set_charset(${ASAS}connect, 'utf8mb4');
 
@@ -1119,34 +1245,28 @@ EOF
     }
 
     # Send confirmation message
-    MESSAGE="✅ The bot is installed alongside Marzban! Send /start to begin."
-    curl -s -X POST "https://api.telegram.org/bot${YOUR_BOT_TOKEN}/sendMessage" \
-         -d chat_id="${YOUR_CHAT_ID}" -d text="$MESSAGE" || {
-        echo -e "\e[91mError: Failed to send Telegram message.\033[0m"
-        exit 1
+    MESSAGE="✅ The bot is installed! for start bot send comment /start"
+    curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" -d chat_id="${CHAT_ID}" -d text="$MESSAGE" || {
+        echo -e "\033[31mError: Failed to send message to Telegram.\033[0m"
+        return 1
     }
 
-    # Setup database tables with retry mechanism
-    for i in {1..5}; do
-        curl "https://${YOUR_DOMAIN}/mirzabotconfig/table.php" && break || {
-            echo -e "\e[93mAttempt $i: Failed to set up database tables. Retrying in 2 seconds...\033[0m"
-            sleep 2
-        }
-        if [ $i -eq 5 ]; then
-            echo -e "\e[91mError: Failed to set up database tables after 5 attempts.\033[0m"
-            exit 1
-        fi
-    done
+    # Execute table creation script
+    TABLE_SETUP_URL="https://${DOMAIN_NAME}/$BOT_NAME/table.php"
+    echo -e "\033[33mSetting up database tables...\033[0m"
+    curl $TABLE_SETUP_URL || {
+        echo -e "\033[31mError: Failed to execute table creation script at $TABLE_SETUP_URL.\033[0m"
+        return 1
+    }
 
-    # Final output
-    clear
-    echo -e "\e[32mBot installed successfully alongside Marzban!\033[0m"
-    echo -e "\e[102mDomain Bot: https://${YOUR_DOMAIN}\033[0m"
-    echo -e "\e[33mDatabase name: \e[36m$dbname\033[0m"
-    echo -e "\e[33mDatabase username: \e[36m$dbuser\033[0m"
-    echo -e "\e[33mDatabase password: \e[36m$dbpass\033[0m"
+    # Output Bot Information
+    echo -e "\033[32mBot installed successfully!\033[0m"
+    echo -e "\033[102mDomain Bot: https://$DOMAIN_NAME\033[0m"
+    echo -e "\033[104mDatabase address: https://$DOMAIN_NAME/phpmyadmin\033[0m"
+    echo -e "\033[33mDatabase name: \033[36m$DB_NAME\033[0m"
+    echo -e "\033[33mDatabase username: \033[36m$DB_USERNAME\033[0m"
+    echo -e "\033[33mDatabase password: \033[36m$DB_PASSWORD\033[0m"
 }
-
 
 # Update Function
 function update_bot() {
@@ -2043,6 +2163,7 @@ EOF
     echo -e "\033[33mDatabase username: \033[36m$DB_USERNAME\033[0m"
     echo -e "\033[33mDatabase password: \033[36m$DB_PASSWORD\033[0m"
 }
+
 
 # Function to Update Additional Bot
 function update_additional_bot() {
