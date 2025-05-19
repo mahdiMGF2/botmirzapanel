@@ -1745,7 +1745,29 @@ if ($text == $datatextbot['text_Add_Balance'] || $text == "/wallet") {
         $PaySetting = select("PaySetting", "ValuePay", "NamePay", "CartDescription", "select")['ValuePay'];
         $Processing_value = number_format($user['Processing_value']);
         $textcart = sprintf($textbotlang['users']['moeny']['carttext'], $Processing_value, $PaySetting);
-        sendmessage($from_id, $textcart, $backuser, 'HTML');
+        preg_match_all('/\d+/', $PaySetting, $Matches);
+        if(isset($Matches[0])) {
+            $peymentSettings['card_number'] = implode('', $Matches[0]); 
+            $MESSAGE = $textcart;
+            $KEYBOARD = json_encode([
+                "inline_keyboard"=> [
+                    [[
+                        'text' => "کپی، شماره کارت",
+                        'copy_text' => ['text'=> $peymentSettings['card_number']]
+                    ],[
+                        'text' => "کپی، مبلغ",
+                        'copy_text' => ['text'=> $user['Processing_value']]
+                    ]],
+                    [[
+                        'text' => "بیخیال، 🏠 بازگشت به منوی اصلی",
+                        'callback_data' => 'backuser'
+                    ]]
+                ]]);
+            Editmessagetext($from_id, $message_id, $MESSAGE, $KEYBOARD);
+        }
+        else {
+            sendmessage($from_id, $textcart, $backuser, 'HTML');
+        }
         step('cart_to_cart_user', $from_id);
     }
     if ($datain == "aqayepardakht") {
