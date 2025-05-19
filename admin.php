@@ -12,7 +12,7 @@ if (!in_array($from_id, $admin_ids)) {
     }
     return;
 }
-if (in_array($text, $textadmin)) {
+if (in_array($text, $textadmin) || $datain == "PANEL") {
     if(!(function_exists('shell_exec') && is_callable('shell_exec'))){
         $cronCommandsendmessage = "*/1 * * * * curl https://$domainhosts/cron/sendmessage.php";
         sendmessage($from_id, sprintf($textbotlang['Admin']['cron']['active_manual_sendmessage'],$cronCommandsendmessage),null, 'HTML');
