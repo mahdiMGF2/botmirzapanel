@@ -20,8 +20,6 @@ if(!empty($_SERVER['SCRIPT_URI'])) {
 else {
     $webAddress = $_SERVER['HTTP_HOST'].dirname(dirname($_SERVER['SCRIPT_NAME']));
 }
-// Bot Source Code File [index.php]
-$webAddress .= 'index.php';
 
 if(isset($uPOST['submit']) && $uPOST['submit']) {
 
@@ -35,7 +33,7 @@ if(isset($uPOST['submit']) && $uPOST['submit']) {
     $dbInfo['name'] = $uPOST['database_name'];
     $dbInfo['username'] = $uPOST['database_username'];
     $dbInfo['password'] = $uPOST['database_password'];
-    $document['address'] = $uPOST['bot_address_webhook'];
+    $document['address'] = dirname($uPOST['bot_address_webhook']);
 
     if($_SERVER['REQUEST_SCHEME'] != 'https') {
         $ERROR[] = 'برای فعال سازی ربات تلگرام نیازمند فعال بودن SSL (https) هستید';
@@ -96,8 +94,8 @@ if(isset($uPOST['submit']) && $uPOST['submit']) {
             $ERROR[] = "فایل های پروژه را مجددا دانلود و بارگذاری کنید (<a href='https://github.com/mahdiMGF2/botmirzapanel'>‎🌐 Github</a>)";
         }
         else {
-            getContents("https://api.telegram.org/bot".$tgBotToken."/setwebhook?url=https://".$document['address']);
-            getContents("https://".dirname($document['address'])."/table.php");
+            getContents("https://api.telegram.org/bot".$tgBotToken."/setwebhook?url=https://".$document['address'].'/index.php');
+            getContents("https://".$document['address']."/table.php");
             $botFirstMessage = "\n[🤖] شما به عنوان ادمین معرفی شدید.";
             getContents('https://api.telegram.org/bot'.$tgBotToken.'/sendMessage?chat_id='.$tgAdminId.'&text='.urlencode(' '.$SUCCESS[0].$botFirstMessage).'&reply_markup={"inline_keyboard":[[{"text":"⚙️ شروع ربات، رفتن به تنظیمات بخش ادمین","callback_data":"PANEL"}]]}');
         }
@@ -162,7 +160,7 @@ if(isset($uPOST['submit']) && $uPOST['submit']) {
                     <details>
                         <summary for="secret_key"><i>آدرس سورس ربات</i></summary>
                         <label for="bot_address_webhook ">آدرس صفحه سورس ربات</label>
-                        <input type="text" id="bot_address_webhook" name="bot_address_webhook" placeholder="Web URL for Set Webhook" value="<?php echo $webAddress; ?>" required>
+                        <input type="text" id="bot_address_webhook" name="bot_address_webhook" placeholder="Web URL for Set Webhook" value="<?php echo $webAddress.'index.php'; ?>" required>
                     </details>
                 </div>
                 <div class="form-group">
