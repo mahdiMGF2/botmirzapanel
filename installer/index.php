@@ -2,7 +2,6 @@
 
 $uPOST = sanitizeInput($_POST);
 $rootDirectory = dirname(__DIR__).'/';
-$rootDirectory = __DIR__.'/';
 
 $configDirectory = $rootDirectory.'config.php';
 $tablesDirectory = $rootDirectory.'table.php';
@@ -21,7 +20,7 @@ if(!empty($_SERVER['SCRIPT_URI'])) {
 else {
     $webAddress = $_SERVER['HTTP_HOST'].dirname(dirname($_SERVER['SCRIPT_NAME']));
 }
-
+// Bot Source Code File [index.php]
 $webAddress .= 'index.php';
 
 if(isset($uPOST['submit']) && $uPOST['submit']) {
@@ -35,8 +34,7 @@ if(isset($uPOST['submit']) && $uPOST['submit']) {
     $dbInfo['host'] = 'localhost';
     $dbInfo['name'] = $uPOST['database_name'];
     $dbInfo['username'] = $uPOST['database_username'];
-    $dbInfo['passowrd'] = $uPOST['database_password'];
-    $document['root_directory'] = $uPOST['bot_directory_path'];
+    $dbInfo['password'] = $uPOST['database_password'];
     $document['address'] = $uPOST['bot_address_webhook'];
 
     if($_SERVER['REQUEST_SCHEME'] != 'https') {
@@ -45,30 +43,34 @@ if(isset($uPOST['submit']) && $uPOST['submit']) {
         $ERROR[] = '<a href="https://'.$_SERVER['HTTP_HOST'].'/'.$_SERVER['SCRIPT_NAME'].'">https://'.$_SERVER['HTTP_HOST'].'/'.$_SERVER['SCRIPT_NAME'].'</a>';
     }
 
-    if(!isValidTelegramToken($tgBotToken)) {
+    $isValidToken = isValidTelegramToken($tgBotToken);
+    if(!$isValidToken) {
         $ERROR[] = "توکن ربات صحیح نمی باشد.";
     }
 
-    if (!isValidTelegramId($tgBotToken)) {
+    if (!isValidTelegramId($tgAdminId)) {
         $ERROR[] = "آیدی عددی ادمین نامعتبر است.";
     }
 
-    $tgBot['details'] = getContents("https://api.telegram.org/bot".$tgBotToken."/getme");
-    if($tgBot['details']['ok'] == false) {
-        $ERROR[] = "توکن ربات را بررسی کنید. <i>عدم توانایی دریافت جزئیات ربات.</i>";
-    }
-    else {
-        $tgBot = getContents("https://api.telegram.org/bot".$tgBotToken."/getChat?chat_id=".$tgAdminId);
-        if($tgBot['ok'] == false) {
-            $ERROR[] = "<b>عدم شناسایی مدیر:</b>";
-            $ERROR[] = "ابتدا ربات را فعال/استارت کنید.";
-            $ERROR[] = "<a href='https://t.me/'".$tgBot['details']['result']['username'].">@".$tgBot['details']['result']['username']."</a>";
+    if($isValidToken) {
+        $tgBot['details'] = getContents("https://api.telegram.org/bot".$tgBotToken."/getMe");
+        if($tgBot['details']['ok'] == false) {
+            $ERROR[] = "توکن ربات را بررسی کنید. <i>عدم توانایی دریافت جزئیات ربات.</i>";
+        }
+        else {
+            $tgBot['recognitionion'] = getContents("https://api.telegram.org/bot".$tgBotToken."/getChat?chat_id=".$tgAdminId);
+            if($tgBot['recognitionion']['ok'] == false) {
+                $ERROR[] = "<b>عدم شناسایی مدیر ربات:</b>";
+                $ERROR[] = "ابتدا ربات را فعال/استارت کنید با اکانت که میخواهید مدیر اصلی ربات باشد.";
+                $ERROR[] = "<a href='https://t.me/'".$tgBot['details']['result']['username'].">@".$tgBot['details']['result']['username']."</a>";
+            }
         }
     }
 
+
     try {
-        $dsn = "mysql:host=$hostdb;dbname=$namedb;charset=utf8mb4";
-        $pdo = new PDO($dsn, $dbInfo['username'], $dbInfo['passowrd']);
+        $dsn = "mysql:host=" . $dbInfo['host'] . ";dbname=" . $dbInfo['name'] . ";charset=utf8mb4";
+        $pdo = new PDO($dsn, $dbInfo['username'], $dbInfo['password']);
         $SUCCESS[] = "✅ اتصال به دیتابیس موفقیت آمیز بود!";
     }
     catch (\PDOException $e) {
@@ -77,27 +79,27 @@ if(isset($uPOST['submit']) && $uPOST['submit']) {
         $ERROR[] = "<code>".$e->getMessage()."</code>";
     }
 
-    if(empty($Error))
-    {
-        getContents('https://api.telegram.org/bot'.$tgBotToken.'/sendMessage?chat_id='.$tgAdminId.'&text='.urlencode($SUCCESS[0]."\n[🤖] شما به عنوان ادمین معرفی شدید.").'&reply_markup={"inline_keyboard":[[{"text":"⚙️ شروع ربات، رفتن به تنظیمات بخش ادمین","callback_data":"PANEL"}]]}');
-
+    if(empty($ERROR)) {
         $replacements = [
             '{DOMAIN.COM/PATH/BOT}' => $document['address'],
             '{BOT_USERNAME}' => $tgBot['details']['result']['username'],
             '{BOT_TOKEN}' => $tgBotToken,
             '{ADMIN_#ID}' => $tgAdminId,
             '{DATABASE_USERNAME}' => $dbInfo['username'],
-            '{DATABASE_PASSOWRD}' => $dbInfo['passowrd'],
+            '{DATABASE_PASSOWRD}' => $dbInfo['password'],
             '{DATABASE_NAME}' => $dbInfo['name']
         ];
 
-        $newConfigData = str_replace(array_keys($replacements),array_values($replacements),$config_file);
-        if(!file_put_contents($configPath,$rawConfigData)) {
-            $Error[] = '✏️❌ خطا در زمان بازنویسی اطلاعات فایل اصلی ربات';
+        $newConfigData = str_replace(array_keys($replacements),array_values($replacements),$rawConfigData,$count);
+        if(file_put_contents($configDirectory,$newConfigData) === false || $count == 0) {
+            $ERROR[] = '✏️❌ خطا در زمان بازنویسی اطلاعات فایل اصلی ربات';
+            $ERROR[] = "فایل های پروژه را مجددا دانلود و بارگذاری کنید (<a href='https://github.com/mahdiMGF2/botmirzapanel'>‎🌐 Github</a>)";
         }
         else {
-            getContents("https://api.telegram.org/bot".$tgBotToken."/setwebhook?url=https://".$document['address']."/index.php");
-            getContents("https://".$document['address']."/table.php");
+            getContents("https://api.telegram.org/bot".$tgBotToken."/setwebhook?url=https://".$document['address']);
+            getContents("https://".dirname($document['address'])."/table.php");
+            $botFirstMessage = "\n[🤖] شما به عنوان ادمین معرفی شدید.";
+            getContents('https://api.telegram.org/bot'.$tgBotToken.'/sendMessage?chat_id='.$tgAdminId.'&text='.urlencode(' '.$SUCCESS[0].$botFirstMessage).'&reply_markup={"inline_keyboard":[[{"text":"⚙️ شروع ربات، رفتن به تنظیمات بخش ادمین","callback_data":"PANEL"}]]}');
         }
 
     }
@@ -126,11 +128,11 @@ if(isset($uPOST['submit']) && $uPOST['submit']) {
         <?php if (!empty($SUCCESS) && empty($ERROR)): ?>
             <div class="alert alert-success">
                 <?php echo implode("<br>",$SUCCESS); ?>
-                <a class="submit-success" href="https://t.me/"<?php echo $tgBot['details']['result']['username']; ?>>🤖 رفتن به ربات <?php echo "‏@".$tgBot['details']['result']['username']; ?> »</a>
             </div>
+            <a class="submit-success" href="https://t.me/<?php echo $tgBot['details']['result']['username']; ?>">🤖 رفتن به ربات <?php echo "‎@".$tgBot['details']['result']['username']; ?> »</a>
         <?php endif; ?>
             
-            <form id="installer-form" <?php if(!empty($SUCCESS)) { echo 'style="display:none;"'; } ?> method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+            <form id="installer-form" <?php if(isset($botFirstMessage)) { echo 'style="display:none;"'; } ?> method="post">
                 <div class="form-group">
                     <label for="admin_id">آیدی عددی ادمین:</label>
                     <input type="text" id="admin_id" name="admin_id" 
@@ -168,7 +170,7 @@ if(isset($uPOST['submit']) && $uPOST['submit']) {
                     <label for="remove_directory" style="font-size: 14px;font-weight: normal;text-indent: 20px;">برای امنیت بیشتر، بعد از اتمام نصب ربات پوشه Installer حذف خواهد شد. </label>
                 </div>
                 
-                <button type="submit" name="submit">نصب ربات</button>
+                <button type="submit" name="submit" value="submit">نصب ربات</button>
             </form>
         <footer>
             <p>Mirzabot Installer , Made by ♥️ | <a href="https://github.com/mahdiMGF2/botmirzapanel">Github</a> | <a href="https://t.me/mirzapanel">Telegram</a> | &copy; <?php echo date('Y'); ?></p>

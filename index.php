@@ -28,6 +28,7 @@ use Endroid\QrCode\RoundBlockSizeMode;
 use Endroid\QrCode\Writer\PngWriter;
 if(is_dir('installer')){
     deleteFolder('installer');
+    unlink('table.php');
 }
 $first_name = sanitizeUserName($first_name);
 if (!in_array($Chat_type, ["private"])) return;
