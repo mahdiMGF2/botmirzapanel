@@ -3,22 +3,21 @@
 channel => @mirzapanel
 */
 //-----------------------------database-------------------------------
-$dbname = "databasename"; //  نام دیتابیس
-$usernamedb = "username"; // نام کاربری دیتابیس
-$passworddb = "password"; // رمز عبور دیتابیس
+$dbname = "{DATABASE_NAME}"; //  نام دیتابیس
+$usernamedb = "{DATABASE_USERNAME}"; // نام کاربری دیتابیس
+$passworddb = "{DATABASE_PASSOWRD}"; // رمز عبور دیتابیس
 $connect = mysqli_connect("localhost", $usernamedb, $passworddb, $dbname);
 if ($connect->connect_error) {
     die("The connection to the database failed:" . $connect->connect_error);
 }
 mysqli_set_charset($connect, "utf8mb4");
+
 //-----------------------------info-------------------------------
 
-$APIKEY = "**TOKEN**"; // توکن ربات خود را وارد کنید
-$adminnumber = "5522424631";// آیدی عددی ادمین
-$domainhosts = "domain.com/bot";// دامنه  هاست و مسیر سورس
-$usernamebot = "marzbaninfobot"; //نام کاربری ربات  بدون @
-
-
+$APIKEY = "{BOT_TOKEN}"; // توکن ربات خود را وارد کنید
+$adminnumber = "{ADMIN_#ID}";// آیدی عددی ادمین
+$domainhosts = "{DOMAIN.COM/PATH/BOT}";// دامنه  هاست و مسیر سورس بدون / اخر
+$usernamebot = "{BOT_USERNAME}"; //نام کاربری ربات  بدون @
 
 $options = [
     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,

@@ -401,16 +401,9 @@ function savedata($type,$namefiled,$valuefiled){
         update("user","Processing_value",json_encode($dataperevieos),"id",$from_id);
     }
 }
-function sanitizeUserName($userName) {
-    $forbiddenCharacters = [
-        "'", "\"", "<", ">", "--", "#", ";", "\\", "%", "(", ")"
-    ];
-
-    foreach ($forbiddenCharacters as $char) {
-        $userName = str_replace($char, "", $userName);
-    }
-
-    return $userName;
+function sanitizeUserName($string) {
+    $forbiddenCharacters = ["'", "\"", "<", ">", "--", "#", ";", "\\", "%", "(", ")"];
+    return str_replace($forbiddenCharacters, "", $string);
 }
 function checktelegramip(){
 

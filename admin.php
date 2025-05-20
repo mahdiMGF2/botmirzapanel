@@ -12,7 +12,7 @@ if (!in_array($from_id, $admin_ids)) {
     }
     return;
 }
-if (in_array($text, $textadmin)) {
+if (in_array($text, $textadmin) || $datain == "PANEL") {
     if(!(function_exists('shell_exec') && is_callable('shell_exec'))){
         $cronCommandsendmessage = "*/1 * * * * curl https://$domainhosts/cron/sendmessage.php";
         sendmessage($from_id, sprintf($textbotlang['Admin']['cron']['active_manual_sendmessage'],$cronCommandsendmessage),null, 'HTML');
@@ -2319,17 +2319,15 @@ elseif(preg_match('/^editstsuts-(.*)-(.*)/', $datain, $dataget)) {
         '0' => $textbotlang['Admin']['Status']['statusoff']
     ][$setting['statuscategory']];
     $cronCommand = "*/4 * * * * curl https://$domainhosts/cron/croncard.php";
-    $existingCronCommands = shell_exec('crontab -l');
     if(!(function_exists('shell_exec') && is_callable('shell_exec'))){
         $cronstatus = 1;
-        $cronCommand = "*/4 * * * * curl https://$domainhosts/cron/croncard.php";
-       sendmessage($from_id, sprintf($textbotlang['Admin']['cron']['active_manual_card'],$cronCommand), null, 'HTML');
     }else{
-    if (strpos($existingCronCommands, $cronCommand) === false) {
-        $cronstatus = 0;
-    }else{
-        $cronstatus = 1;
-    }
+        $existingCronCommands = shell_exec('crontab -l');
+        if (strpos($existingCronCommands, $cronCommand) === false) {
+            $cronstatus = 0;
+        }else{
+            $cronstatus = 1;
+        }
     }
     $status_Automatic_confirmation  = [
         '1' => $textbotlang['Admin']['Status']['statuson'],
