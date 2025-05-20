@@ -507,6 +507,8 @@ $textbotlang['users']['moeny']['date_label'] = "تاریخ : ";
 $textbotlang['users']['moeny']['back_to_bot'] = "بازگشت به ربات";
 $textbotlang['users']['moeny']['setting'] = "⚙️ تنظیمات";
 $textbotlang['users']['moeny']['settingpay'] = "📌 از لیست زیر می توانید درگاه های موجود را انتخاب و مدیریت کنید";
+$textbotlang['users']['moeny']['copy_card_number'] = "کپی، شماره کارت";
+$textbotlang['users']['moeny']['copy_price'] = "کپی، مبلغ";
 
 
 

@@ -47,13 +47,13 @@ function sendvideo($chat_id,$videoid,$caption){
         'caption'=> $caption,
     ]);
 }
-function Editmessagetext($chat_id, $message_id, $text, $keyboard){
+function Editmessagetext($chat_id, $message_id, $text, $keyboard,$parse_mode = "html"){
     return telegram('editmessagetext', [
         'chat_id' => $chat_id,
         'message_id' => $message_id,
         'text' => $text,
         'reply_markup' => $keyboard,
-        'parse_mode'=> 'html'
+        'parse_mode'=> $parse_mode
     ]);
 }
 function deletemessage($chat_id, $message_id){

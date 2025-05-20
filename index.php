@@ -28,7 +28,6 @@ use Endroid\QrCode\RoundBlockSizeMode;
 use Endroid\QrCode\Writer\PngWriter;
 if(is_dir('installer')){
     deleteFolder('installer');
-    unlink('table.php');
 }
 $first_name = sanitizeUserName($first_name);
 if (!in_array($Chat_type, ["private"])) return;
@@ -1750,20 +1749,7 @@ if ($text == $datatextbot['text_Add_Balance'] || $text == "/wallet") {
         if(isset($Matches[0])) {
             $peymentSettings['card_number'] = implode('', $Matches[0]); 
             $MESSAGE = $textcart;
-            $KEYBOARD = json_encode([
-                "inline_keyboard"=> [
-                    [[
-                        'text' => "کپی، شماره کارت",
-                        'copy_text' => ['text'=> $peymentSettings['card_number']]
-                    ],[
-                        'text' => "کپی، مبلغ",
-                        'copy_text' => ['text'=> $user['Processing_value']]
-                    ]],
-                    [[
-                        'text' => "بیخیال، 🏠 بازگشت به منوی اصلی",
-                        'callback_data' => 'backuser'
-                    ]]
-                ]]);
+            $KEYBOARD = json_encode([ "inline_keyboard"=> [ [[ 'text' => $textbotlang['users']['moeny']['copy_card_number'], 'copy_text' => ['text'=> $peymentSettings['card_number']] ],[ 'text' => $textbotlang['users']['moeny']['copy_price'], 'copy_text' => ['text'=> $user['Processing_value']] ]], [[ 'text' => $textbotlang['users']['backhome'], 'callback_data' => 'backuser' ]] ]]);
             Editmessagetext($from_id, $message_id, $MESSAGE, $KEYBOARD);
         }
         else {

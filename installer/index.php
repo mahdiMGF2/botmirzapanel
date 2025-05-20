@@ -160,7 +160,7 @@ if(isset($uPOST['submit']) && $uPOST['submit']) {
                     <details>
                         <summary for="secret_key"><i>آدرس سورس ربات</i></summary>
                         <label for="bot_address_webhook ">آدرس صفحه سورس ربات</label>
-                        <input type="text" id="bot_address_webhook" name="bot_address_webhook" placeholder="Web URL for Set Webhook" value="<?php echo $webAddress.'index.php'; ?>" required>
+                        <input type="text" id="bot_address_webhook" name="bot_address_webhook" placeholder="Web URL for Set Webhook" value="<?php echo $webAddress.'/index.php'; ?>" required>
                     </details>
                 </div>
                 <div class="form-group">
