@@ -106,6 +106,12 @@ details > label {
   margin-top: 8px;
 }
 
+button.alert-success {
+  background-color: rgb(34 197 94 / 37%);
+  color: #FFF;
+  border: 1px solid rgb(33 213 84);
+}
+
 .alert {
   padding: 14px 18px;
   margin-bottom: 20px;
@@ -125,6 +131,24 @@ details > label {
   background-color: rgba(239, 68, 68, 0.15);
   color: #f87171;
   border-color: rgba(239, 68, 68, 0.3);
+}
+
+a.submit-success{
+  display: block;
+  text-align: center;
+  width: 95%;
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin: 10px auto;
+  background-color: #002b032e;
+  color: #4ade80;
+  border: 1px solid;
+}
+a.submit-success:hover{
+  width: 100%;
 }
 
 @media (min-width: 820px) {

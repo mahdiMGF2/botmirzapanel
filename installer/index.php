@@ -57,6 +57,14 @@ if(isset($uPOST['submit']) && $uPOST['submit']) {
     if($tgBot['details']['ok'] == false) {
         $ERROR[] = "توکن ربات را بررسی کنید. <i>عدم توانایی دریافت جزئیات ربات.</i>";
     }
+    else {
+        $tgBot = getContents("https://api.telegram.org/bot".$tgBotToken."/getChat?chat_id=".$tgAdminId);
+        if($tgBot['ok'] == false) {
+            $ERROR[] = "<b>عدم شناسایی مدیر:</b>";
+            $ERROR[] = "ابتدا ربات را فعال/استارت کنید.";
+            $ERROR[] = "<a href='https://t.me/'".$tgBot['details']['result']['username'].">@".$tgBot['details']['result']['username']."</a>";
+        }
+    }
 
     try {
         $dsn = "mysql:host=$hostdb;dbname=$namedb;charset=utf8mb4";
@@ -111,17 +119,18 @@ if(isset($uPOST['submit']) && $uPOST['submit']) {
         
         <?php if (!empty($ERROR)): ?>
             <div class="alert alert-danger">
-                <?php echo implode("\n",$ERROR); ?>
+                <?php echo implode("<br>",$ERROR); ?>
             </div>
         <?php endif; ?>
         
         <?php if (!empty($SUCCESS) && empty($ERROR)): ?>
             <div class="alert alert-success">
-                <?php echo implode("\n",$SUCCESS); ?>
+                <?php echo implode("<br>",$SUCCESS); ?>
+                <a class="submit-success" href="https://t.me/"<?php echo $tgBot['details']['result']['username']; ?>>🤖 رفتن به ربات <?php echo "‏@".$tgBot['details']['result']['username']; ?> »</a>
             </div>
         <?php endif; ?>
-
-            <form id="installer-form" method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+            
+            <form id="installer-form" <?php if(!empty($SUCCESS)) { echo 'style="display:none;"'; } ?> method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
                 <div class="form-group">
                     <label for="admin_id">آیدی عددی ادمین:</label>
                     <input type="text" id="admin_id" name="admin_id" 
