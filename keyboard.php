@@ -472,6 +472,17 @@ $optionMarzban = json_encode([
     ],
     'resize_keyboard' => true
 ]);
+$optionmikrotik = json_encode([
+    'keyboard' => [
+        [['text' => $textbotlang['Admin']['managepanel']['btnshowconnect']], ['text' => $textbotlang['Admin']['managepanel']['showpanelbtn']]],
+        [['text' => $textbotlang['Admin']['managepanel']['showpaneltestbtn']], ['text' => $textbotlang['Admin']['managepanel']['setgroup']]],
+        [['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['namepanel']], ['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['removepanel']]],
+        [['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['editurl']], ['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['editusername']]],
+        [['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['editpassword']],['text' => $textbotlang['Admin']['managepanel']['methodusername']]],
+        [['text' => $textbotlang['Admin']['Back-Adminment']]]
+    ],
+    'resize_keyboard' => true
+]);
 $optionwgdashboard = json_encode([
     'keyboard' => [
         [['text' => $textbotlang['Admin']['managepanel']['btnshowconnect']],['text' => $textbotlang['Admin']['managepanel']['showpanelbtn']]],
@@ -550,6 +561,7 @@ $typepanel =  json_encode([
         [['text' => "marzban"],['text' => "x-ui_single"]],
         [['text' => "marzneshin"],['text' => "alireza"]],
         [['text' => "s_ui"],['text' => "wgdashboard"]],
+        [['text' => 'mikrotik']],
         [['text' => $textbotlang['Admin']['Back-Adminment']]]
     ],
     'resize_keyboard' => true

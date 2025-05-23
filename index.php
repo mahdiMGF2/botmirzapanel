@@ -629,7 +629,11 @@ if (preg_match('/product_(\w+)/', $datain, $dataget)) {
         if ($marzban_list_get['type'] == "wgdashboard") unset($keyboardsetting['inline_keyboard'][0][1]);
         if ($marzban_list_get['type'] == "wgdashboard") unset($keyboardsetting['inline_keyboard'][1][1]);
         $keyboardsetting = json_encode($keyboardsetting);
+        if($marzban_list_get['type'] == "mikrotik"){
+         $textinfo = sprintf($textbotlang['users']['stateus']['InfoSerivceActive_mikrotik'], $status_var, $DataUserOut['username'], $DataUserOut['subscription_url'],$nameloc['Service_location'], $nameloc['id_invoice'], $lastonline, $LastTraffic, $usedTrafficGb, $expirationDate, $day);  
+        }else{
         $textinfo = sprintf($textbotlang['users']['stateus']['InfoSerivceActive'], $status_var, $DataUserOut['username'], $nameloc['Service_location'], $nameloc['id_invoice'], $lastonline, $LastTraffic, $usedTrafficGb, $expirationDate, $day);
+        }
     }
     Editmessagetext($from_id, $message_id, $textinfo, $keyboardsetting);
 }
@@ -1227,7 +1231,7 @@ if ($user['step'] == "createusertest" || preg_match('/locationtests_(.*)/', $dat
     }
     if ($marzban_list_get['configManual'] == "onconfig") {
         foreach ($dataoutput['configs'] as $configs) {
-            $config .= "\n\n" . $configs;
+            $config .= "\n" . $configs;
         }
         $text_config = $config;
     }
@@ -1240,10 +1244,12 @@ if ($user['step'] == "createusertest" || preg_match('/locationtests_(.*)/', $dat
     ]);
     if ($marzban_list_get['type'] == "wgdashboard") {
         $textcreatuser = sprintf($textbotlang['users']['buy']['createservicewg'], $username_ac, $marzban_list_get['name_panel'], $setting['time_usertest'], $setting['val_usertest']);
+    }elseif ($marzban_list_get['type'] == "mikrotik") {
+        $textcreatuser = sprintf($textbotlang['users']['buy']['createservice_mikrotik_test'], $username_ac,$dataoutput['subscription_url'], $marzban_list_get['name_panel'], $setting['time_usertest'], $setting['val_usertest']);
     } else {
         $textcreatuser = sprintf($textbotlang['users']['buy']['createservicetest'], $username_ac, $marzban_list_get['name_panel'], $setting['time_usertest'], $setting['val_usertest'], $output_config_link, $text_config);
     }
-    if ($marzban_list_get['sublink'] == "onsublink") {
+    if ($marzban_list_get['sublink'] == "onsublink" && $marzban_list_get['type'] != "mikrotik") {
         $urlimage = "$from_id$randomString.png";
         $writer = new PngWriter();
         $qrCode = QrCode::create($output_config_link)
@@ -1602,9 +1608,15 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
     ]);
     if ($marzban_list_get['type'] == "wgdashboard") {
         $textcreatuser = sprintf($textbotlang['users']['buy']['createservicewgbuy'], $username_ac, $info_product['name_product'], $marzban_list_get['name_panel'], $info_product['Service_time'], $info_product['Volume_constraint']);
+    }elseif ($marzban_list_get['type'] == "mikrotik") {
+        $textcreatuser = sprintf($textbotlang['users']['buy']['createservice_mikrotik_buy'], $username_ac,$dataoutput['subscription_url'], $info_product['name_product'], $marzban_list_get['name_panel'], $info_product['Service_time'], $info_product['Volume_constraint']);
     } else {
         $textcreatuser = sprintf($textbotlang['users']['buy']['createservice'], $username_ac, $info_product['name_product'], $marzban_list_get['name_panel'], $info_product['Service_time'], $info_product['Volume_constraint'], $text_config, $link_config);
     }
+    if($marzban_list_get['type'] == "mikrotik"){
+        sendmessage($from_id, $textcreatuser, $Shoppinginfo, 'HTML');
+        sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboard, 'HTML');
+    }else{
     if ($marzban_list_get['sublink'] == "onsublink") {
         $urlimage = "$from_id$randomString.png";
         $writer = new PngWriter();
@@ -1657,6 +1669,7 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
     } else {
         sendmessage($from_id, $textcreatuser, $Shoppinginfo, 'HTML');
         sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboard, 'HTML');
+    }
     }
     $Balance_prim = $user['Balance'] - $priceproduct;
     update("user", "Balance", $Balance_prim, "id", $from_id);

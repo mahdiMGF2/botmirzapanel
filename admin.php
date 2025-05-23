@@ -200,6 +200,14 @@ if ($text == $textbotlang['Admin']['managepanel']['btnshowconnect']) {
             sendmessage($from_id, $text_marzban, $optionwg, 'HTML');
         }
     }
+    elseif($marzban_list_get['type'] == "mikrotik"){
+        $result = login_mikrotik($marzban_list_get['url_panel'],$marzban_list_get['username_panel'],$marzban_list_get['password_panel']);
+        if(isset($result['error'])){
+            sendmessage($from_id,$textbotlang['Admin']['managepanel']['notconnect'], $optionmikrotik, 'HTML');
+        }else{
+            sendmessage($from_id,$textbotlang['Admin']['managepanel']['connectx-ui'], $optionmikrotik, 'HTML');
+        }
+    }
     step('home', $from_id);
 }
 if ($text == $textbotlang['Admin']['manageadmin']['showlistbtn']) {
@@ -263,6 +271,8 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['add_panel']) {
         sendmessage($from_id,$textbotlang['Admin']['managepanel']['notemarzban'], null, 'HTML');
     }elseif($userdata['type'] == "wgdashboard"){
         sendmessage($from_id,$textbotlang['Admin']['managepanel']['wgdashboard'], null, 'HTML');
+    }elseif($userdata['type'] == "mikrotik"){
+        sendmessage($from_id,$textbotlang['Admin']['managepanel']['mikrotik'], null, 'HTML');
     }
     step('home', $from_id);
 }
@@ -1186,6 +1196,8 @@ if ($text == $textbotlang['Admin']['managepanel']['methodusername']) {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['savedname'], $optionX_ui_single, 'HTML');
     }elseif($listpanel['type'] == "wgdashboard"){
         sendmessage($from_id,$textbotlang['Admin']['managepanel']['savedname'], $optionwgdashboard, 'HTML');
+    }elseif($listpanel['type'] == "mikrotik"){
+        sendmessage($from_id,$textbotlang['Admin']['managepanel']['savedname'], $optionmikrotik, 'HTML');
     }else{
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['savedname'], $optionMarzban, 'HTML');
     }
@@ -1369,6 +1381,8 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['manage_panel']) {
         sendmessage($from_id, $textbotlang['users']['selectoption'], $optionX_ui_single, 'HTML');
     }elseif($listpanel['type'] == "wgdashboard"){
         sendmessage($from_id, $textbotlang['users']['selectoption'], $optionwgdashboard, 'HTML');
+    }elseif($listpanel['type'] == "mikrotik"){
+        sendmessage($from_id,$textbotlang['users']['selectoption'], $optionmikrotik, 'HTML');
     }else{
         sendmessage($from_id, $textbotlang['users']['selectoption'], $optionMarzban, 'HTML');
     }
@@ -1390,6 +1404,8 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['manage_panel']) {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedNmaePanel'], $options_ui, 'HTML');
     }elseif($listpanel['type'] == "wgdashboard"){
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedNmaePanel'], $optionwgdashboard, 'HTML');
+    }elseif($listpanel['type'] == "mikrotik"){
+        sendmessage($from_id,$textbotlang['Admin']['managepanel']['ChangedNmaePanel'], $optionmikrotik, 'HTML');
     }
     update("marzban_panel", "name_panel", $text, "name_panel", $user['Processing_value']);
     update("invoice", "Service_location", $text, "Service_location", $user['Processing_value']);
@@ -1417,6 +1433,8 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['manage_panel']) {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedurlPanel'], $options_ui, 'HTML');
     }elseif($listpanel['type'] == "wgdashboard"){
         sendmessage($from_id,$textbotlang['Admin']['managepanel']['ChangedurlPanel'], $optionwgdashboard, 'HTML');
+    }elseif($listpanel['type'] == "mikrotik"){
+        sendmessage($from_id,$textbotlang['Admin']['managepanel']['ChangedurlPanel'], $optionmikrotik, 'HTML');
     }
     update("marzban_panel", "url_panel", $text, "name_panel", $user['Processing_value']);
     step('home', $from_id);
@@ -1437,6 +1455,8 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['manage_panel']) {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedusernamePanel'], $options_ui, 'HTML');
     }elseif($listpanel['type'] == "wgdashboard"){
         sendmessage($from_id,$textbotlang['Admin']['managepanel']['ChangedusernamePanel'], $optionwgdashboard, 'HTML');
+    }elseif($listpanel['type'] == "mikrotik"){
+        sendmessage($from_id,$textbotlang['Admin']['managepanel']['ChangedusernamePanel'], $optionmikrotik, 'HTML');
     }
     update("marzban_panel", "username_panel", $text, "name_panel", $user['Processing_value']);
     step('home', $from_id);
@@ -1457,11 +1477,17 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['manage_panel']) {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['ChangedpasswordPanel'], $options_ui, 'HTML');
     }elseif($listpanel['type'] == "wgdashboard"){
         sendmessage($from_id,$textbotlang['Admin']['managepanel']['ChangedpasswordPanel'], $optionwgdashboard, 'HTML');
+    }elseif($listpanel['type'] == "mikrotik"){
+        sendmessage($from_id,$textbotlang['Admin']['managepanel']['ChangedpasswordPanel'], $optionmikrotik, 'HTML');
     }
     update("marzban_panel", "password_panel", $text, "name_panel", $user['Processing_value']);
     step('home', $from_id);
-} elseif ($text == $textbotlang['Admin']['managepanel']['keyboardpanel']['editinound']) {
+} elseif ($text == $textbotlang['Admin']['managepanel']['keyboardpanel']['editinound'] || $text == $textbotlang['Admin']['managepanel']['setgroup']) {
+    if($text == $textbotlang['Admin']['managepanel']['setgroup']){
+    sendmessage($from_id, $textbotlang['Admin']['managepanel']['keyboardpanel']['getgroup'], $backadmin, 'HTML');
+    }else{
     sendmessage($from_id, $textbotlang['Admin']['managepanel']['keyboardpanel']['getidinbound'], $backadmin, 'HTML');
+    }
     step('getinboundiid', $from_id);
 } elseif ($user['step'] == "getinboundiid") {
     $typepanel = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
@@ -1477,6 +1503,8 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['manage_panel']) {
         sendmessage($from_id, $textbotlang['Admin']['managepanel']['keyboardpanel']['setinbound'], $options_ui, 'HTML');
     }elseif($typepanel['type'] == "wgdashboard"){
         sendmessage($from_id,$textbotlang['Admin']['managepanel']['keyboardpanel']['setinbound'], $optionwgdashboard, 'HTML');
+    }elseif($typepanel['type'] == "mikrotik"){
+        sendmessage($from_id,$textbotlang['Admin']['managepanel']['keyboardpanel']['setedgroup'], $optionmikrotik, 'HTML');
     }
     update("marzban_panel", "inboundid", $text, "name_panel", $user['Processing_value']);
     step('home', $from_id);
@@ -1497,6 +1525,8 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['manage_panel']) {
         sendmessage($from_id,$textbotlang['Admin']['managepanel']['ChangedurlPanel'], $optionwgdashboard, 'HTML');
     }elseif($listpanel['type'] == "alireza"){
         sendmessage($from_id,$textbotlang['Admin']['managepanel']['ChangedurlPanel'], $optionX_ui_single, 'HTML');
+    }elseif($listpanel['type'] == "mikrotik"){
+        sendmessage($from_id,$textbotlang['Admin']['managepanel']['ChangedurlPanel'], $optionmikrotik, 'HTML');
     }
     update("marzban_panel", "linksubx", $text, "name_panel", $user['Processing_value']);
     step('home', $from_id);

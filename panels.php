@@ -7,6 +7,7 @@ require_once 'marzneshin.php';
 require_once 'alireza_single.php';
 require_once 's_ui.php';
 require_once 'wgdashboard.php';
+require_once 'mikrotik.php';
 class ManagePanel{
     public $name_panel;
     public $connect;
@@ -126,6 +127,21 @@ class ManagePanel{
                 $Output['subscription_url'] = strval(downloadconfig($Get_Data_Panel['name_panel'],$data_Output['public_key'])['file']);
                 $Output['configs'] = [];
             }
+        }
+        elseif($Get_Data_Panel['type'] == "mikrotik"){
+            $password = bin2hex(random_bytes(6));
+            $name_group = $Get_Data_Panel['inboundid'];
+            $data_Output = addUser_mikrotik($Get_Data_Panel['name_panel'],$usernameC,$password,$name_group);
+            if(isset($data_Output['error'])){
+               $Output['status'] = 'Unsuccessful';
+               $Output['msg'] = $data_Output['msg']; 
+            }else{
+            $Output['status'] = 'successful';
+            $Output['username'] = $usernameC;
+            $Output['subscription_url'] = $password;
+            $Output['configs'] = [];
+            }
+
         }
         else{
             $Output['status'] = 'Unsuccessful';
@@ -375,6 +391,32 @@ class ManagePanel{
                     'sub_updated_at' => null,
                     'sub_last_user_agent'=> null,
                 );
+            }
+        }
+        elseif($Get_Data_Panel['type'] == "mikrotik"){
+           $UsernameData = GetUsermikrotik($Get_Data_Panel['name_panel'],$username)[0];
+            if(isset($UsernameData['error'])){
+                $Output = array(
+                    'status' => 'Unsuccessful',
+                    'msg' => $UsernameData['msg']
+                    );}
+            else{
+                   $invocie = select("invoice","*","username",$username,"select");
+                   $traffic_get = GetUsermikrotik_volume($Get_Data_Panel['name_panel'],$UsernameData['.id']);
+                   $used_traffic = $traffic_get['total-upload'] + $traffic_get['total-download'];
+                   $data_limit = $invocie['Volume']*pow(1024,3);
+                   $expire = $invocie['time_sell'] +  ($invocie['Service_time']*86400);
+                   $UsernameData['enable'] = "active";
+                   $Output = array(
+                        'status' => $UsernameData['enable'],
+                        'username' => $invocie['username'],
+                        'data_limit' => $data_limit,
+                        'expire' => $expire,
+                        'online_at' => null,
+                        'used_traffic' => $used_traffic,
+                        'links' => [],
+                        'subscription_url' => $UsernameData['password'],
+);
             }
         }
         else{
