@@ -2034,6 +2034,19 @@ elseif($text == $textbotlang['Admin']['Help']['change']['editmedia']) {
     }elseif($setting['iran_number'] == "❌ بررسی شماره ایرانی غیرفعال است") {
         update("setting","iran_number","0");
     }
+    if(!(function_exists('shell_exec') && is_callable('shell_exec'))){
+        $cronstatus = 1;
+        $cronCommand = "*/4 * * * * curl https://$domainhosts/cron/croncard.php";
+       sendmessage($from_id, sprintf($textbotlang['Admin']['cron']['active_manual_card'],$cronCommand), null, 'HTML');
+    }else{
+    $cronCommand = "*/4 * * * * curl https://$domainhosts/cron/croncard.php";
+    $existingCronCommands = shell_exec('crontab -l');
+    if (strpos($existingCronCommands, $cronCommand) === false) {
+        $cronstatus = 0;
+    }else{
+        $cronstatus = 1;
+    }
+    }
     $setting = select("setting", "*");
     $name_status   = [
         '1' => $textbotlang['Admin']['Status']['statuson'],
@@ -2067,23 +2080,14 @@ elseif($text == $textbotlang['Admin']['Help']['change']['editmedia']) {
         '1' => $textbotlang['Admin']['Status']['statuson'],
         '0' => $textbotlang['Admin']['Status']['statusoff']
     ][$setting['statuscategory']];
-    if(!(function_exists('shell_exec') && is_callable('shell_exec'))){
-        $cronstatus = 1;
-        $cronCommand = "*/4 * * * * curl https://$domainhosts/cron/croncard.php";
-       sendmessage($from_id, sprintf($textbotlang['Admin']['cron']['active_manual_card'],$cronCommand), null, 'HTML');
-    }else{
-    $cronCommand = "*/4 * * * * curl https://$domainhosts/cron/croncard.php";
-    $existingCronCommands = shell_exec('crontab -l');
-    if (strpos($existingCronCommands, $cronCommand) === false) {
-        $cronstatus = 0;
-    }else{
-        $cronstatus = 1;
-    }
-    }
     $status_Automatic_confirmation  = [
         '1' => $textbotlang['Admin']['Status']['statuson'],
         '0' => $textbotlang['Admin']['Status']['statusoff']
     ][$cronstatus];
+    $status_copy_cart  = [
+        '1' => $textbotlang['Admin']['Status']['statuson'],
+        '0' => $textbotlang['Admin']['Status']['statusoff']
+    ][$setting['copy_cart']];
     $Bot_Status = json_encode([
         'inline_keyboard' => [
             [
@@ -2117,6 +2121,9 @@ elseif($text == $textbotlang['Admin']['Help']['change']['editmedia']) {
             ],[
                 ['text' => $status_Automatic_confirmation, 'callback_data' => "editstsuts-Automatic_confirmation-$cronstatus"],
                 ['text' => $textbotlang['Admin']['Automatic_confirmation']['title'] , 'callback_data' => "Automatic_confirmation"],
+            ],[
+                ['text' => $status_copy_cart, 'callback_data' => "editstsuts-copycart-{$setting['copy_cart']}"],
+                ['text' => $textbotlang['users']['moeny']['copy_cart_status'], 'callback_data' => "copycart"],
             ]
         ]
     ]);
@@ -2181,6 +2188,13 @@ elseif(preg_match('/^editstsuts-(.*)-(.*)/', $datain, $dataget)) {
             $valuenew = "1";
         }
         update("setting","statuscategory",$valuenew);
+    }elseif($type == "copycart"){
+        if($value == "1"){
+            $valuenew = "0";
+        }else{
+            $valuenew = "1";
+        }
+        update("setting","copy_cart",$valuenew);
     }elseif($type == "Automatic_confirmation"){
         if(!(function_exists('shell_exec') && is_callable('shell_exec'))){
         $cronstatus = 1;
@@ -2204,6 +2218,17 @@ elseif(preg_match('/^editstsuts-(.*)-(.*)/', $datain, $dataget)) {
             }
         }
     }
+    }
+    $cronCommand = "*/4 * * * * curl https://$domainhosts/cron/croncard.php";
+    if(!(function_exists('shell_exec') && is_callable('shell_exec'))){
+        $cronstatus = 1;
+    }else{
+        $existingCronCommands = shell_exec('crontab -l');
+        if (strpos($existingCronCommands, $cronCommand) === false) {
+            $cronstatus = 0;
+        }else{
+            $cronstatus = 1;
+        }
     }
     $setting = select("setting", "*");
     $name_status   = [
@@ -2238,21 +2263,14 @@ elseif(preg_match('/^editstsuts-(.*)-(.*)/', $datain, $dataget)) {
         '1' => $textbotlang['Admin']['Status']['statuson'],
         '0' => $textbotlang['Admin']['Status']['statusoff']
     ][$setting['statuscategory']];
-    $cronCommand = "*/4 * * * * curl https://$domainhosts/cron/croncard.php";
-    if(!(function_exists('shell_exec') && is_callable('shell_exec'))){
-        $cronstatus = 1;
-    }else{
-        $existingCronCommands = shell_exec('crontab -l');
-        if (strpos($existingCronCommands, $cronCommand) === false) {
-            $cronstatus = 0;
-        }else{
-            $cronstatus = 1;
-        }
-    }
     $status_Automatic_confirmation  = [
         '1' => $textbotlang['Admin']['Status']['statuson'],
         '0' => $textbotlang['Admin']['Status']['statusoff']
     ][$cronstatus];
+    $status_copy_cart  = [
+        '1' => $textbotlang['Admin']['Status']['statuson'],
+        '0' => $textbotlang['Admin']['Status']['statusoff']
+    ][$setting['copy_cart']];
     $Bot_Status = json_encode([
         'inline_keyboard' => [
             [
@@ -2286,6 +2304,9 @@ elseif(preg_match('/^editstsuts-(.*)-(.*)/', $datain, $dataget)) {
             ],[
                 ['text' => $status_Automatic_confirmation, 'callback_data' => "editstsuts-Automatic_confirmation-$cronstatus"],
                 ['text' => $textbotlang['Admin']['Automatic_confirmation']['title'] , 'callback_data' => "Automatic_confirmation"],
+            ],[
+                ['text' => $status_copy_cart, 'callback_data' => "editstsuts-copycart-{$setting['copy_cart']}"],
+                ['text' => $textbotlang['users']['moeny']['copy_cart_status'], 'callback_data' => "copycart"],
             ]
         ]
     ]);

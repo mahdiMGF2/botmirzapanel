@@ -94,6 +94,7 @@ try {
         namecustome varchar(100)  NULL,
         status_verify varchar(50)  NULL,
         removedayc varchar(100)  NULL,
+        copy_cart varchar(20)  NULL,
         statuscategory varchar(100)  NULL)
         ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin");
         if (!$result) {
@@ -104,8 +105,9 @@ try {
         $active_phone_text = "0";
         $active_phone_iran_text = "0";
         $active_help = "0";
-$connect->query("INSERT INTO setting (Bot_Status,roll_Status,get_number,limit_usertest_all,time_usertest,val_usertest,help_Status,iran_number,NotUser,namecustome,removedayc,status_verify,statuscategory) VALUES ('$active_bot_text','$active_roll_text','$active_phone_text','1','1','100','$active_help','$active_phone_iran_text','0','0','1','0','1')");
+$connect->query("INSERT INTO setting (Bot_Status,roll_Status,get_number,limit_usertest_all,time_usertest,val_usertest,help_Status,iran_number,NotUser,namecustome,removedayc,status_verify,statuscategory,copy_cart) VALUES ('$active_bot_text','$active_roll_text','$active_phone_text','1','1','100','$active_help','$active_phone_iran_text','0','0','1','0','1','0')");
     } else {
+        addFieldToTable($tableName, 'copy_cart', '0',"VARCHAR(20)");
         addFieldToTable($tableName, 'status_verify', '0',"VARCHAR(50)");
         addFieldToTable($tableName, 'statuscategory', '1',"VARCHAR(50)");
         addFieldToTable($tableName, 'namecustome', '0',"VARCHAR(200)");
