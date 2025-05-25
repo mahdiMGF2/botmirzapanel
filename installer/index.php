@@ -9,6 +9,11 @@ if(!file_exists($configDirectory) || !file_exists($tablesDirectory)) {
     $ERROR[] = "فایل های پروژه ناقص هستند.";
     $ERROR[] = "فایل های پروژه را مجددا دانلود و بارگذاری کنید (<a href='https://github.com/mahdiMGF2/botmirzapanel'>‎🌐 Github</a>)";
 }
+if(phpversion() < 8.2){
+    $ERROR[] = "نسخه PHP شما باید حداقل 8.2 باشد.";
+    $ERROR[] = "نسخه فعلی: ".phpversion();
+    $ERROR[] = "لطفا نسخه PHP خود را به 8.2 یا بالاتر ارتقا دهید.";
+}
 
 if(!empty($_SERVER['SCRIPT_URI'])) {
     $URI = str_replace($_SERVER['REQUEST_SCHEME'].'://','',$_SERVER['SCRIPT_URI']);
