@@ -699,6 +699,23 @@ class ManagePanel{
                 );
             }
         }
+         elseif($Get_Data_Panel['type'] == "mikrotik"){
+           $UsernameData = GetUsermikrotik($Get_Data_Panel['name_panel'],$username)[0];
+            if(isset($UsernameData['error'])){
+                $Output = array(
+                    'status' => 'Unsuccessful',
+                    'msg' => $UsernameData['msg']
+                    );
+                
+            }
+            else{
+                deleteUser_mikrotik($Get_Data_Panel['name_panel'],$UsernameData['.id']);
+                $Output = array(
+                'status' => 'successful',
+                'username' => $username,
+                );
+            }
+        }
         else{
             $Output = array(
                 'status' => 'Unsuccessful',

@@ -9,7 +9,7 @@ if (function_exists('fastcgi_finish_request')) {
 }
 
 ini_set('error_log', 'error_log');
-$version = "5.0.2";
+$version = "5.1.0";
 date_default_timezone_set('Asia/Tehran');
 require_once 'config.php';
 require_once 'botapi.php';
@@ -607,30 +607,63 @@ if (preg_match('/product_(\w+)/', $datain, $dataget)) {
         ]);
         $textinfo = sprintf($textbotlang['users']['stateus']['InfoSerivceDisable'], $status_var, $DataUserOut['username'], $nameloc['Service_location'], $nameloc['id_invoice'], $LastTraffic, $usedTrafficGb, $expirationDate, $day);
     } else {
-        $keyboardsetting = [
-            'inline_keyboard' => [
-                [
-                    ['text' => $textbotlang['users']['stateus']['linksub'], 'callback_data' => 'subscriptionurl_' . $username],
-                    ['text' => $textbotlang['users']['stateus']['config'], 'callback_data' => 'config_' . $username],
-                ],
-                [
-                    ['text' => $textbotlang['users']['extend']['title'], 'callback_data' => 'extend_' . $username],
-                    ['text' => $textbotlang['users']['changelink']['btntitle'], 'callback_data' => 'changelink_' . $username],
-                ],
-                [
-                    ['text' => $textbotlang['users']['removeconfig']['btnremoveuser'], 'callback_data' => 'removeserviceuserco-' . $username],
-                    ['text' => $textbotlang['users']['Extra_volume']['sellextra'], 'callback_data' => 'Extra_volume_' . $username],
-                ],
-                [
-                    ['text' => $textbotlang['users']['stateus']['backlist'], 'callback_data' => 'backorder'],
-                ]
-            ]
-        ];
-        if ($marzban_list_get['type'] == "wgdashboard") unset($keyboardsetting['inline_keyboard'][0][1]);
-        if ($marzban_list_get['type'] == "wgdashboard") unset($keyboardsetting['inline_keyboard'][1][1]);
+        $keyboarddate = array(
+            'linksub'=>array(
+                'text' => $textbotlang['users']['stateus']['linksub'],
+                'callback_data' => "subscriptionurl_"
+            ),
+            'config'=>array(
+                'text' => $textbotlang['users']['stateus']['config'],
+                'callback_data' => "config_"
+            ),
+            'extend'=>array(
+                'text' => $textbotlang['users']['extend']['title'],
+                'callback_data' => "extend_"
+            ),
+            'changelink'=>array(
+                'text' => $textbotlang['users']['changelink']['btntitle'],
+                'callback_data' => "changelink_"
+            ),
+            'removeservice'=>array(
+                'text' => $textbotlang['users']['removeconfig']['btnremoveuser'],
+                'callback_data' => "removeserviceuserco-"
+            )
+            ,'Extra_volume'=>array(
+                'text' => $textbotlang['users']['Extra_volume']['sellextra'],
+                'callback_data' => "Extra_volume_"
+            ),
+        );
+        if ($marzban_list_get['type'] == "wgdashboard"){
+            unset($keyboarddate['config']);
+            unset($keyboarddate['changelink']);
+        }
+        if($marzban_list_get['type'] == "mikrotik"){
+            unset($keyboarddate['Extra_volume']);
+            unset($keyboarddate['linksub']);
+            unset($keyboarddate['config']);
+            unset($keyboarddate['extend']);
+            unset($keyboarddate['changelink']);
+            unset($keyboarddate['Extra_volume']);
+        }
+        if($nameloc['name_product'] == "usertest"){
+            unset($keyboarddate['removeservice']);
+        }
+        $tempArray = [];
+        $keyboardsetting = ['inline_keyboard' => []];
+        foreach ($keyboarddate as $keyboardtext){
+            $tempArray[] = ['text' => $keyboardtext['text'] ,'callback_data' => $keyboardtext['callback_data'].$username];
+            if (count($tempArray) == 2) {
+                $keyboardsetting['inline_keyboard'][] = $tempArray;
+                $tempArray = [];
+            }
+        }
+        if (count($tempArray) > 0) {
+            $keyboardsetting['inline_keyboard'][] = $tempArray;
+        }
+        $keyboardsetting['inline_keyboard'][] = [['text' => $textbotlang['users']['stateus']['backlist'], 'callback_data' => 'backorder']];
         $keyboardsetting = json_encode($keyboardsetting);
         if($marzban_list_get['type'] == "mikrotik"){
-         $textinfo = sprintf($textbotlang['users']['stateus']['InfoSerivceActive_mikrotik'], $status_var, $DataUserOut['username'], $DataUserOut['subscription_url'],$nameloc['Service_location'], $nameloc['id_invoice'], $lastonline, $LastTraffic, $usedTrafficGb, $expirationDate, $day);  
+         $textinfo = sprintf($textbotlang['users']['stateus']['InfoSerivceActive_mikrotik'], $status_var, $DataUserOut['username'], $DataUserOut['subscription_url'],$nameloc['Service_location'], $nameloc['id_invoice'], $LastTraffic, $usedTrafficGb, $expirationDate, $day);  
         }else{
         $textinfo = sprintf($textbotlang['users']['stateus']['InfoSerivceActive'], $status_var, $DataUserOut['username'], $nameloc['Service_location'], $nameloc['id_invoice'], $lastonline, $LastTraffic, $usedTrafficGb, $expirationDate, $day);
         }
@@ -1737,6 +1770,9 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
 
 #-------------------[ text_Add_Balance ]---------------------#
 if ($text == $datatextbot['text_Add_Balance'] || $text == "/wallet") {
+    update("user", "Processing_value", "0", "id", $from_id);
+    update("user", "Processing_value_one", "0", "id", $from_id);
+    update("user", "Processing_value_tow", "0", "id", $from_id);
     if ($setting['get_number'] == "1" && $user['step'] != "get_number" && $user['number'] == "none") {
         sendmessage($from_id, $textbotlang['users']['number']['Confirming'], $request_contact, 'HTML');
         step('get_number', $from_id);

@@ -379,8 +379,6 @@ $textbotlang['users']['stateus']['InfoSerivceActive_mikrotik'] = "وضعیت س�
 لوکیشن :%s
 کد سرویس:%s
     
-🟢 اخرین زمان اتصال شما : %s
-    
 ♾ حجم سرویس : %s
 📥 حجم مصرفی : %s
 
@@ -830,7 +828,6 @@ $textbotlang['Admin']['managepanel']['keyboardpanel']['getidinbound'] = "📌 ش
 
 ❌ در صورتی که پنل wgdashboard هستید باید نام کانفیگ را ارسال کنید";
 $textbotlang['Admin']['managepanel']['keyboardpanel']['getgroup'] = "📌 نام گروه را ارسال کنید";
-$textbotlang['Admin']['managepanel']['keyboardpanel']['setedgroup'] = "✅  گروه با موفقیت ذخیره گردید";
 $textbotlang['Admin']['managepanel']['keyboardpanel']['setinbound'] = "✅ شناسه اینباند با موفقیت ذخیره گردید";
 $textbotlang['Admin']['managepanel']['keyboardpanel']['linksub'] = "🔗 دامنه لینک ساب";
 $textbotlang['Admin']['managepanel']['keyboardpanel']['removepanel'] = "❌ حذف پنل";

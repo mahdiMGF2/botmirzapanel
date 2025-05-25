@@ -254,9 +254,15 @@ function DirectPayment($order_id){
         $Shoppinginfo = json_encode($Shoppinginfo);
         if($marzban_list_get['type'] == "wgdashboard"){
         $textcreatuser = sprintf($textbotlang['users']['buy']['createservicewgbuy'],$dataoutput['username'],$get_invoice['name_product'],$marzban_list_get['name_panel'],$get_invoice['Service_time'],$get_invoice['Volume']);
+        }if($marzban_list_get['type'] == "mikrotik"){
+        $textcreatuser = sprintf($textbotlang['users']['buy']['createservice_mikrotik_buy'],$dataoutput['username'],$dataoutput['subscription_url'],$get_invoice['name_product'],$marzban_list_get['name_panel'],$get_invoice['Service_time'],$get_invoice['Volume']);
         }else{
         $textcreatuser = sprintf($textbotlang['users']['buy']['createservice'],$dataoutput['username'],$get_invoice['name_product'],$marzban_list_get['name_panel'],$get_invoice['Service_time'],$get_invoice['Volume'],$config,$output_config_link);
         }
+        if($marzban_list_get['type'] == "mikrotik"){
+            sendmessage($Balance_id['id'], $textcreatuser, $Shoppinginfo, 'HTML');
+            sendmessage($Balance_id['id'], $textbotlang['users']['selectoption'], $keyboard, 'HTML');
+        }else{
         if ($marzban_list_get['configManual'] == "onconfig") {
             if (count($dataoutput['configs']) == 1) {
                 $urlimage = "{$get_invoice['id_user']}$randomString.png";
@@ -306,6 +312,7 @@ function DirectPayment($order_id){
             unlink($urlimage);
         }
             unlink($urlimage);
+        }
         }
         $partsdic = explode("_", $Balance_id['Processing_value_four']);
         if ($partsdic[0] == "dis") {
@@ -493,4 +500,22 @@ function deleteFolder($folderPath) {
     }
 
     return rmdir($folderPath);
+}
+function outtypepanel($typepanel,$message){
+    global $from_id,$optionMarzban,$optionX_ui_single,$optionMarzneshin,$optionmikrotik,$options_ui;
+    if($typepanel == "marzban"){
+    sendmessage($from_id, $message, $optionMarzban, 'HTML');
+    }elseif($typepanel == "x-ui_single"){
+    sendmessage($from_id,$message, $optionX_ui_single, 'HTML');
+    }elseif($typepanel == "alireza"){
+    sendmessage($from_id,$message, $optionX_ui_single, 'HTML');
+    }elseif($typepanel == "marzneshin"){
+    sendmessage($from_id,$message, $optionMarzneshin, 'HTML');
+    }elseif($typepanel == "WGDashboard"){
+    sendmessage($from_id,$message, $optionwgdashboard, 'HTML');
+    }elseif($typepanel == "s_ui"){
+    sendmessage($from_id,$message, $options_ui, 'HTML');
+    }elseif($typepanel == "mikrotik"){
+    sendmessage($from_id,$message, $optionmikrotik, 'HTML');
+    }
 }

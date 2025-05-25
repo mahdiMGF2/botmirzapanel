@@ -142,7 +142,7 @@ function deleteUser_mikrotik($name_panel,$username){
     $panel = select("marzban_panel","*","name_panel",$name_panel,"select");
     $curl = curl_init();
     $data = array(
-        '.id' => $id
+        '.id' => $username
         );
     curl_setopt_array($curl, array(
       CURLOPT_URL => $panel['url_panel'].'/rest/user-manager/user/remove',
