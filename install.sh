@@ -11,7 +11,7 @@ check_ssl_status() {
     # First get domain from config file
     if [ -f "/var/www/html/mirzabotconfig/config.php" ]; then
         domain=$(grep '^\$domainhosts' "/var/www/html/mirzabotconfig/config.php" | cut -d"'" -f2 | cut -d'/' -f1)
-        
+
         if [ -n "$domain" ] && [ -f "/etc/letsencrypt/live/$domain/cert.pem" ]; then
             expiry_date=$(openssl x509 -enddate -noout -in "/etc/letsencrypt/live/$domain/cert.pem" | cut -d= -f2)
             current_date=$(date +%s)
@@ -57,7 +57,7 @@ function show_logo() {
     echo -e "\033[1;36mVersion:\033[0m \033[33m0.13\033[0m"
     echo -e "\033[1;36mTelegram Channel:\033[0m \033[34mhttps://t.me/mirzapanel\033[0m"
     echo -e "\033[1;36mTelegram Group:  \033[0m \033[34mhttps://t.me/mirzapanelgroup\033[0m"
-    echo -e "\033[1;36mBuy Pro Version: \033[0m \033[34mhttps://t.me/mirzaperimiumsup\033[0m"
+    echo -e "\033[1;36m⭐️Buy Pro Version⭐️: \033[0m \033[34mhttps://t.me/mirzaperimium\033[0m"
     echo ""
     echo -e "\033[1;36mInstallation Status:\033[0m"
     check_bot_status
@@ -143,10 +143,10 @@ function find_free_port() {
 # Function to fix update issues by changing mirrors
 function fix_update_issues() {
     echo -e "\e[33mTrying to fix update issues by changing mirrors...\033[0m"
-    
+
     # Backup original sources.list
     cp /etc/apt/sources.list /etc/apt/sources.list.backup
-    
+
     # Detect Ubuntu version
     if [ -f /etc/os-release ]; then
         . /etc/apt/sources.list
@@ -156,7 +156,7 @@ function fix_update_issues() {
         echo -e "\e[91mCould not detect Ubuntu version.\033[0m"
         return 1
     fi
-    
+
     # Try different mirrors
     MIRRORS=(
         "archive.ubuntu.com"
@@ -166,7 +166,7 @@ function fix_update_issues() {
         "mirrors.digitalocean.com"
         "mirrors.linode.com"
     )
-    
+
     for mirror in "${MIRRORS[@]}"; do
         echo -e "\e[33mTrying mirror: $mirror\033[0m"
         # Create new sources.list
@@ -175,14 +175,14 @@ deb http://$mirror/ubuntu/ $UBUNTU_CODENAME main restricted universe multiverse
 deb http://$mirror/ubuntu/ $UBUNTU_CODENAME-updates main restricted universe multiverse
 deb http://$mirror/ubuntu/ $UBUNTU_CODENAME-security main restricted universe multiverse
 EOF
-        
+
         # Try updating
         if apt-get update 2>/dev/null; then
             echo -e "\e[32mSuccessfully updated using mirror: $mirror\033[0m"
             return 0
         fi
     done
-    
+
     # If all mirrors fail, restore original sources.list
     mv /etc/apt/sources.list.backup /etc/apt/sources.list
     echo -e "\e[91mAll mirrors failed. Restored original sources.list\033[0m"
@@ -248,7 +248,7 @@ function install_bot() {
         echo -e "\e[91mError: Failed to install software-properties-common.\033[0m"
         exit 1
     }
-    
+
     sudo apt install -y git unzip curl || {
         echo -e "\e[91mError: Failed to install required packages.\033[0m"
         exit 1
@@ -739,12 +739,15 @@ echo -e "$text_to_save" >> /var/www/html/mirzabotconfig/config.php
 
     elif [ "$ROOT_PASSWORD" = "" ] || [ "$ROOT_USER" = "" ]; then
         echo -e "\n\e[36mThe password is empty.\033[0m\n"
-    else 
+    else
 
         echo -e "\n\e[36mThe password is not correct.\033[0m\n"
 
     fi
 
+    # Add executable permission and link
+    chmod +x /root/install.sh
+    ln -vs /root/install.sh /usr/local/bin/mirza
 
 }
 
@@ -1266,6 +1269,10 @@ EOF
     echo -e "\033[33mDatabase name: \033[36m$DB_NAME\033[0m"
     echo -e "\033[33mDatabase username: \033[36m$DB_USERNAME\033[0m"
     echo -e "\033[33mDatabase password: \033[36m$DB_PASSWORD\033[0m"
+
+    # Add executable permission and link
+    chmod +x /root/install.sh
+    ln -vs /root/install.sh /usr/local/bin/mirza
 }
 
 # Update Function
@@ -1293,21 +1300,21 @@ function update_bot() {
     else
         ZIP_URL=$(curl -s https://api.github.com/repos/mahdiMGF2/botmirzapanel/releases/latest | grep "zipball_url" | cut -d '"' -f4)
     fi
-    
+
     # Create temporary directory
     TEMP_DIR="/tmp/mirzabot_update"
     mkdir -p "$TEMP_DIR"
-    
+
     # Download and extract
     wget -O "$TEMP_DIR/bot.zip" "$ZIP_URL" || {
         echo -e "\e[91mError: Failed to download update package.\033[0m"
         exit 1
     }
     unzip "$TEMP_DIR/bot.zip" -d "$TEMP_DIR"
-    
+
     # Find extracted directory
     EXTRACTED_DIR=$(find "$TEMP_DIR" -mindepth 1 -maxdepth 1 -type d)
-    
+
     # Backup config file
     CONFIG_PATH="/var/www/html/mirzabotconfig/config.php"
     TEMP_CONFIG="/root/mirza_config_backup.php"
@@ -1317,20 +1324,20 @@ function update_bot() {
             exit 1
         }
     fi
-    
+
     # Remove old version
     sudo rm -rf /var/www/html/mirzabotconfig || {
         echo -e "\e[91mFailed to remove old bot files!\033[0m"
         exit 1
     }
-    
+
     # Move new files
     sudo mkdir -p /var/www/html/mirzabotconfig
     sudo mv "$EXTRACTED_DIR"/* /var/www/html/mirzabotconfig/ || {
         echo -e "\e[91mFile transfer failed!\033[0m"
         exit 1
     }
-    
+
     # Restore config file
     if [ -f "$TEMP_CONFIG" ]; then
         sudo mv "$TEMP_CONFIG" "$CONFIG_PATH" || {
@@ -1338,21 +1345,38 @@ function update_bot() {
             exit 1
         }
     fi
-    
+
+    # Copy the new install.sh to /root/
+    if [ -f "/var/www/html/mirzabotconfig/install.sh" ]; then
+        sudo cp /var/www/html/mirzabotconfig/install.sh /root/install.sh
+        echo -e "\n\e[92mCopied latest install.sh to /root/install.sh.\033[0m"
+    else
+        echo -e "\n\e[91mWarning: install.sh not found in /var/www/html/mirzabotconfig/ after update. Cannot update /root/install.sh.\033[0m"
+    fi
+
     # Set permissions
     sudo chown -R www-data:www-data /var/www/html/mirzabotconfig/
     sudo chmod -R 755 /var/www/html/mirzabotconfig/
-    
+
     # Run setup script
     URL=$(grep '\$domainhosts' "$CONFIG_PATH" | cut -d"'" -f2)
     curl -s "https://$URL/table.php" || {
         echo -e "\e[91mSetup script execution failed!\033[0m"
     }
-    
+
     # Cleanup
     rm -rf "$TEMP_DIR"
-    
+
     echo -e "\n\e[92mMirza Bot updated to latest version successfully!\033[0m"
+
+    # Ensure /root/install.sh is executable and linked
+    if [ -f "/root/install.sh" ]; then
+        sudo chmod +x /root/install.sh
+        sudo ln -vsf /root/install.sh /usr/local/bin/mirza
+        echo -e "\e[92mEnsured /root/install.sh is executable and 'mirza' command is linked.\033[0m"
+    else
+        echo -e "\e[91mError: /root/install.sh not found after update attempt. Cannot make it executable or link 'mirza' command.\033[0m"
+    fi
 }
 
 # Delete Function
@@ -1933,7 +1957,7 @@ function change_domain() {
 
         NEW_SECRET=$(openssl rand -base64 12 | tr -dc 'a-zA-Z0-9')
         sudo sed -i "s/\$secrettoken = '.*';/\$secrettoken = '${NEW_SECRET%%}';/" "$CONFIG_FILE"
-        
+
         BOT_TOKEN=$(awk -F"'" '/\$APIKEY/{print $2}' "$CONFIG_FILE")
         curl -s -o /dev/null -F "url=https://${new_domain}/mirzabotconfig/index.php" \
              -F "secret_token=${NEW_SECRET}" \
@@ -2674,11 +2698,11 @@ process_arguments() {
         -beta)
             install_bot "-beta"
             ;;
-        --beta)  
+        --beta)
             install_bot "-beta"
             ;;
         -update)
-            update_bot "$2"
+            update_bot "$2" # Pass along any arguments to update_bot, like -beta
             ;;
         *)
             show_menu
