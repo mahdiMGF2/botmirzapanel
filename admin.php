@@ -168,7 +168,7 @@ if ($text == $textbotlang['Admin']['managepanel']['btnshowconnect']) {
             sendmessage($from_id, $text_marzban, null, 'HTML');
         }
     } elseif ($marzban_list_get['type'] == "x-ui_single") {
-        $x_ui_check_connect = login($marzban_list_get['url_panel'], $marzban_list_get['username_panel'], $marzban_list_get['password_panel']);
+        $x_ui_check_connect = login($marzban_list_get['id'],false);
         if ($x_ui_check_connect['success']) {
             sendmessage($from_id, $textbotlang['Admin']['managepanel']['connectx-ui'], null, 'HTML');
         } elseif ($x_ui_check_connect['msg'] == "Invalid username or password.") {
@@ -1417,7 +1417,7 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['manage_panel']) {
         return;
     }
     $panel = select("marzban_panel","*","name_panel",$user['Processing_value'],"select");
-    outtypepanel($listpanel['type'],$textbotlang['Admin']['managepanel']['ChangedurlPanel']);
+    outtypepanel($panel['type'],$textbotlang['Admin']['managepanel']['ChangedurlPanel']);
     update("marzban_panel", "linksubx", $text, "name_panel", $user['Processing_value']);
     step('home', $from_id);
 }elseif ($user['step'] == "GetpaawordNew") {

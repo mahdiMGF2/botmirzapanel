@@ -6,11 +6,11 @@ function token_panel($code_panel){
     if($panel['datelogin'] != null){
         $date = json_decode($panel['datelogin'],true);
         if(isset($date['time'])){
-            $timecurrent = time();
-            $start_date = time() - strtotime($date['time']);
-            if($start_date <= 600){
-                return $date;
-            }
+        $timecurrent = time();
+        $start_date = time() - strtotime($date['time']);
+        if($start_date <= 3600){
+            return $date;
+        }
         }
     }
     $url_get_token = $panel['url_panel'].'/api/admin/token';
@@ -44,7 +44,7 @@ function token_panel($code_panel){
         $data = json_encode(array(
             'time' => $time,
             'access_token' => $body['access_token']
-        ));
+            ));
         update("marzban_panel","datelogin",$data,'name_panel',$panel['name_panel']);
     }
     return $body;
@@ -118,7 +118,7 @@ function adduser($username,$expire,$data_limit,$location)
             $data["status"] = "on_hold";
             $data["on_hold_expire_duration"] = $expire - time();
         }else{
-            $data['expire'] = $expire;
+        $data['expire'] = $expire;
         }
     }
     $payload = json_encode($data);
@@ -190,20 +190,20 @@ function Modifyuser($location,$username,array $data)
     $Check_token = token_panel($marzban_list_get['id']);
     $url =  $marzban_list_get['url_panel'].'/api/user/'.$username;
     $payload = json_encode($data);
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-    $headers = array();
-    $headers[] = 'Accept: application/json';
-    $headers[] = 'Authorization: Bearer '.$Check_token['access_token'];
-    $headers[] = 'Content-Type: application/json';
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+$headers = array();
+$headers[] = 'Accept: application/json';
+$headers[] = 'Authorization: Bearer '.$Check_token['access_token'];
+$headers[] = 'Content-Type: application/json';
+curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
-    $result = curl_exec($ch);
-    curl_close($ch);
-    $data_useer = json_decode($result, true);
+$result = curl_exec($ch);
+curl_close($ch);
+     $data_useer = json_decode($result, true);
     return $data_useer;
 }
 
