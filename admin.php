@@ -191,14 +191,7 @@ if ($text == $textbotlang['Admin']['managepanel']['btnshowconnect']) {
         }
     }
     elseif ($marzban_list_get['type'] == "wgdashboard") {
-        $wg_check_connect = loginwg($marzban_list_get['url_panel'],$marzban_list_get['username_panel'],$marzban_list_get['password_panel']);
-        unlink('cookie.txt');
-        if($wg_check_connect['status']){
-            sendmessage($from_id, $textbotlang['Admin']['managepanel']['connectx-ui'], $optionwg, 'HTML');
-        }else {
-            $text_marzban = $textbotlang['Admin']['managepanel']['errorstateuspanel']."\n\n".$wg_check_connect['message'];
-            sendmessage($from_id, $text_marzban, $optionwg, 'HTML');
-        }
+        sendmessage($from_id, $textbotlang['users']['selectoption'], $optionwgdashboard, 'HTML');
     }
     elseif($marzban_list_get['type'] == "mikrotik"){
         $result = login_mikrotik($marzban_list_get['url_panel'],$marzban_list_get['username_panel'],$marzban_list_get['password_panel']);
@@ -241,7 +234,7 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['add_panel']) {
     }
     savedata("save","url_panel",$text);
     $userdata = json_decode($user['Processing_value'],true);
-    if($userdata['type'] == "s_ui"){
+    if($userdata['type'] == "s_ui" || $userdata['type'] == "wgdashboard"){
         sendmessage($from_id,$textbotlang['Admin']['managepanel']['settoken'], $backadmin, 'HTML');
         step('add_password_panel', $from_id);
         savedata("save","username_panel","none");

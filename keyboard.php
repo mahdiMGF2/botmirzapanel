@@ -485,10 +485,9 @@ $optionmikrotik = json_encode([
 ]);
 $optionwgdashboard = json_encode([
     'keyboard' => [
-        [['text' => $textbotlang['Admin']['managepanel']['btnshowconnect']],['text' => $textbotlang['Admin']['managepanel']['showpanelbtn']]],
+        [['text' => $textbotlang['Admin']['managepanel']['showpanelbtn']]],
         [['text' => $textbotlang['Admin']['managepanel']['showpaneltestbtn']]],
         [['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['namepanel']],['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['removepanel']]],
-        [['text' => $textbotlang['Admin']['managepanel']['methodusername']]],
         [['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['editpassword']],['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['editusername']]],
         [['text'=>$textbotlang['Admin']['managepanel']['keyboardpanel']['editurl']],['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['editinound']]],
         [['text' => $textbotlang['Admin']['Back-Adminment']]]
