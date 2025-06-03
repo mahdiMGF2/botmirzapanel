@@ -54,7 +54,7 @@ function show_logo() {
     echo "================================================================================="
     echo -e "\033[0m"
     echo ""
-    echo -e "\033[1;36mVersion:\033[0m \033[33m0.13\033[0m"
+    echo -e "\033[1;36mVersion:\033[0m \033[33m0.14\033[0m"
     echo -e "\033[1;36mTelegram Channel:\033[0m \033[34mhttps://t.me/mirzapanel\033[0m"
     echo -e "\033[1;36mTelegram Group:  \033[0m \033[34mhttps://t.me/mirzapanelgroup\033[0m"
     echo -e "\033[1;36m⭐️Buy Pro Version⭐️: \033[0m \033[34mhttps://t.me/mirzaperimium\033[0m"
@@ -1255,7 +1255,7 @@ EOF
     }
 
     # Execute table creation script
-    TABLE_SETUP_URL="https://${DOMAIN_NAME}/$BOT_NAME/table.php"
+    TABLE_SETUP_URL="https://${YOUR_DOMAIN}/mirzabotconfig/table.php"
     echo -e "\033[33mSetting up database tables...\033[0m"
     curl $TABLE_SETUP_URL || {
         echo -e "\033[31mError: Failed to execute table creation script at $TABLE_SETUP_URL.\033[0m"
