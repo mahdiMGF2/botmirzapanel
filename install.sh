@@ -1255,7 +1255,7 @@ EOF
     }
 
     # Execute table creation script
-    TABLE_SETUP_URL="https://${DOMAIN_NAME}/$BOT_NAME/table.php"
+    TABLE_SETUP_URL="https://${YOUR_DOMAIN}/mirzabotconfig/table.php"
     echo -e "\033[33mSetting up database tables...\033[0m"
     curl $TABLE_SETUP_URL || {
         echo -e "\033[31mError: Failed to execute table creation script at $TABLE_SETUP_URL.\033[0m"
