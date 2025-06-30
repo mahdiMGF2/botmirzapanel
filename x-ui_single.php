@@ -80,7 +80,6 @@ function get_clinets($username,$namepanel){
     global $connect;
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $namepanel,"select");
     $login =login($marzban_list_get['id']);
-    if(!isset($login))return;
     $curl = curl_init();
 
 curl_setopt_array($curl, array(

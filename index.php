@@ -976,11 +976,11 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
         sendmessage($from_id, $textbotlang['users']['Extra_volume']['invalidprice'], $backuser, 'HTML');
         return;
     }
-    $priceextra = $setting['Extra_volume'] * $text;
+    $priceextra =  $text;
     $keyboardsetting = json_encode([
         'inline_keyboard' => [
             [
-                ['text' => $textbotlang['users']['Extra_volume']['extracheck'], 'callback_data' => 'confirmaextra_' . $priceextra],
+                ['text' => $textbotlang['users']['Extra_volume']['extracheck'], 'callback_data' => 'confirmaextra_' . $text],
             ]
         ]
     ]);
@@ -991,20 +991,31 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
     step('home', $from_id);
 } elseif (preg_match('/confirmaextra_(\w+)/', $datain, $dataget)) {
     $volume = $dataget[1];
+    $price_extra = $setting['Extra_volume'] *$volume;
     Editmessagetext($from_id, $message_id, $text_callback, json_encode(['inline_keyboard' => []]));
     $nameloc = select("invoice", "*", "username", $user['Processing_value'], "select");
-    if ($user['Balance'] < $volume) {
-        $Balance_prim = $volume - $user['Balance'];
+    if($nameloc == false){
+        sendmessage($from_id, $textbotlang['users']['stateus']['error'], null, 'html');
+        return;   
+    }
+    $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'], "select");
+    if($marzban_list_get == false){
+        sendmessage($from_id, $textbotlang['users']['stateus']['error'], null, 'html');
+        return;   
+    }
+    if ($user['Balance'] < $price_extra && intval($setting['Extra_volume']) != 0) {
+        $Balance_prim = $price_extra - $user['Balance'];
         update("user", "Processing_value", $Balance_prim, "id", $from_id);
         sendmessage($from_id, $textbotlang['users']['sell']['None-credit'], $step_payment, 'HTML');
         step('get_step_payment', $from_id);
         return;
     }
-    $Balance_Low_user = $user['Balance'] - $volume;
+    if(intval($setting['Extra_volume']) != 0){
+    $Balance_Low_user = $user['Balance'] - $price_extra;
     update("user", "Balance", $Balance_Low_user, "id", $from_id);
-    $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'], "select");
+    }
     $DataUserOut = $ManagePanel->DataUser($marzban_list_get['name_panel'], $user['Processing_value']);
-    $data_limit = $DataUserOut['data_limit'] + ($volume / $setting['Extra_volume'] * pow(1024, 3));
+    $data_limit = $DataUserOut['data_limit'] + ($volume * pow(1024, 3));
     if ($marzban_list_get['type'] == "marzban") {
         $datam = array(
             "data_limit" => $data_limit
@@ -1064,7 +1075,7 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
         }
         setjob($nameloc['Service_location'], "total_data", $data_limit, $datauser['id']);
     }
-    $ManagePanel->Modifyuser($user['Processing_value'], $marzban_list_get['name_panel'], $datam);
+    $ManagePanel->Modifyuser($nameloc['username'], $marzban_list_get['name_panel'], $datam);
     $keyboardextrafnished = json_encode([
         'inline_keyboard' => [
             [
@@ -1073,9 +1084,9 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
         ]
     ]);
     sendmessage($from_id, $textbotlang['users']['Extra_volume']['extraadded'], $keyboardextrafnished, 'HTML');
-    $volumes = $volume / $setting['Extra_volume'];
-    $volume = number_format($volume);
-    $text_report = sprintf($textbotlang['Admin']['Report']['Extra_volume'], $from_id, $volumes, $volume);
+    $volumes = $volume ;
+    $price_extra = number_format($price_extra);
+    $text_report = sprintf($textbotlang['Admin']['Report']['Extra_volume'], $from_id, $volumes, $price_extra);
     if (isset($setting['Channel_Report']) && strlen($setting['Channel_Report']) > 0) {
         sendmessage($setting['Channel_Report'], $text_report, null, 'HTML');
     }
