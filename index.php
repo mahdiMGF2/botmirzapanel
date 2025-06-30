@@ -785,12 +785,24 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
     $codeproduct = $dataget[1];
     deletemessage($from_id, $message_id);
     $nameloc = select("invoice", "*", "username", $user['Processing_value'], "select");
+    if($nameloc == false){
+        sendmessage($from_id, $textbotlang['users']['extend']['error2'], null, 'HTML');
+        return;
+    }
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'], "select");
+    if($marzban_list_get == false){
+        sendmessage($from_id, $textbotlang['users']['extend']['error2'], null, 'HTML');
+        return;
+    }
     $stmt = $pdo->prepare("SELECT * FROM product WHERE (Location = :Location OR location = '/all') AND code_product = :code_product LIMIT 1");
     $stmt->bindValue(':Location', $nameloc['Service_location']);
     $stmt->bindValue(':code_product', $codeproduct);
     $stmt->execute();
     $product = $stmt->fetch(PDO::FETCH_ASSOC);
+    if($product == false){
+        sendmessage($from_id, $textbotlang['users']['extend']['error2'], null, 'HTML');
+        return;
+    }
     if ($user['Balance'] < $product['price_product']) {
         $Balance_prim = $product['price_product'] - $user['Balance'];
         update("user", "Processing_value", $Balance_prim, "id", $from_id);
