@@ -1657,7 +1657,7 @@ if ($text == $textbotlang['Admin']['affiliate']['giftstart']) {
     }
     step("descriptionsrequsts", $from_id);
     update("user", "Processing_value", $usernamepanel, "id", $from_id);
-    sendmessage($from_id,$textbotlang['users']['stateus']['acceptrequest'], $backuser, 'HTML');
+    sendmessage($from_id,$textbotlang['users']['stateus']['rejectrequest'], $backuser, 'HTML');
 
 } elseif ($user['step'] == "descriptionsrequsts") {
     sendmessage($from_id, $textbotlang['users']['stateus']['acceptrequestnote'], $keyboardadmin, 'HTML');
