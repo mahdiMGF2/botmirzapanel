@@ -55,13 +55,17 @@ class ManagePanel{
                 if (!preg_match('/^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?((\/[^\s\/]+)+)?$/', $data_Output['subscription_url'])) {
                     $data_Output['subscription_url'] = $Get_Data_Panel['url_panel'] . "/" . ltrim($data_Output['subscription_url'], "/");
                 }
-                $data_Output['links'] = [base64_decode(outputlunk($data_Output['subscription_url']))];
+                $links_user = outputlunk($data_Output['subscription_url']);
+                if(isBase64($string)){
+                    $links_user = base64_decode($links_user);
+                }
+                $links_user = explode("\n",trim($links_user));
                 $timestamp = strtotime($data_Output['expire']);
                 $data_Output['expire'] = $timestamp;
                 $Output['status'] = 'successful';
                 $Output['username'] = $data_Output['username'];
                 $Output['subscription_url'] = $data_Output['subscription_url'];
-                $Output['configs'] = $data_Output['links'];
+                $Output['configs'] = $links_user;
             }
         }
         elseif($Get_Data_Panel['type'] == "x-ui_single"){
@@ -214,7 +218,11 @@ class ManagePanel{
                 }elseif($UsernameData['data_limit'] - $UsernameData['used_traffic'] <= 0){
                     $UsernameData['status'] = "limtied";
                 }
-                $UsernameData['links'] = [base64_decode(outputlunk($UsernameData['subscription_url']))];
+                $links_user = outputlunk($UsernameData['subscription_url']);
+                if(isBase64($string)){
+                    $links_user = base64_decode($links_user);
+                }
+                $links_user = explode("\n",trim($links_user));
                 if(isset($UsernameData['expire_date'])){
                     $expiretime = strtotime(($UsernameData['expire_date']));
                 }else{
@@ -227,7 +235,7 @@ class ManagePanel{
                     'expire' => $expiretime,
                     'online_at' => $UsernameData['online_at'],
                     'used_traffic' => $UsernameData['used_traffic'],
-                    'links' => $UsernameData['links'],
+                    'links' => $links_user,
                     'subscription_url' => $UsernameData['subscription_url'],
                     'sub_updated_at' => $UsernameData['sub_updated_at'],
                     'sub_last_user_agent'=> $UsernameData['sub_last_user_agent'],

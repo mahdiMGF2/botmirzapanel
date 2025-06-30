@@ -1280,14 +1280,17 @@ if ($user['step'] == "createusertest" || preg_match('/locationtests_(.*)/', $dat
     $stmt->bindParam(9, $setting['time_usertest']);
     $stmt->bindParam(10, $Status);
     $stmt->execute();
+    $config = "";
     $text_config = "";
     $output_config_link = "";
     if ($marzban_list_get['sublink'] == "onsublink") {
         $output_config_link = $dataoutput['subscription_url'];
     }
     if ($marzban_list_get['configManual'] == "onconfig") {
+        if (is_array($dataoutput['configs'])){
         foreach ($dataoutput['configs'] as $configs) {
             $config .= "\n" . $configs;
+        }
         }
         $text_config = $config;
     }
@@ -1644,7 +1647,7 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
         $link_config = $output_config_link;
     }
     if ($marzban_list_get['configManual'] == "onconfig") {
-        if (isset($dataoutput['configs']) and count($dataoutput['configs']) != 0) {
+        if (is_array($dataoutput['configs']) and count($dataoutput['configs']) != 0) {
             foreach ($dataoutput['configs'] as $configs) {
                 $config .= "\n" . $configs;
                 $configqr .= $configs;
