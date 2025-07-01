@@ -1546,7 +1546,15 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
     $stmt->bindValue(':loc1', $user['Processing_value']);
     $stmt->execute();
     $info_product = $stmt->fetch(PDO::FETCH_ASSOC);
+    if($info_product == false){
+     sendmessage($from_id, $textbotlang['users']['stateus']['error2'], $keyboard, 'HTML');
+     return;
+    }
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
+    if($marzban_list_get == false){
+     sendmessage($from_id, $textbotlang['users']['stateus']['error2'], $keyboard, 'HTML');
+     return;
+    }
     if ($marzban_list_get['linksubx'] == null and in_array($marzban_list_get['type'], ["x-ui_single", "alireza"])) {
         foreach ($admin_ids as $admin) {
             sendmessage($admin, sprintf($textbotlang['Admin']['managepanel']['notsetlinksub'], $marzban_list_get['name_panel']), null, 'HTML');

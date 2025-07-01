@@ -46,6 +46,7 @@ function login($code_panel,$verify = true){
         'access_token' => file_get_contents('cookie.txt')
             ));
     update("marzban_panel","datelogin",$data,'id',$panel['id']);
+     if(!is_string($response))return array('success' => false);
     return json_decode($response,true);
 }
 
