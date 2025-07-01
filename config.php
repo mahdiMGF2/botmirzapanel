@@ -3,9 +3,9 @@
 channel => @mirzapanel
 */
 //-----------------------------database-------------------------------
-$dbname = "{DATABASE_NAME}"; //  نام دیتابیس
-$usernamedb = "{DATABASE_USERNAME}"; // نام کاربری دیتابیس
-$passworddb = "{DATABASE_PASSOWRD}"; // رمز عبور دیتابیس
+$dbname = '{DATABASE_NAME}'; //  نام دیتابیس
+$usernamedb = '{DATABASE_USERNAME}'; // نام کاربری دیتابیس
+$passworddb = '{DATABASE_PASSOWRD}'; // رمز عبور دیتابیس
 $connect = mysqli_connect("localhost", $usernamedb, $passworddb, $dbname);
 if ($connect->connect_error) {
     die("The connection to the database failed:" . $connect->connect_error);
