@@ -519,3 +519,9 @@ function outtypepanel($typepanel,$message){
     sendmessage($from_id,$message, $optionmikrotik, 'HTML');
     }
 }
+function isBase64($string) {
+    if (base64_encode(base64_decode($string, true)) === $string) {
+        return true;
+    }
+    return false;
+}
