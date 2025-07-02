@@ -996,7 +996,7 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
             ]
         ]
     ]);
-    $priceextra = number_format($priceextra);
+    $priceextra = number_format($priceextra*$setting['Extra_volume']);
     $setting['Extra_volume'] = number_format($setting['Extra_volume']);
     $textextra = sprintf($textbotlang['users']['Extra_volume']['invoiceExtraVolume'], $setting['Extra_volume'], $priceextra, $text);
     sendmessage($from_id, $textextra, $keyboardsetting, 'HTML');
