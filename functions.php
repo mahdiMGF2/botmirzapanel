@@ -169,7 +169,7 @@ function generateUsername($from_id,$Metode,$username,$randomString,$text)
     elseif($Metode == $textbotlang['users']['customtextandrandom'])return $setting['namecustome']."_".$randomString;
 }
 
-function outputlunk($text){
+function outputlink($text){
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $text);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

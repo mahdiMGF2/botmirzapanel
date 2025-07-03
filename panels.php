@@ -55,7 +55,7 @@ class ManagePanel{
                 if (!preg_match('/^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?((\/[^\s\/]+)+)?$/', $data_Output['subscription_url'])) {
                     $data_Output['subscription_url'] = $Get_Data_Panel['url_panel'] . "/" . ltrim($data_Output['subscription_url'], "/");
                 }
-                $links_user = outputlunk($data_Output['subscription_url']);
+                $links_user = outputlink($data_Output['subscription_url']);
                 if(isBase64($string)){
                     $links_user = base64_decode($links_user);
                 }
@@ -79,7 +79,7 @@ class ManagePanel{
                 $Output['status'] = 'successful';
                 $Output['username'] = $usernameC;
                 $Output['subscription_url'] = "{$Get_Data_Panel['linksubx']}/{$subId}#$usernameC";
-                $Output['configs'] = [outputlunk($Output['subscription_url'])];
+                $Output['configs'] = [outputlink($Output['subscription_url'])];
             }
         }
         elseif($Get_Data_Panel['type'] == "alireza"){
@@ -93,7 +93,7 @@ class ManagePanel{
                 $Output['status'] = 'successful';
                 $Output['username'] = $usernameC;
                 $Output['subscription_url'] = "{$Get_Data_Panel['linksubx']}/{$subId}?name=$usernameC";
-                $Output['configs'] = [outputlunk($Output['subscription_url'])];
+                $Output['configs'] = [outputlink($Output['subscription_url'])];
             }
         }
         elseif($Get_Data_Panel['type'] == "s_ui"){
@@ -108,7 +108,7 @@ class ManagePanel{
                 $Output['status'] = 'successful';
                 $Output['username'] = $usernameC;
                 $Output['subscription_url'] = $url_sub;
-                $Output['configs'] = [outputlunk($url_sub)];
+                $Output['configs'] = [outputlink($url_sub)];
             }
 
         }
@@ -218,7 +218,7 @@ class ManagePanel{
                 }elseif($UsernameData['data_limit'] - $UsernameData['used_traffic'] <= 0){
                     $UsernameData['status'] = "limtied";
                 }
-                $links_user = outputlunk($UsernameData['subscription_url']);
+                $links_user = outputlink($UsernameData['subscription_url']);
                 if(isBase64($string)){
                     $links_user = base64_decode($links_user);
                 }
@@ -272,7 +272,7 @@ class ManagePanel{
                     'expire' => $UsernameData['expiryTime']/1000,
                     'online_at' => $status_user,
                     'used_traffic' => $UsernameData['up']+$UsernameData['down'],
-                    'links' => [outputlunk($linksub)],
+                    'links' => [outputlink($linksub)],
                     'subscription_url' => $linksub,
                 );
             }
@@ -301,7 +301,7 @@ class ManagePanel{
                     'expire' => $UsernameData['expiryTime']/1000,
                     'online_at' => $status_user,
                     'used_traffic' => $UsernameData['up']+$UsernameData['down'],
-                    'links' => [outputlunk($linksub)],
+                    'links' => [outputlink($linksub)],
                     'subscription_url' => $linksub,
                 );
             }
@@ -469,7 +469,7 @@ class ManagePanel{
             }else{
                 $config = new ManagePanel();
                 $Data_User  = $config->DataUser($name_panel,$username);
-                $Data_User['links'] = [base64_decode(outputlunk($Data_User['subscription_url']))];
+                $Data_User['links'] = [base64_decode(outputlink($Data_User['subscription_url']))];
                 $Output = array(
                     'status' => 'successful',
                     'configs' => $Data_User['links'],
@@ -506,7 +506,7 @@ class ManagePanel{
             }else{
                 $Output = array(
                     'status' => 'successful',
-                    'configs' => outputlunk($linksub),
+                    'configs' => outputlink($linksub),
                     'subscription_url' => $linksub,
                 );
             }
@@ -540,7 +540,7 @@ class ManagePanel{
             }else{
                 $Output = array(
                     'status' => 'successful',
-                    'configs' => outputlunk($linksub),
+                    'configs' => outputlink($linksub),
                     'subscription_url' => $linksub,
                 );
             }
@@ -619,7 +619,7 @@ class ManagePanel{
                 $url_sub = $url[0] .":". $url[1] . ":" . $setting_app['subPort'] . $setting_app['subPath'] . $username;
                 $Output = array(
                     'status' => 'successful',
-                    'configs' => [outputlunk($url_sub)],
+                    'configs' => [outputlink($url_sub)],
                     'subscription_url' => $url_sub,
                 );
             }
