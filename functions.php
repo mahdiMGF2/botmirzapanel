@@ -85,10 +85,10 @@ function generateUUID() {
 }
 function tronratee(){
     $tronrate = [];
-    $requeststron = json_decode(file_get_contents('https://api.nobitex.ir/v2/orderbook/TRXIRT'), true);
-    $requestsusd = json_decode(file_get_contents('https://api.nobitex.ir/v2/orderbook/USDTIRT'), true);
-    $tronrate['result']['USD'] = $requestsusd['lastTradePrice']*0.1;
-    $tronrate['result']['TRX'] = $requeststron['lastTradePrice']*0.1;
+    $requeststron = json_decode(file_get_contents('https://api.diadata.org/v1/assetQuotation/Tron/0x0000000000000000000000000000000000000000'), true);
+    $requestsusd = json_decode(file_get_contents('https://api.wallex.ir/v1/markets'), true);
+    $tronrate['result']['USD'] = intval($requestsusd['result']['symbols']['USDTTMN']['stats']['lastPrice']);
+    $tronrate['result']['TRX'] = intval($requeststron['Price']*$tronrate['result']['USD']);
     return $tronrate;
 }
 function nowPayments($payment, $price_amount, $order_id, $order_description){
