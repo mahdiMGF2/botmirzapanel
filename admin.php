@@ -1410,6 +1410,29 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['manage_panel']) {
         return;
     }
     $panel = select("marzban_panel","*","name_panel",$user['Processing_value'],"select");
+    if($panel['type'] == "x-ui_single"){
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $text);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        if($httpCode != 200){
+            sendmessage($from_id,$textbotlang['Admin']['managepanel']['subinvalidDomain'], null, 'HTML');
+            return;
+        }
+        if (curl_error($ch)) {
+            sendmessage($from_id, $textbotlang['Admin']['managepanel']['subinvalidDomain'], null, 'HTML');
+            return;
+        }
+        $protocol = ['vmess','vless','trojan','ss'];
+        $sub_check = explode('://',$response)[0];
+        if(!in_array($sub_check,$protocol)){
+            sendmessage($from_id, $sub_check, null, 'HTML');
+            return;
+        }
+        $text = dirname($text);
+    }
     outtypepanel($panel['type'],$textbotlang['Admin']['managepanel']['ChangedurlPanel']);
     update("marzban_panel", "linksubx", $text, "name_panel", $user['Processing_value']);
     step('home', $from_id);
