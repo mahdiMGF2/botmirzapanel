@@ -92,6 +92,7 @@ function tronratee(){
     return $tronrate;
 }
 function nowPayments($payment, $price_amount, $order_id, $order_description){
+    global $domainhosts;
     $apinowpayments = select("PaySetting", "ValuePay", "NamePay", 'apinowpayment',"select")['ValuePay'];
     $curl = curl_init();
     curl_setopt_array($curl, array(
@@ -113,11 +114,12 @@ function nowPayments($payment, $price_amount, $order_id, $order_description){
         'pay_currency' => 'trx',
         'order_id' => $order_id,
         'order_description' => $order_description,
+        'ipn_callback_url' => "https://".$domainhosts."/payment/nowpayments/back.php"
     ]));
 
     $response = curl_exec($curl);
     curl_close($curl);
-    return json_decode($response);
+    return json_decode($response,true);
 }
 function StatusPayment($paymentid){
     $apinowpayments = select("PaySetting", "ValuePay", "NamePay", 'apinowpayment',"select")['ValuePay'];

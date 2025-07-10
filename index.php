@@ -1877,18 +1877,25 @@ if ($text == $datatextbot['text_Add_Balance'] || $text == "/wallet") {
         sendmessage($from_id, $textnowpayments, $paymentkeyboard, 'HTML');
     }
     if ($datain == "nowpayments") {
+        deletemessage($from_id, $message_id);
+        sendmessage($from_id, $textbotlang['users']['Balance']['linkpayments'], $keyboard, 'HTML');
         $price_rate = tronratee();
         $USD = $price_rate['result']['USD'];
         $usdprice = round($user['Processing_value'] / $USD, 2);
-        sendmessage($from_id, $textbotlang['users']['Balance']['linkpayments'], $keyboard, 'HTML');
         $dateacc = date('Y/m/d H:i:s');
         $randomString = bin2hex(random_bytes(5));
         $payment_Status = "Unpaid";
         $Payment_Method = "Nowpayments";
-        if ($user['Processing_value_tow'] == "getconfigafterpay") {
-            $invoice = "{$user['Processing_value_tow']}|{$user['Processing_value_one']}";
-        } else {
-            $invoice = "0|0";
+        $invoice = $user['Processing_value_tow'] == "getconfigafterpay" ? "{$user['Processing_value_tow']}|{$user['Processing_value_one']}" : "0|0";
+        $pay = nowPayments('invoice', $usdprice, $randomString, "order");
+        if (!isset($pay['id'])) {
+            $text_error = json_encode($pay);
+            sendmessage($from_id, $textbotlang['users']['Balance']['errorLinkPayment'], $keyboard, 'HTML');
+            step('home', $from_id);
+            if (strlen($setting['Channel_Report']) > 0) {
+                sendmessage($setting['Channel_Report'], sprintf($textbotlang['users']['moeny']['nowpayments_create_link_error'],$text_error,$from_id,$username), null, 'HTML');
+            }
+            return;
         }
         $stmt = $pdo->prepare("INSERT INTO Payment_report (id_user, id_order, time, price, payment_Status, Payment_Method,invoice) VALUES (?, ?, ?, ?, ?, ?,?)");
         $stmt->bindParam(1, $from_id);
@@ -1902,7 +1909,7 @@ if ($text == $datatextbot['text_Add_Balance'] || $text == "/wallet") {
         $paymentkeyboard = json_encode([
             'inline_keyboard' => [
                 [
-                    ['text' => $textbotlang['users']['Balance']['payments'], 'url' => "https://" . "$domainhosts" . "/payment/nowpayments/nowpayments.php?price=$usdprice&order_description=Add_Balance&order_id=$randomString"],
+                    ['text' => $textbotlang['users']['Balance']['payments'], 'url' => $pay['invoice_url']],
                 ]
             ]
         ]);
