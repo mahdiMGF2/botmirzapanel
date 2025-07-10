@@ -1426,9 +1426,12 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['manage_panel']) {
             return;
         }
         $protocol = ['vmess','vless','trojan','ss'];
+        if(isBase64($response)){
+           $response =  base64_decode($response);
+        }
         $sub_check = explode('://',$response)[0];
         if(!in_array($sub_check,$protocol)){
-            sendmessage($from_id, $sub_check, null, 'HTML');
+            sendmessage($from_id, $textbotlang['Admin']['managepanel']['subinvalid'], null, 'HTML');
             return;
         }
         $text = dirname($text);
