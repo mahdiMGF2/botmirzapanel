@@ -1,5 +1,6 @@
 <?php
 
+$process_start = microtime(true);
 if (function_exists('fastcgi_finish_request')) {
     fastcgi_finish_request();
 } elseif (function_exists('litespeed_finish_request')) {
