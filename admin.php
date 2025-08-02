@@ -102,12 +102,8 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['bot_statistics']) {
     $datefirst = $current_date_time - 86400;
     $desired_date_time_start = $current_date_time - 3600;
     $month_date_time_start = $current_date_time - 2592000;
-    $datefirstday = time() - 86400;
+    $datefirstday = $current_date_time - 86400;
     $dateacc = jdate('Y/m/d');
-    $sql = "SELECT * FROM invoice WHERE  (Status = 'active' OR Status = 'end_of_time'  OR Status = 'end_of_volume' OR status = 'sendedwarn') AND name_product != 'usertest'";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute();
-    $dayListSell = $stmt->rowCount();
     $Balanceall =  select("user","SUM(Balance)",null,null,"select");
     $statistics = select("user","*",null,null,"count");
     $sumpanel = select("marzban_panel","*",null,null,"count");
@@ -118,12 +114,18 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['bot_statistics']) {
     $sql = "SELECT SUM(price_product)  FROM invoice WHERE (status = 'active' OR status = 'end_of_time'  OR status = 'end_of_volume' OR status = 'sendedwarn') AND name_product != 'usertest'";
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
-    $invoicesum =$stmt->fetch(PDO::FETCH_ASSOC)['SUM(price_product)'];
-    $sql = "SELECT SUM(price_product) FROM invoice WHERE time_sell > :time_sell AND (Status = 'active' OR Status = 'end_of_time'  OR Status = 'end_of_volume' OR status = 'sendedwarn') AND name_product != 'usertest'";
+    $invoicesum =$stmt->fetch(PDO::FETCH_ASSOC)['SUM(price_product)'] ?? 0;
+    $sql = "
+    SELECT COUNT(*) AS invoice_count
+    FROM invoice
+    WHERE time_sell >= :time_sell
+      AND status IN ('active', 'end_of_time', 'end_of_volume', 'sendedwarn')
+      AND name_product != 'usertest'
+    ";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':time_sell', $datefirstday);
     $stmt->execute();
-    $dayListSell = $stmt->rowCount();
+    $dayListSell = $stmt->fetch(PDO::FETCH_ASSOC)['invoice_count'] ?? 0;
     $count_usertest = select("invoice","*","name_product","usertest","count");
 
     $ch = curl_init('https://api.telegram.org');
