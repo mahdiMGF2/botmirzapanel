@@ -163,7 +163,7 @@ if ($user['User_Status'] == "block") {
 }
 if (strpos($text, "/start ") !== false) {
     if ($user['affiliates'] != 0) {
-        sendmessage($from_id, sprintf($textbotlang['users']['affiliates']['affiliateseduser'], $user['affiliates']), null, 'html');
+        sendmessage($from_id, $textbotlang['users']['affiliates']['affiliateseduser'], null, 'html');
         return;
     }
     $affiliatesvalue = select("affiliates", "*", null, null, "select")['affiliatesstatus'];
