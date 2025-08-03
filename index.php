@@ -57,7 +57,15 @@ if (intval($from_id) != 0) {
     } else {
         $verify = 1;
     }
-    $ref_code = bin2hex(random_bytes(16)); // 32-hex-char string
+
+    do {
+        $ref_code = bin2hex(random_bytes(16));
+        $stmt_check = $pdo->prepare("SELECT 1 FROM user WHERE ref_code = :ref_code");
+        $stmt_check->bindParam(':ref_code', $ref_code);
+        $stmt_check->execute();
+
+    } while ($stmt_check->fetchColumn());
+
     $stmt = $pdo->prepare(
         "INSERT IGNORE INTO user
             (id, ref_code, step, limit_usertest, User_Status, number, Balance,

@@ -55,17 +55,22 @@ try {
         if ($result_ref && $result_ref->num_rows > 0) {
             while ($row = $result_ref->fetch_assoc()) {
                 $id = $row['id'];
-                $new_ref_code = str_replace('-', '', sprintf(
-                    '%04x%04x%04x%04x%04x%04x%04x%04x',
-                    mt_rand(0, 0xffff), mt_rand(0, 0xffff),
-                    mt_rand(0, 0xffff), mt_rand(0, 0xffff),
-                    mt_rand(0, 0xffff), mt_rand(0, 0xffff),
-                    mt_rand(0, 0xffff), mt_rand(0, 0xffff)
-                ));
-                $connect->query("UPDATE user SET ref_code = '$new_ref_code' WHERE id = '$id'");
+                do {
+                    $new_ref_code = bin2hex(random_bytes(16));
+                    $stmt_check = $connect->prepare("SELECT id FROM user WHERE ref_code = ?");
+                    $stmt_check->bind_param("s", $new_ref_code);
+                    $stmt_check->execute();
+                    $check_result = $stmt_check->get_result();
+                    $is_duplicate = ($check_result && $check_result->num_rows > 0);
+                    $stmt_check->close();
+                } while ($is_duplicate);
+                $stmt_update = $connect->prepare("UPDATE user SET ref_code = ? WHERE id = ?");
+                $stmt_update->bind_param("ss", $new_ref_code, $id);
+                $stmt_update->execute();
+                $stmt_update->close();
             }
         }
-        }
+    }
 } catch (Exception $e) {
     file_put_contents("$randomString.txt",$e->getMessage());
 }
