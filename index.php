@@ -163,6 +163,15 @@ if (strpos($text, "/start ") !== false) {
             sendmessage($from_id, $textbotlang['users']['affiliates']['invalidaffiliates'], null, 'html');
             return;
         }
+        $inviterData = select("user", "affiliates", "id", $affiliatesid, "select");
+        if ($inviterData && intval($inviterData['affiliates']) === intval($from_id)) {
+            sendmessage($from_id,
+                $textbotlang['users']['affiliates']['invalidMutual'],
+                null,
+                'html'
+            );
+            return;
+        }
         $marzbanDiscountaffiliates = select("affiliates", "*", null, null, "select");
         if ($marzbanDiscountaffiliates['Discount'] == "onDiscountaffiliates") {
             $marzbanDiscountaffiliates = select("affiliates", "*", null, null, "select");
