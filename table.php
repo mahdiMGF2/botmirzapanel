@@ -13,6 +13,7 @@ try {
     if (!$table_exists) {
         $result = $connect->query("CREATE TABLE user (
         id varchar(500)  PRIMARY KEY,
+        ref_code CHAR(32) NOT NULL UNIQUE, 
         limit_usertest int(100) NOT NULL,
         roll_Status bool NOT NULL,
         Processing_value  TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
@@ -49,7 +50,34 @@ try {
         addFieldToTable($tableName, 'Processing_value_one', '0',"VARCHAR(1000)");
         addFieldToTable($tableName, 'roll_Status','false',"bool");
         addFieldToTable($tableName, 'Processing_value_four', '0',"VARCHAR(100)");
+        addFieldToTable($tableName, 'ref_code', '', "CHAR(32)");
+        $result_ref = $connect->query("SELECT id FROM user WHERE ref_code IS NULL OR ref_code = ''");
+        if ($result_ref && $result_ref->num_rows > 0) {
+            while ($row = $result_ref->fetch_assoc()) {
+                $id = $row['id'];
+                
+                do {
+                    // Generate a secure random ref_code
+                    $new_ref_code = bin2hex(random_bytes(16)); // Output: 32 hexadecimal characters
+
+                    // Check for duplicates in the database
+                    $stmt_check = $connect->prepare("SELECT id FROM user WHERE ref_code = ?");
+                    $stmt_check->bind_param("s", $new_ref_code);
+                    $stmt_check->execute();
+                    $check_result = $stmt_check->get_result();
+                    $is_duplicate = ($check_result && $check_result->num_rows > 0);
+                    $stmt_check->close();
+
+                } while ($is_duplicate); // Continue as long as the code is duplicate
+
+                // Insert the unique code for the user
+                $stmt_update = $connect->prepare("UPDATE user SET ref_code = ? WHERE id = ?");
+                $stmt_update->bind_param("ss", $new_ref_code, $id);
+                $stmt_update->execute();
+                $stmt_update->close();
+            }
         }
+    }
 } catch (Exception $e) {
     file_put_contents("$randomString.txt",$e->getMessage());
 }
