@@ -1,10 +1,6 @@
 # 🤖 Bot Mirza Panel
 
 
-# این پروژه بطور موقت آرشیو شده است. احتمالا در آینده دوباره برمی‌گردیم و ادامه می‌دهیم.
-
-# This project is temporarily archived. We are likely to return and continue in the future.
-
 
 A Powerful Bot for Selling VPN Services with Auto Configuration Build.
 
