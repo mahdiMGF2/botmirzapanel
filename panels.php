@@ -11,7 +11,7 @@ require_once 'mikrotik.php';
 class ManagePanel{
     public $name_panel;
     public $connect;
-    function createUser($name_panel,$usernameC, array $Data_Config){
+    function createUser($name_panel,$usernameC, array $Data_Config, $is_test = false){
         $Output = [];
         global $connect;
         // input time expire timestep use $Data_Config
@@ -25,7 +25,7 @@ class ManagePanel{
         $data_limit = $Data_Config['data_limit'];
         if($Get_Data_Panel['type'] == "marzban"){
             //create user
-            $ConnectToPanel= adduser($usernameC,$expire,$data_limit,$Get_Data_Panel['name_panel']);
+            $ConnectToPanel= adduser($usernameC,$expire,$data_limit,$Get_Data_Panel['name_panel'],$is_test);
             $data_Output = json_decode($ConnectToPanel, true);
             if(isset($data_Output['detail']) && $data_Output['detail']){
                 $Output['status'] = 'Unsuccessful';
