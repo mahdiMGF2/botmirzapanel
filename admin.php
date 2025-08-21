@@ -125,12 +125,8 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['bot_statistics']) {
     $stmt->execute();
     $dayListSell = $stmt->rowCount();
     $count_usertest = select("invoice","*","name_product","usertest","count");
-
-    $ping_start = microtime(true);
-    telegram('getMe');
-    $ping_end = microtime(true);
-    $ping = (round(($ping_end - $ping_start) * 1000) * 2) + round(($ping_end - $process_start) * 1000);
-    
+    $ping = sys_getloadavg();
+    $ping = number_format(floatval($ping[0]),2);
     $timeacc = jdate('H:i:s', time());
     $statisticsall = sprintf($textbotlang['Admin']['Statistics']['info'],$statistics,$Balanceall['SUM(Balance)'],$ping,$count_usertest,$invoice ,$invoicesum,$dayListSell,$sumpanel);
     sendmessage($from_id, $statisticsall, null, 'HTML');

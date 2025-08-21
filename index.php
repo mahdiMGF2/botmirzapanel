@@ -1,6 +1,5 @@
 <?php
 
-$process_start = microtime(true);
 if (function_exists('fastcgi_finish_request')) {
     fastcgi_finish_request();
 } elseif (function_exists('litespeed_finish_request')) {
@@ -10,7 +9,7 @@ if (function_exists('fastcgi_finish_request')) {
 }
 
 ini_set('error_log', 'error_log');
-$version = "5.1.3";
+$version = "5.1.5";
 date_default_timezone_set('Asia/Tehran');
 require_once 'config.php';
 require_once 'botapi.php';
@@ -862,7 +861,7 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
         'parse_mode' => "HTML",
     ]);
     if ($marzban_list_get['type'] == "wgdashboard") {
-        $urlimage = "{$marzban_list_get['inboundid']}{$randomString}.conf";
+        $urlimage = "{$marzban_list_get['inboundid']}_{$nameloc['username']}.conf";
         file_put_contents($urlimage, $DataUserOut['subscription_url']);
         sendDocument($from_id, $urlimage, $textbotlang['users']['buy']['configwg']);
         unlink($urlimage);
@@ -1490,7 +1489,7 @@ if ($user['step'] == "createusertest" || preg_match('/locationtests_(.*)/', $dat
             'parse_mode' => "HTML",
         ]);
         if ($marzban_list_get['type'] == "wgdashboard") {
-            $urlimage = "{$marzban_list_get['inboundid']}_{$randomString}.conf";
+            $urlimage = "{$marzban_list_get['inboundid']}_{$dataoutput['username']}.conf";
             file_put_contents($urlimage, $output_config_link);
             sendDocument($from_id, $urlimage, $textbotlang['users']['buy']['configwg']);
             unlink($urlimage);
@@ -1866,7 +1865,7 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
             'parse_mode' => "HTML",
         ]);
         if ($marzban_list_get['type'] == "wgdashboard") {
-            $urlimage = "{$marzban_list_get['inboundid']}{$randomString}.conf";
+            $urlimage = "{$marzban_list_get['inboundid']}_{$dataoutput['username']}.conf";
             file_put_contents($urlimage, $output_config_link);
             sendDocument($from_id, $urlimage, $textbotlang['users']['buy']['configwg']);
             unlink($urlimage);
