@@ -9,7 +9,7 @@ if (function_exists('fastcgi_finish_request')) {
 }
 
 ini_set('error_log', 'error_log');
-$version = "5.1.5";
+$version = "5.1.6";
 date_default_timezone_set('Asia/Tehran');
 require_once 'config.php';
 require_once 'botapi.php';
@@ -2337,14 +2337,23 @@ if ($text == $textbotlang['users']['affiliates']['btn']) {
         return;
     }
     $affiliates = select("affiliates", "*", null, null, "select");
-    $my_code = $user['ref_code'];                        // <- brand-new field
-    $textaffiliates = "{$affiliates['description']}\n\n🔗 https://t.me/$usernamebot?start=$my_code";
-    telegram('sendphoto', [
-        'chat_id' => $from_id,
-        'photo' => $affiliates['id_media'],
-        'caption' => $textaffiliates,
-        'parse_mode' => "HTML",
-    ]);
+    $my_code = $user['ref_code'];
+    $textaffiliates = ($affiliates['description'] !== null && $affiliates['description'] !== '' && $affiliates['description'] !== 'none')
+        ? "{$affiliates['description']}\n\n🔗 https://t.me/$usernamebot?start=$my_code"
+        : "🔗 https://t.me/$usernamebot?start=$my_code";
+    
+    // Check if badge/image is set before sending photo
+    if (!empty($affiliates['id_media']) && $affiliates['id_media'] !== 'none') {
+        telegram('sendphoto', [
+            'chat_id' => $from_id,
+            'photo' => $affiliates['id_media'],
+            'caption' => $textaffiliates,
+            'parse_mode' => "HTML",
+        ]);
+    } else {
+        // Send as text message if no badge/image is available
+        sendmessage($from_id, $textaffiliates, null, 'HTML');
+    }
     $affiliatescommission = select("affiliates", "*", null, null, "select");
     if ($affiliatescommission['status_commission'] == "oncommission") {
         $affiliatespercentage = $affiliatescommission['affiliatespercentage'] . $textbotlang['users']['Percentage'];
