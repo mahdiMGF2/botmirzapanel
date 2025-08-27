@@ -436,11 +436,11 @@ $textbotlang['users']['Discount']['acceptdiscount']  = "کد هدیه با مو�
 $textbotlang['users']['moeny']['cart_to_Cart_btn'] = "💳 کارت به کارت";
 $textbotlang['users']['moeny']['nowpaymentbtn'] = "💵 پرداخت nowpayments";
 $textbotlang['users']['moeny']['currency_rial_gateway'] = "💎 ارزی ریالی";
-$textbotlang['users']['moeny']['mr_payment_gateway'] = "🔵 آقای پرداخت";
+$textbotlang['users']['moeny']['mr_payment_gateway'] = "🔵 تتراپی";
 $textbotlang['users']['moeny']['card_number_settings'] = "💳 تنظیم شماره کارت";
 $textbotlang['users']['moeny']['alsat_merchant_settings'] = "تنظیم مرچنت";
-$textbotlang['users']['moeny']['mr_payment_merchant_settings'] = "تنظیم مرچنت آقای پرداخت";
-$textbotlang['users']['moeny']['mr_payment_gateway_status'] = "وضعیت درگاه آقای پرداخت";
+$textbotlang['users']['moeny']['mr_payment_merchant_settings'] = "تنظیم مرچنت تتراپی";
+$textbotlang['users']['moeny']['mr_payment_gateway_status'] = "وضعیت درگاه تتراپی";
 $textbotlang['users']['moeny']['nowpayment_api'] = "🧩 api nowpayment";
 $textbotlang['users']['moeny']['nowpayment_gateway_status'] = "nowpayments 🔌";
 $textbotlang['users']['moeny']['nowpayments_create_link_error'] = "⭕️ خطا در ساخت لینک پرداخت nowpayment
@@ -535,7 +535,7 @@ $textbotlang['users']['moeny']['sendcart'] = "💳 شماره کارت خود ر
 $textbotlang['users']['moeny']['getapinowpayment'] = "⚙️ api سایت nowpayments.io را ارسال نمایید
     
 api nowpayment :%s";
-$textbotlang['users']['moeny']['getmarchent'] = "💳 مرچنت کد خود را ازآقای پرداخت دریافت و در این قسمت وارد کنید
+$textbotlang['users']['moeny']['getmarchent'] = "💳 مرچنت کد خود را ازتتراپی دریافت و در این قسمت وارد کنید
     
 مرچنت کد فعلی شما :%s";
 $textbotlang['users']['moeny']['invalidprice'] = "مبلغ ارسال شده نامعتبر است";
@@ -1315,7 +1315,7 @@ $textbotlang['Admin']['Report']['aqayepardakht'] = "💵 پرداخت جدید
         
 آیدی عددی کاربر : %s
 مبلغ تراکنش %s
-روش پرداخت :  درگاه آقای پرداخت";
+روش پرداخت :  درگاه تتراپی";
 $textbotlang['Admin']['Report']['nowpayment'] = "💵 پرداخت جدید
         
 آیدی عددی کاربر : %s
