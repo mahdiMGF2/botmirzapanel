@@ -17,14 +17,14 @@ if($checkprice !=$amount){
     return;
 }
 $data = [
-    'pin'    => $PaySetting,
-    'amount'    => $amount,
-    'callback' => $domainhosts."/payment/aqayepardakht/back.php",
-    'invoice_id' => $invoice_id,
+    'ApiKey'    => $PaySetting,
+    'Amount'    => $amount *10,
+    'CallbackURL' => "https://".$domainhosts."/payment/aqayepardakht/back.php",
+    'Hash_id' => $invoice_id,
 ];
 
 $data = json_encode($data);
-$ch = curl_init('https://panel.aqayepardakht.ir/api/v2/create');
+$ch = curl_init('https://tetra98.ir/api/create_order');
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLINFO_HEADER_OUT, true);
 curl_setopt($ch, CURLOPT_POST, true);
@@ -37,8 +37,8 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, array(
 $result = curl_exec($ch);
 curl_close($ch);
 $result = json_decode($result);
-if ($result->status == "success") {
-    header('Location: https://panel.aqayepardakht.ir/startpay/' . $result->transid);
+if ($result->status == "100") {
+    header('Location: https://tetra98.ir/pay/' . $result->Authority);
 } else {
     $status_pay = [
         '-1' => "amount نمی تواند خالی باشد",
@@ -59,4 +59,3 @@ if ($result->status == "success") {
     ][$result->code];
     echo $status_pay;
 }
-
