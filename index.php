@@ -1666,6 +1666,11 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
         $prodcut = $dataget[1];
     }
     $panellist = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
+    if ($panellist == false) {
+        sendmessage($from_id, $textbotlang['users']['category']['error'], $keyboard, 'html');
+        step("home", $from_id);
+        return;
+    }
     if ($panellist['MethodUsername'] == $textbotlang['users']['customusername']) {
         if (!preg_match('~(?!_)^[a-z][a-z\d_]{2,32}(?<!_)$~i', $text)) {
             sendmessage($from_id, $textbotlang['users']['invalidusername'], $backuser, 'HTML');
@@ -1687,6 +1692,11 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
     $stmt->bindValue(':loc1', $user['Processing_value']);
     $stmt->execute();
     $info_product = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($info_product == false) {
+        sendmessage($from_id, $textbotlang['users']['stateus']['error2'], $keyboard, 'HTML');
+        step("home", $from_id);
+        return;
+    }
     $randomString = bin2hex(random_bytes(2));
     $panellist = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
     $username_ac = strtolower(generateUsername($from_id, $panellist['MethodUsername'], $username, $randomString, $text));
@@ -1923,6 +1933,16 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
     $SellDiscountlimit = select("DiscountSell", "*", "codeDiscount", $text, "select");
     if ($SellDiscountlimit == false) {
         sendmessage($from_id, $textbotlang['Admin']['Discount']['invalidcodedis'], null, 'HTML');
+        return;
+    }
+    $stmt = $pdo->prepare("SELECT * FROM product WHERE code_product = :code AND (location = :loc1 OR location = '/all') LIMIT 1");
+    $stmt->bindValue(':code', $user['Processing_value_one']);
+    $stmt->bindValue(':loc1', $user['Processing_value']);
+    $stmt->execute();
+    $info_product = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($info_product == false) {
+        sendmessage($from_id, $textbotlang['users']['stateus']['error2'], $keyboard, 'HTML');
+        step('home', $from_id);
         return;
     }
     if ($SellDiscountlimit['limitDiscount'] == $SellDiscountlimit['usedDiscount']) {
