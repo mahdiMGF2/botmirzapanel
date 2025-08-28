@@ -26,13 +26,15 @@ use Endroid\QrCode\ErrorCorrectionLevel;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\RoundBlockSizeMode;
 use Endroid\QrCode\Writer\PngWriter;
-if(is_dir('installer')){
+if (is_dir('installer')) {
     deleteFolder('installer');
 }
 $first_name = sanitizeUserName($first_name);
-if (!in_array($Chat_type, ["private"])) return;
+if (!in_array($Chat_type, ["private"]))
+    return;
 #-----------telegram_ip_ranges------------#
-if (!checktelegramip()) die("Unauthorized access");
+if (!checktelegramip())
+    die("Unauthorized access");
 #-------------Variable----------#
 $users_ids = select("user", "id", null, null, "FETCH_COLUMN");
 $setting = select("setting", "*");
@@ -97,7 +99,8 @@ if ($user == false) {
 if (($setting['status_verify'] == "1" && intval($user['verify']) == 0) && !in_array($from_id, $admin_ids)) {
     sendmessage($from_id, $textbotlang['users']['VerifyUser'], null, 'html');
     return;
-};
+}
+;
 $channels = array();
 $helpdata = select("help", "*");
 $datatextbotget = select("textbot", "*", null, null, "fetchAll");
@@ -142,13 +145,13 @@ foreach ($datatxtbot as $item) {
     }
 }
 if (function_exists('shell_exec') && is_callable('shell_exec')) {
-$existingCronCommands = shell_exec('crontab -l');
-$phpFilePath = "https://$domainhosts/cron/sendmessage.php";
-$cronCommand = "*/1 * * * * curl $phpFilePath";
-if (strpos($existingCronCommands, $cronCommand) === false) {
-    $command = "(crontab -l ; echo '$cronCommand') | crontab -";
-    shell_exec($command);
-}
+    $existingCronCommands = shell_exec('crontab -l');
+    $phpFilePath = "https://$domainhosts/cron/sendmessage.php";
+    $cronCommand = "*/1 * * * * curl $phpFilePath";
+    if (strpos($existingCronCommands, $cronCommand) === false) {
+        $command = "(crontab -l ; echo '$cronCommand') | crontab -";
+        shell_exec($command);
+    }
 }
 #---------channel--------------#
 if ($user['username'] == "none" || $user['username'] == null) {
@@ -175,12 +178,10 @@ if (strpos($text, "/start ") !== false) {
     if ($refRow !== false) {
         $affiliatesid = $refRow['id'];                 // modern link found
     }
-    /*  2️⃣  fall back to legacy numeric ID  */
-    elseif (ctype_digit($token)) {
-        $affiliatesid = (int)$token;                   // old link
+    /*  2️⃣  fall back to legacy numeric ID  */ elseif (ctype_digit($token)) {
+        $affiliatesid = (int) $token;                   // old link
     }
-    /*  3️⃣  invalid token → pretend there is no referrer       */
-    else {
+    /*  3️⃣  invalid token → pretend there is no referrer       */ else {
         $affiliatesid = 0;                             // will fail the in_array() test below
     }
     if (ctype_digit($affiliatesid)) {
@@ -194,7 +195,8 @@ if (strpos($text, "/start ") !== false) {
         }
         $inviterData = select("user", "affiliates", "id", $affiliatesid, "select");
         if ($inviterData && intval($inviterData['affiliates']) === intval($from_id)) {
-            sendmessage($from_id,
+            sendmessage(
+                $from_id,
                 $textbotlang['users']['affiliates']['invalidMutual'],
                 null,
                 'html'
@@ -286,7 +288,7 @@ if ($text == $textbotlang['users']['rulesaccept']) {
 }
 
 #-----------Bot_Status------------#
-if ($setting['Bot_Status'] == "0"  && !in_array($from_id, $admin_ids)) {
+if ($setting['Bot_Status'] == "0" && !in_array($from_id, $admin_ids)) {
     sendmessage($from_id, $datatextbot['text_bot_off'], null, 'html');
     return;
 }
@@ -770,36 +772,37 @@ if (preg_match('/product_(\w+)/', $datain, $dataget)) {
         $textinfo = sprintf($textbotlang['users']['stateus']['InfoSerivceDisable'], $status_var, $DataUserOut['username'], $nameloc['Service_location'], $nameloc['id_invoice'], $LastTraffic, $usedTrafficGb, $expirationDate, $day);
     } else {
         $keyboarddate = array(
-            'linksub'=>array(
+            'linksub' => array(
                 'text' => $textbotlang['users']['stateus']['linksub'],
                 'callback_data' => "subscriptionurl_"
             ),
-            'config'=>array(
+            'config' => array(
                 'text' => $textbotlang['users']['stateus']['config'],
                 'callback_data' => "config_"
             ),
-            'extend'=>array(
+            'extend' => array(
                 'text' => $textbotlang['users']['extend']['title'],
                 'callback_data' => "extend_"
             ),
-            'changelink'=>array(
+            'changelink' => array(
                 'text' => $textbotlang['users']['changelink']['btntitle'],
                 'callback_data' => "changelink_"
             ),
-            'removeservice'=>array(
+            'removeservice' => array(
                 'text' => $textbotlang['users']['removeconfig']['btnremoveuser'],
                 'callback_data' => "removeserviceuserco-"
             )
-            ,'Extra_volume'=>array(
+            ,
+            'Extra_volume' => array(
                 'text' => $textbotlang['users']['Extra_volume']['sellextra'],
                 'callback_data' => "Extra_volume_"
             ),
         );
-        if ($marzban_list_get['type'] == "wgdashboard"){
+        if ($marzban_list_get['type'] == "wgdashboard") {
             unset($keyboarddate['config']);
             unset($keyboarddate['changelink']);
         }
-        if($marzban_list_get['type'] == "mikrotik"){
+        if ($marzban_list_get['type'] == "mikrotik") {
             unset($keyboarddate['Extra_volume']);
             unset($keyboarddate['linksub']);
             unset($keyboarddate['config']);
@@ -807,13 +810,13 @@ if (preg_match('/product_(\w+)/', $datain, $dataget)) {
             unset($keyboarddate['changelink']);
             unset($keyboarddate['Extra_volume']);
         }
-        if($nameloc['name_product'] == "usertest"){
+        if ($nameloc['name_product'] == "usertest") {
             unset($keyboarddate['removeservice']);
         }
         $tempArray = [];
         $keyboardsetting = ['inline_keyboard' => []];
-        foreach ($keyboarddate as $keyboardtext){
-            $tempArray[] = ['text' => $keyboardtext['text'] ,'callback_data' => $keyboardtext['callback_data'].$username];
+        foreach ($keyboarddate as $keyboardtext) {
+            $tempArray[] = ['text' => $keyboardtext['text'], 'callback_data' => $keyboardtext['callback_data'] . $username];
             if (count($tempArray) == 2) {
                 $keyboardsetting['inline_keyboard'][] = $tempArray;
                 $tempArray = [];
@@ -824,10 +827,10 @@ if (preg_match('/product_(\w+)/', $datain, $dataget)) {
         }
         $keyboardsetting['inline_keyboard'][] = [['text' => $textbotlang['users']['stateus']['backlist'], 'callback_data' => 'backorder']];
         $keyboardsetting = json_encode($keyboardsetting);
-        if($marzban_list_get['type'] == "mikrotik"){
-         $textinfo = sprintf($textbotlang['users']['stateus']['InfoSerivceActive_mikrotik'], $status_var, $DataUserOut['username'], $DataUserOut['subscription_url'],$nameloc['Service_location'], $nameloc['id_invoice'], $LastTraffic, $usedTrafficGb, $expirationDate, $day);  
-        }else{
-        $textinfo = sprintf($textbotlang['users']['stateus']['InfoSerivceActive'], $status_var, $DataUserOut['username'], $nameloc['Service_location'], $nameloc['id_invoice'], $lastonline, $LastTraffic, $usedTrafficGb, $expirationDate, $day);
+        if ($marzban_list_get['type'] == "mikrotik") {
+            $textinfo = sprintf($textbotlang['users']['stateus']['InfoSerivceActive_mikrotik'], $status_var, $DataUserOut['username'], $DataUserOut['subscription_url'], $nameloc['Service_location'], $nameloc['id_invoice'], $LastTraffic, $usedTrafficGb, $expirationDate, $day);
+        } else {
+            $textinfo = sprintf($textbotlang['users']['stateus']['InfoSerivceActive'], $status_var, $DataUserOut['username'], $nameloc['Service_location'], $nameloc['id_invoice'], $lastonline, $LastTraffic, $usedTrafficGb, $expirationDate, $day);
         }
     }
     Editmessagetext($from_id, $message_id, $textinfo, $keyboardsetting);
@@ -947,12 +950,12 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
     $codeproduct = $dataget[1];
     deletemessage($from_id, $message_id);
     $nameloc = select("invoice", "*", "username", $user['Processing_value'], "select");
-    if($nameloc == false){
+    if ($nameloc == false) {
         sendmessage($from_id, $textbotlang['users']['extend']['error2'], null, 'HTML');
         return;
     }
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'], "select");
-    if($marzban_list_get == false){
+    if ($marzban_list_get == false) {
         sendmessage($from_id, $textbotlang['users']['extend']['error2'], null, 'HTML');
         return;
     }
@@ -961,7 +964,7 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
     $stmt->bindValue(':code_product', $codeproduct);
     $stmt->execute();
     $product = $stmt->fetch(PDO::FETCH_ASSOC);
-    if($product == false){
+    if ($product == false) {
         sendmessage($from_id, $textbotlang['users']['extend']['error2'], null, 'HTML');
         return;
     }
@@ -1150,7 +1153,7 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
         sendmessage($from_id, $textbotlang['users']['Extra_volume']['invalidprice'], $backuser, 'HTML');
         return;
     }
-    $priceextra =  $text;
+    $priceextra = $text;
     $keyboardsetting = json_encode([
         'inline_keyboard' => [
             [
@@ -1158,24 +1161,24 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
             ]
         ]
     ]);
-    $priceextra = number_format($priceextra*$setting['Extra_volume']);
+    $priceextra = number_format($priceextra * $setting['Extra_volume']);
     $setting['Extra_volume'] = number_format($setting['Extra_volume']);
     $textextra = sprintf($textbotlang['users']['Extra_volume']['invoiceExtraVolume'], $setting['Extra_volume'], $priceextra, $text);
     sendmessage($from_id, $textextra, $keyboardsetting, 'HTML');
     step('home', $from_id);
 } elseif (preg_match('/confirmaextra_(\w+)/', $datain, $dataget)) {
     $volume = $dataget[1];
-    $price_extra = $setting['Extra_volume'] *$volume;
+    $price_extra = $setting['Extra_volume'] * $volume;
     Editmessagetext($from_id, $message_id, $text_callback, json_encode(['inline_keyboard' => []]));
     $nameloc = select("invoice", "*", "username", $user['Processing_value'], "select");
-    if($nameloc == false){
+    if ($nameloc == false) {
         sendmessage($from_id, $textbotlang['users']['stateus']['error'], null, 'html');
-        return;   
+        return;
     }
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'], "select");
-    if($marzban_list_get == false){
+    if ($marzban_list_get == false) {
         sendmessage($from_id, $textbotlang['users']['stateus']['error'], null, 'html');
-        return;   
+        return;
     }
     if ($user['Balance'] < $price_extra && intval($setting['Extra_volume']) != 0) {
         $Balance_prim = $price_extra - $user['Balance'];
@@ -1184,9 +1187,9 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
         step('get_step_payment', $from_id);
         return;
     }
-    if(intval($setting['Extra_volume']) != 0){
-    $Balance_Low_user = $user['Balance'] - $price_extra;
-    update("user", "Balance", $Balance_Low_user, "id", $from_id);
+    if (intval($setting['Extra_volume']) != 0) {
+        $Balance_Low_user = $user['Balance'] - $price_extra;
+        update("user", "Balance", $Balance_Low_user, "id", $from_id);
     }
     $DataUserOut = $ManagePanel->DataUser($marzban_list_get['name_panel'], $user['Processing_value']);
     $data_limit = $DataUserOut['data_limit'] + ($volume * pow(1024, 3));
@@ -1258,7 +1261,7 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
         ]
     ]);
     sendmessage($from_id, $textbotlang['users']['Extra_volume']['extraadded'], $keyboardextrafnished, 'HTML');
-    $volumes = $volume ;
+    $volumes = $volume;
     $price_extra = number_format($price_extra);
     $text_report = sprintf($textbotlang['Admin']['Report']['Extra_volume'], $from_id, $volumes, $price_extra);
     if (isset($setting['Channel_Report']) && strlen($setting['Channel_Report']) > 0) {
@@ -1449,10 +1452,10 @@ if ($user['step'] == "createusertest" || preg_match('/locationtests_(.*)/', $dat
         $output_config_link = $dataoutput['subscription_url'];
     }
     if ($marzban_list_get['configManual'] == "onconfig") {
-        if (is_array($dataoutput['configs'])){
-        foreach ($dataoutput['configs'] as $configs) {
-            $config .= "\n" . $configs;
-        }
+        if (is_array($dataoutput['configs'])) {
+            foreach ($dataoutput['configs'] as $configs) {
+                $config .= "\n" . $configs;
+            }
         }
         $text_config = $config;
     }
@@ -1465,8 +1468,8 @@ if ($user['step'] == "createusertest" || preg_match('/locationtests_(.*)/', $dat
     ]);
     if ($marzban_list_get['type'] == "wgdashboard") {
         $textcreatuser = sprintf($textbotlang['users']['buy']['createservicewg'], $username_ac, $marzban_list_get['name_panel'], $setting['time_usertest'], $setting['val_usertest']);
-    }elseif ($marzban_list_get['type'] == "mikrotik") {
-        $textcreatuser = sprintf($textbotlang['users']['buy']['createservice_mikrotik_test'], $username_ac,$dataoutput['subscription_url'], $marzban_list_get['name_panel'], $setting['time_usertest'], $setting['val_usertest']);
+    } elseif ($marzban_list_get['type'] == "mikrotik") {
+        $textcreatuser = sprintf($textbotlang['users']['buy']['createservice_mikrotik_test'], $username_ac, $dataoutput['subscription_url'], $marzban_list_get['name_panel'], $setting['time_usertest'], $setting['val_usertest']);
     } else {
         $textcreatuser = sprintf($textbotlang['users']['buy']['createservicetest'], $username_ac, $marzban_list_get['name_panel'], $setting['time_usertest'], $setting['val_usertest'], $output_config_link, $text_config);
     }
@@ -1708,14 +1711,14 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
     $stmt->bindValue(':loc1', $user['Processing_value']);
     $stmt->execute();
     $info_product = $stmt->fetch(PDO::FETCH_ASSOC);
-    if($info_product == false){
-     sendmessage($from_id, $textbotlang['users']['stateus']['error2'], $keyboard, 'HTML');
-     return;
+    if ($info_product == false) {
+        sendmessage($from_id, $textbotlang['users']['stateus']['error2'], $keyboard, 'HTML');
+        return;
     }
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
-    if($marzban_list_get == false){
-     sendmessage($from_id, $textbotlang['users']['stateus']['error2'], $keyboard, 'HTML');
-     return;
+    if ($marzban_list_get == false) {
+        sendmessage($from_id, $textbotlang['users']['stateus']['error2'], $keyboard, 'HTML');
+        return;
     }
     if ($marzban_list_get['linksubx'] == null and in_array($marzban_list_get['type'], ["x-ui_single", "alireza"])) {
         foreach ($admin_ids as $admin) {
@@ -1740,7 +1743,7 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
         sendmessage($from_id, $textbotlang['users']['sell']['None-credit'], $step_payment, 'HTML');
         step('get_step_payment', $from_id);
         $stmt = $connect->prepare("INSERT IGNORE INTO invoice(id_user, id_invoice, username,time_sell, Service_location, name_product, price_product, Volume, Service_time,Status) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?,?)");
-        $Status =  "unpaid";
+        $Status = "unpaid";
         $stmt->bind_param("ssssssssss", $from_id, $randomString, $username_ac, $date, $marzban_list_get['name_panel'], $info_product['name_product'], $info_product['price_product'], $info_product['Volume_constraint'], $info_product['Service_time'], $Status);
         $stmt->execute();
         $stmt->close();
@@ -1837,46 +1840,19 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
     ]);
     if ($marzban_list_get['type'] == "wgdashboard") {
         $textcreatuser = sprintf($textbotlang['users']['buy']['createservicewgbuy'], $username_ac, $info_product['name_product'], $marzban_list_get['name_panel'], $info_product['Service_time'], $info_product['Volume_constraint']);
-    }elseif ($marzban_list_get['type'] == "mikrotik") {
-        $textcreatuser = sprintf($textbotlang['users']['buy']['createservice_mikrotik_buy'], $username_ac,$dataoutput['subscription_url'], $info_product['name_product'], $marzban_list_get['name_panel'], $info_product['Service_time'], $info_product['Volume_constraint']);
+    } elseif ($marzban_list_get['type'] == "mikrotik") {
+        $textcreatuser = sprintf($textbotlang['users']['buy']['createservice_mikrotik_buy'], $username_ac, $dataoutput['subscription_url'], $info_product['name_product'], $marzban_list_get['name_panel'], $info_product['Service_time'], $info_product['Volume_constraint']);
     } else {
         $textcreatuser = sprintf($textbotlang['users']['buy']['createservice'], $username_ac, $info_product['name_product'], $marzban_list_get['name_panel'], $info_product['Service_time'], $info_product['Volume_constraint'], $text_config, $link_config);
     }
-    if($marzban_list_get['type'] == "mikrotik"){
+    if ($marzban_list_get['type'] == "mikrotik") {
         sendmessage($from_id, $textcreatuser, $Shoppinginfo, 'HTML');
         sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboard, 'HTML');
-    }else{
-    if ($marzban_list_get['sublink'] == "onsublink") {
-        $urlimage = "$from_id$randomString.png";
-        $writer = new PngWriter();
-        $qrCode = QrCode::create($output_config_link)
-            ->setEncoding(new Encoding('UTF-8'))
-            ->setErrorCorrectionLevel(ErrorCorrectionLevel::Low)
-            ->setSize(400)
-            ->setMargin(0)
-            ->setRoundBlockSizeMode(RoundBlockSizeMode::Margin);
-        $result = $writer->write($qrCode, null, null);
-        $result->saveToFile($urlimage);
-        telegram('sendphoto', [
-            'chat_id' => $from_id,
-            'photo' => new CURLFile($urlimage),
-            'reply_markup' => $Shoppinginfo,
-            'caption' => $textcreatuser,
-            'parse_mode' => "HTML",
-        ]);
-        if ($marzban_list_get['type'] == "wgdashboard") {
-            $urlimage = "{$marzban_list_get['inboundid']}_{$dataoutput['username']}.conf";
-            file_put_contents($urlimage, $output_config_link);
-            sendDocument($from_id, $urlimage, $textbotlang['users']['buy']['configwg']);
-            unlink($urlimage);
-        }
-        sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboard, 'HTML');
-        unlink($urlimage);
-    } elseif ($marzban_list_get['config'] == "onconfig") {
-        if (count($dataoutput['configs']) == 1) {
+    } else {
+        if ($marzban_list_get['sublink'] == "onsublink") {
             $urlimage = "$from_id$randomString.png";
             $writer = new PngWriter();
-            $qrCode = QrCode::create($configqr)
+            $qrCode = QrCode::create($output_config_link)
                 ->setEncoding(new Encoding('UTF-8'))
                 ->setErrorCorrectionLevel(ErrorCorrectionLevel::Low)
                 ->setSize(400)
@@ -1891,14 +1867,41 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
                 'caption' => $textcreatuser,
                 'parse_mode' => "HTML",
             ]);
+            if ($marzban_list_get['type'] == "wgdashboard") {
+                $urlimage = "{$marzban_list_get['inboundid']}_{$dataoutput['username']}.conf";
+                file_put_contents($urlimage, $output_config_link);
+                sendDocument($from_id, $urlimage, $textbotlang['users']['buy']['configwg']);
+                unlink($urlimage);
+            }
+            sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboard, 'HTML');
             unlink($urlimage);
+        } elseif ($marzban_list_get['config'] == "onconfig") {
+            if (count($dataoutput['configs']) == 1) {
+                $urlimage = "$from_id$randomString.png";
+                $writer = new PngWriter();
+                $qrCode = QrCode::create($configqr)
+                    ->setEncoding(new Encoding('UTF-8'))
+                    ->setErrorCorrectionLevel(ErrorCorrectionLevel::Low)
+                    ->setSize(400)
+                    ->setMargin(0)
+                    ->setRoundBlockSizeMode(RoundBlockSizeMode::Margin);
+                $result = $writer->write($qrCode, null, null);
+                $result->saveToFile($urlimage);
+                telegram('sendphoto', [
+                    'chat_id' => $from_id,
+                    'photo' => new CURLFile($urlimage),
+                    'reply_markup' => $Shoppinginfo,
+                    'caption' => $textcreatuser,
+                    'parse_mode' => "HTML",
+                ]);
+                unlink($urlimage);
+            } else {
+                sendmessage($from_id, $textcreatuser, $Shoppinginfo, 'HTML');
+            }
         } else {
             sendmessage($from_id, $textcreatuser, $Shoppinginfo, 'HTML');
+            sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboard, 'HTML');
         }
-    } else {
-        sendmessage($from_id, $textcreatuser, $Shoppinginfo, 'HTML');
-        sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboard, 'HTML');
-    }
     }
     $Balance_prim = $user['Balance'] - $priceproduct;
     update("user", "Balance", $Balance_prim, "id", $from_id);
@@ -1922,7 +1925,6 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
         sendmessage($from_id, $textbotlang['Admin']['Discount']['invalidcodedis'], null, 'HTML');
         return;
     }
-    $SellDiscountlimit = select("DiscountSell", "*", "codeDiscount", $text, "select");
     if ($SellDiscountlimit['limitDiscount'] == $SellDiscountlimit['usedDiscount']) {
         sendmessage($from_id, $textbotlang['users']['Discount']['erorrlimit'], null, 'HTML');
         return;
@@ -1939,11 +1941,6 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
     }
     sendmessage($from_id, $textbotlang['users']['Discount']['correctcode'], $keyboard, 'HTML');
     step('payment', $from_id);
-    $stmt = $pdo->prepare("SELECT * FROM product WHERE code_product = :code AND (location = :loc1 OR location = '/all') LIMIT 1");
-    $stmt->bindValue(':code', $user['Processing_value_one']);
-    $stmt->bindValue(':loc1', $user['Processing_value']);
-    $stmt->execute();
-    $info_product = $stmt->fetch(PDO::FETCH_ASSOC);
     $result = ($SellDiscountlimit['price'] / 100) * $info_product['price_product'];
 
     $info_product['price_product'] = $info_product['price_product'] - $result;
@@ -1991,13 +1988,12 @@ if ($text == $datatextbot['text_Add_Balance'] || $text == "/wallet") {
         $Processing_value = number_format($user['Processing_value']);
         $textcart = sprintf($textbotlang['users']['moeny']['carttext'], $Processing_value, $PaySetting);
         preg_match_all('/\d+/', $PaySetting, $Matches);
-        if(!empty($Matches[0]) && intval($setting['copy_cart']) == 1) {
-            $peymentSettings['card_number'] = implode('', $Matches[0]); 
+        if (!empty($Matches[0]) && intval($setting['copy_cart']) == 1) {
+            $peymentSettings['card_number'] = implode('', $Matches[0]);
             $MESSAGE = $textcart;
-            $KEYBOARD = json_encode([ "inline_keyboard"=> [ [[ 'text' => $textbotlang['users']['moeny']['copy_card_number'], 'copy_text' => ['text'=> $peymentSettings['card_number']] ],[ 'text' => $textbotlang['users']['moeny']['copy_price'], 'copy_text' => ['text'=> $user['Processing_value']] ]], [[ 'text' => $textbotlang['users']['backhome'], 'callback_data' => 'backuser' ]] ]]);
+            $KEYBOARD = json_encode(["inline_keyboard" => [[['text' => $textbotlang['users']['moeny']['copy_card_number'], 'copy_text' => ['text' => $peymentSettings['card_number']]], ['text' => $textbotlang['users']['moeny']['copy_price'], 'copy_text' => ['text' => $user['Processing_value']]]], [['text' => $textbotlang['users']['backhome'], 'callback_data' => 'backuser']]]]);
             Editmessagetext($from_id, $message_id, $MESSAGE, $KEYBOARD);
-        }
-        else {
+        } else {
             deletemessage($from_id, $message_id);
             sendmessage($from_id, $textcart, $backuser, 'HTML');
         }
@@ -2055,7 +2051,7 @@ if ($text == $datatextbot['text_Add_Balance'] || $text == "/wallet") {
             sendmessage($from_id, $textbotlang['users']['Balance']['errorLinkPayment'], $keyboard, 'HTML');
             step('home', $from_id);
             if (strlen($setting['Channel_Report']) > 0) {
-                sendmessage($setting['Channel_Report'], sprintf($textbotlang['users']['moeny']['nowpayments_create_link_error'],$text_error,$from_id,$username), null, 'HTML');
+                sendmessage($setting['Channel_Report'], sprintf($textbotlang['users']['moeny']['nowpayments_create_link_error'], $text_error, $from_id, $username), null, 'HTML');
             }
             return;
         }
@@ -2341,7 +2337,7 @@ if ($text == $textbotlang['users']['affiliates']['btn']) {
     $textaffiliates = ($affiliates['description'] !== null && $affiliates['description'] !== '' && $affiliates['description'] !== 'none')
         ? "{$affiliates['description']}\n\n🔗 https://t.me/$usernamebot?start=$my_code"
         : "🔗 https://t.me/$usernamebot?start=$my_code";
-    
+
     // Check if badge/image is set before sending photo
     if (!empty($affiliates['id_media']) && $affiliates['id_media'] !== 'none') {
         telegram('sendphoto', [
