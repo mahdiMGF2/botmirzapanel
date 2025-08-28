@@ -2,16 +2,7 @@
 
 #----------------[  admin section  ]------------------#
 $textadmin = ["panel", "/panel",$textbotlang['Admin']['commendadminmanagment'], $textbotlang['Admin']['commendadmin']];
-if (!in_array($from_id, $admin_ids)) {
-    if (in_array($text, $textadmin)) {
-        sendmessage($from_id, $textbotlang['users']['Invalid-comment'], null, 'HTML');
-        foreach ($admin_ids as $admin) {
-            $textadmin = sprintf($textbotlang['Admin']['Unauthorized-entry'],$username,$from_id,$first_name);
-            sendmessage($admin, $textadmin, null, 'HTML');
-        }
-    }
-    return;
-}
+if (!in_array($from_id, $admin_ids))return;
 if (in_array($text, $textadmin) || $datain == "PANEL") {
     if(!(function_exists('shell_exec') && is_callable('shell_exec'))){
         $cronCommandsendmessage = "*/1 * * * * curl https://$domainhosts/cron/sendmessage.php";

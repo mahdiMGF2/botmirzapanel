@@ -658,10 +658,6 @@ $textbotlang['users']['cron']['sendedmessage'] = "📌 پیام برای تما�
 #--------------[ admin ]--------------#
 $textbotlang['Admin']['commendadmin'] = "ادمین";
 $textbotlang['Admin']['commendadminmanagment'] = "پنل مدیریت";
-$textbotlang['Admin']['Unauthorized-entry'] = "مدیر عزیز یک کاربر قصد ورود به پنل ادمین را داشت 
-نام کاربری : @%s
-آیدی عددی : %s
-نام کاربر  :%s";
 $textbotlang['Admin']['login-admin'] = "
 سلام 😍
 ⭕️ نسخه فعلی ربات شما : %s
