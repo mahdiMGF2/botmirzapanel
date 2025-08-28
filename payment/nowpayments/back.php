@@ -1,9 +1,6 @@
 <?php
-$rootPath = filter_input(INPUT_SERVER, 'DOCUMENT_ROOT', FILTER_SANITIZE_STRING);
-$PHP_SELF = filter_input(INPUT_SERVER, 'PHP_SELF', FILTER_SANITIZE_STRING);
-$Pathfile = dirname(dirname($PHP_SELF, 2));
 ini_set('error_log', 'error_log');
-$Pathfiles = $rootPath.$Pathfile;
+$Pathfiles = dirname(dirname(__DIR__ ));
 require_once $Pathfiles.'/config.php';
 require_once $Pathfiles.'/functions.php';
 require_once $Pathfiles.'/jdf.php';
