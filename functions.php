@@ -199,12 +199,10 @@ function DirectPayment($order_id){
     $Balance_id = select("user", "*", "id", $Payment_report['id_user'],"select");
     $steppay = explode("|", $Payment_report['invoice']);
     if ($steppay[0] == "getconfigafterpay") {
-        $stmt = $pdo->prepare("SELECT * FROM invoice WHERE username = '{$steppay[1]}' AND Status = 'unpaid' LIMIT 1");
+        $stmt = $pdo->prepare("SELECT * FROM invoice WHERE username = :username AND Status = 'unpaid' LIMIT 1");
+        $stmt->bindParam(':username', $steppay[1], PDO::PARAM_STR);
         $stmt->execute();
         $get_invoice = $stmt->fetch(PDO::FETCH_ASSOC);
-        $stmt = $pdo->prepare("SELECT * FROM product WHERE name_product = '{$get_invoice['name_product']}' AND (Location = '{$get_invoice['Service_location']}'  or Location = '/all')");
-        $stmt->execute();
-        $info_product = $stmt->fetch(PDO::FETCH_ASSOC);
         $username_ac = $get_invoice['username'];
         $randomString = bin2hex(random_bytes(2));
         $marzban_list_get = select("marzban_panel", "*", "name_panel", $get_invoice['Service_location'],"select");
@@ -242,6 +240,7 @@ function DirectPayment($order_id){
         if ($marzban_list_get['sublink'] == "onsublink") {
             $output_config_link = $dataoutput['subscription_url'];
         }
+        $configqr = "";
         if ($marzban_list_get['configManual'] == "onconfig") {
             if(isset($dataoutput['configs']) and count($dataoutput['configs']) !=0){
                 foreach ($dataoutput['configs'] as $configs) {

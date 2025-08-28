@@ -56,7 +56,7 @@ class ManagePanel{
                     $data_Output['subscription_url'] = $Get_Data_Panel['url_panel'] . "/" . ltrim($data_Output['subscription_url'], "/");
                 }
                 $links_user = outputlink($data_Output['subscription_url']);
-                if(isBase64($string)){
+                if(isBase64($links_user)){
                     $links_user = base64_decode($links_user);
                 }
                 $links_user = explode("\n",trim($links_user));
@@ -219,7 +219,7 @@ class ManagePanel{
                     $UsernameData['status'] = "limtied";
                 }
                 $links_user = outputlink($UsernameData['subscription_url']);
-                if(isBase64($string)){
+                if(isBase64($links_user)){
                     $links_user = base64_decode($links_user);
                 }
                 $links_user = explode("\n",trim($links_user));
