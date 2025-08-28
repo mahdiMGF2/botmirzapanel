@@ -1,7 +1,7 @@
 <?php
 ini_set('error_log', 'error_log');
 require_once 'config.php';
-require_once 'apipanel.php';
+require_once 'marzban.php';
 require_once 'x-ui_single.php';
 require_once 'marzneshin.php';
 require_once 'alireza_single.php';

@@ -13,7 +13,6 @@ $version = "5.1.7";
 date_default_timezone_set('Asia/Tehran');
 require_once 'config.php';
 require_once 'botapi.php';
-require_once 'apipanel.php';
 require_once 'jdf.php';
 require_once 'text.php';
 require_once 'keyboard.php';
