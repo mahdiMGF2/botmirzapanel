@@ -1463,11 +1463,9 @@ if ($text == $textbotlang['Admin']['Balance']['SendBalanceAll']) {
         return;
     }
     sendmessage($from_id, $textbotlang['Admin']['Balance']['AddBalanceUsers'], $User_Services, 'HTML');
-    $Balance_user = select("user", "*", null, null, "fetchAll");
-    foreach ($Balance_user as $balance) {
-        $Balance_add_user = $balance['Balance'] + $text;
-        update("user", "Balance", $Balance_add_user, "id", $balance['id']);
-    }
+    $stmt = $pdo->prepare("UPDATE user SET Balance = Balance + :balance");
+    $stmt->bindParam(':balance', $text, PDO::PARAM_INT);
+    $stmt->execute();
     step('home', $from_id);
 }
 if ($text == $textbotlang['Admin']['Discountsell']['create']) {
