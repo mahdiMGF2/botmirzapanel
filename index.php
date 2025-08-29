@@ -922,11 +922,19 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
 } elseif (preg_match('/serviceextendselect_(\w+)/', $datain, $dataget)) {
     $codeproduct = $dataget[1];
     $nameloc = select("invoice", "*", "username", $user['Processing_value'], "select");
+    if( $nameloc == false) {
+        sendmessage($from_id, $textbotlang['users']['extend']['error2'], null, 'HTML');
+        return;
+    }
     $stmt = $pdo->prepare("SELECT * FROM product WHERE (Location = :Location OR location = '/all') AND code_product = :code_product LIMIT 1");
     $stmt->bindValue(':Location', $nameloc['Service_location']);
     $stmt->bindValue(':code_product', $codeproduct);
     $stmt->execute();
     $product = $stmt->fetch(PDO::FETCH_ASSOC);
+    if($product == false) {
+        sendmessage($from_id, $textbotlang['users']['extend']['error2'], null, 'HTML');
+        return;
+    }
     update("invoice", "name_product", $product['name_product'], "username", $user['Processing_value']);
     update("invoice", "Service_time", $product['Service_time'], "username", $user['Processing_value']);
     update("invoice", "Volume", $product['Volume_constraint'], "username", $user['Processing_value']);
