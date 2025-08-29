@@ -850,6 +850,13 @@ $textbotlang['Admin']['managepanel']['setedinbound'] = "✅ اینباند و پ
 $textbotlang['Admin']['managepanel']['notoffsublink'] = "ابتدا لینک اشتراک را خاموش کنید";
 $textbotlang['Admin']['managepanel']['subinvalidDomain'] = "لینک ساب فعال نمی باشد";
 $textbotlang['Admin']['managepanel']['subinvalid'] = "لینک ساب معتبر نمی باشد";
+$textbotlang['Admin']['managepanel']['type']['marzban'] = "مرزبان";
+$textbotlang['Admin']['managepanel']['type']['marzneshin'] = "مرزنشین";
+$textbotlang['Admin']['managepanel']['type']['s-ui'] = "s-ui";
+$textbotlang['Admin']['managepanel']['type']['wgdashboard'] = "wgdashboard";
+$textbotlang['Admin']['managepanel']['type']['mikrotik'] = "میکروتیک";
+$textbotlang['Admin']['managepanel']['type']['3x-ui'] = "سنایی";
+$textbotlang['Admin']['managepanel']['type']['alireza'] = "علیرضا";
 
 
 
