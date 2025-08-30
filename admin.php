@@ -1787,8 +1787,8 @@ if ($text == $textbotlang['Admin']['keyboardadmin']['settingscron']) {
 }
 if ($text == $textbotlang['Admin']['cron']['test']['active']) {
     sendmessage($from_id, $textbotlang['Admin']['cron']['test']['dec'], null, 'HTML');
-    $phpFilePath = "https://$domainhosts/cron/configtest.php";
-    $cronCommand = escapeshellarg("*/15 * * * * curl $phpFilePath");
+    $phpFilePath = escapeshellarg("https://$domainhosts/cron/configtest.php");
+    $cronCommand = "*/15 * * * * curl $phpFilePath";
     $existingCronCommands = shell_exec('crontab -l');
     if (strpos($existingCronCommands, $cronCommand) === false) {
         $command = "(crontab -l ; echo '$cronCommand') | crontab -";
@@ -1798,7 +1798,8 @@ if ($text == $textbotlang['Admin']['cron']['test']['active']) {
 if ($text == $textbotlang['Admin']['cron']['test']['disable']) {
     sendmessage($from_id, $textbotlang['Admin']['cron']['test']['disabled'], null, 'HTML');
     $currentCronJobs = shell_exec("crontab -l");
-    $jobToRemove = escapeshellarg("*/15 * * * * curl https://$domainhosts/cron/configtest.php");
+    $url = escapeshellarg("https://$domainhosts/cron/configtest.php");
+    $jobToRemove = "*/15 * * * * curl $url";
     $newCronJobs = preg_replace('/' . preg_quote($jobToRemove, '/') . '/', '', $currentCronJobs);
     file_put_contents('/tmp/crontab.txt', $newCronJobs);
     shell_exec('crontab /tmp/crontab.txt');
@@ -1806,11 +1807,11 @@ if ($text == $textbotlang['Admin']['cron']['test']['disable']) {
 }
 if ($text == $textbotlang['Admin']['cron']['volume']['active']) {
     sendmessage($from_id, $textbotlang['Admin']['cron']['volume']['dec'], null, 'HTML');
-    $phpFilePath = "https://$domainhosts/cron/cronvolume.php";
+    $phpFilePath = escapeshellarg("https://$domainhosts/cron/cronvolume.php");
     $cronCommand = "*/1 * * * * curl $phpFilePath";
     $existingCronCommands = shell_exec('crontab -l');
     if (strpos($existingCronCommands, $cronCommand) === false) {
-        $command = escapeshellarg("(crontab -l ; echo '$cronCommand') | crontab -");
+        $command = "(crontab -l ; echo '$cronCommand') | crontab -";
         shell_exec($command);
     }
 }
@@ -1825,11 +1826,11 @@ if ($text == $textbotlang['Admin']['cron']['volume']['disable']) {
 }
 if ($text == $textbotlang['Admin']['cron']['time']['active']) {
     sendmessage($from_id, $textbotlang['Admin']['cron']['time']['dec'], null, 'HTML');
-    $phpFilePath = "https://$domainhosts/cron/cronday.php";
+    $phpFilePath = escapeshellarg("https://$domainhosts/cron/cronday.php");
     $cronCommand = "*/1 * * * * curl $phpFilePath";
     $existingCronCommands = shell_exec('crontab -l');
     if (strpos($existingCronCommands, $cronCommand) === false) {
-        $command = escapeshellarg("(crontab -l ; echo '$cronCommand') | crontab -");
+        $command = "(crontab -l ; echo '$cronCommand') | crontab -";
         shell_exec($command);
     }
 }
@@ -2230,10 +2231,11 @@ if ($text == $textbotlang['users']['stateus']['manageService']) {
                 unlink('/tmp/crontab.txt');
             } else {
                 $existingCronCommands = shell_exec('crontab -l');
-                $phpFilePath = "https://$domainhosts/cron/croncard.php";
+                $phpFilePath = escapeshellarg("https://$domainhosts/cron/croncard.php");
                 $cronCommand = "*/4 * * * * curl $phpFilePath";
                 if (strpos($existingCronCommands, $cronCommand) === false) {
-                    $command = escapeshellarg("(crontab -l ; echo '$cronCommand') | crontab -");
+                    $command = "(crontab -l;  echo '$cronCommand') | crontab -";
+                    error_log($command);
                     shell_exec($command);
                 }
             }
