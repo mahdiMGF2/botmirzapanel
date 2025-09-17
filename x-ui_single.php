@@ -52,13 +52,12 @@ function login($code_panel,$verify = true){
 
 
 function get_Client($username,$namepanel){
-    global $connect;
-    $marzban_list_get = select("marzban_panel", "*", "name_panel", $namepanel,"select");
-    login($marzban_list_get['id']);
+    $panel = select("marzban_panel", "*", "name_panel", $namepanel,"select");
+    login($panel['id']);
     $curl = curl_init();
 
 curl_setopt_array($curl, array(
-  CURLOPT_URL => $marzban_list_get['url_panel'].'/panel/api/inbounds/getClientTraffics/'.$username,
+  CURLOPT_URL => $panel['url_panel'].'/panel/api/inbounds/getClientTraffics/'.$username,
   CURLOPT_RETURNTRANSFER => true,
   CURLOPT_ENCODING => '',
   CURLOPT_MAXREDIRS => 10,
@@ -78,13 +77,12 @@ return $response;
 unlink('cookie.txt');
 }
 function get_clinets($username,$namepanel){
-    global $connect;
-    $marzban_list_get = select("marzban_panel", "*", "name_panel", $namepanel,"select");
-    $login =login($marzban_list_get['id']);
+    $panel = select("marzban_panel", "*", "name_panel", $namepanel,"select");
+    $login =login($panel['id']);
     $curl = curl_init();
 
 curl_setopt_array($curl, array(
-  CURLOPT_URL => $marzban_list_get['url_panel'].'/panel/api/inbounds/list',
+  CURLOPT_URL => $panel['url_panel'].'/panel/api/inbounds/list',
   CURLOPT_RETURNTRANSFER => true,
   CURLOPT_ENCODING => '',
   CURLOPT_MAXREDIRS => 10,
@@ -115,16 +113,15 @@ unlink('cookie.txt');
 return $output;
 }
 function addClient($namepanel, $usernameac, $Expire,$Total, $Uuid,$Flow,$subid){
-    global $connect;
-    $marzban_list_get = select("marzban_panel", "*", "name_panel", $namepanel,"select");
+    $panel = select("marzban_panel", "*", "name_panel", $namepanel,"select");
     $Allowedusername = get_Client($usernameac,$namepanel);
     if (isset($Allowedusername['email'])) {
         $random_number = rand(1000000, 9999999);
         $username_ac = $usernameac . $random_number;
     }
-    login($marzban_list_get['id']);
+    login($panel['id']);
     $config = array(
-        "id" => intval($marzban_list_get['inboundid']),
+        "id" => intval($panel['inboundid']),
         'settings' => json_encode(array(
             'clients' => array(
                 array(
@@ -147,7 +144,7 @@ function addClient($namepanel, $usernameac, $Expire,$Total, $Uuid,$Flow,$subid){
 
     $curl = curl_init();
     curl_setopt_array($curl, array(
-        CURLOPT_URL => $marzban_list_get['url_panel'].'/panel/api/inbounds/addClient',
+        CURLOPT_URL => $panel['url_panel'].'/panel/api/inbounds/addClient',
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_ENCODING => '',
         CURLOPT_MAXREDIRS => 10,
@@ -170,15 +167,14 @@ function addClient($namepanel, $usernameac, $Expire,$Total, $Uuid,$Flow,$subid){
     return json_decode($response, true);
 }
 function updateClient($namepanel, $username,array $config){
-    global $connect;
     $UsernameData = get_clinets($username,$namepanel);
-    $marzban_list_get = select("marzban_panel", "*", "name_panel", $namepanel,"select");
-    login($marzban_list_get['id']);
+    $panel = select("marzban_panel", "*", "name_panel", $namepanel,"select");
+    login($panel['id']);
     $configpanel = json_encode($config,true);
 
     $curl = curl_init();
     curl_setopt_array($curl, array(
-        CURLOPT_URL => $marzban_list_get['url_panel'].'/panel/api/inbounds/updateClient/'.$UsernameData['id'],
+        CURLOPT_URL => $panel['url_panel'].'/panel/api/inbounds/updateClient/'.$UsernameData['id'],
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_ENCODING => '',
         CURLOPT_MAXREDIRS => 10,
@@ -202,13 +198,12 @@ function updateClient($namepanel, $username,array $config){
     return json_decode($response, true);
 }
 function ResetUserDataUsagex_uisin($usernamepanel, $namepanel){
-    global $connect;
     $data_user = get_clinets($usernamepanel,$namepanel);
-    $marzban_list_get = select("marzban_panel", "*", "name_panel", $namepanel,"select");
-    login($marzban_list_get['id']);
+    $panel = select("marzban_panel", "*", "name_panel", $namepanel,"select");
+    login($panel['id']);
     $curl = curl_init();
 curl_setopt_array($curl, array(
-  CURLOPT_URL => $marzban_list_get['url_panel']."/panel/api/inbounds/{$marzban_list_get['inboundid']}/resetClientTraffic/".$data_user['email'],
+  CURLOPT_URL => $panel['url_panel']."/panel/api/inbounds/{$panel['inboundid']}/resetClientTraffic/".$data_user['email'],
   CURLOPT_RETURNTRANSFER => true,
         CURLOPT_ENCODING => '',
         CURLOPT_MAXREDIRS => 10,
@@ -231,13 +226,11 @@ curl_close($curl);
 unlink('cookie.txt');
 }
 function removeClient($location,$username){
-    global $connect;
-    $marzban_list_get = select("marzban_panel", "*", "name_panel", $location,"select");
-    $data_user = get_clinets($username,$location);
-    login($marzban_list_get['id']);
+    $panel = select("marzban_panel", "*", "name_panel", $location,"select");
+    login($panel['id']);
     $curl = curl_init();
     curl_setopt_array($curl, array(
-  CURLOPT_URL => $marzban_list_get['url_panel']."/panel/api/inbounds/{$marzban_list_get['inboundid']}/delClient/".$data_user['id'],
+  CURLOPT_URL => $panel['url_panel']."/panel/api/inbounds/{$panel['inboundid']}/delClientByEmail/".$username,
   CURLOPT_RETURNTRANSFER => true,
   CURLOPT_ENCODING => '',
   CURLOPT_MAXREDIRS => 10,
@@ -257,12 +250,11 @@ unlink('cookie.txt');
 return $response;
 }
 function get_onlinecli($name_panel,$username){
-    global $connect;
-    $marzban_list_get = select("marzban_panel", "*", "name_panel", $name_panel,"select");
-    login($marzban_list_get['id']);
+    $panel = select("marzban_panel", "*", "name_panel", $name_panel,"select");
+    login($panel['id']);
     $curl = curl_init();
 curl_setopt_array($curl, array(
-  CURLOPT_URL => $marzban_list_get['url_panel'].'/panel/api/inbounds/onlines',
+  CURLOPT_URL => $panel['url_panel'].'/panel/api/inbounds/onlines',
   CURLOPT_RETURNTRANSFER => true,
   CURLOPT_ENCODING => '',
   CURLOPT_MAXREDIRS => 10,
