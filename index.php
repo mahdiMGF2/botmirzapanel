@@ -1057,7 +1057,8 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
         $data_limit = intval($product['Volume_constraint']) * pow(1024, 3);
         $config = array(
             "volume" => $data_limit,
-            "expiry" => $newDate
+            "expiry" => $newDate,
+            "enable" => true,
         );
         $ManagePanel->Modifyuser($user['Processing_value'], $nameloc['Service_location'], $config);
     } elseif ($marzban_list_get['type'] == "wgdashboard") {
