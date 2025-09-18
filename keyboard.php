@@ -70,11 +70,9 @@ $keyboardadmin = json_encode([
     'keyboard' => [
         [['text' => $textbotlang['Admin']['keyboardadmin']['bot_statistics']]],
         [['text' => $textbotlang['Admin']['keyboardadmin']['manage_panel']], ['text' => $textbotlang['Admin']['keyboardadmin']['add_panel']]],
-        [['text' => $textbotlang['Admin']['keyboardadmin']['test_account_settings']]],
         [['text' => $textbotlang['Admin']['keyboardadmin']['shop_section']], ['text' => $textbotlang['Admin']['keyboardadmin']['finance']]],
         [['text' => $textbotlang['Admin']['keyboardadmin']['admin_section']], ['text' => $textbotlang['Admin']['keyboardadmin']['bot_text_settings']]],
         [['text' => $textbotlang['Admin']['keyboardadmin']['user_services']], ['text' => $textbotlang['Admin']['keyboardadmin']['user_search']], ['text' => $textbotlang['Admin']['keyboardadmin']['send_message']]],
-        [['text' => $textbotlang['Admin']['keyboardadmin']['affiliate_settings']]],
         [['text' => $textbotlang['Admin']['keyboardadmin']['tutorial_section']], ['text' => $textbotlang['Admin']['keyboardadmin']['settings']]],
         [['text' => $textbotlang['users']['backhome']]]
     ],
@@ -122,9 +120,10 @@ $keyboard_usertest = json_encode([
 ]);
 $setting_panel = json_encode([
     'keyboard' => [
-        [['text' => $textbotlang['Admin']['keyboardadmin']['settingscron']]],
         [['text' => $textbotlang['Admin']['keyboardadmin']['seetingstatus']]],
+        [['text' => $textbotlang['Admin']['keyboardadmin']['settingscron']], ['text' => $textbotlang['Admin']['keyboardadmin']['test_account_settings']]],
         [['text' => $textbotlang['Admin']['channel']['channelreport']], ['text' => $textbotlang['Admin']['channel']['setting']]],
+        [['text' => $textbotlang['Admin']['keyboardadmin']['affiliate_settings']]],
         [['text' => $textbotlang['Admin']['Back-Adminment']]]
     ],
     'resize_keyboard' => true

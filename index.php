@@ -2366,6 +2366,13 @@ if ($text == $textbotlang['users']['affiliates']['btn']) {
     }
     $affiliates = select("affiliates", "*", null, null, "select");
     $my_code = $user['ref_code'];
+    $keyboard_share = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $textbotlang["users"]["affiliates"]["share"], 'url' => "https://t.me/$usernamebot?start=$my_code"],
+            ],
+        ]
+    ]);
     $textaffiliates = ($affiliates['description'] !== null && $affiliates['description'] !== '' && $affiliates['description'] !== 'none')
         ? "{$affiliates['description']}\n\n🔗 https://t.me/$usernamebot?start=$my_code"
         : "🔗 https://t.me/$usernamebot?start=$my_code";
@@ -2377,10 +2384,11 @@ if ($text == $textbotlang['users']['affiliates']['btn']) {
             'photo' => $affiliates['id_media'],
             'caption' => $textaffiliates,
             'parse_mode' => "HTML",
+            'reply_markup' => $keyboard_share
         ]);
     } else {
         // Send as text message if no badge/image is available
-        sendmessage($from_id, $textaffiliates, null, 'HTML');
+        sendmessage($from_id, $textaffiliates, $keyboard_share, 'HTML');
     }
     $affiliatescommission = select("affiliates", "*", null, null, "select");
     if ($affiliatescommission['status_commission'] == "oncommission") {
