@@ -141,7 +141,7 @@ if ($text == $textbotlang['Admin']['managepanel']['btnshowconnect']) {
         } elseif (isset($Check_token['detail']) && $Check_token['detail'] == "Incorrect username or password") {
             sendmessage($from_id, $textbotlang['Admin']['managepanel']['Incorrectinfo'], null, 'HTML');
         } else {
-            $text_marzban = $textbotlang['Admin']['managepanel']['errorstateuspanel'] . json_encode($Check_token);
+            $text_marzban = $textbotlang['Admin']['managepanel']['errorstatuspanel'] . json_encode($Check_token);
             sendmessage($from_id, $text_marzban, null, 'HTML');
         }
     } elseif ($marzban_list_get['type'] == "marzneshin") {
@@ -156,7 +156,7 @@ if ($text == $textbotlang['Admin']['managepanel']['btnshowconnect']) {
             $text_marzban = $textbotlang['Admin']['managepanel']['Incorrectinfo'];
             sendmessage($from_id, $text_marzban, null, 'HTML');
         } else {
-            $text_marzban = $textbotlang['Admin']['managepanel']['errorstateuspanel'] . json_encode($Check_token);
+            $text_marzban = $textbotlang['Admin']['managepanel']['errorstatuspanel'] . json_encode($Check_token);
             sendmessage($from_id, $text_marzban, null, 'HTML');
         }
     } elseif ($marzban_list_get['type'] == "x-ui_single") {
@@ -167,7 +167,7 @@ if ($text == $textbotlang['Admin']['managepanel']['btnshowconnect']) {
             $text_marzban = $textbotlang['Admin']['managepanel']['Incorrectinfo'];
             sendmessage($from_id, $text_marzban, null, 'HTML');
         } else {
-            $text_marzban = $textbotlang['Admin']['managepanel']['errorstateuspanel'];
+            $text_marzban = $textbotlang['Admin']['managepanel']['errorstatuspanel'];
             sendmessage($from_id, $text_marzban, null, 'HTML');
         }
     } elseif ($marzban_list_get['type'] == "alireza") {
@@ -178,7 +178,7 @@ if ($text == $textbotlang['Admin']['managepanel']['btnshowconnect']) {
             $text_marzban = $textbotlang['Admin']['managepanel']['Incorrectinfo'];
             sendmessage($from_id, $text_marzban, null, 'HTML');
         } else {
-            $text_marzban = $textbotlang['Admin']['managepanel']['errorstateuspanel'];
+            $text_marzban = $textbotlang['Admin']['managepanel']['errorstatuspanel'];
             sendmessage($from_id, $text_marzban, null, 'HTML');
         }
     } elseif ($marzban_list_get['type'] == "wgdashboard") {
@@ -1667,7 +1667,7 @@ if ($text == $textbotlang['Admin']['affiliate']['giftstart']) {
             'answerCallbackQuery',
             array(
                 'callback_query_id' => $callback_query_id,
-                'text' => $textbotlang['users']['stateus']['residaccepted'],
+                'text' => $textbotlang['users']['status']['residaccepted'],
                 'show_alert' => true,
                 'cache_time' => 5,
             )
@@ -1676,15 +1676,15 @@ if ($text == $textbotlang['Admin']['affiliate']['giftstart']) {
     }
     step("descriptionsrequsts", $from_id);
     update("user", "Processing_value", $usernamepanel, "id", $from_id);
-    sendmessage($from_id, $textbotlang['users']['stateus']['rejectrequest'], $backuser, 'HTML');
+    sendmessage($from_id, $textbotlang['users']['status']['rejectrequest'], $backuser, 'HTML');
 
 } elseif ($user['step'] == "descriptionsrequsts") {
-    sendmessage($from_id, $textbotlang['users']['stateus']['acceptrequestnote'], $keyboardadmin, 'HTML');
+    sendmessage($from_id, $textbotlang['users']['status']['acceptrequestnote'], $keyboardadmin, 'HTML');
     $nameloc = select("invoice", "*", "username", $user['Processing_value'], "select");
     update("cancel_service", "status", "reject", "username", $user['Processing_value']);
     update("cancel_service", "description", $text, "username", $user['Processing_value']);
     step("home", $from_id);
-    sendmessage($nameloc['id_user'], sprintf($textbotlang['users']['stateus']['rejectsendtouser'], $user['Processing_value'], $text), null, 'HTML');
+    sendmessage($nameloc['id_user'], sprintf($textbotlang['users']['status']['rejectsendtouser'], $user['Processing_value'], $text), null, 'HTML');
 
 } elseif (preg_match('/remoceserviceadmin-(\w+)/', $datain, $dataget)) {
     $username = $dataget[1];
@@ -1694,7 +1694,7 @@ if ($text == $textbotlang['Admin']['affiliate']['giftstart']) {
             'answerCallbackQuery',
             array(
                 'callback_query_id' => $callback_query_id,
-                'text' => $textbotlang['users']['stateus']['residaccepted'],
+                'text' => $textbotlang['users']['status']['residaccepted'],
                 'show_alert' => true,
                 'cache_time' => 5,
             )
@@ -1703,7 +1703,7 @@ if ($text == $textbotlang['Admin']['affiliate']['giftstart']) {
     }
     step("getpricerequests", $from_id);
     update("user", "Processing_value", $username, "id", $from_id);
-    sendmessage($from_id, $textbotlang['users']['stateus']['getpriceforadd'], $backuser, 'HTML');
+    sendmessage($from_id, $textbotlang['users']['status']['getpriceforadd'], $backuser, 'HTML');
 
 } elseif ($user['step'] == "getpricerequests") {
     if (!ctype_digit($text)) {
@@ -1714,7 +1714,7 @@ if ($text == $textbotlang['Admin']['affiliate']['giftstart']) {
         sendmessage($from_id, $textbotlang['Admin']['maxvalue'], $backuser, 'HTML');
         return;
     }
-    sendmessage($from_id, $textbotlang['users']['stateus']['acceptrequestnote'], $keyboardadmin, 'HTML');
+    sendmessage($from_id, $textbotlang['users']['status']['acceptrequestnote'], $keyboardadmin, 'HTML');
     step("home", $from_id);
     $marzban_list_get = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM marzban_panel WHERE name_panel = '{$nameloc['Service_location']}'"));
     $DataUserOut = $ManagePanel->DataUser($marzban_list_get['name_panel'], $user['Processing_value']);
@@ -1724,13 +1724,13 @@ if ($text == $textbotlang['Admin']['affiliate']['giftstart']) {
     update("cancel_service", "status", "accept", "username", $user['Processing_value']);
     update("invoice", "status", "removedbyadmin", "username", $user['Processing_value']);
     step("home", $from_id);
-    sendmessage($nameloc['id_user'], sprintf($textbotlang['users']['stateus']['acceptrequest'], $user['Processing_value']), null, 'HTML');
+    sendmessage($nameloc['id_user'], sprintf($textbotlang['users']['status']['acceptrequest'], $user['Processing_value']), null, 'HTML');
     $pricecancel = number_format(intval($text));
     if (intval($text) != 0) {
         $Balance_id_cancel = mysqli_fetch_assoc(mysqli_query($connect, "SELECT * FROM user WHERE id = '{$nameloc['id_user']}' LIMIT 1"));
         $Balance_id_cancel_fee = intval($Balance_id_cancel['Balance']) + intval($text);
         update("user", "Balance", $Balance_id_cancel_fee, "id", $nameloc['id_user']);
-        sendmessage($nameloc['id_user'], sprintf($textbotlang['users']['stateus']['addedbalanceremove'], $pricecancel), null, 'HTML');
+        sendmessage($nameloc['id_user'], sprintf($textbotlang['users']['status']['addedbalanceremove'], $pricecancel), null, 'HTML');
     }
     if (isset($setting['Channel_Report']) && strlen($setting['Channel_Report']) > 0) {
         sendmessage($setting['Channel_Report'], sprintf($textbotlang['Admin']['Report']['reportremove'], $from_id, $pricecancel, $username, $nameloc['id_user']), null, 'HTML');
@@ -1919,8 +1919,8 @@ if ($text == $textbotlang['Admin']['cron']['remove']['timeset']) {
     step("home", $from_id);
     update("setting", "removedayc", $text, null, null);
 }
-if ($text == $textbotlang['users']['stateus']['manageService']) {
-    sendmessage($from_id, $textbotlang['users']['stateus']['manageServicedec'], $backadmin, 'HTML');
+if ($text == $textbotlang['users']['status']['manageService']) {
+    sendmessage($from_id, $textbotlang['users']['status']['manageServicedec'], $backadmin, 'HTML');
     step('getservceid', $from_id);
 } elseif ($user['step'] == "getservceid") {
     $userdata = getuserm($text, $user['Processing_value']);
@@ -1980,7 +1980,7 @@ if ($text == $textbotlang['users']['stateus']['manageService']) {
     if ($panel['type'] == "marzban") {
         $DataUserOut = getuser($text, $user['Processing_value']);
         if ((isset($DataUserOut['msg']) && $DataUserOut['msg'] == "User not found") or !isset($DataUserOut['proxies'])) {
-            sendmessage($from_id, $textbotlang['users']['stateus']['usernotfound'], null, 'html');
+            sendmessage($from_id, $textbotlang['users']['status']['usernotfound'], null, 'html');
             return;
         }
         foreach ($DataUserOut['proxies'] as $key => &$value) {
@@ -2400,7 +2400,7 @@ if ($text == $textbotlang['users']['stateus']['manageService']) {
 } elseif ($user['step'] == "getusernameconfig") {
     $text = strtolower($text);
     if (!preg_match('/^\w{3,32}$/', $text)) {
-        sendmessage($from_id, $textbotlang['users']['stateus']['Invalidusername'], $backuser, 'html');
+        sendmessage($from_id, $textbotlang['users']['status']['Invalidusername'], $backuser, 'html');
         return;
     }
     if (in_array($text, $usernameinvoice)) {

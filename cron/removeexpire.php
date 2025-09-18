@@ -26,11 +26,11 @@ $stmt->execute();
         $textservice = select("textbot","text","id_text","text_Purchased_services","select");
         $RemainingVolume = formatBytes($output);
         $status_var = [
-        'active' => $textbotlang['users']['stateus']['active'],
-        'limited' => $textbotlang['users']['stateus']['limited'],
-        'disabled' => $textbotlang['users']['stateus']['disabled'],
-        'expired' => $textbotlang['users']['stateus']['expired'],
-        'on_hold' => $textbotlang['users']['stateus']['onhold'],
+        'active' => $textbotlang['users']['status']['active'],
+        'limited' => $textbotlang['users']['status']['limited'],
+        'disabled' => $textbotlang['users']['status']['disabled'],
+        'expired' => $textbotlang['users']['status']['expired'],
+        'on_hold' => $textbotlang['users']['status']['onhold'],
     ][$get_username_Check['status']];
     
         if ($day <= intval("-".$setting['removedayc'])) {

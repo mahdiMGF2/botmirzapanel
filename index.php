@@ -621,12 +621,12 @@ if ($datain == 'next_page') {
     Editmessagetext($from_id, $message_id, $text_callback, $keyboard_json);
 }
 if ($datain == "usernotlist") {
-    sendmessage($from_id, $textbotlang['users']['stateus']['SendUsername'], $backuser, 'html');
+    sendmessage($from_id, $textbotlang['users']['status']['SendUsername'], $backuser, 'html');
     step('getusernameinfo', $from_id);
 }
 if ($user['step'] == "getusernameinfo") {
     if (!preg_match('/^\w{3,32}$/', $text)) {
-        sendmessage($from_id, $textbotlang['users']['stateus']['Invalidusername'], $backuser, 'html');
+        sendmessage($from_id, $textbotlang['users']['status']['Invalidusername'], $backuser, 'html');
         return;
     }
     update("user", "Processing_value", $text, "id", $from_id);
@@ -639,7 +639,7 @@ if ($user['step'] == "getusernameinfo") {
     $DataUserOut = $ManagePanel->DataUser($marzban_list_get['name_panel'], $user['Processing_value']);
     if ($DataUserOut['status'] == "Unsuccessful") {
         if ($DataUserOut['msg'] == "User not found") {
-            sendmessage($from_id, $textbotlang['users']['stateus']['notUsernameget'], $keyboard, 'html');
+            sendmessage($from_id, $textbotlang['users']['status']['notUsernameget'], $keyboard, 'html');
             step('home', $from_id);
             return;
         }
@@ -647,24 +647,24 @@ if ($user['step'] == "getusernameinfo") {
     #-------------[ status ]----------------#
     $status = $DataUserOut['status'];
     $status_var = [
-        'active' => $textbotlang['users']['stateus']['active'],
-        'limited' => $textbotlang['users']['stateus']['limited'],
-        'disabled' => $textbotlang['users']['stateus']['disabled'],
-        'expired' => $textbotlang['users']['stateus']['expired'],
-        'on_hold' => $textbotlang['users']['stateus']['onhold']
+        'active' => $textbotlang['users']['status']['active'],
+        'limited' => $textbotlang['users']['status']['limited'],
+        'disabled' => $textbotlang['users']['status']['disabled'],
+        'expired' => $textbotlang['users']['status']['expired'],
+        'on_hold' => $textbotlang['users']['status']['onhold']
     ][$status];
     #--------------[ expire ]---------------#
-    $expirationDate = $DataUserOut['expire'] ? jdate('Y/m/d', $DataUserOut['expire']) : $textbotlang['users']['stateus']['Unlimited'];
+    $expirationDate = $DataUserOut['expire'] ? jdate('Y/m/d', $DataUserOut['expire']) : $textbotlang['users']['status']['Unlimited'];
     #-------------[ data_limit ]----------------#
-    $LastTraffic = $DataUserOut['data_limit'] ? formatBytes($DataUserOut['data_limit']) : $textbotlang['users']['stateus']['Unlimited'];
+    $LastTraffic = $DataUserOut['data_limit'] ? formatBytes($DataUserOut['data_limit']) : $textbotlang['users']['status']['Unlimited'];
     #---------------[ RemainingVolume ]--------------#
     $output = $DataUserOut['data_limit'] - $DataUserOut['used_traffic'];
     $RemainingVolume = $DataUserOut['data_limit'] ? formatBytes($output) : $textbotlang['users']['unlimited'];
     #---------------[ used_traffic ]--------------#
-    $usedTrafficGb = $DataUserOut['used_traffic'] ? formatBytes($DataUserOut['used_traffic']) : $textbotlang['users']['stateus']['Notconsumed'];
+    $usedTrafficGb = $DataUserOut['used_traffic'] ? formatBytes($DataUserOut['used_traffic']) : $textbotlang['users']['status']['Notconsumed'];
     #--------------[ day ]---------------#
     $timeDiff = $DataUserOut['expire'] - time();
-    $day = $DataUserOut['expire'] ? floor($timeDiff / 86400) + 1 . $textbotlang['users']['stateus']['day'] : $textbotlang['users']['stateus']['Unlimited'];
+    $day = $DataUserOut['expire'] ? floor($timeDiff / 86400) + 1 . $textbotlang['users']['status']['day'] : $textbotlang['users']['status']['Unlimited'];
     #-----------------------------#
 
 
@@ -672,36 +672,36 @@ if ($user['step'] == "getusernameinfo") {
         'inline_keyboard' => [
             [
                 ['text' => $DataUserOut['username'], 'callback_data' => "username"],
-                ['text' => $textbotlang['users']['stateus']['username'], 'callback_data' => 'username'],
+                ['text' => $textbotlang['users']['status']['username'], 'callback_data' => 'username'],
             ],
             [
                 ['text' => $status_var, 'callback_data' => 'status_var'],
-                ['text' => $textbotlang['users']['stateus']['stateus'], 'callback_data' => 'status_var'],
+                ['text' => $textbotlang['users']['status']['status'], 'callback_data' => 'status_var'],
             ],
             [
                 ['text' => $expirationDate, 'callback_data' => 'expirationDate'],
-                ['text' => $textbotlang['users']['stateus']['expirationDate'], 'callback_data' => 'expirationDate'],
+                ['text' => $textbotlang['users']['status']['expirationDate'], 'callback_data' => 'expirationDate'],
             ],
             [],
             [
                 ['text' => $day, 'callback_data' => 'day'],
-                ['text' => $textbotlang['users']['stateus']['daysleft'], 'callback_data' => 'day'],
+                ['text' => $textbotlang['users']['status']['daysleft'], 'callback_data' => 'day'],
             ],
             [
                 ['text' => $LastTraffic, 'callback_data' => 'LastTraffic'],
-                ['text' => $textbotlang['users']['stateus']['LastTraffic'], 'callback_data' => 'LastTraffic'],
+                ['text' => $textbotlang['users']['status']['LastTraffic'], 'callback_data' => 'LastTraffic'],
             ],
             [
                 ['text' => $usedTrafficGb, 'callback_data' => 'expirationDate'],
-                ['text' => $textbotlang['users']['stateus']['usedTrafficGb'], 'callback_data' => 'expirationDate'],
+                ['text' => $textbotlang['users']['status']['usedTrafficGb'], 'callback_data' => 'expirationDate'],
             ],
             [
                 ['text' => $RemainingVolume, 'callback_data' => 'RemainingVolume'],
-                ['text' => $textbotlang['users']['stateus']['RemainingVolume'], 'callback_data' => 'RemainingVolume'],
+                ['text' => $textbotlang['users']['status']['RemainingVolume'], 'callback_data' => 'RemainingVolume'],
             ]
         ]
     ]);
-    sendmessage($from_id, $textbotlang['users']['stateus']['info'], $keyboardinfo, 'html');
+    sendmessage($from_id, $textbotlang['users']['status']['info'], $keyboardinfo, 'html');
     sendmessage($from_id, $textbotlang['users']['selectoption'], $keyboard, 'html');
     step('home', $from_id);
 }
@@ -711,12 +711,12 @@ if (preg_match('/product_(\w+)/', $datain, $dataget)) {
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'], "select");
     $DataUserOut = $ManagePanel->DataUser($nameloc['Service_location'], $username);
     if (isset($DataUserOut['msg']) && $DataUserOut['msg'] == "User not found") {
-        sendmessage($from_id, $textbotlang['users']['stateus']['usernotfound'], $keyboard, 'html');
+        sendmessage($from_id, $textbotlang['users']['status']['usernotfound'], $keyboard, 'html');
         update("invoice", "Status", "disabledn", "id_invoice", $nameloc['id_invoice']);
         return;
     }
     if ($DataUserOut['status'] == "Unsuccessful") {
-        sendmessage($from_id, $textbotlang['users']['stateus']['error'], $keyboard, 'html');
+        sendmessage($from_id, $textbotlang['users']['status']['error'], $keyboard, 'html');
         return;
     }
     if ($DataUserOut['online_at'] == "online") {
@@ -728,30 +728,30 @@ if (preg_match('/product_(\w+)/', $datain, $dataget)) {
             $dateString = $DataUserOut['online_at'];
             $lastonline = jdate('Y/m/d h:i:s', strtotime($dateString));
         } else {
-            $lastonline = $textbotlang['users']['stateus']['notconnected'];
+            $lastonline = $textbotlang['users']['status']['notconnected'];
         }
     }
     #-------------status----------------#
     $status = $DataUserOut['status'];
     $status_var = [
-        'active' => $textbotlang['users']['stateus']['active'],
-        'limited' => $textbotlang['users']['stateus']['limited'],
-        'disabled' => $textbotlang['users']['stateus']['disabled'],
-        'expired' => $textbotlang['users']['stateus']['expired'],
-        'on_hold' => $textbotlang['users']['stateus']['onhold']
+        'active' => $textbotlang['users']['status']['active'],
+        'limited' => $textbotlang['users']['status']['limited'],
+        'disabled' => $textbotlang['users']['status']['disabled'],
+        'expired' => $textbotlang['users']['status']['expired'],
+        'on_hold' => $textbotlang['users']['status']['onhold']
     ][$status];
     #--------------[ expire ]---------------#
-    $expirationDate = $DataUserOut['expire'] ? jdate('Y/m/d', $DataUserOut['expire']) : $textbotlang['users']['stateus']['Unlimited'];
+    $expirationDate = $DataUserOut['expire'] ? jdate('Y/m/d', $DataUserOut['expire']) : $textbotlang['users']['status']['Unlimited'];
     #-------------[ data_limit ]----------------#
-    $LastTraffic = $DataUserOut['data_limit'] ? formatBytes($DataUserOut['data_limit']) : $textbotlang['users']['stateus']['Unlimited'];
+    $LastTraffic = $DataUserOut['data_limit'] ? formatBytes($DataUserOut['data_limit']) : $textbotlang['users']['status']['Unlimited'];
     #---------------[ RemainingVolume ]--------------#
     $output = $DataUserOut['data_limit'] - $DataUserOut['used_traffic'];
     $RemainingVolume = $DataUserOut['data_limit'] ? formatBytes($output) : $textbotlang['users']['unlimited'];
     #---------------[ used_traffic ]--------------#
-    $usedTrafficGb = $DataUserOut['used_traffic'] ? formatBytes($DataUserOut['used_traffic']) : $textbotlang['users']['stateus']['Notconsumed'];
+    $usedTrafficGb = $DataUserOut['used_traffic'] ? formatBytes($DataUserOut['used_traffic']) : $textbotlang['users']['status']['Notconsumed'];
     #--------------[ day ]---------------#
     $timeDiff = $DataUserOut['expire'] - time();
-    $day = $DataUserOut['expire'] ? floor($timeDiff / 86400) + 1 . $textbotlang['users']['stateus']['day'] : $textbotlang['users']['stateus']['Unlimited'];
+    $day = $DataUserOut['expire'] ? floor($timeDiff / 86400) + 1 . $textbotlang['users']['status']['day'] : $textbotlang['users']['status']['Unlimited'];
     #-----------------------------#
     if (!in_array($status, ['active', "on_hold"])) {
         $keyboardsetting = json_encode([
@@ -760,23 +760,23 @@ if (preg_match('/product_(\w+)/', $datain, $dataget)) {
                     ['text' => $textbotlang['users']['extend']['title'], 'callback_data' => 'extend_' . $username],
                 ],
                 [
-                    ['text' => $textbotlang['users']['stateus']['RemoveSerivecbtn'], 'callback_data' => 'removebyuser-' . $username],
+                    ['text' => $textbotlang['users']['status']['RemoveSerivecbtn'], 'callback_data' => 'removebyuser-' . $username],
                     ['text' => $textbotlang['users']['Extra_volume']['sellextra'], 'callback_data' => 'Extra_volume_' . $username],
                 ],
                 [
-                    ['text' => $textbotlang['users']['stateus']['backlist'], 'callback_data' => 'backorder'],
+                    ['text' => $textbotlang['users']['status']['backlist'], 'callback_data' => 'backorder'],
                 ]
             ]
         ]);
-        $textinfo = sprintf($textbotlang['users']['stateus']['InfoSerivceDisable'], $status_var, $DataUserOut['username'], $nameloc['Service_location'], $nameloc['id_invoice'], $LastTraffic, $usedTrafficGb, $expirationDate, $day);
+        $textinfo = sprintf($textbotlang['users']['status']['InfoSerivceDisable'], $status_var, $DataUserOut['username'], $nameloc['Service_location'], $nameloc['id_invoice'], $LastTraffic, $usedTrafficGb, $expirationDate, $day);
     } else {
         $keyboarddate = array(
             'linksub' => array(
-                'text' => $textbotlang['users']['stateus']['linksub'],
+                'text' => $textbotlang['users']['status']['linksub'],
                 'callback_data' => "subscriptionurl_"
             ),
             'config' => array(
-                'text' => $textbotlang['users']['stateus']['config'],
+                'text' => $textbotlang['users']['status']['config'],
                 'callback_data' => "config_"
             ),
             'extend' => array(
@@ -824,12 +824,12 @@ if (preg_match('/product_(\w+)/', $datain, $dataget)) {
         if (count($tempArray) > 0) {
             $keyboardsetting['inline_keyboard'][] = $tempArray;
         }
-        $keyboardsetting['inline_keyboard'][] = [['text' => $textbotlang['users']['stateus']['backlist'], 'callback_data' => 'backorder']];
+        $keyboardsetting['inline_keyboard'][] = [['text' => $textbotlang['users']['status']['backlist'], 'callback_data' => 'backorder']];
         $keyboardsetting = json_encode($keyboardsetting);
         if ($marzban_list_get['type'] == "mikrotik") {
-            $textinfo = sprintf($textbotlang['users']['stateus']['InfoSerivceActive_mikrotik'], $status_var, $DataUserOut['username'], $DataUserOut['subscription_url'], $nameloc['Service_location'], $nameloc['id_invoice'], $LastTraffic, $usedTrafficGb, $expirationDate, $day);
+            $textinfo = sprintf($textbotlang['users']['status']['InfoSerivceActive_mikrotik'], $status_var, $DataUserOut['username'], $DataUserOut['subscription_url'], $nameloc['Service_location'], $nameloc['id_invoice'], $LastTraffic, $usedTrafficGb, $expirationDate, $day);
         } else {
-            $textinfo = sprintf($textbotlang['users']['stateus']['InfoSerivceActive'], $status_var, $DataUserOut['username'], $nameloc['Service_location'], $nameloc['id_invoice'], $lastonline, $LastTraffic, $usedTrafficGb, $expirationDate, $day);
+            $textinfo = sprintf($textbotlang['users']['status']['InfoSerivceActive'], $status_var, $DataUserOut['username'], $nameloc['Service_location'], $nameloc['id_invoice'], $lastonline, $LastTraffic, $usedTrafficGb, $expirationDate, $day);
         }
     }
     Editmessagetext($from_id, $message_id, $textinfo, $keyboardsetting);
@@ -900,11 +900,11 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'], "select");
     $DataUserOut = $ManagePanel->DataUser($nameloc['Service_location'], $username);
     if ($DataUserOut['status'] == "Unsuccessful") {
-        sendmessage($from_id, $textbotlang['users']['stateus']['error'], null, 'html');
+        sendmessage($from_id, $textbotlang['users']['status']['error'], null, 'html');
         return;
     }
     if ($DataUserOut['status'] == "on_hold") {
-        sendmessage($from_id, $textbotlang['users']['stateus']['error_onhold'], null, 'html');
+        sendmessage($from_id, $textbotlang['users']['status']['error_onhold'], null, 'html');
         return;
     }
     update("user", "Processing_value", $username, "id", $from_id);
@@ -1108,10 +1108,10 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
     $keyboardextendfnished = json_encode([
         'inline_keyboard' => [
             [
-                ['text' => $textbotlang['users']['stateus']['backlist'], 'callback_data' => "backorder"],
+                ['text' => $textbotlang['users']['status']['backlist'], 'callback_data' => "backorder"],
             ],
             [
-                ['text' => $textbotlang['users']['stateus']['backservice'], 'callback_data' => "product_" . $usernamepanel],
+                ['text' => $textbotlang['users']['status']['backservice'], 'callback_data' => "product_" . $usernamepanel],
             ]
         ]
     ]);
@@ -1132,7 +1132,7 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
                 ['text' => $textbotlang['users']['changelink']['confirm'], 'callback_data' => "confirmchange_" . $username],
             ],
             [
-                ['text' => $textbotlang['users']['stateus']['backservice'], 'callback_data' => "product_" . $username],
+                ['text' => $textbotlang['users']['status']['backservice'], 'callback_data' => "product_" . $username],
             ]
         ]
     ]);
@@ -1145,7 +1145,7 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
     $keyboardchange = json_encode([
         'inline_keyboard' => [
             [
-                ['text' => $textbotlang['users']['stateus']['backservice'], 'callback_data' => "product_" . $usernameconfig],
+                ['text' => $textbotlang['users']['status']['backservice'], 'callback_data' => "product_" . $usernameconfig],
             ]
         ]
     ]);
@@ -1184,12 +1184,12 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
     Editmessagetext($from_id, $message_id, $text_callback, json_encode(['inline_keyboard' => []]));
     $nameloc = select("invoice", "*", "username", $user['Processing_value'], "select");
     if ($nameloc == false) {
-        sendmessage($from_id, $textbotlang['users']['stateus']['error'], null, 'html');
+        sendmessage($from_id, $textbotlang['users']['status']['error'], null, 'html');
         return;
     }
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'], "select");
     if ($marzban_list_get == false) {
-        sendmessage($from_id, $textbotlang['users']['stateus']['error'], null, 'html');
+        sendmessage($from_id, $textbotlang['users']['status']['error'], null, 'html');
         return;
     }
     if ($user['Balance'] < $price_extra && intval($setting['Extra_volume']) != 0) {
@@ -1268,7 +1268,7 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
     $keyboardextrafnished = json_encode([
         'inline_keyboard' => [
             [
-                ['text' => $textbotlang['users']['stateus']['backservice'], 'callback_data' => "product_" . $user['Processing_value']],
+                ['text' => $textbotlang['users']['status']['backservice'], 'callback_data' => "product_" . $user['Processing_value']],
             ]
         ]
     ]);
@@ -1285,22 +1285,22 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $nameloc['Service_location'], "select");
     $DataUserOut = $ManagePanel->DataUser($marzban_list_get['name_panel'], $username);
     if (isset($DataUserOut['status']) && in_array($DataUserOut['status'], ["expired", "limited", "disabled"])) {
-        sendmessage($from_id, $textbotlang['users']['stateus']['notusername'], null, 'html');
+        sendmessage($from_id, $textbotlang['users']['status']['notusername'], null, 'html');
         return;
     }
     $requestcheck = select("cancel_service", "*", "username", $username, "count");
     if ($requestcheck != 0) {
-        sendmessage($from_id, $textbotlang['users']['stateus']['errorexits'], null, 'html');
+        sendmessage($from_id, $textbotlang['users']['status']['errorexits'], null, 'html');
         return;
     }
     $confirmremove = json_encode([
         'inline_keyboard' => [
             [
-                ['text' => $textbotlang['users']['stateus']['RequestRemove'], 'callback_data' => "confirmremoveservices-$username"],
+                ['text' => $textbotlang['users']['status']['RequestRemove'], 'callback_data' => "confirmremoveservices-$username"],
             ],
         ]
     ]);
-    Editmessagetext($from_id, $message_id, $textbotlang['users']['stateus']['descriptions_removeservice'], $confirmremove);
+    Editmessagetext($from_id, $message_id, $textbotlang['users']['status']['descriptions_removeservice'], $confirmremove);
 } elseif (preg_match('/removebyuser-(\w+)/', $datain, $dataget)) {
     $username = $dataget[1];
     $nameloc = select("invoice", "*", "username", $username, "select");
@@ -1316,11 +1316,11 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
         ]);
     }
     deletemessage($from_id, $message_id);
-    sendmessage($from_id, $textbotlang['users']['stateus']['RemovedService'], null, 'html');
+    sendmessage($from_id, $textbotlang['users']['status']['RemovedService'], null, 'html');
 } elseif (preg_match('/confirmremoveservices-(\w+)/', $datain, $dataget)) {
     $checkcancelservice = mysqli_query($connect, "SELECT * FROM cancel_service WHERE id_user = '$from_id' AND status = 'waiting'");
     if (mysqli_num_rows($checkcancelservice) != 0) {
-        sendmessage($from_id, $textbotlang['users']['stateus']['exitsrequsts'], null, 'HTML');
+        sendmessage($from_id, $textbotlang['users']['status']['exitsrequsts'], null, 'HTML');
         return;
     }
     $usernamepanel = $dataget[1];
@@ -1336,26 +1336,26 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
     #-------------status----------------#
     $status = $DataUserOut['status'];
     $status_var = [
-        'active' => $textbotlang['users']['stateus']['active'],
-        'limited' => $textbotlang['users']['stateus']['limited'],
-        'disabled' => $textbotlang['users']['stateus']['disabled'],
-        'expired' => $textbotlang['users']['stateus']['expired'],
-        'on_hold' => $textbotlang['users']['stateus']['onhold']
+        'active' => $textbotlang['users']['status']['active'],
+        'limited' => $textbotlang['users']['status']['limited'],
+        'disabled' => $textbotlang['users']['status']['disabled'],
+        'expired' => $textbotlang['users']['status']['expired'],
+        'on_hold' => $textbotlang['users']['status']['onhold']
     ][$status];
     #--------------[ expire ]---------------#
-    $expirationDate = $DataUserOut['expire'] ? jdate('Y/m/d', $DataUserOut['expire']) : $textbotlang['users']['stateus']['Unlimited'];
+    $expirationDate = $DataUserOut['expire'] ? jdate('Y/m/d', $DataUserOut['expire']) : $textbotlang['users']['status']['Unlimited'];
     #-------------[ data_limit ]----------------#
-    $LastTraffic = $DataUserOut['data_limit'] ? formatBytes($DataUserOut['data_limit']) : $textbotlang['users']['stateus']['Unlimited'];
+    $LastTraffic = $DataUserOut['data_limit'] ? formatBytes($DataUserOut['data_limit']) : $textbotlang['users']['status']['Unlimited'];
     #---------------[ RemainingVolume ]--------------#
     $output = $DataUserOut['data_limit'] - $DataUserOut['used_traffic'];
     $RemainingVolume = $DataUserOut['data_limit'] ? formatBytes($output) : $textbotlang['users']['unlimited'];
     #---------------[ used_traffic ]--------------#
-    $usedTrafficGb = $DataUserOut['used_traffic'] ? formatBytes($DataUserOut['used_traffic']) : $textbotlang['users']['stateus']['Notconsumed'];
+    $usedTrafficGb = $DataUserOut['used_traffic'] ? formatBytes($DataUserOut['used_traffic']) : $textbotlang['users']['status']['Notconsumed'];
     #--------------[ day ]---------------#
     $timeDiff = $DataUserOut['expire'] - time();
-    $day = $DataUserOut['expire'] ? floor($timeDiff / 86400) . $textbotlang['users']['stateus']['day'] : $textbotlang['users']['stateus']['Unlimited'];
+    $day = $DataUserOut['expire'] ? floor($timeDiff / 86400) . $textbotlang['users']['status']['day'] : $textbotlang['users']['status']['Unlimited'];
     #-----------------------------#
-    $textinfoadmin = sprintf($textbotlang['users']['stateus']['RequestInfoRemove'], $from_id, $username, $nameloc['username'], $status_var, $nameloc['Service_location'], $nameloc['id_invoice'], $usedTrafficGb, $LastTraffic, $RemainingVolume, $expirationDate, $day);
+    $textinfoadmin = sprintf($textbotlang['users']['status']['RequestInfoRemove'], $from_id, $username, $nameloc['username'], $status_var, $nameloc['Service_location'], $nameloc['id_invoice'], $usedTrafficGb, $LastTraffic, $RemainingVolume, $expirationDate, $day);
     $confirmremoveadmin = json_encode([
         'inline_keyboard' => [
             [
@@ -1705,7 +1705,7 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
     $stmt->execute();
     $info_product = $stmt->fetch(PDO::FETCH_ASSOC);
     if ($info_product == false) {
-        sendmessage($from_id, $textbotlang['users']['stateus']['error2'], $keyboard, 'HTML');
+        sendmessage($from_id, $textbotlang['users']['status']['error2'], $keyboard, 'HTML');
         step("home", $from_id);
         return;
     }
@@ -1719,7 +1719,7 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
     }
     update("user", "Processing_value_tow", $username_ac, "id", $from_id);
     if ($info_product['Volume_constraint'] == 0)
-        $info_product['Volume_constraint'] = $textbotlang['users']['stateus']['Unlimited'];
+        $info_product['Volume_constraint'] = $textbotlang['users']['status']['Unlimited'];
     $info_product['price_product'] = number_format($info_product['price_product'], 0);
     $user['Balance'] = number_format($user['Balance']);
     $textin = sprintf($textbotlang['users']['buy']['invoicebuy'], $username_ac, $info_product['name_product'], $info_product['Service_time'], $info_product['price_product'], $info_product['Volume_constraint'], $user['Balance']);
@@ -1734,12 +1734,12 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
     $stmt->execute();
     $info_product = $stmt->fetch(PDO::FETCH_ASSOC);
     if ($info_product == false) {
-        sendmessage($from_id, $textbotlang['users']['stateus']['error2'], $keyboard, 'HTML');
+        sendmessage($from_id, $textbotlang['users']['status']['error2'], $keyboard, 'HTML');
         return;
     }
     $marzban_list_get = select("marzban_panel", "*", "name_panel", $user['Processing_value'], "select");
     if ($marzban_list_get == false) {
-        sendmessage($from_id, $textbotlang['users']['stateus']['error2'], $keyboard, 'HTML');
+        sendmessage($from_id, $textbotlang['users']['status']['error2'], $keyboard, 'HTML');
         return;
     }
     if ($marzban_list_get['linksubx'] == null and in_array($marzban_list_get['type'], ["x-ui_single", "alireza"])) {
@@ -1953,7 +1953,7 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
     $stmt->execute();
     $info_product = $stmt->fetch(PDO::FETCH_ASSOC);
     if ($info_product == false) {
-        sendmessage($from_id, $textbotlang['users']['stateus']['error2'], $keyboard, 'HTML');
+        sendmessage($from_id, $textbotlang['users']['status']['error2'], $keyboard, 'HTML');
         step('home', $from_id);
         return;
     }
@@ -2386,12 +2386,12 @@ if ($text == $textbotlang['users']['affiliates']['btn']) {
     if ($affiliatescommission['status_commission'] == "oncommission") {
         $affiliatespercentage = $affiliatescommission['affiliatespercentage'] . $textbotlang['users']['Percentage'];
     } else {
-        $affiliatespercentage = $textbotlang['users']['stateus']['disabled'];
+        $affiliatespercentage = $textbotlang['users']['status']['disabled'];
     }
     if ($affiliatescommission['Discount'] == "onDiscountaffiliates") {
         $price_Discount = $affiliatescommission['price_Discount'] . $textbotlang['users']['IRT'];
     } else {
-        $price_Discount = $textbotlang['users']['stateus']['disabled'];
+        $price_Discount = $textbotlang['users']['status']['disabled'];
     }
     $textaffiliates = sprintf($textbotlang['users']['affiliates']['infotext'], $price_Discount, $affiliatespercentage);
     sendmessage($from_id, $textaffiliates, $keyboard, 'HTML');

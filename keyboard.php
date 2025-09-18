@@ -513,7 +513,7 @@ $optionMarzneshin = json_encode([
         [['text' => $textbotlang['Admin']['managepanel']['showpaneltestbtn']]],
         [['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['namepanel']], ['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['removepanel']]],
         [['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['editurl']], ['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['editusername']]],
-        [['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['editpassword']], ['text' => $textbotlang['users']['stateus']['manageService']]],
+        [['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['editpassword']], ['text' => $textbotlang['users']['status']['manageService']]],
         [['text' => $textbotlang['Admin']['managepanel']['methodusername']], ['text' => $textbotlang['Admin']['managepanel']['keyboardpanel']['on_hold_status']]],
         [['text' => $textbotlang['Admin']['managepanel']['sublinkstatus']], ['text' => $textbotlang['Admin']['managepanel']['configstatus']]],
         [['text' => $textbotlang['Admin']['Back-Adminment']]]
