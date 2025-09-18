@@ -334,9 +334,9 @@ function DirectPayment($order_id)
                     'parse_mode' => "HTML",
                 ]);
                 if ($marzban_list_get['type'] == "wgdashboard") {
-                    $urlimage = "{$marzban_list_get['inboundid']}_{$dataoutput['username']}.conf";
+                    $urldocs = "{$marzban_list_get['inboundid']}_{$get_invoice['id_invoice']}.conf";
                     file_put_contents($urlimage, $output_config_link);
-                    sendDocument($get_invoice['id_user'], $urlimage, $textbotlang['users']['buy']['configwg']);
+                    sendDocument($get_invoice['id_user'], $urldocs, $textbotlang['users']['buy']['configwg']);
                     unlink($urlimage);
                 }
                 unlink($urlimage);
