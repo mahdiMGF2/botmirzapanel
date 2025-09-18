@@ -554,6 +554,7 @@ $textbotlang['users']['moeny']['settingpay'] = "📌 از لیست زیر می �
 $textbotlang['users']['moeny']['copy_card_number'] = "کپی، شماره کارت";
 $textbotlang['users']['moeny']['copy_price'] = "کپی، مبلغ";
 $textbotlang['users']['moeny']['copy_cart_status'] = "💸 کپی شماره کارت";
+$textbotlang['users']['moeny']['paymentaccepted'] = "✅ پرداخت تایید شده است";
 
 
 

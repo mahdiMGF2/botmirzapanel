@@ -769,6 +769,19 @@ if (preg_match('/Confirm_pay_(\w+)/', $datain, $dataget)) {
         return;
     }
     DirectPayment($order_id);
+    $keyboard_accept = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $textbotlang['users']['moeny']['paymentaccepted'], 'callback_data' => "none"],
+            ],
+        ]
+    ]);
+    telegram('editMessageCaption',[
+        'chat_id' => $from_id,
+        'message_id' => $message_id,
+        'caption' => $caption,
+        'reply_markup' => $keyboard_accept
+    ]);
     update("user", "Processing_value", "0", "id", $Balance_id['id']);
     update("user", "Processing_value_one", "0", "id", $Balance_id['id']);
     update("user", "Processing_value_tow", "0", "id", $Balance_id['id']);

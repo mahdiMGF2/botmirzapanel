@@ -7,11 +7,14 @@ function telegram($method, $datas = [])
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $datas);
-    $res = curl_exec($ch);
+    $res = json_decode(curl_exec($ch),true);
+    if(!$res['ok']){
+        error_log(json_encode($res));
+    }
     if (curl_error($ch)) {
-        return curl_error($ch);
+        error_log(curl_error($ch));
     } else {
-        return json_decode($res,true);
+        return $res;
     }
 }
 function sendmessage($chat_id,$text,$keyboard,$parse_mode){
@@ -78,7 +81,7 @@ $text_callback = $update["callback_query"]["message"]["text"] ?? '';
 $message_id = $update["message"]["message_id"] ?? $update["callback_query"]["message"]["message_id"] ?? 0;
 $photo = $update["message"]["photo"] ?? 0;
 $photoid = $photo ? end($photo)["file_id"] : '';
-$caption = $update["message"]["caption"] ?? '';
+$caption = $update["message"]["caption"] ?? $update['callback_query']['message']["caption"]  ?? '';
 $video = $update["message"]["video"] ?? 0;
 $videoid = $video ? $video["file_id"] : 0;
 $forward_from_id = $update["message"]["reply_to_message"]["forward_from"]["id"] ?? 0;

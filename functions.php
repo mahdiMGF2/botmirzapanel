@@ -396,15 +396,6 @@ function DirectPayment($order_id)
         update("invoice", "status", "active", "username", $get_invoice['username']);
         if ($Payment_report['Payment_Method'] == "cart to cart") {
             update("invoice", "Status", "active", "id_invoice", $get_invoice['id_invoice']);
-            telegram(
-                'answerCallbackQuery',
-                array(
-                    'callback_query_id' => $callback_query_id,
-                    'text' => $textbotlang['users']['moeny']['acceptedcart'],
-                    'show_alert' => true,
-                    'cache_time' => 5,
-                )
-            );
         }
     } else {
         $Balance_confrim = intval($Balance_id['Balance']) + intval($Payment_report['price']);
@@ -475,6 +466,7 @@ function channel($id_channel)
 {
     global $from_id, $APIKEY;
     $channel_link = array();
+    if(!$id_channel)return [];
     $response = telegram('getChatMember', [
         "chat_id" => "@$id_channel",
         "user_id" => $from_id,
