@@ -903,6 +903,10 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
         sendmessage($from_id, $textbotlang['users']['stateus']['error'], null, 'html');
         return;
     }
+    if ($DataUserOut['status'] == "on_hold") {
+        sendmessage($from_id, $textbotlang['users']['stateus']['error_onhold'], null, 'html');
+        return;
+    }
     update("user", "Processing_value", $username, "id", $from_id);
     $stmt = $pdo->prepare("SELECT * FROM product WHERE (Location = :Location OR location = '/all')");
     $stmt->bindValue(':Location', $nameloc['Service_location']);
@@ -922,7 +926,7 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
 } elseif (preg_match('/serviceextendselect_(\w+)/', $datain, $dataget)) {
     $codeproduct = $dataget[1];
     $nameloc = select("invoice", "*", "username", $user['Processing_value'], "select");
-    if( $nameloc == false) {
+    if ($nameloc == false) {
         sendmessage($from_id, $textbotlang['users']['extend']['error2'], null, 'HTML');
         return;
     }
@@ -931,7 +935,7 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
     $stmt->bindValue(':code_product', $codeproduct);
     $stmt->execute();
     $product = $stmt->fetch(PDO::FETCH_ASSOC);
-    if($product == false) {
+    if ($product == false) {
         sendmessage($from_id, $textbotlang['users']['extend']['error2'], null, 'HTML');
         return;
     }
