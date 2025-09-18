@@ -179,7 +179,7 @@ class ManagePanel{
                 if (!preg_match('/^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?((\/[^\s\/]+)+)?$/', $UsernameData['subscription_url'])) {
                     $UsernameData['subscription_url'] = $Get_Data_Panel['url_panel'] . "/" . ltrim($UsernameData['subscription_url'], "/");
                 }
-
+                $UsernameData['expire'] = $UsernameData['status'] == 'on_hold' ? 0 : $UsernameData['expire'];
                 $Output = array(
                     'status' => $UsernameData['status'],
                     'username' => $UsernameData['username'],
