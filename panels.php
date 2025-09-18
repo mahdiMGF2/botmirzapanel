@@ -189,53 +189,52 @@ class ManagePanel
         } elseif ($Get_Data_Panel['type'] == "marzneshin") {
             $UsernameData = getuserm($username, $Get_Data_Panel['name_panel']);
             if (isset($UsernameData['detail']) && $UsernameData['detail']) {
-                $Output = array(
+                return array(
                     'status' => 'Unsuccessful',
                     'msg' => $UsernameData['detail']
                 );
             } elseif (!isset($UsernameData['username'])) {
-                $Output = array(
+                return array(
                     'status' => 'Unsuccessful',
                     'msg' => ""
                 );
-            } else {
-                if (!preg_match('/^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?((\/[^\s\/]+)+)?$/', $UsernameData['subscription_url'])) {
-                    $UsernameData['subscription_url'] = $Get_Data_Panel['url_panel'] . "/" . ltrim($UsernameData['subscription_url'], "/");
-                }
-                $UsernameData['status'] = "active";
-                if (!$UsernameData['enabled']) {
-                    $UsernameData['status'] = "disabled";
-                } elseif ($UsernameData['expire_strategy'] == "start_on_first_use") {
-                    $UsernameData['status'] = "on_hold";
-                } elseif ($UsernameData['expired']) {
-                    $UsernameData['status'] = "expired";
-                } elseif ($UsernameData['data_limit'] - $UsernameData['used_traffic'] <= 0) {
-                    $UsernameData['status'] = "limtied";
-                }
-                $links_user = outputlink($UsernameData['subscription_url']);
-                if (isBase64($links_user)) {
-                    $links_user = base64_decode($links_user);
-                }
-                $links_user = explode("\n", trim($links_user));
-                if (isset($UsernameData['expire_date'])) {
-                    $expiretime = strtotime(($UsernameData['expire_date']));
-                } else {
-                    $expiretime = 0;
-                }
-                $Output = array(
-                    'status' => $UsernameData['status'],
-                    'username' => $UsernameData['username'],
-                    'data_limit' => $UsernameData['data_limit'],
-                    'expire' => $expiretime,
-                    'online_at' => $UsernameData['online_at'],
-                    'used_traffic' => $UsernameData['used_traffic'],
-                    'links' => $links_user,
-                    'subscription_url' => $UsernameData['subscription_url'],
-                    'sub_updated_at' => $UsernameData['sub_updated_at'],
-                    'sub_last_user_agent' => $UsernameData['sub_last_user_agent'],
-                    'uuid' => null
-                );
             }
+            if (!preg_match('/^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?((\/[^\s\/]+)+)?$/', $UsernameData['subscription_url'])) {
+                $UsernameData['subscription_url'] = $Get_Data_Panel['url_panel'] . "/" . ltrim($UsernameData['subscription_url'], "/");
+            }
+            $UsernameData['status'] = "active";
+            if (!$UsernameData['enabled']) {
+                $UsernameData['status'] = "disabled";
+            } elseif ($UsernameData['expire_strategy'] == "start_on_first_use") {
+                $UsernameData['status'] = "on_hold";
+            } elseif ($UsernameData['expired']) {
+                $UsernameData['status'] = "expired";
+            } elseif ($UsernameData['data_limit'] - $UsernameData['used_traffic'] <= 0) {
+                $UsernameData['status'] = "limtied";
+            }
+            $links_user = outputlink($UsernameData['subscription_url']);
+            if (isBase64($links_user)) {
+                $links_user = base64_decode($links_user);
+            }
+            $links_user = explode("\n", trim($links_user));
+            if (isset($UsernameData['expire_date'])) {
+                $expiretime = strtotime(($UsernameData['expire_date']));
+            } else {
+                $expiretime = 0;
+            }
+            $Output = array(
+                'status' => $UsernameData['status'],
+                'username' => $UsernameData['username'],
+                'data_limit' => $UsernameData['data_limit'],
+                'expire' => $expiretime,
+                'online_at' => $UsernameData['online_at'],
+                'used_traffic' => $UsernameData['used_traffic'],
+                'links' => $links_user,
+                'subscription_url' => $UsernameData['subscription_url'],
+                'sub_updated_at' => $UsernameData['sub_updated_at'],
+                'sub_last_user_agent' => $UsernameData['sub_last_user_agent'],
+                'uuid' => null
+            );
         } elseif ($Get_Data_Panel['type'] == "x-ui_single") {
             $UsernameData = get_Client($username, $Get_Data_Panel['name_panel']);
             $UsernameData2 = get_clinets($username, $Get_Data_Panel['name_panel']);
@@ -243,180 +242,175 @@ class ManagePanel
             if (!$UsernameData['id']) {
                 if (empty($UsernameData['msg']))
                     $UsernameData['msg'] = "";
-                $Output = array(
+                return array(
                     'status' => 'Unsuccessful',
                     'msg' => $UsernameData['msg']
                 );
-            } else {
-                if ($UsernameData['enable']) {
-                    $UsernameData['enable'] = "active";
-                } else {
-                    $UsernameData['enable'] = "disabled";
-                }
-                if (intval($UsernameData['expiryTime']) != 0) {
-                    if ($expire - time() <= 0)
-                        $UsernameData['enable'] = "expired";
-                }
-                $subId = $UsernameData2['subId'];
-                $status_user = get_onlinecli($Get_Data_Panel['name_panel'], $username);
-                $linksub = "{$Get_Data_Panel['linksubx']}/{$subId}#$username";
-                $Output = array(
-                    'status' => $UsernameData['enable'],
-                    'username' => $UsernameData['email'],
-                    'data_limit' => $UsernameData['total'],
-                    'expire' => $UsernameData['expiryTime'] / 1000,
-                    'online_at' => $status_user,
-                    'used_traffic' => $UsernameData['up'] + $UsernameData['down'],
-                    'links' => [outputlink($linksub)],
-                    'subscription_url' => $linksub,
-                );
             }
+            if ($UsernameData['enable']) {
+                $UsernameData['enable'] = "active";
+            } else {
+                $UsernameData['enable'] = "disabled";
+            }
+            if (intval($UsernameData['expiryTime']) != 0) {
+                if ($expire - time() <= 0)
+                    $UsernameData['enable'] = "expired";
+            }
+            $subId = $UsernameData2['subId'];
+            $status_user = get_onlinecli($Get_Data_Panel['name_panel'], $username);
+            $linksub = "{$Get_Data_Panel['linksubx']}/{$subId}#$username";
+            $Output = array(
+                'status' => $UsernameData['enable'],
+                'username' => $UsernameData['email'],
+                'data_limit' => $UsernameData['total'],
+                'expire' => $UsernameData['expiryTime'] / 1000,
+                'online_at' => $status_user,
+                'used_traffic' => $UsernameData['up'] + $UsernameData['down'],
+                'links' => [outputlink($linksub)],
+                'subscription_url' => $linksub,
+            );
         } elseif ($Get_Data_Panel['type'] == "alireza") {
             $UsernameData = get_Clientalireza($username, $Get_Data_Panel['name_panel']);
             $UsernameData2 = get_clinetsalireza($username, $Get_Data_Panel['name_panel']);
             if (!$UsernameData['id']) {
-                $Output = array(
+                return array(
                     'status' => 'Unsuccessful',
                     'msg' => $UsernameData['msg']
                 );
-            } else {
-                if ($UsernameData['enable']) {
-                    $UsernameData['enable'] = "active";
-                } else {
-                    $UsernameData['enable'] = "disabled";
-                }
-                $subId = $UsernameData2['subId'];
-                $status_user = get_onlinecli($Get_Data_Panel['name_panel'], $username);
-                $linksub = "{$Get_Data_Panel['linksubx']}/{$subId}?name=$username";
-                $Output = array(
-                    'status' => $UsernameData['enable'],
-                    'username' => $UsernameData['email'],
-                    'data_limit' => $UsernameData['total'],
-                    'expire' => $UsernameData['expiryTime'] / 1000,
-                    'online_at' => $status_user,
-                    'used_traffic' => $UsernameData['up'] + $UsernameData['down'],
-                    'links' => [outputlink($linksub)],
-                    'subscription_url' => $linksub,
-                );
             }
+            if ($UsernameData['enable']) {
+                $UsernameData['enable'] = "active";
+            } else {
+                $UsernameData['enable'] = "disabled";
+            }
+            $subId = $UsernameData2['subId'];
+            $status_user = get_onlinecli($Get_Data_Panel['name_panel'], $username);
+            $linksub = "{$Get_Data_Panel['linksubx']}/{$subId}?name=$username";
+            $Output = array(
+                'status' => $UsernameData['enable'],
+                'username' => $UsernameData['email'],
+                'data_limit' => $UsernameData['total'],
+                'expire' => $UsernameData['expiryTime'] / 1000,
+                'online_at' => $status_user,
+                'used_traffic' => $UsernameData['up'] + $UsernameData['down'],
+                'links' => [outputlink($linksub)],
+                'subscription_url' => $linksub,
+            );
         } elseif ($Get_Data_Panel['type'] == "s_ui") {
             $UsernameData = GetClientsS_UI($username, $Get_Data_Panel['name_panel']);
             $onlinestatus = get_onlineclients_ui($Get_Data_Panel['name_panel'], $username);
             if (!isset($UsernameData['id'])) {
-                $Output = array(
+                return array(
                     'status' => 'Unsuccessful',
                     'msg' => $UsernameData['msg']
                 );
-            } else {
-                $links = [];
-                if (is_array($UsernameData['links'])) {
-                    foreach ($UsernameData['links'] as $config) {
-                        $links[] = $config['uri'];
-                    }
-                }
-                $setting_app = get_settig($Get_Data_Panel['name_panel']);
-                $url = explode(":", $Get_Data_Panel['url_panel']);
-                $url_sub = $url[0] . ":" . $url[1] . ":" . $setting_app['subPort'] . $setting_app['subPath'] . $username;
-                $data_limit = $UsernameData['volume'];
-                $useage = $UsernameData['up'] + $UsernameData['down'];
-                $RemainingVolume = $data_limit - $useage;
-                $expire = $UsernameData['expiry'];
-                if ($UsernameData['enable']) {
-                    $UsernameData['enable'] = "active";
-                } elseif ($data_limit != 0 and $RemainingVolume < 0) {
-                    $UsernameData['enable'] = "limited";
-                } elseif ($expire - time() < 0 and $expire != 0) {
-                    $UsernameData['enable'] = "expired";
-                } else {
-                    $UsernameData['enable'] = "disabled";
-                }
-                $Output = array(
-                    'status' => $UsernameData['enable'],
-                    'username' => $UsernameData['name'],
-                    'data_limit' => $data_limit,
-                    'expire' => $expire,
-                    'online_at' => $onlinestatus,
-                    'used_traffic' => $useage,
-                    'links' => $links,
-                    'subscription_url' => $url_sub,
-                    'sub_updated_at' => null,
-                    'sub_last_user_agent' => null,
-                );
             }
+            $links = [];
+            if (is_array($UsernameData['links'])) {
+                foreach ($UsernameData['links'] as $config) {
+                    $links[] = $config['uri'];
+                }
+            }
+            $setting_app = get_settig($Get_Data_Panel['name_panel']);
+            $url = explode(":", $Get_Data_Panel['url_panel']);
+            $url_sub = $url[0] . ":" . $url[1] . ":" . $setting_app['subPort'] . $setting_app['subPath'] . $username;
+            $data_limit = $UsernameData['volume'];
+            $useage = $UsernameData['up'] + $UsernameData['down'];
+            $RemainingVolume = $data_limit - $useage;
+            $expire = $UsernameData['expiry'];
+            if ($UsernameData['enable']) {
+                $UsernameData['enable'] = "active";
+            } elseif ($data_limit != 0 and $RemainingVolume < 0) {
+                $UsernameData['enable'] = "limited";
+            } elseif ($expire - time() < 0 and $expire != 0) {
+                $UsernameData['enable'] = "expired";
+            } else {
+                $UsernameData['enable'] = "disabled";
+            }
+            $Output = array(
+                'status' => $UsernameData['enable'],
+                'username' => $UsernameData['name'],
+                'data_limit' => $data_limit,
+                'expire' => $expire,
+                'online_at' => $onlinestatus,
+                'used_traffic' => $useage,
+                'links' => $links,
+                'subscription_url' => $url_sub,
+                'sub_updated_at' => null,
+                'sub_last_user_agent' => null,
+            );
         } elseif ($Get_Data_Panel['type'] == "wgdashboard") {
             $UsernameData = get_userwg($username, $Get_Data_Panel['name_panel']);
             $invoiceinfo = select("invoice", "*", "username", $username, "select");
             $infoconfig = json_decode($invoiceinfo['user_info'], true);
             if (!isset($UsernameData['id'])) {
-                $Output = array(
+                return array(
                     'status' => 'Unsuccessful',
                     'msg' => isset($UsernameData['msg']) ? $UsernameData['msg'] : ''
                 );
-            } else {
-                $jobtime = [];
-                $jobvolume = [];
-                foreach ($UsernameData['jobs'] as $job) {
-                    if ($job['Field'] == "total_data") {
-                        $jobvolume = $job;
-                    } elseif ($job['Field'] == "date") {
-                        $jobtime = $job;
-                    }
-                }
-                if (intval($invoiceinfo['Service_time']) == 0) {
-                    $expire = 0;
-                } else {
-                    if (isset($jobtime['Value'])) {
-                        $expire = strtotime($jobtime['Value']);
-                    } else {
-                        $expire = 0;
-                    }
-                }
-                $status = "active";
-                if ($expire != 0 and $expire - time() < 0) {
-                    $status = "expired";
-                }
-                $data_useage = ($UsernameData['total_data'] * pow(1024, 3)) + ($UsernameData['cumu_data'] * pow(1024, 3));
-                if (($jobvolume['Value'] * pow(1024, 3)) < $data_useage) {
-                    $status = "limited";
-                }
-                $Output = array(
-                    'status' => $status,
-                    'username' => $UsernameData['name'],
-                    'data_limit' => $jobvolume['Value'] * pow(1024, 3),
-                    'expire' => $expire,
-                    'online_at' => null,
-                    'used_traffic' => $data_useage,
-                    'links' => [],
-                    'subscription_url' => strval(downloadconfig($Get_Data_Panel['name_panel'], $infoconfig['public_key'])['file']),
-                    'sub_updated_at' => null,
-                    'sub_last_user_agent' => null,
-                );
             }
+            $jobtime = [];
+            $jobvolume = [];
+            foreach ($UsernameData['jobs'] as $job) {
+                if ($job['Field'] == "total_data") {
+                    $jobvolume = $job;
+                } elseif ($job['Field'] == "date") {
+                    $jobtime = $job;
+                }
+            }
+            if (intval($invoiceinfo['Service_time']) == 0) {
+                $expire = 0;
+            } else {
+                if (isset($jobtime['Value'])) {
+                    $expire = strtotime($jobtime['Value']);
+                } else {
+                    $expire = 0;
+                }
+            }
+            $status = "active";
+            if ($expire != 0 and $expire - time() < 0) {
+                $status = "expired";
+            }
+            $data_useage = ($UsernameData['total_data'] * pow(1024, 3)) + ($UsernameData['cumu_data'] * pow(1024, 3));
+            if (($jobvolume['Value'] * pow(1024, 3)) < $data_useage) {
+                $status = "limited";
+            }
+            $Output = array(
+                'status' => $status,
+                'username' => $UsernameData['name'],
+                'data_limit' => $jobvolume['Value'] * pow(1024, 3),
+                'expire' => $expire,
+                'online_at' => null,
+                'used_traffic' => $data_useage,
+                'links' => [],
+                'subscription_url' => strval(downloadconfig($Get_Data_Panel['name_panel'], $infoconfig['public_key'])['file']),
+                'sub_updated_at' => null,
+                'sub_last_user_agent' => null,
+            );
         } elseif ($Get_Data_Panel['type'] == "mikrotik") {
             $UsernameData = GetUsermikrotik($Get_Data_Panel['name_panel'], $username)[0];
             if (isset($UsernameData['error'])) {
-                $Output = array(
+                return array(
                     'status' => 'Unsuccessful',
                     'msg' => $UsernameData['msg']
                 );
-            } else {
-                $invocie = select("invoice", "*", "username", $username, "select");
-                $traffic_get = GetUsermikrotik_volume($Get_Data_Panel['name_panel'], $UsernameData['.id']);
-                $used_traffic = $traffic_get['total-upload'] + $traffic_get['total-download'];
-                $data_limit = $invocie['Volume'] * pow(1024, 3);
-                $expire = $invocie['time_sell'] + ($invocie['Service_time'] * 86400);
-                $UsernameData['enable'] = "active";
-                $Output = array(
-                    'status' => $UsernameData['enable'],
-                    'username' => $invocie['username'],
-                    'data_limit' => $data_limit,
-                    'expire' => $expire,
-                    'online_at' => null,
-                    'used_traffic' => $used_traffic,
-                    'links' => [],
-                    'subscription_url' => $UsernameData['password'],
-                );
             }
+            $invocie = select("invoice", "*", "username", $username, "select");
+            $traffic_get = GetUsermikrotik_volume($Get_Data_Panel['name_panel'], $UsernameData['.id']);
+            $used_traffic = $traffic_get['total-upload'] + $traffic_get['total-download'];
+            $data_limit = $invocie['Volume'] * pow(1024, 3);
+            $expire = $invocie['time_sell'] + ($invocie['Service_time'] * 86400);
+            $UsernameData['enable'] = "active";
+            $Output = array(
+                'status' => $UsernameData['enable'],
+                'username' => $invocie['username'],
+                'data_limit' => $data_limit,
+                'expire' => $expire,
+                'online_at' => null,
+                'used_traffic' => $used_traffic,
+                'links' => [],
+                'subscription_url' => $UsernameData['password'],
+            );
         } else {
             $Output = array(
                 'status' => 'Unsuccessful',
