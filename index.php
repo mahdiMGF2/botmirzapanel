@@ -9,7 +9,7 @@ if (function_exists('fastcgi_finish_request')) {
 }
 
 ini_set('error_log', 'error_log');
-$version = "5.1.9";
+$version = "5.1.10";
 date_default_timezone_set('Asia/Tehran');
 require_once 'config.php';
 require_once 'botapi.php';
@@ -1022,7 +1022,6 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
         $newDate = strtotime(date("Y-m-d H:i:s", $date)) * 1000;
         $data_limit = intval($product['Volume_constraint']) * pow(1024, 3);
         $config = array(
-            'id' => intval($marzban_list_get['inboundid']),
             'settings' => json_encode(
                 array(
                     'clients' => array(
@@ -1215,7 +1214,6 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
         );
     } elseif ($marzban_list_get['type'] == "x-ui_single") {
         $datam = array(
-            'id' => intval($marzban_list_get['inboundid']),
             'settings' => json_encode(
                 array(
                     'clients' => array(

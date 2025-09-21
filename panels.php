@@ -72,14 +72,20 @@ class ManagePanel
             $subId = bin2hex(random_bytes(8));
             $Expireac = $expire * 1000;
             $data_Output = addClient($Get_Data_Panel['name_panel'], $usernameC, $Expireac, $data_limit, generateUUID(), "", $subId);
+            $link_sub = "{$Get_Data_Panel['linksubx']}/{$subId}#$usernameC";
+            $config = outputlink($link_sub);
+            if (isBase64($config)) {
+                $config = base64_decode($config);
+            }
+            $config = explode('\n', $config);
             if (!$data_Output['success']) {
                 $Output['status'] = 'Unsuccessful';
                 $Output['msg'] = $data_Output['msg'];
             } else {
                 $Output['status'] = 'successful';
                 $Output['username'] = $usernameC;
-                $Output['subscription_url'] = "{$Get_Data_Panel['linksubx']}/{$subId}#$usernameC";
-                $Output['configs'] = [outputlink($Output['subscription_url'])];
+                $Output['subscription_url'] = $link_sub;
+                $Output['configs'] = $config;
             }
         } elseif ($Get_Data_Panel['type'] == "alireza") {
             $subId = bin2hex(random_bytes(8));
@@ -244,26 +250,26 @@ class ManagePanel
                 );
             }
             $expire = $UsernameData['expiryTime'] / 1000;
-            if ($UsernameData['enable']) {
-                $UsernameData['enable'] = "active";
-            } else {
-                $UsernameData['enable'] = "disabled";
-            }
+            $UsernameData['enable'] = $UsernameData['enable'] ? 'active' : 'disabled';
             if (intval($UsernameData['expiryTime']) != 0) {
                 if ($expire - time() <= 0)
                     $UsernameData['enable'] = "expired";
             }
-            $subId = $UsernameData2['subId'];
-            $status_user = get_onlinecli($Get_Data_Panel['name_panel'], $username);
-            $linksub = "{$Get_Data_Panel['linksubx']}/{$subId}#$username";
+            $linksub = "{$Get_Data_Panel['linksubx']}/{$UsernameData['subId']}#$username";
+            $config = outputlink($linksub);
+            if (isBase64($config)) {
+                $config = base64_decode($config);
+            }
+            $config = explode('\n', $config);
+            $UsernameData['lastOnline'] = $UsernameData['lastOnline'] == 0 ? "offline" : date('c', $UsernameData['lastOnline']);
             $Output = array(
                 'status' => $UsernameData['enable'],
                 'username' => $UsernameData['email'],
                 'data_limit' => $UsernameData['total'],
                 'expire' => $UsernameData['expiryTime'] / 1000,
-                'online_at' => $status_user,
+                'online_at' => $UsernameData['lastOnline'],
                 'used_traffic' => $UsernameData['up'] + $UsernameData['down'],
-                'links' => [outputlink($linksub)],
+                'links' => $config,
                 'subscription_url' => $linksub,
             );
         } elseif ($Get_Data_Panel['type'] == "alireza") {
@@ -458,7 +464,7 @@ class ManagePanel
                 );
             }
         } elseif ($Get_Data_Panel['type'] == "x-ui_single") {
-            $clients = get_clinets($username, $name_panel);
+            $clients = get_Client($username, $name_panel);
             $subId = bin2hex(random_bytes(8));
             $linksub = "{$Get_Data_Panel['linksubx']}/{$subId}#$username";
             $config = array(
@@ -468,9 +474,9 @@ class ManagePanel
                         'clients' => array(
                             array(
                                 "id" => generateUUID(),
-                                "flow" => $clients['flow'],
+                                "flow" => "",
                                 "email" => $clients['email'],
-                                "totalGB" => $clients['totalGB'],
+                                "totalGB" => $clients['total'],
                                 "expiryTime" => $clients['expiryTime'],
                                 "enable" => true,
                                 "subId" => $subId,
@@ -479,7 +485,7 @@ class ManagePanel
                     )
                 )
             );
-            $updateinbound = updateClient($Get_Data_Panel['name_panel'], $username, $config);
+            updateClient($Get_Data_Panel['name_panel'], $config, $clients['uuid']);
             if (!$clients) {
                 $Output = array(
                     'status' => 'Unsuccessful',
@@ -757,17 +763,17 @@ class ManagePanel
             $config['username'] = $username;
             Modifyuserm($name_panel, $username, $config);
         } elseif ($Get_Data_Panel['type'] == "x-ui_single") {
-            $clients = get_clinets($username, $name_panel);
+            $clients = get_Client($username, $name_panel);
             $configs = array(
-                'id' => intval($Get_Data_Panel['inboundid']),
+                'id' => intval($clients['inboundId']),
                 'settings' => json_encode(
                     array(
                         'clients' => array(
                             array(
-                                "id" => $clients['id'],
-                                "flow" => $clients['flow'],
+                                "id" => $clients['uuid'],
+                                "flow" => "",
                                 "email" => $clients['email'],
-                                "totalGB" => $clients['totalGB'],
+                                "totalGB" => $clients['total'],
                                 "expiryTime" => $clients['expiryTime'],
                                 "enable" => true,
                                 "subId" => $clients['subId'],
@@ -779,7 +785,7 @@ class ManagePanel
                 ),
             );
             $configs['settings'] = json_encode(array_replace_recursive(json_decode($configs['settings'], true), json_decode($config['settings'], true)));
-            $updateinbound = updateClient($Get_Data_Panel['name_panel'], $username, $configs);
+            updateClient($Get_Data_Panel['name_panel'], $configs, $clients['uuid']);
         } elseif ($Get_Data_Panel['type'] == "alireza") {
             $clients = get_clinetsalireza($username, $name_panel);
             $configs = array(
