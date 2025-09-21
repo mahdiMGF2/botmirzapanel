@@ -864,7 +864,7 @@ if (preg_match('/subscriptionurl_(\w+)/', $datain, $dataget)) {
     ]);
     if ($marzban_list_get['type'] == "wgdashboard") {
         $urldocs = "{$marzban_list_get['inboundid']}_{$nameloc['id_invoice']}.conf";
-        file_put_contents($urlimage, $DataUserOut['subscription_url']);
+        file_put_contents($urldocs, $DataUserOut['subscription_url']);
         sendDocument($from_id, $urldocs, $textbotlang['users']['buy']['configwg']);
         unlink($urlimage);
     }
@@ -1503,7 +1503,7 @@ if ($user['step'] == "createusertest" || preg_match('/locationtests_(.*)/', $dat
         ]);
         if ($marzban_list_get['type'] == "wgdashboard") {
             $urldocs = "{$marzban_list_get['inboundid']}_{$randomString}.conf";
-            file_put_contents($urlimage, $output_config_link);
+            file_put_contents($urldocs, $output_config_link);
             sendDocument($from_id, $urldocs, $textbotlang['users']['buy']['configwg']);
             unlink($urlimage);
         }
@@ -1889,7 +1889,7 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
             ]);
             if ($marzban_list_get['type'] == "wgdashboard") {
                 $urldocs = "{$marzban_list_get['inboundid']}_{$randomString}.conf";
-                file_put_contents($urlimage, $output_config_link);
+                file_put_contents($urldocs, $output_config_link);
                 sendDocument($from_id, $urldocs, $textbotlang['users']['buy']['configwg']);
                 unlink($urlimage);
             }
