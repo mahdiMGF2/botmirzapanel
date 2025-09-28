@@ -546,7 +546,6 @@ if (preg_match('/Response_(\w+)/', $datain, $dataget)) {
         telegram('sendphoto', [
             'chat_id' => $user['Processing_value'],
             'photo' => $photoid,
-            'reply_markup' => $Response,
             'caption' => $textSendAdminToUser,
             'parse_mode' => "HTML",
         ]);
