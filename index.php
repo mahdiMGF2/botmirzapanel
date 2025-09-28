@@ -1438,7 +1438,7 @@ if ($user['step'] == "createusertest" || preg_match('/locationtests_(.*)/', $dat
         return;
     }
     $date = time();
-    $randomString = bin2hex(random_bytes(2));
+    $randomString = bin2hex(random_bytes(4));
     $sql = "INSERT IGNORE INTO invoice (id_user, id_invoice, username, time_sell, Service_location, name_product, price_product, Volume, Service_time, Status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $Status = "active";
     $usertest = "usertest";
@@ -1749,7 +1749,7 @@ if ($text == $datatextbot['text_sell'] || $datain == "buy" || $text == "/buy") {
     }
     $username_ac = $user['Processing_value_tow'];
     $date = time();
-    $randomString = bin2hex(random_bytes(2));
+    $randomString = bin2hex(random_bytes(4));
     if (empty($info_product['price_product']) || empty($info_product['price_product']))
         return;
     if ($datain == "confirmandgetserviceDiscount") {
