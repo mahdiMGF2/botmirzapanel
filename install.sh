@@ -1258,7 +1258,7 @@ EOF
 
     # Send confirmation message
     MESSAGE="✅ The bot is installed! for start bot send comment /start"
-    curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" -d chat_id="${CHAT_ID}" -d text="$MESSAGE" || {
+    curl -s -X POST "https://api.telegram.org/bot${YOUR_BOT_TOKEN}/sendMessage" -d chat_id="${YOUR_CHAT_ID}" -d text="$MESSAGE" || {
         echo -e "\033[31mError: Failed to send message to Telegram.\033[0m"
         return 1
     }
